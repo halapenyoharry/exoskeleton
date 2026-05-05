@@ -1,0 +1,43 @@
+:root {
+  --bg-deep: #0a0e27;
+  --bg-panel: #0d1225;
+  --bg-section: #080c22;
+
+  --accent-cyan: #18ffff;
+  --accent-cyan-dim: #18ffff88;
+  --border-cyan: #00e5ff40;
+  --accent-amber: #ff9800;
+
+  --text: #18ffff;
+  --text-dim: #18ffff88;
+
+  --titlebar-h: 32px;
+  --hotbar-h: 56px;
+  --sidepane-w: 240px;
+  --sidepane-w-collapsed: 0px;
+
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, "Cascadia Mono", monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border-cyan);
+  padding: 4px 8px;
+  cursor: pointer;
+}
+button:hover { border-color: var(--accent-cyan); }
