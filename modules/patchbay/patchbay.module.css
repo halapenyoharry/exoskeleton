@@ -1,0 +1,98 @@
+.patchbay {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: var(--font-mono);
+  color: var(--text);
+  background: var(--bg-panel);
+}
+
+.graph {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  min-height: 0;
+  padding: 32px 40px;
+  background:
+    linear-gradient(var(--bg-deep), var(--bg-deep)),
+    radial-gradient(circle at 50% 50%, #00e5ff10, transparent 60%);
+  border-bottom: 1px solid var(--border-cyan);
+}
+
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  z-index: 1;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.node {
+  padding: 8px 12px;
+  border: 1px solid var(--border-cyan);
+  background: var(--bg-section);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.port {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  border: 1px solid var(--border-cyan);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.port--source { margin-left: -7px; }
+.port--target { margin-right: -7px; }
+.port--active { background: var(--accent-cyan); box-shadow: 0 0 12px var(--accent-cyan); }
+.port--armed { cursor: crosshair; }
+
+.output {
+  padding: 12px 16px;
+  background: var(--bg-section);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 40%;
+  overflow: auto;
+}
+
+.output__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.output__title {
+  flex: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 11px;
+  color: var(--accent-cyan);
+}
+
+.output__pre {
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--bg-deep);
+  color: var(--accent-cyan);
+  font-size: 11px;
+  border: 1px solid var(--border-cyan);
+  overflow: auto;
+}
