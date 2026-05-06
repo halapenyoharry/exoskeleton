@@ -1,23 +1,21 @@
-import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
-import type { ModuleManifest } from './types'
+import type {
+  ModuleComponents,
+  ModuleManifest,
+  RegisteredModule,
+} from './types'
 
 interface ManifestModule { default: ModuleManifest }
-interface ComponentModule { default: ComponentType }
+type IndexModule = ModuleComponents
 
 const manifestGlob = import.meta.glob<ManifestModule>(
   '../modules/*/manifest.ts',
   { eager: true },
 )
 
-const componentGlob = import.meta.glob<ComponentModule>(
+const indexGlob = import.meta.glob<IndexModule>(
   '../modules/*/index.tsx',
+  { eager: true },
 )
-
-export interface RegisteredModule {
-  manifest: ModuleManifest
-  Component: LazyExoticComponent<ComponentType>
-  folder: string
-}
 
 function folderOf(path: string): string {
   const m = path.match(/\/modules\/([^/]+)\//)
@@ -32,14 +30,17 @@ function buildRegistry(): RegisteredModule[] {
     if (!folder || folder === '_template') continue
 
     const manifest = manifestGlob[manifestPath].default
-    const componentPath = `../modules/${folder}/index.tsx`
-    const loader = componentGlob[componentPath]
+    const indexPath = `../modules/${folder}/index.tsx`
+    const idx = indexGlob[indexPath]
 
-    if (!loader) {
+    if (!idx) {
       console.warn(`[hud] module "${folder}" has manifest but no index.tsx`)
       continue
     }
-
+    if (!idx.Main) {
+      console.warn(`[hud] module "${folder}" must export a Main component`)
+      continue
+    }
     if (manifest.id !== folder) {
       console.warn(
         `[hud] module folder "${folder}" has manifest id "${manifest.id}" — they should match`,
@@ -48,8 +49,10 @@ function buildRegistry(): RegisteredModule[] {
 
     out.push({
       manifest,
-      Component: lazy(loader as () => Promise<ComponentModule>),
-      folder,
+      Provider: idx.Provider,
+      Side: idx.Side,
+      Main: idx.Main,
+      Hud: idx.Hud,
     })
   }
 

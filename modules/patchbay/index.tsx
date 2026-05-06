@@ -1,145 +1,179 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import {
+  createContext,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import styles from './patchbay.module.css'
 
-interface Source { id: string; label: string; value?: number }
+interface Source { id: string; label: string }
 interface Target { id: string; label: string }
 interface Edge { id: string; source_id: string; target_id: string }
 
 const defaultSources: Source[] = [
-  { id: 's1', label: 'Raw Source 1' },
-  { id: 's2', label: 'Raw Source 2' },
-  { id: 's3', label: 'Raw Source 3' },
+  { id: 's1', label: 'raw source 1' },
+  { id: 's2', label: 'raw source 2' },
+  { id: 's3', label: 'raw source 3' },
 ]
 
 const defaultTargets: Target[] = [
-  { id: 't1', label: 'Target Parameter A' },
-  { id: 't2', label: 'Target Parameter B' },
-  { id: 't3', label: 'Target Parameter C' },
+  { id: 't1', label: 'target parameter a' },
+  { id: 't2', label: 'target parameter b' },
+  { id: 't3', label: 'target parameter c' },
 ]
 
-interface Props {
-  sources?: Source[]
-  targets?: Target[]
+interface Ctx {
+  sources: Source[]
+  targets: Target[]
+  edges: Edge[]
+  addEdge: (sourceId: string, targetId: string) => void
+  clearEdges: () => void
 }
 
-export default function GenericPatchBay({
-  sources = defaultSources,
-  targets = defaultTargets,
-}: Props) {
+const PatchbayCtx = createContext<Ctx | null>(null)
+
+function usePatchbay(): Ctx {
+  const v = useContext(PatchbayCtx)
+  if (!v) throw new Error('PatchbayCtx missing — use the module Provider')
+  return v
+}
+
+export function Provider({ children }: { children: ReactNode }) {
   const [edges, setEdges] = useState<Edge[]>([])
+
+  const value = useMemo<Ctx>(
+    () => ({
+      sources: defaultSources,
+      targets: defaultTargets,
+      edges,
+      addEdge: (source_id, target_id) => {
+        const id = `edge_${source_id}_${target_id}`
+        setEdges(prev =>
+          prev.some(e => e.source_id === source_id && e.target_id === target_id)
+            ? prev
+            : [...prev, { id, source_id, target_id }],
+        )
+      },
+      clearEdges: () => setEdges([]),
+    }),
+    [edges],
+  )
+
+  return <PatchbayCtx.Provider value={value}>{children}</PatchbayCtx.Provider>
+}
+
+export function Main() {
+  const { sources, targets, edges, addEdge } = usePatchbay()
   const [activeSource, setActiveSource] = useState<string | null>(null)
-  const [portCoords, setPortCoords] = useState<Record<string, { x: number; y: number }>>({})
-  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [coords, setCoords] = useState<Record<string, { x: number; y: number }>>({})
+  const ref = useRef<HTMLDivElement | null>(null)
 
   useLayoutEffect(() => {
-    const el = containerRef.current
+    const el = ref.current
     if (!el) return
-
-    const updateCoordinates = () => {
+    const measure = () => {
       const rect = el.getBoundingClientRect()
       const next: Record<string, { x: number; y: number }> = {}
-      el.querySelectorAll<HTMLElement>('.graph-port').forEach(port => {
-        const r = port.getBoundingClientRect()
-        const id = port.dataset.nodeId
+      el.querySelectorAll<HTMLElement>('[data-port-id]').forEach(p => {
+        const r = p.getBoundingClientRect()
+        const id = p.dataset.portId
         if (!id) return
         next[id] = {
           x: r.left - rect.left + r.width / 2,
           y: r.top - rect.top + r.height / 2,
         }
       })
-      setPortCoords(next)
+      setCoords(next)
     }
-
-    updateCoordinates()
-    const ro = new ResizeObserver(updateCoordinates)
+    measure()
+    const ro = new ResizeObserver(measure)
     ro.observe(el)
-    window.addEventListener('resize', updateCoordinates)
+    window.addEventListener('resize', measure)
     return () => {
       ro.disconnect()
-      window.removeEventListener('resize', updateCoordinates)
+      window.removeEventListener('resize', measure)
     }
   }, [sources, targets])
 
-  const handleSourceClick = (sourceId: string) => setActiveSource(sourceId)
-
-  const handleTargetClick = (targetId: string) => {
+  const onTarget = (targetId: string) => {
     if (!activeSource) return
-    const exists = edges.some(e => e.source_id === activeSource && e.target_id === targetId)
-    if (!exists) {
-      setEdges(prev => [
-        ...prev,
-        {
-          id: `edge_${activeSource}_${targetId}`,
-          source_id: activeSource,
-          target_id: targetId,
-        },
-      ])
-    }
+    addEdge(activeSource, targetId)
     setActiveSource(null)
   }
 
   return (
-    <div className={styles.patchbay}>
-      <div ref={containerRef} className={styles.graph}>
-        <svg className={styles.svg}>
-          {edges.map(edge => {
-            const start = portCoords[edge.source_id]
-            const end = portCoords[edge.target_id]
-            if (!start || !end) return null
-            return (
-              <line
-                key={edge.id}
-                x1={start.x}
-                y1={start.y}
-                x2={end.x}
-                y2={end.y}
-                stroke="#18ffff"
-                strokeWidth={2}
-              />
-            )
-          })}
-        </svg>
+    <div ref={ref} className={styles.graph}>
+      <svg className={styles.svg}>
+        {edges.map(e => {
+          const a = coords[e.source_id]
+          const b = coords[e.target_id]
+          if (!a || !b) return null
+          return (
+            <line
+              key={e.id}
+              x1={a.x}
+              y1={a.y}
+              x2={b.x}
+              y2={b.y}
+              className={styles.line}
+            />
+          )
+        })}
+      </svg>
 
-        <div className={styles.column}>
-          {sources.map(src => (
-            <div key={src.id} className={styles.row}>
-              <div className={styles.node}>{src.label}</div>
-              <div
-                className={`graph-port ${styles.port} ${styles['port--source']} ${
-                  activeSource === src.id ? styles['port--active'] : ''
-                }`}
-                data-node-id={src.id}
-                onClick={() => handleSourceClick(src.id)}
-              />
-            </div>
-          ))}
-        </div>
-
-        <div className={styles.column}>
-          {targets.map(tgt => (
-            <div key={tgt.id} className={styles.row}>
-              <div
-                className={`graph-port ${styles.port} ${styles['port--target']} ${
-                  activeSource ? styles['port--armed'] : ''
-                }`}
-                data-node-id={tgt.id}
-                onClick={() => handleTargetClick(tgt.id)}
-              />
-              <div className={styles.node}>{tgt.label}</div>
-            </div>
-          ))}
-        </div>
+      <div className={styles.column}>
+        {sources.map(src => (
+          <div key={src.id} className={styles.row}>
+            <div className={styles.node}>{src.label}</div>
+            <button
+              type="button"
+              data-port-id={src.id}
+              onClick={() => setActiveSource(src.id)}
+              className={`${styles.port} ${styles.portSource} ${
+                activeSource === src.id ? styles.portActive : ''
+              }`}
+              aria-label={`source ${src.label}`}
+            />
+          </div>
+        ))}
       </div>
 
-      <div className={styles.output}>
-        <div className={styles.output__head}>
-          <span className={styles.output__title}>Resulting JSON State</span>
-          <button onClick={() => setEdges([])}>Clear All Edges</button>
-        </div>
-        <pre className={styles.output__pre}>
-          {JSON.stringify({ edges }, null, 2)}
-        </pre>
+      <div className={styles.column}>
+        {targets.map(tgt => (
+          <div key={tgt.id} className={styles.row}>
+            <button
+              type="button"
+              data-port-id={tgt.id}
+              onClick={() => onTarget(tgt.id)}
+              className={`${styles.port} ${styles.portTarget} ${
+                activeSource ? styles.portArmed : ''
+              }`}
+              aria-label={`target ${tgt.label}`}
+            />
+            <div className={styles.node}>{tgt.label}</div>
+          </div>
+        ))}
       </div>
+    </div>
+  )
+}
+
+export function Side() {
+  const { edges, clearEdges } = usePatchbay()
+  return (
+    <div className={styles.side}>
+      <pre className={styles.json}>{JSON.stringify({ edges }, null, 2)}</pre>
+      <button
+        type="button"
+        className={styles.clear}
+        onClick={clearEdges}
+        disabled={edges.length === 0}
+      >
+        clear
+      </button>
     </div>
   )
 }

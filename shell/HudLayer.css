@@ -1,6 +1,10 @@
 .hud-layer {
   position: absolute;
   inset: 0;
-  z-index: 1;
   pointer-events: none;
+  z-index: 1;
+}
+
+.hud-layer > * {
+  pointer-events: auto;
 }
