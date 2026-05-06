@@ -1,27 +1,20 @@
-import { Suspense } from 'react'
-import SceneLayer from './SceneLayer'
+import { Children, type ReactNode } from 'react'
 import HudLayer from './HudLayer'
-import HudWidget from './HudWidget'
-import Hotbar from './Hotbar'
-import { modules } from './moduleRegistry'
 import './Viewport.css'
 
-export default function Viewport() {
+interface Props {
+  children: ReactNode
+}
+
+export default function Viewport({ children }: Props) {
+  const kids = Children.toArray(children)
+  const main = kids[0] ?? null
+  const hud = kids[1] ?? null
+
   return (
     <div className="viewport">
-      <div className="viewport__stage">
-        <SceneLayer />
-        <HudLayer>
-          {modules.map(({ manifest, Component }) => (
-            <HudWidget key={manifest.id} manifest={manifest}>
-              <Suspense fallback={<div className="hud-widget__loading">loading…</div>}>
-                <Component />
-              </Suspense>
-            </HudWidget>
-          ))}
-        </HudLayer>
-      </div>
-      <Hotbar />
+      <div className="viewport__main">{main}</div>
+      {hud ? <HudLayer>{hud}</HudLayer> : null}
     </div>
   )
 }

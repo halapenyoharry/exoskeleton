@@ -1,9 +1,0 @@
-.scene-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background:
-    radial-gradient(circle at 30% 20%, #0d1f3a 0%, transparent 40%),
-    radial-gradient(circle at 70% 80%, #102236 0%, transparent 45%),
-    var(--bg-deep);
-}

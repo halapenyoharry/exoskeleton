@@ -1,0 +1,26 @@
+.bottom {
+  grid-area: bottom;
+  display: flex;
+  align-items: center;
+  height: var(--bottom-h);
+  padding: 0 12px;
+  background: var(--bg-bottom);
+  color: var(--text-faint);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+
+.bottom__view {
+  color: var(--text-dim);
+}
+.bottom__view:not(:disabled):hover { color: var(--text); }
+.bottom__view:disabled { cursor: default; }
+
+.bottom__spacer { flex: 1; }
+
+.bottom__side {
+  color: var(--text-faint);
+}
+.bottom__side:hover { color: var(--text); }
+.bottom__side--on { color: var(--text-dim); }
