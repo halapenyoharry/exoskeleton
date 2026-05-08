@@ -26,10 +26,24 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 3px;
   background: var(--panel-accent, transparent);
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 12px;
+  background: #0a0e27;
+  color: var(--panel-accent, var(--text-dim));
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  user-select: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--panel-accent, transparent) 25%, transparent);
 }
 
 .panel-pad--editor   { --panel-accent: var(--accent-editor); }

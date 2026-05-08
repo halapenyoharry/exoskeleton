@@ -1,10 +1,14 @@
 .terminal-host {
-  position: absolute;
-  inset: 0;
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  min-width: 0;
   padding: 8px 10px;
   background: #0d1326;
+  overflow: hidden;
 }
 
+.terminal-host .xterm,
 .terminal-host .xterm-viewport,
 .terminal-host .xterm-screen {
   background: transparent !important;
