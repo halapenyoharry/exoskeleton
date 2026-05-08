@@ -1,83 +1,79 @@
 # HUD
 
-A calm opinionated app shell. The frame stays out of the way; modules build inside.
+Cross-platform desktop workspace built on Tauri. One window with three docked panels — a Markdown editor, a terminal that runs a real shell, and a webview for local-network services like ComfyUI on the lumen RTX 3090. Targets macOS (Apple Silicon) and Pop!_OS.
 
-Idiom: Typora / Mark Text — soft chrome, no borders, two background shades, rounded outer. Module is a *view* with three slots it owns: a main pane, an optional side pane, and an optional HUD overlay layer.
+## Stack
+
+| Concern | Choice |
+| --- | --- |
+| Shell / window | [Tauri 2](https://v2.tauri.app/) (Rust) |
+| UI framework | React 19 + TypeScript |
+| Layout / docking | [Dockview 6](https://dockview.dev) — drag, dock, tab, resize |
+| Terminal frontend | [`@xterm/xterm`](https://www.npmjs.com/package/@xterm/xterm) v6 |
+| Terminal backend | [`tauri-plugin-pty`](https://github.com/Tnze/tauri-plugin-pty) (wraps `portable-pty`) via [`tauri-pty`](https://www.npmjs.com/package/tauri-pty) JS bindings |
+| Markdown editor | currently a textarea **(TODO: swap in [`@marktext/muya`](https://github.com/marktext/muya) when stable; npm 0.2.5 is flagged not-for-prod)** |
+| File ops | `@tauri-apps/plugin-fs` + `@tauri-apps/plugin-dialog` |
+| Webview | plain `<iframe>` with URL bar |
 
 ## Run
 
+Prereqs: Rust 1.77+, Node 20+, on macOS Xcode CLT, on Pop!_OS the [Tauri Linux deps](https://v2.tauri.app/start/prerequisites/#linux).
+
 ```
 npm install
-npm run dev      # http://localhost:5808
+npm run tauri dev
 ```
 
-## Shape
+First run compiles the Rust deps — **5–15 min** depending on the box. Subsequent dev runs are fast.
+
+For a production bundle:
 
 ```
-+ rounded outer ----------------------------------+
-|                                                  |
-|   side    |   main                               |
-| (shade A) |   (shade B)                          |
-|           |   + optional HUD overlay layer +     |
-|           |                                      |
-+-----------+--------------------------------------+
-| viewname                                   side  |  <- thin dim status edge
-+--------------------------------------------------+
+npm run tauri build
 ```
-
-When the side is hidden, the main fills corner-to-corner. There are no borders anywhere; regions are distinguished by background shade only.
-
-## Module contract
-
-```
-modules/<name>/
-  manifest.ts   // default-exports { id, title }
-  index.tsx     // named exports: Main (required), Side?, Provider?, Hud?
-```
-
-- **Main** — required. The viewport content. Fills the main pane.
-- **Side** — optional. Sidepane content. The sidepane appears only when this is exported.
-- **Provider** — optional. Wraps the whole view; use it to share state between Main and Side via React context.
-- **Hud** — optional. Renders on a `pointer-events: none` overlay layer above Main; widgets inside opt in to `pointer-events: auto`.
-
-A starter lives at [modules/_template/](modules/_template/).
-
-## Strict isolation rule
-
-Modules import only `@shell/types` from the shell. Modules do **not** import from each other or from any other shell internals. A module's folder is its blast radius.
-
-## Keyboard
-
-- `Cmd+B` (or `Ctrl+B`) — toggle the side pane.
-
-## Theme tokens
-
-Defined in [shell/theme.css](shell/theme.css). Two shades, dim chrome text, a single accent color reserved for live signal inside modules:
-
-- `--bg-side`, `--bg-main`, `--bg-bottom` — region shades
-- `--text`, `--text-dim`, `--text-faint` — content / chrome / chrome-secondary
-- `--accent` — used by modules to signal live state, not by chrome
-
-## Deployment targets
-
-The same source runs in three places without code changes:
-
-- **web** — `npm run dev` / `npm run build`, host the `dist/` anywhere
-- **vscode** — wrap `dist/` in a tiny extension that opens it in a Webview panel
-- **app** — wrap with [Tauri](https://tauri.app) (much smaller than Electron, same web build inside)
-
-The web target is what `npm run dev` gives you today.
-
-## Assumptions that will change
-
-- Single active view. View switching is a click on the bottom-left view name (cycles through registered modules; only patchbay registered today).
-- No persistence of side-open state across reloads.
-- Side and Main are separate React subtrees; share state via the module's `Provider`.
-- HUD overlay is per-module opt-in; absent for calm viewers like patchbay.
-- No drag-resize on the side pane (fixed width via `--side-w`).
-- Outer rounded corners come from CSS — when wrapped in Tauri/Electron, the OS window will provide its own.
 
 ## Layout
 
-- [shell/](shell/) — the chrome. Module authors don't edit anything here.
-- [modules/<name>/](modules/) — one folder per module. Self-contained.
+The app boots with three panels in a Dockview grid:
+
+```
++-------------------------+----------------+
+| editor (Markdown)       |                |
+|                         |    webview     |
++-------------------------+   (LAN URL)    |
+| terminal (xterm + pty)  |                |
++-------------------------+----------------+
+```
+
+You can drag panel headers to redock, split, tab, or resize. Dockview persists the runtime grid state in memory; persistence to disk is not wired yet.
+
+## Source layout
+
+```
+hud/
+├── src/                       <- React frontend
+│   ├── App.tsx                   Dockview composition
+│   ├── main.tsx                  React mount + global CSS
+│   ├── theme.css                 dark cyan-tinted base
+│   └── panels/
+│       ├── EditorPanel.tsx       textarea + open/save via Tauri fs/dialog
+│       ├── TerminalPanel.tsx     xterm wired to a real PTY
+│       └── WebviewPanel.tsx      iframe with URL toolbar
+├── src-tauri/                 <- Rust backend
+│   ├── src/lib.rs                plugin registration (fs, dialog, pty, opener)
+│   ├── tauri.conf.json           window + bundle config
+│   ├── capabilities/default.json grants fs/dialog/pty permissions
+│   └── Cargo.toml
+├── docs/
+│   └── patchbay-spec.md          (preserved earlier spec, unrelated to current build)
+├── package.json
+└── vite.config.ts
+```
+
+## Known caveats
+
+- **Muya not yet integrated.** Editor uses a plain textarea. Muya 0.2.5 on npm is the latest published version and is flagged "not for production." Path forward: either pin to a known-good fork, run from the GitHub master branch, or swap to a maintained alternative (Milkdown / Lexical / CodeMirror+remark). The editor's open/save plumbing is independent of the editor surface, so swapping is mechanical.
+- **First Rust compile is slow.** Tauri pulls a large dep graph. Expect 5–15 min on first `npm run tauri dev`; future incremental rebuilds are fast.
+- **Default webview URL** is `http://lumen.local:8188` (ComfyUI on the RTX 3090). Edit the URL bar to point anywhere else.
+- **Webview is an iframe**, not a native child webview. iframes can't observe HTTPS-only or X-Frame-Options-deny pages. For LAN HTTP services (ComfyUI, Open WebUI, Cockpit) this works fine. If you need one of those rejected, switch to Tauri's `WebviewWindow::new` for a native child surface.
+- **Cross-platform compile** is tested on macOS only in this scaffold. The same source should `cargo tauri build` on Pop!_OS once `webkit2gtk-4.1` and friends are installed (see Tauri prerequisites).

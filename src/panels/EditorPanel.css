@@ -1,0 +1,14 @@
+.editor-textarea {
+  flex: 1;
+  margin: 0;
+  padding: 16px 20px;
+  border: none;
+  outline: none;
+  resize: none;
+  font: inherit;
+  color: #c5e8ee;
+  background: #0d1326;
+  caret-color: #18ffff;
+  white-space: pre-wrap;
+  tab-size: 2;
+}
