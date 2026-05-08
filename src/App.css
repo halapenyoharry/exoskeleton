@@ -1,3 +1,9 @@
+:root {
+  --accent-editor: #18ffff;
+  --accent-terminal: #ff9800;
+  --accent-webview: #6dffaa;
+}
+
 .app-frame {
   position: absolute;
   inset: 0;
@@ -14,6 +20,22 @@
   overflow: hidden;
 }
 
+.panel-pad::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--panel-accent, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.panel-pad--editor   { --panel-accent: var(--accent-editor); }
+.panel-pad--terminal { --panel-accent: var(--accent-terminal); }
+.panel-pad--webview  { --panel-accent: var(--accent-webview); }
+
 .panel-toolbar {
   display: flex;
   gap: 8px;
@@ -22,6 +44,7 @@
   background: #0a0e27;
   font-size: 11px;
   color: #4a6a78;
+  border-bottom: 1px solid color-mix(in srgb, var(--panel-accent, transparent) 30%, transparent);
 }
 
 .panel-toolbar input,
@@ -36,7 +59,7 @@
 
 .panel-toolbar input { flex: 1; min-width: 100px; }
 .panel-toolbar button { cursor: pointer; }
-.panel-toolbar button:hover { color: #18ffff; }
+.panel-toolbar button:hover { color: var(--panel-accent, #18ffff); }
 .panel-toolbar button:disabled { color: #2a3a45; cursor: default; }
 
 .panel-body {
@@ -46,3 +69,8 @@
   min-width: 0;
   overflow: hidden;
 }
+
+/* Tab text color is set per-panel by ColoredTab.tsx (inline style).
+   The active underline below the tab uses the same color via box-shadow
+   on the inner element, since the parent .dv-tab can't read it. */
+.dv-active-tab .dv-default-tab { box-shadow: inset 0 -2px 0 0 currentColor; }

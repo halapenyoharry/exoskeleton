@@ -41,7 +41,7 @@ export default function EditorPanel() {
   }
 
   return (
-    <div className="panel-pad">
+    <div className="panel-pad panel-pad--editor">
       <div className="panel-toolbar">
         <button onClick={openFile}>open</button>
         <button onClick={saveFile} disabled={!dirty && !!path}>

@@ -14,7 +14,7 @@ export default function WebviewPanel() {
   }
 
   return (
-    <div className="panel-pad">
+    <div className="panel-pad panel-pad--webview">
       <div className="panel-toolbar">
         <input
           value={url}
