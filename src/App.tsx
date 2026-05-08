@@ -1,4 +1,5 @@
 import { DockviewReact, type DockviewReadyEvent } from "dockview";
+import ColoredTab from "./ColoredTab";
 import EditorPanel from "./panels/EditorPanel";
 import TerminalPanel from "./panels/TerminalPanel";
 import WebviewPanel from "./panels/WebviewPanel";
@@ -35,7 +36,11 @@ function onReady(event: DockviewReadyEvent) {
 export default function App() {
   return (
     <div className="dockview-theme-abyss app-frame">
-      <DockviewReact components={components} onReady={onReady} />
+      <DockviewReact
+        components={components}
+        defaultTabComponent={ColoredTab}
+        onReady={onReady}
+      />
     </div>
   );
 }
