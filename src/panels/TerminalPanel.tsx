@@ -77,6 +77,7 @@ export default function TerminalPanel() {
 
   return (
     <div className="panel-pad panel-pad--terminal">
+      <div className="panel-header">terminal</div>
       <div ref={hostRef} className="terminal-host" />
     </div>
   );
