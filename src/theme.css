@@ -1,0 +1,12 @@
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  background: #0d1326;
+  color: #c5e8ee;
+  font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Mono", monospace;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+*, *::before, *::after { box-sizing: border-box; }

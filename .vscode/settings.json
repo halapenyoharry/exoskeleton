@@ -22,5 +22,23 @@
         "editor.selectionBackground": "#1a237e80",
         "editor.lineHighlightBackground": "#0d122540",
         "notificationsInfoIcon.foreground": "#ff9800",
-    }
+        "activityBar.activeBackground": "#a5a3a1",
+        "activityBar.background": "#a5a3a1",
+        "activityBar.foreground": "#15202b",
+        "activityBar.inactiveForeground": "#15202b99",
+        "activityBarBadge.background": "#cfefdf",
+        "activityBarBadge.foreground": "#15202b",
+        "commandCenter.border": "#15202b99",
+        "sash.hoverBorder": "#a5a3a1",
+        "statusBar.background": "#8c8a87",
+        "statusBar.foreground": "#15202b",
+        "statusBarItem.hoverBackground": "#72706e",
+        "statusBarItem.remoteBackground": "#8c8a87",
+        "statusBarItem.remoteForeground": "#15202b",
+        "titleBar.activeBackground": "#8c8a87",
+        "titleBar.activeForeground": "#15202b",
+        "titleBar.inactiveBackground": "#8c8a8799",
+        "titleBar.inactiveForeground": "#15202b99"
+    },
+    "peacock.color": "#8c8a87"
 }

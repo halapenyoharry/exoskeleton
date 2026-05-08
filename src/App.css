@@ -1,0 +1,48 @@
+.app-frame {
+  position: absolute;
+  inset: 0;
+  background: #0d1326;
+}
+
+.panel-pad {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #0d1326;
+  color: #c5e8ee;
+  overflow: hidden;
+}
+
+.panel-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px;
+  background: #0a0e27;
+  font-size: 11px;
+  color: #4a6a78;
+}
+
+.panel-toolbar input,
+.panel-toolbar button {
+  font: inherit;
+  color: #c5e8ee;
+  background: #0d1326;
+  border: 1px solid transparent;
+  padding: 4px 8px;
+  outline: none;
+}
+
+.panel-toolbar input { flex: 1; min-width: 100px; }
+.panel-toolbar button { cursor: pointer; }
+.panel-toolbar button:hover { color: #18ffff; }
+.panel-toolbar button:disabled { color: #2a3a45; cursor: default; }
+
+.panel-body {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
