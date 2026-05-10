@@ -137,6 +137,23 @@ Everything else is implementation detail behind one of those three.
 
 (A note on format: today the manifest is TypeScript. Dockview can serialize the runtime layout to JSON via `api.toJSON()` and restore it via `api.fromJSON()` — so when Exoskeleton grows layout persistence, "where you left your panels last time" will live as JSON on disk, while *which panels are even possible* will keep living as code in `App.tsx`.)
 
+### The structure is self-similar
+
+A panel's content is just a React component. A React component can render anything — including a whole `DockviewReact` of its own. Which means one panel can contain its own grid, with its own groups, with its own panels. Each of *those* panels can do the same. The hierarchy is fractal:
+
+```
+window
+  └─ grid
+      └─ groups
+          └─ panels
+              └─ (each panel's content can be) → another whole DockviewReact
+                                                   └─ grid
+                                                       └─ groups
+                                                           └─ panels ...
+```
+
+Same shape at every level, no architectural depth limit — only the practical one of whoever's reading the screen. Each nested Dockview is its own world: independent state, independent drag-and-drop scope, independent layout to persist. You can't drag a tab across the boundary between an outer grid and an inner one; they're peers in topology, not in interaction. Useful when one panel needs to *be* a self-contained mini-workspace (a lab, a scratchpad, a portable mini-IDE). Wrong when you just want more splits — those belong to the outer grid as more groups, not as a nested instance.
+
 ## Known caveats
 
 - **Muya not yet integrated.** Editor uses a plain textarea. Muya 0.2.5 on npm is the latest published version and is flagged "not for production." Path forward: either pin to a known-good fork, run from the GitHub master branch, or swap to a maintained alternative (Milkdown / Lexical / CodeMirror+remark). The editor's open/save plumbing is independent of the editor surface, so swapping is mechanical.
