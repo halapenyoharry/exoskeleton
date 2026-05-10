@@ -84,7 +84,5 @@
   overflow: hidden;
 }
 
-/* Tab text color is set per-panel by ColoredTab.tsx (inline style).
-   The active underline below the tab uses the same color via box-shadow
-   on the inner element, since the parent .dv-tab can't read it. */
-.dv-active-tab .dv-default-tab { box-shadow: inset 0 -2px 0 0 currentColor; }
+/* Active-tab underline now lives in ColoredTab.css (.dv-active-tab .colored-tab),
+   since ColoredTab is fully custom and no longer wraps DockviewDefaultTab. */

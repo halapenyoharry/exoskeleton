@@ -1,10 +1,17 @@
 import { DockviewReact, type DockviewReadyEvent } from "dockview";
 import ColoredTab from "./ColoredTab";
+import Watermark from "./Watermark";
+import {
+  PrefixHeaderActions,
+  LeftHeaderActions,
+  RightHeaderActions,
+} from "./HeaderActions";
 import EditorPanel from "./panels/EditorPanel";
 import TerminalPanel from "./panels/TerminalPanel";
 import LanWebview from "./panels/LanWebview";
 import "./App.css";
 
+// Panel content components — what fills each rectangle.
 const components = {
   editor: EditorPanel,
   terminal: TerminalPanel,
@@ -38,7 +45,12 @@ export default function App() {
     <div className="dockview-theme-abyss app-frame">
       <DockviewReact
         components={components}
+        // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —
         defaultTabComponent={ColoredTab}
+        watermarkComponent={Watermark}
+        prefixHeaderActionsComponent={PrefixHeaderActions}
+        leftHeaderActionsComponent={LeftHeaderActions}
+        rightHeaderActionsComponent={RightHeaderActions}
         onReady={onReady}
       />
     </div>

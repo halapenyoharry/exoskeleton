@@ -1,0 +1,94 @@
+.watermark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0d1326;
+  color: #c5e8ee;
+}
+
+.watermark-card {
+  text-align: center;
+  padding: 28px 32px;
+  max-width: 420px;
+  background: #0a0e27;
+  border: 1px solid #1a2a3a;
+  border-radius: 4px;
+}
+
+.watermark-card h2 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: normal;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #4a6a78;
+}
+
+.watermark-card p {
+  font-size: 12px;
+  color: #6a8a98;
+  line-height: 1.55;
+  margin: 0 0 4px;
+}
+
+.watermark-card code {
+  font-family: inherit;
+  background: #0d1326;
+  padding: 1px 5px;
+  border-radius: 2px;
+  color: var(--accent-editor);
+  font-size: 11px;
+}
+
+.watermark-restore {
+  display: block;
+  margin: 18px auto 4px;
+  background: transparent;
+  border: 1px solid var(--accent-editor);
+  color: var(--accent-editor);
+  padding: 8px 18px;
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.watermark-restore:hover {
+  background: var(--accent-editor);
+  color: #0d1326;
+}
+
+.watermark-hint {
+  margin-top: 16px !important;
+  font-size: 11px !important;
+  color: #4a6a78 !important;
+}
+
+.watermark-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.watermark-btn {
+  background: transparent;
+  border: 1px solid;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.watermark-btn--editor   { border-color: var(--accent-editor);   color: var(--accent-editor);   }
+.watermark-btn--terminal { border-color: var(--accent-terminal); color: var(--accent-terminal); }
+.watermark-btn--webview  { border-color: var(--accent-webview);  color: var(--accent-webview);  }
+
+.watermark-btn--editor:hover   { background: var(--accent-editor);   color: #0d1326; }
+.watermark-btn--terminal:hover { background: var(--accent-terminal); color: #0d1326; }
+.watermark-btn--webview:hover  { background: var(--accent-webview);  color: #0d1326; }
