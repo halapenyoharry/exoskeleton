@@ -1,12 +1,12 @@
 [package]
-name = "hud"
+name = "exoskeleton"
 version = "0.1.0"
-description = "HUD — integrated workspace (terminal, web viewport, markdown editor)"
+description = "Exoskeleton — integrated workspace (terminal, web viewport, markdown editor)"
 authors = ["Harold Tajchman <halapenyoharry@gmail.com>"]
 edition = "2021"
 
 [lib]
-name = "hud_lib"
+name = "exoskeleton_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

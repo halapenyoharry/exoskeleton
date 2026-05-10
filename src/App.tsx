@@ -2,13 +2,13 @@ import { DockviewReact, type DockviewReadyEvent } from "dockview";
 import ColoredTab from "./ColoredTab";
 import EditorPanel from "./panels/EditorPanel";
 import TerminalPanel from "./panels/TerminalPanel";
-import WebviewPanel from "./panels/WebviewPanel";
+import LanWebview from "./panels/LanWebview";
 import "./App.css";
 
 const components = {
   editor: EditorPanel,
   terminal: TerminalPanel,
-  webview: WebviewPanel,
+  webview: LanWebview,
 };
 
 function onReady(event: DockviewReadyEvent) {

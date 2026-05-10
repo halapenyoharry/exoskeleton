@@ -1,9 +1,9 @@
 import { useState } from "react";
-import "./WebviewPanel.css";
+import "./LanWebview.css";
 
 const DEFAULT_URL = "http://lumen.local:8188"; // ComfyUI on the RTX 3090
 
-export default function WebviewPanel() {
+export default function LanWebview() {
   const [url, setUrl] = useState(DEFAULT_URL);
   const [loadedUrl, setLoadedUrl] = useState(DEFAULT_URL);
   const [reloadKey, setReloadKey] = useState(0);
