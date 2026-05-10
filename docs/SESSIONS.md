@@ -37,3 +37,10 @@ State: clean tree at d242634 + this entry. Workspace file consolidated to `exosk
 Last: rename hygiene. The earlier open question — "should `target/` get a `cargo clean`?" — answered yes: the first post-rename build failed because cargo's incremental state had `/Users/harold/Projects/hud/...` absolute paths baked into tauri plugin permissions output. `cargo clean` fixed it.
 Next: Harold's call. Top of the queue per the muya caveat in README. Or pick a different module to push on.
 Open: VS Code keeps offering to recreate `xos.code-workspace` if its workspace identity is reset. Watch for it; trash if it reappears.
+
+## 2026-05-10 (later — chrome demos)
+
+State: clean tree at 3341c9c. All Dockview chrome slots demoed live in the running app: custom ColoredTab (glyph + title + close ×), Watermark (centered card with restore buttons, only visible when grid is fully empty), PrefixHeaderActions (glowing accent dot before tabs), LeftHeaderActions (+ tab button), RightHeaderActions (⨯ close-group button). README and CLAUDE.md not yet updated to document the chrome layer — they still only mention `ColoredTab`.
+Last: built chrome demos in response to Harold wanting to *see* each slot before adding layout persistence.
+Next: layout persistence — Dockview's `api.toJSON()` / `api.fromJSON()` + Tauri's `tauri-plugin-store` (or just `tauri-plugin-fs` to a JSON file). Save layout on `onDidLayoutChange`, restore on app startup.
+Open: I overstated earlier when I told Harold about a `headerComponent` slot — it doesn't exist. A "full custom header" is built by combining prefix/left/right actions + custom tabComponents. The commit message acknowledges this; my conversational message did too.
