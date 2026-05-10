@@ -30,3 +30,10 @@ State: project renamed `hud` → `exoskeleton`. New paths: repo dir `~/Projects/
 Last: full rename pass — package.json, Cargo.toml, tauri.conf.json, capabilities, main.rs, README, CLAUDE.md, dir, GitHub repo, git remote. Cargo will rebuild target/ from scratch on next `npm run tauri dev` (5–15 min) because the crate name changed.
 Next: still Harold's call. Muya editor swap is the open caveat. Or push on the next module.
 Open: should `target/` get a `cargo clean` to drop stale `hud`-named artifacts, or just let cargo handle it?
+
+## 2026-05-10
+
+State: clean tree at d242634 + this entry. Workspace file consolidated to `exoskeleton.code-workspace` (tracked). Old hud-era auto-memory archived at `~/.claude/projects/-Users-harold-Projects-hud.archived/`. Empty `~/Projects/hud/` shell trashed. Build verified: `npm run tauri dev` brings up the **Exoskeleton** window.
+Last: rename hygiene. The earlier open question — "should `target/` get a `cargo clean`?" — answered yes: the first post-rename build failed because cargo's incremental state had `/Users/harold/Projects/hud/...` absolute paths baked into tauri plugin permissions output. `cargo clean` fixed it.
+Next: Harold's call. Top of the queue per the muya caveat in README. Or pick a different module to push on.
+Open: VS Code keeps offering to recreate `xos.code-workspace` if its workspace identity is reset. Watch for it; trash if it reappears.
