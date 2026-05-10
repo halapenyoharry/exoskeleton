@@ -1,0 +1,43 @@
+.colored-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  height: 100%;
+  font: inherit;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.colored-tab__glyph {
+  font-size: 10px;
+  opacity: 0.9;
+}
+
+.colored-tab__title {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.colored-tab__close {
+  background: none;
+  border: none;
+  color: inherit;
+  opacity: 0.35;
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: 14px;
+  line-height: 1;
+  margin-left: 2px;
+}
+
+.colored-tab__close:hover {
+  opacity: 1;
+}
+
+/* underline when active — parent gets .dv-active-tab from Dockview */
+.dv-active-tab .colored-tab {
+  box-shadow: inset 0 -2px 0 0 currentColor;
+}
