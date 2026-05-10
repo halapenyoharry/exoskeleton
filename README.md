@@ -1,6 +1,6 @@
-# HUD
+# Exoskeleton
 
-Cross-platform desktop workspace built on Tauri. One window with three docked panels — a Markdown editor, a terminal that runs a real shell, and a webview for local-network services like ComfyUI on the lumen RTX 3090. Targets macOS (Apple Silicon) and Pop!_OS.
+Cross-platform desktop workspace built on Tauri — structure you operate inside while you work. One window with three docked panels: a Markdown editor, a terminal that runs a real shell, and a webview for local-network services like ComfyUI on the lumen RTX 3090. Targets macOS (Apple Silicon) and Pop!_OS.
 
 ## Stack
 
@@ -50,7 +50,7 @@ You can drag panel headers to redock, split, tab, or resize. Dockview persists t
 ## Source layout
 
 ```
-hud/
+exoskeleton/
 ├── src/                       <- React frontend
 │   ├── App.tsx                   Dockview composition
 │   ├── main.tsx                  React mount + global CSS
@@ -58,7 +58,7 @@ hud/
 │   └── panels/
 │       ├── EditorPanel.tsx       textarea + open/save via Tauri fs/dialog
 │       ├── TerminalPanel.tsx     xterm wired to a real PTY
-│       └── WebviewPanel.tsx      iframe with URL toolbar
+│       └── LanWebview.tsx        iframe with URL toolbar (LAN HTTP services)
 ├── src-tauri/                 <- Rust backend
 │   ├── src/lib.rs                plugin registration (fs, dialog, pty, opener)
 │   ├── tauri.conf.json           window + bundle config
