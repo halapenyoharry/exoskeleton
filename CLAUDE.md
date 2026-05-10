@@ -46,9 +46,14 @@ Read these in order at the start of a session:
 ## Don't touch without asking
 
 - **Dockview composition** in [src/App.tsx](src/App.tsx) — the side+main shape is intentional (commit 607a2e2).
-- **Panel color identity** (cyan/amber/mint) — the last commit (6de2850) made it unmissable on purpose. Don't soften.
 - **Default webview URL** `http://lumen.local:8188` — this is ComfyUI on the RTX 3090; iframe-friendly because it's HTTP and on-LAN.
 - **File names** Harold chose — never rename without asking (global rule).
+
+## Not load-bearing — just current
+
+These look like they might be sacred but aren't. Free to change with normal review:
+
+- **Panel accent colors** (cyan/amber/mint). Harold asked for distinct colors so he could tell panels apart while thinking — pragmatic, not a design system. The earlier CLAUDE.md treated this as untouchable; that was over-canonization on my part (clarified 2026-05-10).
 
 ## Convention: end-of-session handoff
 
