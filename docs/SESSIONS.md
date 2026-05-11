@@ -69,3 +69,15 @@ Harold also landed (untracked, rolled into 7d53106): TopoViewerPanel + src/topov
 Last: side-grid MVP per Harold's specification, minimum scope (no custom titlebar, no tab polish, no breakout buttons — all deferred).
 Next: Harold to confirm visual and decide what to add. Open candidates per his earlier list: custom Tauri titlebar with explicit settings/themes buttons; tab-position prefs (top/bottom/left/right); transparent-on-hover tabs; per-tab popout button via api.addPopoutGroup; new-tab-goes-left-of-active ordering.
 Open: future README update — Harold wants README to become the all-in-one "how to fork Exoskeleton and build your own app" guide. Not yet doing that wholesale; "Building with it" section + the fractal observation + the schema/state split are scaffolding for it. Also: a future hypergraph diagram of Dockview-and-Tauri integration is on the wish list.
+
+## 2026-05-11 (end of day — logging + popout + readme rewrite)
+
+State: clean tree at d87f1ad (runtime) + this SESSIONS commit.
+Three coherent landings this round:
+- **tauri-plugin-log** wired with Stdout + LogDir + Webview targets. Log file at `~/Library/Logs/dev.harold.exoskeleton/Exoskeleton.log`. Global filter set to INFO (tao's TRACE was drowning the file). JS side: `import { info, ... } from "@tauri-apps/plugin-log"`. Unified Rust ↔ JS log stream, ready for "users report issues" workflows.
+- **Popout button** (⤴) in `rightHeaderActionsComponent`. Calls `containerApi.addPopoutGroup(group)`. Spawns a Tauri WebviewWindow for the group; each popout is its own React tree. First step toward the multi-window architecture the hypergraph doc points at.
+- **README full rewrite** as the all-in-one fork-and-build guide. New sections: What's in the box, side-grid, chrome customization, persistence (with the on-disk JSON shape documented), multi-window/popout, debugging, "what's not yet built." Schema/state split moved from conversation into permanent doc. Self-similar/fractal section preserved verbatim.
+- Harold added `docs/Dockview Tauri Hypergraph JSON.md` (long-form research on HIF — Hypergraph Interchange Format — as the future unified schema for both Dockview layout AND Tauri OS-window topology). Referenced in README's multi-window section. Not implementing HIF today; doc captures direction for when multi-window state-sync is actually needed.
+Last: logging + popout + readme rewrite.
+Next: Harold's call. The "what's not yet built" list at the bottom of README is the runway.
+Open: tao's pre-filter TRACE entries (43 lines) are still at the top of the log file from the brief window before LevelFilter::Info was applied. Harmless; will age out as the log rotates.
