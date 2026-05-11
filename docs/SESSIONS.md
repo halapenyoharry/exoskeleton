@@ -44,3 +44,10 @@ State: clean tree at 3341c9c. All Dockview chrome slots demoed live in the runni
 Last: built chrome demos in response to Harold wanting to *see* each slot before adding layout persistence.
 Next: layout persistence — Dockview's `api.toJSON()` / `api.fromJSON()` + Tauri's `tauri-plugin-store` (or just `tauri-plugin-fs` to a JSON file). Save layout on `onDidLayoutChange`, restore on app startup.
 Open: I overstated earlier when I told Harold about a `headerComponent` slot — it doesn't exist. A "full custom header" is built by combining prefix/left/right actions + custom tabComponents. The commit message acknowledges this; my conversational message did too.
+
+## 2026-05-11
+
+State: clean tree at b2b9a49. Persistence is live. State JSON at `~/Library/Application Support/dev.harold.exoskeleton/exoskeleton.json` (schema `version: 1`). Layout + per-panel params saved on `onDidLayoutChange` / `onDidActivePanelChange` (debounced 400ms), restored on `onReady` via `api.fromJSON()`. LanWebview now reads its URL from `params` and writes back via `updateParameters` — so user URL changes persist. Persistence layer split into `src/persistence/{storage.ts, tauri-storage.ts, default-layout.ts}` so future web/vscode adapters slot in without rearchitecting. Also rolled in an earlier uncommitted App.css fix (`.panel-pad` was `position:absolute` and was painting over Dockview's tab bar).
+Last: persistence layer, including the schema/state split documented in README's "Building with it" section (schema=code, state=JSON delta on top).
+Next: discuss with Harold *where controls can be stored* for apps built on top of Exoskeleton — Tauri titlebar / floating window / Dockview panel / separate hidable grid. He's doing his own research in parallel. Also: a hidable floating window for raw JSON state editing was mentioned as a "could".
+Open: undo/history is deferred — the JSON format leaves room (could add `history: AppState[]` later) but the UX trigger isn't decided. Color identity (cyan/amber/mint) was clarified earlier to NOT be load-bearing (commit 3ed2f5a relaxed CLAUDE.md).
