@@ -1,5 +1,14 @@
-import type { IDockviewPanelHeaderProps } from "dockview";
+import { DockviewDefaultTab, type IDockviewPanelHeaderProps } from "dockview";
 import "./ColoredTab.css";
+
+// Customize Dockview's default tab without replacing it. The default tab
+// carries the drag-and-drop plumbing (pointer event handlers, drag start /
+// data transfer setup). Building a tab from scratch means re-implementing
+// that — easy to get wrong, breaks when Dockview ships internal changes.
+//
+// Instead we pass color + a CSS variable carrying the glyph through to the
+// default tab's root div. ColoredTab.css uses the variable in a ::before
+// pseudo-element. Result: drag works because we touched nothing important.
 
 const accents: Record<string, string> = {
   editor: "var(--accent-editor)",
@@ -8,33 +17,25 @@ const accents: Record<string, string> = {
 };
 
 const glyphs: Record<string, string> = {
-  editor: "◆",
-  terminal: "▸",
-  webview: "◯",
+  editor: '"◆"',
+  terminal: '"▸"',
+  webview: '"◯"',
 };
 
 export default function ColoredTab(props: IDockviewPanelHeaderProps) {
   const id = props.api.id;
-  const title = props.api.title ?? id;
   const accent = accents[id] ?? "inherit";
-  const glyph = glyphs[id] ?? "·";
-
-  function onClose(e: React.MouseEvent) {
-    e.stopPropagation();
-    props.api.close();
-  }
+  const glyph = glyphs[id] ?? '"·"';
 
   return (
-    <div className="colored-tab" style={{ color: accent }}>
-      <span className="colored-tab__glyph">{glyph}</span>
-      <span className="colored-tab__title">{title}</span>
-      <button
-        className="colored-tab__close"
-        onClick={onClose}
-        title="close panel"
-      >
-        ×
-      </button>
-    </div>
+    <DockviewDefaultTab
+      {...props}
+      style={
+        {
+          color: accent,
+          "--tab-glyph": glyph,
+        } as React.CSSProperties
+      }
+    />
   );
 }
