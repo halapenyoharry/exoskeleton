@@ -6,7 +6,7 @@ import type { DockviewApi } from "dockview";
 // This is the SCHEMA's idea of "what panels exist and how they're arranged."
 // State (the JSON saved between sessions) is a delta on top of this.
 
-export const DEFAULT_WEBVIEW_URL = "http://lumen.local:8188";
+export const DEFAULT_WEBVIEW_URL = "https://dockview.dev";
 
 export function buildDefaultLayout(api: DockviewApi) {
   api.addPanel({
@@ -28,12 +28,5 @@ export function buildDefaultLayout(api: DockviewApi) {
     component: "terminal",
     title: "terminal",
     position: { referencePanel: "editor", direction: "below" },
-  });
-
-  api.addPanel({
-    id: "topoviewer",
-    component: "topoviewer",
-    title: "topoviewer",
-    position: { referencePanel: "webview", direction: "within" },
   });
 }

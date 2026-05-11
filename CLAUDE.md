@@ -2,7 +2,7 @@
 
 ## What this is
 
-A Tauri 2 desktop workspace — structure you operate inside while you work. One window, three docked panels: a Markdown editor, a real-shell terminal, and a webview pointed at LAN services (default: ComfyUI on lumen's RTX 3090). macOS Apple Silicon + Pop!_OS.
+A Tauri 2 desktop workspace — structure you operate inside while you work. One window, three docked panels: a Markdown editor, a real-shell terminal, and a webview for LAN HTTP services (or any iframe-friendly site). macOS Apple Silicon + Pop!_OS.
 
 The repo was originally named `hud` (heads-up display); renamed 2026-05-09 because *exoskeleton* better captures the posture — you wear it and operate from it, not just look at it.
 
@@ -33,7 +33,7 @@ Three panels via Dockview, defined in [src/App.tsx](src/App.tsx):
 
 - **editor** (cyan) — [src/panels/EditorPanel.tsx](src/panels/EditorPanel.tsx) — textarea + Tauri fs/dialog
 - **terminal** (amber) — [src/panels/TerminalPanel.tsx](src/panels/TerminalPanel.tsx) — xterm wired to a real PTY
-- **webview** (mint) — [src/panels/LanWebview.tsx](src/panels/LanWebview.tsx) — iframe with URL bar for LAN HTTP services, defaults to `http://lumen.local:8188`. Named `LanWebview` to label what it's for; the panel id `webview` (and the mint color identity) are kept because they describe the panel's *role*, not its implementation.
+- **webview** (mint) — [src/panels/LanWebview.tsx](src/panels/LanWebview.tsx) — iframe with URL bar, defaults to `https://dockview.dev` (the layout library's docs). Named `LanWebview` to label what it's *for* — LAN HTTP services and similar iframe-friendly surfaces. The panel id `webview` (and the mint color identity) are kept because they describe the panel's *role*, not its implementation.
 
 ## Where to look first
 
@@ -46,7 +46,7 @@ Read these in order at the start of a session:
 ## Don't touch without asking
 
 - **Dockview composition** in [src/App.tsx](src/App.tsx) — the side+main shape is intentional (commit 607a2e2).
-- **Default webview URL** `http://lumen.local:8188` — this is ComfyUI on the RTX 3090; iframe-friendly because it's HTTP and on-LAN.
+- **Default webview URL** `https://dockview.dev` — generic onboarding default for fresh forks. Change in [src/persistence/default-layout.ts](src/persistence/default-layout.ts) if needed; not load-bearing.
 - **File names** Harold chose — never rename without asking (global rule).
 
 ## Not load-bearing — just current

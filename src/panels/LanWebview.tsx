@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
 import "./LanWebview.css";
 
-const FALLBACK_URL = "http://lumen.local:8188"; // ComfyUI on the RTX 3090
+const FALLBACK_URL = "https://dockview.dev";
 
 interface LanWebviewParams {
   url?: string;
@@ -33,7 +33,7 @@ export default function LanWebview(props: IDockviewPanelProps<LanWebviewParams>)
           onKeyDown={(e) => {
             if (e.key === "Enter") go();
           }}
-          placeholder="http://lumen.local:8188"
+          placeholder="https://example.com or http://lan-host:port"
           spellCheck={false}
         />
         <button onClick={go}>go</button>

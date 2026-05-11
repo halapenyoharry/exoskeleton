@@ -65,7 +65,6 @@ const components = {
   editor: EditorPanel,
   terminal: TerminalPanel,
   webview: LanWebview,
-  topoviewer: TopoViewerPanel,
 };
 ```
 
@@ -75,12 +74,11 @@ The left side of each pair is the *role*. The right side is the *implementation*
 
 ```ts
 event.api.addPanel({ id: "editor", component: "editor", title: "editor" });
-event.api.addPanel({ id: "webview",   ..., position: { referencePanel: "editor",  direction: "right" } });
-event.api.addPanel({ id: "terminal",  ..., position: { referencePanel: "editor",  direction: "below" } });
-event.api.addPanel({ id: "topoviewer",..., position: { referencePanel: "webview", direction: "within" } });
+event.api.addPanel({ id: "webview",  ..., position: { referencePanel: "editor", direction: "right" } });
+event.api.addPanel({ id: "terminal", ..., position: { referencePanel: "editor", direction: "below" } });
 ```
 
-Four calls. The first fills the empty grid. The second cuts the grid side-to-side. The third splits the left half top-to-bottom. The fourth uses `direction: "within"` to put topoviewer *as a tab inside the webview group* rather than splitting. The arrangement that results is the one you see on first launch.
+Three calls. The first fills the empty grid. The second cuts the grid side-to-side. The third splits the left half top-to-bottom. The arrangement that results is the one you see on first launch. (`direction: "within"` is also available — it adds a panel *as a tab inside an existing group* rather than splitting.)
 
 ### Forking it: adding your own panel
 
@@ -226,17 +224,15 @@ exoskeleton/
 │   ├── panels/                        main-grid panel components
 │   │   ├── EditorPanel.tsx               textarea + open/save via fs/dialog
 │   │   ├── TerminalPanel.tsx             xterm + PTY
-│   │   ├── LanWebview.tsx                iframe with URL toolbar
-│   │   └── TopoViewerPanel.tsx           hypergraph topology canvas
+│   │   └── LanWebview.tsx                iframe with URL toolbar
 │   ├── sidegrid/                      side-grid (the Cmd+B controls area)
 │   │   ├── SideGrid.tsx                  the side-grid's DockviewReact
 │   │   ├── SettingsPanel.tsx             raw JSON state editor
 │   │   └── SideGridWatermark.tsx         side-grid empty state
-│   ├── persistence/                   state save/load layer
-│   │   ├── storage.ts                    interface + AppState type
-│   │   ├── tauri-storage.ts              Tauri adapter
-│   │   └── default-layout.ts             default panel arrangement
-│   └── topoviewer/                    topology viewer support code (parser, renderer, types)
+│   └── persistence/                   state save/load layer
+│       ├── storage.ts                    interface + AppState type
+│       ├── tauri-storage.ts              Tauri adapter
+│       └── default-layout.ts             default panel arrangement
 ├── src-tauri/                      <- Rust backend
 │   ├── src/lib.rs                     plugin registration + setup (devtools auto-open)
 │   ├── tauri.conf.json                window + bundle config (dragDropEnabled: false)
@@ -256,8 +252,8 @@ exoskeleton/
 
 - **Muya not yet integrated.** Editor uses a plain textarea. Muya 0.2.5 on npm is the latest published version and is flagged "not for production." Path forward: pin a fork, run from master, or swap to a maintained alternative (Milkdown / Lexical / CodeMirror+remark). The editor's open/save plumbing is independent of the editor surface, so swapping is mechanical.
 - **First Rust compile is slow.** Tauri pulls a large dep graph. Expect 5–15 min on first `npm run tauri dev`; future incremental rebuilds are fast.
-- **Default webview URL** is `http://lumen.local:8188` (ComfyUI on the RTX 3090). Edit the URL bar to point anywhere else.
-- **Webview is an iframe**, not a native child webview. iframes can't observe HTTPS-only or `X-Frame-Options`-deny pages. For LAN HTTP services (ComfyUI, Open WebUI, Cockpit) this works fine. If you need one of those rejected, switch to Tauri's `WebviewWindow::new` for a native child surface.
+- **Default webview URL** is `https://dockview.dev` (the docs site for the layout library Exoskeleton wraps). Change `DEFAULT_WEBVIEW_URL` in [src/persistence/default-layout.ts](src/persistence/default-layout.ts) to set a different first-launch default, or just edit the URL bar.
+- **Webview is an iframe**, not a native child webview. iframes can't observe `X-Frame-Options`-deny pages. For LAN HTTP services (ComfyUI, Open WebUI, Cockpit, etc.) and most docs sites this works fine. If you need an embed-rejected site, switch to Tauri's `WebviewWindow::new` for a native child surface.
 - **OS-level file drop is disabled.** Tauri's native file-drop listener was intercepting Dockview's HTML5 drag-and-drop on macOS WKWebView (the green-plus cursor of doom). Re-enabling it requires intercepting `dragover` at the React level to set `dataTransfer.dropEffect = "move"` for Dockview-originating drags. See [docs/dockviewtips1.md](docs/dockviewtips1.md).
 - **Cross-platform compile** is tested on macOS only. The same source should `cargo tauri build` on Pop!_OS once `webkit2gtk-4.1` and friends are installed (see Tauri prerequisites).
 
