@@ -17,12 +17,15 @@
 
 /* The window's horizontal split between the (toggleable) side-grid on the
    left and the main grid on the right. When side-grid is hidden, the main
-   grid fills the whole frame. */
+   grid fills the whole frame. Explicit flex-direction: row so this can't
+   be flipped by inherited dir/rtl or theme overrides. */
 .app-layout {
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: row;
   align-items: stretch;
+  direction: ltr;
 }
 
 .app-layout__side {
@@ -30,12 +33,14 @@
   min-width: 200px;
   position: relative;
   border-right: 1px solid #1a2a3a;
+  order: 0;
 }
 
 .app-layout__main {
   flex: 1 1 auto;
   min-width: 0;
   position: relative;
+  order: 1;
 }
 
 .panel-pad {

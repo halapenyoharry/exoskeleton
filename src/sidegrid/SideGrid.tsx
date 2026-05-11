@@ -6,6 +6,7 @@ import {
 } from "dockview";
 import ColoredTab from "../ColoredTab";
 import SettingsPanel from "./SettingsPanel";
+import SideGridWatermark from "./SideGridWatermark";
 import "./SideGrid.css";
 
 // The side-grid is a *peer* DockviewReact to the main grid. Same chrome
@@ -57,6 +58,7 @@ export default function SideGrid({ savedLayout, onApiReady }: SideGridProps) {
       <DockviewReact
         components={components}
         defaultTabComponent={ColoredTab}
+        watermarkComponent={SideGridWatermark}
         onReady={onReady}
       />
     </div>
