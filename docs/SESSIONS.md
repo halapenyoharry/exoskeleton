@@ -60,3 +60,12 @@ State: clean tree at 33c9416. Tab drag-and-drop now works (Harold to confirm vis
 Last: drag fix.
 Next: still the controls-storage discussion from earlier today's entry. Harold's research is on Tauri titlebar / floating window / Dockview panel / hidable Dockview grid as options for where controls live in apps built on top of Exoskeleton.
 Open: if we ever want OS-level file-drop INTO Exoskeleton (e.g. drop an image onto the webview, drop a file onto the editor), we have to flip dragDropEnabled back to true and intercept dragover at the React level to set `dataTransfer.dropEffect = "move"` when the drag is from a Dockview tab. Noted in dockviewtips1.md.
+
+## 2026-05-11 (later still — side-grid MVP)
+
+State: clean tree at 7d53106. Side-grid landed — a peer DockviewReact instance on the left, toggleable with Cmd+B, hidden by default. Today holds one panel: `⚙ SETTINGS`, a raw JSON editor for the full app state on disk. Layout lives at flex: 0 0 320px when visible.
+AppState extended with optional `sideGrid: SerializedDockview` and `preferences: { sideGridVisible }`. Forward-compatible — old state files load fine, just lack the new fields. App.tsx coordinates a single debounced save across both grids + prefs. sideApiRef cleared on hide so saves don't serialize a disposed Dockview. SideGrid takes savedLayout + onApiReady; App keeps sideGridLayout in state so content survives unmount cycles.
+Harold also landed (untracked, rolled into 7d53106): TopoViewerPanel + src/topoviewer/ (parse / renderer / types). First real domain feature on top of Exoskeleton. Color slot `--accent-topoviewer: #b388ff` purple, glyph ⌬ via ColoredTab.
+Last: side-grid MVP per Harold's specification, minimum scope (no custom titlebar, no tab polish, no breakout buttons — all deferred).
+Next: Harold to confirm visual and decide what to add. Open candidates per his earlier list: custom Tauri titlebar with explicit settings/themes buttons; tab-position prefs (top/bottom/left/right); transparent-on-hover tabs; per-tab popout button via api.addPopoutGroup; new-tab-goes-left-of-active ordering.
+Open: future README update — Harold wants README to become the all-in-one "how to fork Exoskeleton and build your own app" guide. Not yet doing that wholesale; "Building with it" section + the fractal observation + the schema/state split are scaffolding for it. Also: a future hypergraph diagram of Dockview-and-Tauri integration is on the wish list.
