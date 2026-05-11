@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "exoskeleton: dev",
+      "detail": "Runs `npm run tauri dev`. Auto-starts when this workspace opens (after you allow automatic tasks the first time).",
+      "type": "shell",
+      "command": "npm run tauri dev",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always",
+        "focus": false,
+        "echo": true,
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}
