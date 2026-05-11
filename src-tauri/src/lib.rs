@@ -23,15 +23,17 @@ pub fn run() {
                 .build(),
         )
         .setup(|app| {
-            // Auto-open WebKit Inspector in debug builds so devtools is one
-            // click away (otherwise you have to hunt for the keyboard
-            // shortcut, which varies by platform / WebKit version).
-            #[cfg(debug_assertions)]
-            {
-                use tauri::Manager;
-                if let Some(window) = app.get_webview_window("main") {
-                    window.open_devtools();
-                }
+            use tauri::Manager;
+            if let Some(window) = app.get_webview_window("main") {
+                // Auto-open WebKit Inspector in debug builds so devtools is
+                // one click away (otherwise you have to hunt for the keyboard
+                // shortcut, which varies by platform / WebKit version).
+                #[cfg(debug_assertions)]
+                window.open_devtools();
+                // Activate the app and bring the window forward, so an
+                // auto-launch (VS Code's runOn:folderOpen task) doesn't leave
+                // it sitting behind the IDE.
+                let _ = window.set_focus();
             }
             Ok(())
         })
