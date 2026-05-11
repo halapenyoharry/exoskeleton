@@ -149,7 +149,16 @@ export default function App() {
   function onSideReady(api: DockviewApi) {
     sideApiRef.current = api;
     api.onDidLayoutChange(() => {
-      setSideGridLayout(api.toJSON());
+      // Auto-hide when the last panel closes. UX cue: an empty side-grid
+      // sitting there with a watermark is a worse signal than just
+      // tucking it away. Clear the saved layout so next Cmd+B rebuilds
+      // the default settings panel rather than restoring the empty state.
+      if (api.totalPanels === 0) {
+        setSideGridVisible(false);
+        setSideGridLayout(null);
+      } else {
+        setSideGridLayout(api.toJSON());
+      }
       save();
     });
     api.onDidActivePanelChange(save);
