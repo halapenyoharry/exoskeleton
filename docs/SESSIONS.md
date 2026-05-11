@@ -51,3 +51,12 @@ State: clean tree at b2b9a49. Persistence is live. State JSON at `~/Library/Appl
 Last: persistence layer, including the schema/state split documented in README's "Building with it" section (schema=code, state=JSON delta on top).
 Next: discuss with Harold *where controls can be stored* for apps built on top of Exoskeleton — Tauri titlebar / floating window / Dockview panel / separate hidable grid. He's doing his own research in parallel. Also: a hidable floating window for raw JSON state editing was mentioned as a "could".
 Open: undo/history is deferred — the JSON format leaves room (could add `history: AppState[]` later) but the UX trigger isn't decided. Color identity (cyan/amber/mint) was clarified earlier to NOT be load-bearing (commit 3ed2f5a relaxed CLAUDE.md).
+
+## 2026-05-11 (later — drag fix + devtools)
+
+State: clean tree at 33c9416. Tab drag-and-drop now works (Harold to confirm visually). Two real fixes plus one diagnostic:
+- 4a45fa3: ColoredTab back to wrapping DockviewDefaultTab. The fully-custom version was eating dragstart somehow, leaving event.defaultPrevented true when abstractDragHandler.js ran, so PanelTransfer was never set. Glyph (◆/▸/◯) now comes from a CSS variable + ::before pseudo, color from the style prop — both flow through Object.assign in DockviewDefaultTab. lib.rs auto-opens WebKit Inspector in debug builds via `window.open_devtools()` in setup().
+- 33c9416: `dragDropEnabled: false` on the main window in tauri.conf.json. Tauri's native OS file-drop listener was intercepting WKWebView's HTML5 drag events. Harold did this research himself and brought me the answer — saved a longer diagnostic dance. Tip written up in docs/dockviewtips1.md.
+Last: drag fix.
+Next: still the controls-storage discussion from earlier today's entry. Harold's research is on Tauri titlebar / floating window / Dockview panel / hidable Dockview grid as options for where controls live in apps built on top of Exoskeleton.
+Open: if we ever want OS-level file-drop INTO Exoskeleton (e.g. drop an image onto the webview, drop a file onto the editor), we have to flip dragDropEnabled back to true and intercept dragover at the React level to set `dataTransfer.dropEffect = "move"` when the drag is from a Dockview tab. Noted in dockviewtips1.md.
