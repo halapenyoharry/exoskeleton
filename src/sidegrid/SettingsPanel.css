@@ -1,0 +1,91 @@
+.settings-panel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #0a0e27;
+  color: #c5e8ee;
+  overflow: hidden;
+}
+
+.settings-panel__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #0a0e27;
+  border-bottom: 1px solid #1a2a3a;
+  font-size: 11px;
+}
+
+.settings-panel__toolbar button {
+  background: transparent;
+  border: 1px solid #2a3a45;
+  color: #c5e8ee;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.settings-panel__toolbar button:hover:not(:disabled) {
+  border-color: #18ffff;
+  color: #18ffff;
+}
+
+.settings-panel__toolbar button:disabled {
+  color: #2a3a45;
+  border-color: #1a2a3a;
+  cursor: default;
+}
+
+.settings-panel__status {
+  margin-left: auto;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.settings-panel__clean {
+  color: #6dffaa;
+}
+
+.settings-panel__dirty {
+  color: #ff9800;
+}
+
+.settings-panel__error {
+  color: #ff6666;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: "SF Mono", Menlo, monospace;
+}
+
+.settings-panel__textarea {
+  flex: 1;
+  margin: 0;
+  padding: 12px 16px;
+  border: none;
+  outline: none;
+  resize: none;
+  font: 12px/1.5 "SF Mono", Menlo, monospace;
+  color: #c5e8ee;
+  background: #0d1326;
+  caret-color: #18ffff;
+  white-space: pre;
+  tab-size: 2;
+  overflow: auto;
+}
+
+.settings-panel__hint {
+  padding: 6px 10px;
+  background: #0a0e27;
+  border-top: 1px solid #1a2a3a;
+  font-size: 10px;
+  color: #4a6a78;
+  font-style: italic;
+}

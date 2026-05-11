@@ -29,4 +29,11 @@ export function buildDefaultLayout(api: DockviewApi) {
     title: "terminal",
     position: { referencePanel: "editor", direction: "below" },
   });
+
+  api.addPanel({
+    id: "topoviewer",
+    component: "topoviewer",
+    title: "topoviewer",
+    position: { referencePanel: "webview", direction: "within" },
+  });
 }
