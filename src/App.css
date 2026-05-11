@@ -11,8 +11,13 @@
 }
 
 .panel-pad {
-  position: absolute;
-  inset: 0;
+  /* Fill Dockview's .dv-content-container (a flex item with flex-grow:1)
+     without using position:absolute — that would escape to .app-frame and
+     paint over the tab bars. position:relative provides a positioning
+     context for absolutely-positioned children (e.g. .webview-frame). */
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   background: #0d1326;

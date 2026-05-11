@@ -12,6 +12,7 @@
     "dialog:default",
     "dialog:allow-open",
     "dialog:allow-save",
-    "pty:default"
+    "pty:default",
+    "store:default"
   ]
 }

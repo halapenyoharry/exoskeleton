@@ -1,23 +1,12 @@
 import type { IWatermarkPanelProps } from "dockview";
+import { buildDefaultLayout } from "./persistence/default-layout";
 import "./Watermark.css";
 
 export default function Watermark(props: IWatermarkPanelProps) {
   const api = props.containerApi;
 
   function restoreAll() {
-    api.addPanel({ id: "editor", component: "editor", title: "editor" });
-    api.addPanel({
-      id: "webview",
-      component: "webview",
-      title: "webview",
-      position: { referencePanel: "editor", direction: "right" },
-    });
-    api.addPanel({
-      id: "terminal",
-      component: "terminal",
-      title: "terminal",
-      position: { referencePanel: "editor", direction: "below" },
-    });
+    buildDefaultLayout(api);
   }
 
   function restoreOne(id: "editor" | "terminal" | "webview") {

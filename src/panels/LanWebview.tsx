@@ -1,16 +1,26 @@
 import { useState } from "react";
+import type { IDockviewPanelProps } from "dockview";
 import "./LanWebview.css";
 
-const DEFAULT_URL = "http://lumen.local:8188"; // ComfyUI on the RTX 3090
+const FALLBACK_URL = "http://lumen.local:8188"; // ComfyUI on the RTX 3090
 
-export default function LanWebview() {
-  const [url, setUrl] = useState(DEFAULT_URL);
-  const [loadedUrl, setLoadedUrl] = useState(DEFAULT_URL);
+interface LanWebviewParams {
+  url?: string;
+}
+
+export default function LanWebview(props: IDockviewPanelProps<LanWebviewParams>) {
+  // The URL is held in panel params (Dockview's per-panel state), so it
+  // persists across restarts as part of the serialized layout.
+  const initialUrl = props.params?.url ?? FALLBACK_URL;
+  const [url, setUrl] = useState(initialUrl);
+  const [loadedUrl, setLoadedUrl] = useState(initialUrl);
   const [reloadKey, setReloadKey] = useState(0);
 
   function go() {
     setLoadedUrl(url);
     setReloadKey((k) => k + 1);
+    // Write the new URL back into params so it'll be saved with the layout.
+    props.api.updateParameters({ url });
   }
 
   return (
