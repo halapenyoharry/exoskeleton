@@ -15,7 +15,6 @@ import {
 import EditorPanel from "./panels/EditorPanel";
 import TerminalPanel from "./panels/TerminalPanel";
 import LanWebview from "./panels/LanWebview";
-import TopoViewerPanel from "./panels/TopoViewerPanel";
 import SideGrid from "./sidegrid/SideGrid";
 import { buildDefaultLayout } from "./persistence/default-layout";
 import { CURRENT_VERSION, type AppState } from "./persistence/storage";
@@ -28,7 +27,6 @@ const components = {
   editor: EditorPanel,
   terminal: TerminalPanel,
   webview: LanWebview,
-  topoviewer: TopoViewerPanel,
 };
 
 // Choose persistence backend by environment.

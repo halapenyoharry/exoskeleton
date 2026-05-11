@@ -18,7 +18,7 @@ export interface Preferences {
 
 export interface AppState {
   version: number;
-  /** Main grid layout (editor / terminal / webview / topoviewer / ...). */
+  /** Main grid layout (editor / terminal / webview / ...). */
   layout: SerializedDockview;
   /** Side-grid (secondary Dockview) layout. Optional — absent if the
    *  user has never opened the side-grid. */
