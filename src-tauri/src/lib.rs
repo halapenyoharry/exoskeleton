@@ -6,6 +6,22 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_pty::init())
         .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(
+            // Unified logging from both Rust and JS. Writes to:
+            //   - stdout (visible in the `npm run tauri dev` terminal)
+            //   - the OS log dir (macOS: ~/Library/Logs/dev.harold.exoskeleton/)
+            //   - the WebView console (visible in the auto-opened devtools)
+            // JS side imports from `@tauri-apps/plugin-log` to emit logs.
+            tauri_plugin_log::Builder::default()
+                .targets([
+                    tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout),
+                    tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir { file_name: None }),
+                    tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Webview),
+                ])
+                // INFO globally; tao's window-event tracing is too noisy at TRACE.
+                .level(log::LevelFilter::Info)
+                .build(),
+        )
         .setup(|app| {
             // Auto-open WebKit Inspector in debug builds so devtools is one
             // click away (otherwise you have to hunt for the keyboard
