@@ -14,12 +14,15 @@ const accents: Record<string, string> = {
   editor: "var(--accent-editor)",
   terminal: "var(--accent-terminal)",
   webview: "var(--accent-webview)",
+  topoviewer: "var(--accent-topoviewer)",
 };
 
 const glyphs: Record<string, string> = {
   editor: '"◆"',
   terminal: '"▸"',
   webview: '"◯"',
+  topoviewer: '"⌬"',
+  settings: '"⚙"',
 };
 
 export default function ColoredTab(props: IDockviewPanelHeaderProps) {

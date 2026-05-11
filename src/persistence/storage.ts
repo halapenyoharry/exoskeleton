@@ -10,9 +10,21 @@ import type { SerializedDockview } from "dockview";
 
 export const CURRENT_VERSION = 1;
 
+export interface Preferences {
+  /** Whether the side-grid is currently shown. Toggled by Cmd+B. */
+  sideGridVisible?: boolean;
+  // Room for: theme, tabPosition, tabsVisible, etc. — when those become real.
+}
+
 export interface AppState {
   version: number;
+  /** Main grid layout (editor / terminal / webview / topoviewer / ...). */
   layout: SerializedDockview;
+  /** Side-grid (secondary Dockview) layout. Optional — absent if the
+   *  user has never opened the side-grid. */
+  sideGrid?: SerializedDockview;
+  /** User preferences. Merged on top of schema defaults at load time. */
+  preferences?: Preferences;
 }
 
 export interface Storage {

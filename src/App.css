@@ -2,12 +2,40 @@
   --accent-editor: #18ffff;
   --accent-terminal: #ff9800;
   --accent-webview: #6dffaa;
+  --accent-topoviewer: #b388ff;
 }
 
 .app-frame {
   position: absolute;
   inset: 0;
   background: #0d1326;
+}
+
+.app-frame--loading {
+  /* No content — just the dark background while initial state is loading. */
+}
+
+/* The window's horizontal split between the (toggleable) side-grid on the
+   left and the main grid on the right. When side-grid is hidden, the main
+   grid fills the whole frame. */
+.app-layout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: stretch;
+}
+
+.app-layout__side {
+  flex: 0 0 320px;
+  min-width: 200px;
+  position: relative;
+  border-right: 1px solid #1a2a3a;
+}
+
+.app-layout__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  position: relative;
 }
 
 .panel-pad {
