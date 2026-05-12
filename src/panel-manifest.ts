@@ -2,19 +2,43 @@ import type { ComponentType } from "react";
 import type { IDockviewPanelProps } from "dockview";
 
 /**
- * Standard OSC argument type tags. A panel declaring its OSC integration
- * lists args using these. Most panels will only need 'i', 'f', and 's'.
+ * OSC argument type names. A panel declaring its OSC integration lists
+ * its args using these. The vocabulary mirrors the runtime `OscArg` union
+ * in [src/osc/types.ts](./osc/types.ts) so manifests and the wire format
+ * use the same words.
  *
- * - `f` 32-bit float
- * - `i` 32-bit signed int
- * - `s` UTF-8 string
- * - `T` true (no arg payload)
- * - `F` false (no arg payload)
- * - `b` blob (binary data)
- * - `h` 64-bit int
- * - `d` 64-bit double
+ * Most panels will only need `int`, `float`, `string`, and `bool`.
+ *
+ * - `int`     32-bit signed integer
+ * - `float`   32-bit float
+ * - `string`  UTF-8 string
+ * - `blob`    binary data (`number[]` on the wire)
+ * - `time`    OSC timetag (seconds + fractional)
+ * - `long`    64-bit signed integer
+ * - `double`  64-bit float
+ * - `char`    single character
+ * - `color`   RGBA color (red/green/blue/alpha, 0–255)
+ * - `midi`    MIDI message (port + status + data1 + data2)
+ * - `bool`    boolean
+ * - `array`   nested array of OSC args
+ * - `nil`     no value (type-tag only)
+ * - `inf`     positive infinity (type-tag only)
  */
-export type OscArgType = "f" | "i" | "s" | "T" | "F" | "b" | "h" | "d";
+export type OscArgType =
+  | "int"
+  | "float"
+  | "string"
+  | "blob"
+  | "time"
+  | "long"
+  | "double"
+  | "char"
+  | "color"
+  | "midi"
+  | "bool"
+  | "array"
+  | "nil"
+  | "inf";
 
 /** One OSC address the panel either emits or listens for. */
 export interface OscAddressDecl {
