@@ -1,14 +1,14 @@
 # Panel Contract Proposal — Host-Owned Wrapping
 
 **Status:** accepted, implemented 2026-05-12
-**Scope:** Exoskeleton + the panel library at `~/Projects/exoskeleton-componant-library`
+**Scope:** Exoskeleton + the panel library at `~/Projects/exoskeleton-component-library`
 **Origin:** discussion 2026-05-12 about whether the two repos should remain separate, and what their shared contract should actually be
 
 **Implementation notes (post-acceptance):**
 
 - `PanelRoot` and `exoPanel` live in [`src/PanelRoot.tsx`](../src/PanelRoot.tsx) (not `src/panel/` — flat under src/ for symmetry with `panel-manifest.ts`).
 - Q1 (className support on `PanelRoot`) accepted up-front rather than deferred — cheap, prevents downstream churn.
-- Library-side migration done in the same pass: `~/Projects/exoskeleton-componant-library/panels/TopoViewerPanel.{tsx,css}` updated; the library README's "Anatomy" section rewritten.
+- Library-side migration done in the same pass: `~/Projects/exoskeleton-component-library/panels/TopoViewerPanel.{tsx,css}` updated; the library README's "Anatomy" section rewritten.
 - Library panels keep their *internal* accent var (e.g. `--accent-topoviewer` declared in the library's `:root`) for self-sufficiency. The *stripe* accent flows through `--panel-accent` from `exoPanel`. Two layers, one for portability, one for the stripe.
 
 ## Summary
@@ -19,7 +19,7 @@ This proposal replaces that convention with a single component owned by Exoskele
 
 ## 1. The contract today
 
-Reading the current code in [src/panels/](../src/panels/) and [exoskeleton-componant-library/panels/](../../exoskeleton-componant-library/panels/), the "Exoskeleton panel contract" is made of four obligations on the panel author:
+Reading the current code in [src/panels/](../src/panels/) and [exoskeleton-component-library/panels/](../../exoskeleton-component-library/panels/), the "Exoskeleton panel contract" is made of four obligations on the panel author:
 
 | Obligation | How it's expressed | Where it lives |
 | --- | --- | --- |
@@ -36,7 +36,7 @@ Two problems with the current expression of the first two obligations:
 
 **Problem A — string coupling.** The class name `panel-pad` and the variant pattern `panel-pad--<role>` are strings the panel author must type correctly. A typo silently produces an unaccented panel. The host CSS file has no way to know which panel role names exist; it just hosts a fixed list of rules for the roles that happened to be hardcoded when the file was written.
 
-**Problem B — cross-repo CSS drift.** The library's [`TopoViewerPanel.css:5`](../../exoskeleton-componant-library/panels/TopoViewerPanel.css#L5) defines `.panel-pad--topoviewer { --panel-accent: var(--accent-topoviewer); }`. This rule only works if (a) the host page already defines the `--accent-topoviewer` CSS variable and (b) the host already includes the `.panel-pad` base rule. The library's CSS quietly depends on host CSS variables that are not declared in the library. There is no compile-time signal of that dependency.
+**Problem B — cross-repo CSS drift.** The library's [`TopoViewerPanel.css:5`](../../exoskeleton-component-library/panels/TopoViewerPanel.css#L5) defines `.panel-pad--topoviewer { --panel-accent: var(--accent-topoviewer); }`. This rule only works if (a) the host page already defines the `--accent-topoviewer` CSS variable and (b) the host already includes the `.panel-pad` base rule. The library's CSS quietly depends on host CSS variables that are not declared in the library. There is no compile-time signal of that dependency.
 
 The two problems combine into a *drift surface*: each new panel adds a string in two places (the panel's JSX, the host's CSS), and the library carries its own variant rule that has to coordinate with the host's variable declarations across a repo boundary.
 

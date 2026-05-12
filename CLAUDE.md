@@ -47,7 +47,7 @@ Read these in order at the start of a session:
 
 These are the type-level contracts that library panels and other tooling depend on. Adding fields is fine; renaming or removing without a heads-up will break every library component.
 
-- **[src/panel-manifest.ts](src/panel-manifest.ts)** — `PanelManifest<P>` is the integration contract every library panel satisfies. Agents installing a panel from `~/Projects/exoskeleton-componant-library/` read a manifest and perform the App.tsx / ColoredTab / App.css / default-layout / capabilities / Cargo / package.json edits implied by its fields. The library's top-level README documents the install protocol.
+- **[src/panel-manifest.ts](src/panel-manifest.ts)** — `PanelManifest<P>` is the integration contract every library panel satisfies. Agents installing a panel from `~/Projects/exoskeleton-component-library/` read a manifest and perform the App.tsx / ColoredTab / App.css / default-layout / capabilities / Cargo / package.json edits implied by its fields. The library's top-level README documents the install protocol.
 
 ## Don't touch without asking
 
