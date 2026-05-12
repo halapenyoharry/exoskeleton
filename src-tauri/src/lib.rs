@@ -1,3 +1,5 @@
+mod osc;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -22,7 +24,9 @@ pub fn run() {
                 .level(log::LevelFilter::Info)
                 .build(),
         )
+        .invoke_handler(tauri::generate_handler![crate::osc::send_osc])
         .setup(|app| {
+            crate::osc::setup(app.handle())?;
             use tauri::Manager;
             if let Some(window) = app.get_webview_window("main") {
                 // Auto-open WebKit Inspector in debug builds so devtools is
