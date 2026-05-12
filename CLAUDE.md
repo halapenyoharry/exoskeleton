@@ -43,6 +43,12 @@ Read these in order at the start of a session:
 2. **[README.md](README.md)** — human-facing intro and labeled caveats.
 3. **`~/.claude/projects/-Users-harold-Projects-exoskeleton/memory/`** — how Harold works (e.g. ship-concrete-start feedback). Loaded automatically; skim if relevant.
 
+## Core contracts (don't redesign — extend)
+
+These are the type-level contracts that library panels and other tooling depend on. Adding fields is fine; renaming or removing without a heads-up will break every library component.
+
+- **[src/panel-manifest.ts](src/panel-manifest.ts)** — `PanelManifest<P>` is the integration contract every library panel satisfies. Agents installing a panel from `~/Projects/exoskeleton-componant-library/` read a manifest and perform the App.tsx / ColoredTab / App.css / default-layout / capabilities / Cargo / package.json edits implied by its fields. The library's top-level README documents the install protocol.
+
 ## Don't touch without asking
 
 - **Dockview composition** in [src/App.tsx](src/App.tsx) — the side+main shape is intentional (commit 607a2e2).
