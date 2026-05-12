@@ -1,11 +1,10 @@
 use rosc::{OscMessage, OscPacket, OscType};
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
-use std::sync::Arc;
+use std::sync::OnceLock;
 use tauri::{AppHandle, Emitter, Manager, Runtime};
 use tauri_plugin_store::StoreExt;
 use tokio::net::UdpSocket;
-use tokio::sync::Mutex;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OscArg {
@@ -180,8 +179,12 @@ pub struct OscEvent {
     pub args: Vec<OscArg>,
 }
 
+// Socket is wrapped in OnceLock (not Mutex) so send_to and recv_from can run
+// concurrently — tokio's UdpSocket supports both via `&self`, so no exclusive
+// access is needed. A Mutex around the socket would serialize sends behind any
+// in-flight recv_from, blocking sends indefinitely on a quiet network.
 pub struct OscState {
-    pub socket: Arc<Mutex<Option<UdpSocket>>>,
+    pub socket: OnceLock<UdpSocket>,
     pub target_host: String,
     pub target_port: u16,
 }
@@ -199,18 +202,39 @@ pub async fn send_osc(
     }))
     .map_err(|e| format!("Failed to encode OSC message: {}", e))?;
 
-    let socket_guard = state.socket.lock().await;
-    if let Some(socket) = &*socket_guard {
-        let target_addr = format!("{}:{}", state.target_host, state.target_port);
-        socket
-            .send_to(&msg, target_addr)
-            .await
-            .map_err(|e| format!("Failed to send OSC message: {}", e))?;
-    } else {
-        return Err("OSC socket not initialized".to_string());
-    }
+    let socket = state
+        .socket
+        .get()
+        .ok_or_else(|| "OSC socket not initialized".to_string())?;
+    let target_addr = format!("{}:{}", state.target_host, state.target_port);
+    socket
+        .send_to(&msg, target_addr)
+        .await
+        .map_err(|e| format!("Failed to send OSC message: {}", e))?;
 
     Ok(())
+}
+
+/// Emit a single OSC message as an `osc://message` Tauri event.
+fn emit_message<R: Runtime>(app: &AppHandle<R>, msg: OscMessage) {
+    let event = OscEvent {
+        address: msg.addr,
+        args: msg.args.into_iter().map(OscArg::from_osc_type).collect(),
+    };
+    let _ = app.emit("osc://message", event);
+}
+
+/// Recursively emit every message from an OSC packet. Bundles are flattened —
+/// inner bundles are walked, inner messages are emitted individually.
+fn emit_packet<R: Runtime>(app: &AppHandle<R>, packet: OscPacket) {
+    match packet {
+        OscPacket::Message(msg) => emit_message(app, msg),
+        OscPacket::Bundle(bundle) => {
+            for inner in bundle.content {
+                emit_packet(app, inner);
+            }
+        }
+    }
 }
 
 pub fn setup<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<dyn std::error::Error>> {
@@ -234,7 +258,7 @@ pub fn setup<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<dyn std::error::E
         .unwrap_or(8000);
 
     let state = OscState {
-        socket: Arc::new(Mutex::new(None)),
+        socket: OnceLock::new(),
         target_host,
         target_port,
     };
@@ -246,53 +270,32 @@ pub fn setup<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<dyn std::error::E
         match UdpSocket::bind(SocketAddr::from(([0, 0, 0, 0], receive_port))).await {
             Ok(socket) => {
                 let state: tauri::State<'_, OscState> = app_handle.state();
-                *state.socket.lock().await = Some(socket);
+                if state.socket.set(socket).is_err() {
+                    log::error!("OSC socket already initialized; listener exiting");
+                    return;
+                }
+                let socket = state.socket.get().expect("just set above");
 
-                let socket_ref = state.socket.clone();
-
-                // listener loop
+                let mut buf = [0u8; 65536];
                 loop {
-                    let mut buf = [0u8; 65536];
-                    let socket_guard = socket_ref.lock().await;
-                    if let Some(ref sock) = *socket_guard {
-                        match sock.recv_from(&mut buf).await {
-                            Ok((size, _addr)) => {
-                                if let Ok((_, packet)) = rosc::decoder::decode_udp(&buf[..size]) {
-                                    match packet {
-                                        OscPacket::Message(msg) => {
-                                            let event = OscEvent {
-                                                address: msg.addr,
-                                                args: msg.args.into_iter().map(OscArg::from_osc_type).collect(),
-                                            };
-                                            let _ = app_handle.emit("osc://message", event);
-                                        }
-                                        OscPacket::Bundle(bundle) => {
-                                            // Handle bundles if we ever want to, currently out of scope
-                                            // But for safety let's just log or ignore
-                                            for packet in bundle.content {
-                                                if let OscPacket::Message(msg) = packet {
-                                                    let event = OscEvent {
-                                                        address: msg.addr,
-                                                        args: msg.args.into_iter().map(OscArg::from_osc_type).collect(),
-                                                    };
-                                                    let _ = app_handle.emit("osc://message", event);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            Err(e) => {
-                                log::error!("OSC recv_from error: {}", e);
+                    match socket.recv_from(&mut buf).await {
+                        Ok((size, _addr)) => {
+                            if let Ok((_, packet)) = rosc::decoder::decode_udp(&buf[..size]) {
+                                emit_packet(&app_handle, packet);
                             }
                         }
-                    } else {
-                        break;
+                        Err(e) => {
+                            log::error!("OSC recv_from error: {}", e);
+                        }
                     }
                 }
             }
             Err(e) => {
-                log::error!("Failed to bind OSC UDP socket on port {}: {}", receive_port, e);
+                log::error!(
+                    "Failed to bind OSC UDP socket on port {}: {}",
+                    receive_port,
+                    e
+                );
             }
         }
     });
