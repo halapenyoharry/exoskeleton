@@ -15,6 +15,7 @@ const accents: Record<string, string> = {
   terminal: "var(--accent-terminal)",
   webview: "var(--accent-webview)",
   "tempo-clock": "var(--accent-tempo-clock)",
+  settings: "var(--accent-settings)",
 };
 
 const glyphs: Record<string, string> = {

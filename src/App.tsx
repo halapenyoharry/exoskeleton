@@ -3,7 +3,6 @@ import {
   DockviewReact,
   type DockviewApi,
   type DockviewReadyEvent,
-  type SerializedDockview,
 } from "dockview";
 import ColoredTab from "./ColoredTab";
 import Watermark from "./Watermark";
@@ -16,7 +15,7 @@ import EditorPanel from "./panels/EditorPanel";
 import TerminalPanel from "./panels/TerminalPanel";
 import LanWebview from "./panels/LanWebview";
 import TempoClockPanel from "./panels/tempo-clock/TempoClockPanel";
-import SideGrid from "./sidegrid/SideGrid";
+import SettingsPanel from "./panels/settings/SettingsPanel";
 import { exoPanel } from "./PanelRoot";
 import { buildDefaultLayout, migrateLayout } from "./persistence/default-layout";
 import { CURRENT_VERSION, type AppState } from "./persistence/storage";
@@ -32,12 +31,19 @@ const components = {
   terminal:      exoPanel(TerminalPanel,   "var(--accent-terminal)"),
   webview:       exoPanel(LanWebview,      "var(--accent-webview)"),
   "tempo-clock": exoPanel(TempoClockPanel, "var(--accent-tempo-clock)"),
+  settings:      exoPanel(SettingsPanel,   "var(--accent-settings)"),
 };
 
 // Choose persistence backend by environment.
 // Today: Tauri only. Tomorrow: branch on window.__TAURI_INTERNALS__,
 // acquireVsCodeApi, etc. to pick web/vscode adapters.
 const storage = tauriStorage;
+
+// The Cmd+B-summoned settings panel lives in a Dockview 6 edge group on
+// the left side of the main grid. Same constant used by toggleSettings,
+// the auto-cleanup hook, and (implicitly) the serialized layout.
+const SIDE_EDGE = "left" as const;
+const SIDE_GROUP_ID = "side-grid";
 
 // Debounce helper for save-on-change.
 function debounce<T extends (...args: never[]) => void>(fn: T, ms: number) {
@@ -54,83 +60,64 @@ export default function App() {
   // resolved so we don't briefly flash a default layout.
   const [saved, setSaved] = useState<AppState | null | undefined>(undefined);
 
-  // Side-grid visibility. Toggled by Cmd+B (or Ctrl+B on Linux). Persisted
-  // in preferences.sideGridVisible.
-  const [sideGridVisible, setSideGridVisible] = useState(false);
-
-  // Latest known side-grid layout. Tracked in state so it survives the
-  // SideGrid unmount/remount cycle as the user toggles visibility.
-  const [sideGridLayout, setSideGridLayout] =
-    useState<SerializedDockview | null>(null);
-
   const mainApiRef = useRef<DockviewApi | null>(null);
-  const sideApiRef = useRef<DockviewApi | null>(null);
 
-  // Refs so the (debounced) save callback can read current values without
-  // being recreated. The save itself is captured once and stable.
-  const sideGridVisibleRef = useRef(sideGridVisible);
-  const sideGridLayoutRef = useRef(sideGridLayout);
-  useEffect(() => { sideGridVisibleRef.current = sideGridVisible; }, [sideGridVisible]);
-  useEffect(() => { sideGridLayoutRef.current = sideGridLayout; }, [sideGridLayout]);
-
-  // Single debounced save. Reads current values via refs.
+  // Single debounced save. Reads the live api ref each tick.
   const save = useRef(
     debounce(() => {
       const main = mainApiRef.current?.toJSON();
       if (!main) return;
-      // Try the live side api first; fall back to the last-known layout we
-      // captured before the SideGrid component unmounted.
-      let side: SerializedDockview | null | undefined;
-      try {
-        side = sideApiRef.current?.toJSON();
-      } catch {
-        side = undefined;
-      }
-      if (!side) side = sideGridLayoutRef.current;
       storage.save({
         version: CURRENT_VERSION,
         layout: main,
-        sideGrid: side ?? undefined,
-        preferences: {
-          sideGridVisible: sideGridVisibleRef.current,
-        },
       });
     }, 400),
   ).current;
 
-  // When the SideGrid hides, its Dockview is disposed but our ref still
-  // points at it. Clear so future saves use the captured snapshot instead.
-  useEffect(() => {
-    if (!sideGridVisible) sideApiRef.current = null;
-  }, [sideGridVisible]);
-
   // Initial load.
   useEffect(() => {
-    storage.load().then((s) => {
-      setSaved(s);
-      setSideGridVisible(s?.preferences?.sideGridVisible ?? false);
-      setSideGridLayout(s?.sideGrid ?? null);
-    });
+    storage.load().then(setSaved);
   }, []);
 
-  // Save whenever side-grid visibility changes (after initial load).
-  useEffect(() => {
-    if (saved !== undefined) save();
-  }, [sideGridVisible, saved, save]);
-
-  // Cmd+B / Ctrl+B toggles the side-grid (VS Code convention).
+  // Cmd+B / Ctrl+B summons or dismisses the settings panel (VS Code convention).
+  // Settings lives in a left edge group that's created on demand and torn
+  // down when its last panel closes.
   useEffect(() => {
     function handler(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
-        e.preventDefault();
-        setSideGridVisible((v) => !v);
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "b") return;
+      e.preventDefault();
+      const api = mainApiRef.current;
+      if (!api) return;
+
+      const existing = api.getPanel("settings");
+      if (existing) {
+        api.removePanel(existing);
+        return;
       }
+
+      // Ensure the left edge group exists, then drop the settings panel in.
+      // The onDidLayoutChange cleanup in onMainReady handles the reverse —
+      // when the user closes the settings tab, the edge group is removed.
+      let edge = api.getEdgeGroup(SIDE_EDGE);
+      if (!edge) {
+        edge = api.addEdgeGroup(SIDE_EDGE, {
+          id: SIDE_GROUP_ID,
+          initialSize: 320,
+          minimumSize: 200,
+        });
+      }
+      api.addPanel({
+        id: "settings",
+        component: "settings",
+        title: "settings",
+        position: { referenceGroup: edge.id },
+      });
     }
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  async function onMainReady(event: DockviewReadyEvent) {
+  function onMainReady(event: DockviewReadyEvent) {
     mainApiRef.current = event.api;
     if (saved) {
       try {
@@ -150,26 +137,21 @@ export default function App() {
     } else {
       buildDefaultLayout(event.api);
     }
-    event.api.onDidLayoutChange(save);
-    event.api.onDidActivePanelChange(save);
-  }
 
-  function onSideReady(api: DockviewApi) {
-    sideApiRef.current = api;
-    api.onDidLayoutChange(() => {
-      // Auto-hide when the last panel closes. UX cue: an empty side-grid
-      // sitting there with a watermark is a worse signal than just
-      // tucking it away. Clear the saved layout so next Cmd+B rebuilds
-      // the default settings panel rather than restoring the empty state.
-      if (api.totalPanels === 0) {
-        setSideGridVisible(false);
-        setSideGridLayout(null);
-      } else {
-        setSideGridLayout(api.toJSON());
+    // Auto-cleanup: when the left edge group empties (e.g. user closes the
+    // settings tab), remove the edge group entirely. Mirrors the old
+    // "auto-hide side-grid when empty" UX from the peer-grid era.
+    event.api.onDidLayoutChange(() => {
+      const edge = event.api.getEdgeGroup(SIDE_EDGE);
+      if (edge) {
+        const group = event.api.groups.find((g) => g.id === edge.id);
+        if (group && group.panels.length === 0) {
+          event.api.removeEdgeGroup(SIDE_EDGE);
+        }
       }
       save();
     });
-    api.onDidActivePanelChange(save);
+    event.api.onDidActivePanelChange(save);
   }
 
   if (saved === undefined) {
@@ -178,28 +160,16 @@ export default function App() {
 
   return (
     <div className="dockview-theme-abyss app-frame">
-      <div className="app-layout">
-        {sideGridVisible && (
-          <div className="app-layout__side">
-            <SideGrid
-              savedLayout={sideGridLayout}
-              onApiReady={onSideReady}
-            />
-          </div>
-        )}
-        <div className="app-layout__main">
-          <DockviewReact
-            components={components}
-            // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —
-            defaultTabComponent={ColoredTab}
-            watermarkComponent={Watermark}
-            prefixHeaderActionsComponent={PrefixHeaderActions}
-            leftHeaderActionsComponent={LeftHeaderActions}
-            rightHeaderActionsComponent={RightHeaderActions}
-            onReady={onMainReady}
-          />
-        </div>
-      </div>
+      <DockviewReact
+        components={components}
+        // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —
+        defaultTabComponent={ColoredTab}
+        watermarkComponent={Watermark}
+        prefixHeaderActionsComponent={PrefixHeaderActions}
+        leftHeaderActionsComponent={LeftHeaderActions}
+        rightHeaderActionsComponent={RightHeaderActions}
+        onReady={onMainReady}
+      />
     </div>
   );
 }

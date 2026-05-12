@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { tauriStorage } from "../persistence/tauri-storage";
+import { tauriStorage } from "../../persistence/tauri-storage";
 import "./SettingsPanel.css";
 
 /**

@@ -8,21 +8,26 @@
 
 import type { SerializedDockview } from "dockview";
 
-export const CURRENT_VERSION = 2;
+// Schema version history:
+//   1 — initial (editor / terminal / webview, separate sideGrid field)
+//   2 — added tempo-clock panel; migrateLayout handles auto-add for v1 users
+//   3 — side-grid migrated to a Dockview 6 edge group inside `layout`;
+//       the standalone `sideGrid` field is gone (silently dropped from
+//       legacy state on next save). Same for preferences.sideGridVisible.
+export const CURRENT_VERSION = 3;
 
 export interface Preferences {
-  /** Whether the side-grid is currently shown. Toggled by Cmd+B. */
-  sideGridVisible?: boolean;
-  // Room for: theme, tabPosition, tabsVisible, etc. — when those become real.
+  // Empty for now; reserved for theme, tab-position, etc. when those land.
+  // Removed in v3: sideGridVisible (now implicit in the edge group's presence
+  // within `layout`).
 }
 
 export interface AppState {
   version: number;
-  /** Main grid layout (editor / terminal / webview / ...). */
+  /** Main grid layout (editor / terminal / webview / tempo-clock / settings
+   *  edge group / ...). Settings + the left edge group are part of this
+   *  blob since v3 — no longer a separate field. */
   layout: SerializedDockview;
-  /** Side-grid (secondary Dockview) layout. Optional — absent if the
-   *  user has never opened the side-grid. */
-  sideGrid?: SerializedDockview;
   /** User preferences. Merged on top of schema defaults at load time. */
   preferences?: Preferences;
 }
