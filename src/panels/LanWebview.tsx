@@ -23,8 +23,9 @@ export default function LanWebview(props: IDockviewPanelProps<LanWebviewParams>)
     props.api.updateParameters({ url });
   }
 
+  // Pure content — the host wraps this in PanelRoot via exoPanel().
   return (
-    <div className="panel-pad panel-pad--webview">
+    <>
       <div className="panel-header">webview</div>
       <div className="panel-toolbar">
         <input
@@ -48,6 +49,6 @@ export default function LanWebview(props: IDockviewPanelProps<LanWebviewParams>)
           allow="clipboard-write; fullscreen"
         />
       </div>
-    </div>
+    </>
   );
 }

@@ -16,17 +16,20 @@ import EditorPanel from "./panels/EditorPanel";
 import TerminalPanel from "./panels/TerminalPanel";
 import LanWebview from "./panels/LanWebview";
 import SideGrid from "./sidegrid/SideGrid";
+import { exoPanel } from "./PanelRoot";
 import { buildDefaultLayout } from "./persistence/default-layout";
 import { CURRENT_VERSION, type AppState } from "./persistence/storage";
 import { tauriStorage } from "./persistence/tauri-storage";
 import "./App.css";
 
 // SCHEMA — what panels exist and which React components fill them.
-// (See README "Building with it" for the schema/state distinction.)
+// Each entry is wrapped with `exoPanel(Component, accent)` so the host
+// (not the panel) owns positioning and the accent stripe. The panel
+// itself is pure content. See src/PanelRoot.tsx for the wrapper.
 const components = {
-  editor: EditorPanel,
-  terminal: TerminalPanel,
-  webview: LanWebview,
+  editor:   exoPanel(EditorPanel,   "var(--accent-editor)"),
+  terminal: exoPanel(TerminalPanel, "var(--accent-terminal)"),
+  webview:  exoPanel(LanWebview,    "var(--accent-webview)"),
 };
 
 // Choose persistence backend by environment.

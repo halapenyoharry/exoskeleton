@@ -83,9 +83,9 @@
   border-bottom: 1px solid color-mix(in srgb, var(--panel-accent, transparent) 25%, transparent);
 }
 
-.panel-pad--editor   { --panel-accent: var(--accent-editor); }
-.panel-pad--terminal { --panel-accent: var(--accent-terminal); }
-.panel-pad--webview  { --panel-accent: var(--accent-webview); }
+/* Per-role .panel-pad--<role> variant rules were removed when the host
+   started supplying --panel-accent as an inline style on PanelRoot.
+   See src/PanelRoot.tsx + docs/panel-contract-proposal.md. */
 
 .panel-toolbar {
   display: flex;
