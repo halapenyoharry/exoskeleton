@@ -19,13 +19,21 @@ test("isCompatible should return false for objects missing the version property"
   assert.strictEqual(isCompatible({ layout: {} }), false);
 });
 
-test("isCompatible should return true for objects with CURRENT_VERSION", () => {
+test("isCompatible should return true for any known schema version", () => {
+  // CURRENT_VERSION itself is accepted.
   assert.strictEqual(isCompatible({ version: CURRENT_VERSION }), true);
   assert.strictEqual(isCompatible({ version: CURRENT_VERSION, layout: {} }), true);
+  // Older schema versions are accepted too — migrateLayout brings them
+  // up to current on load. Version 1 (the original) must always work.
+  assert.strictEqual(isCompatible({ version: 1 }), true);
 });
 
-test("isCompatible should return false for objects with an incorrect version", () => {
+test("isCompatible should return false for unknown / future / wrong-type versions", () => {
+  // Future versions (downgrade) are rejected.
   assert.strictEqual(isCompatible({ version: CURRENT_VERSION + 1 }), false);
-  assert.strictEqual(isCompatible({ version: CURRENT_VERSION - 1 }), false);
+  // Non-positive versions are rejected.
+  assert.strictEqual(isCompatible({ version: 0 }), false);
+  assert.strictEqual(isCompatible({ version: -1 }), false);
+  // Non-number versions are rejected.
   assert.strictEqual(isCompatible({ version: "1" }), false);
 });

@@ -18,7 +18,7 @@ import LanWebview from "./panels/LanWebview";
 import TempoClockPanel from "./panels/tempo-clock/TempoClockPanel";
 import SideGrid from "./sidegrid/SideGrid";
 import { exoPanel } from "./PanelRoot";
-import { buildDefaultLayout } from "./persistence/default-layout";
+import { buildDefaultLayout, migrateLayout } from "./persistence/default-layout";
 import { CURRENT_VERSION, type AppState } from "./persistence/storage";
 import { tauriStorage } from "./persistence/tauri-storage";
 import "./App.css";
@@ -135,6 +135,11 @@ export default function App() {
     if (saved) {
       try {
         event.api.fromJSON(saved.layout);
+        // Add any panels the user's saved state predates. No-op when the
+        // saved version is already current. Without this, panels installed
+        // after the user's last save would never appear unless they
+        // cleared state — a real UX trap for library-panel installs.
+        migrateLayout(event.api, saved.version);
       } catch (e) {
         console.warn(
           "[exoskeleton] main fromJSON failed, falling back to defaults:",

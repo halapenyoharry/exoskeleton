@@ -8,7 +8,7 @@
 
 import type { SerializedDockview } from "dockview";
 
-export const CURRENT_VERSION = 1;
+export const CURRENT_VERSION = 2;
 
 export interface Preferences {
   /** Whether the side-grid is currently shown. Toggled by Cmd+B. */
@@ -34,13 +34,13 @@ export interface Storage {
 }
 
 /**
- * Decide if a loaded blob is usable in this code version.
- * If the version is older we could migrate; for now we just accept v1 and
- * fall back to defaults for anything else. When v2 lands, write a migrate()
- * that returns a v1→v2 transformer.
+ * Decide if a loaded blob is usable in this code version. Accepts any
+ * known schema version from 1 through CURRENT_VERSION — older states get
+ * migrated at load time by `migrateLayout` in default-layout.ts.
+ * Future versions are rejected (downgrade is not supported).
  */
 export function isCompatible(state: unknown): state is AppState {
   if (!state || typeof state !== "object") return false;
   const v = (state as AppState).version;
-  return v === CURRENT_VERSION;
+  return typeof v === "number" && v >= 1 && v <= CURRENT_VERSION;
 }
