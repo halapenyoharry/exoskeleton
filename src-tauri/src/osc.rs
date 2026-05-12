@@ -267,35 +267,54 @@ pub fn setup<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<dyn std::error::E
     let app_handle = app.clone();
 
     tauri::async_runtime::spawn(async move {
-        match UdpSocket::bind(SocketAddr::from(([0, 0, 0, 0], receive_port))).await {
-            Ok(socket) => {
-                let state: tauri::State<'_, OscState> = app_handle.state();
-                if state.socket.set(socket).is_err() {
-                    log::error!("OSC socket already initialized; listener exiting");
-                    return;
-                }
-                let socket = state.socket.get().expect("just set above");
-
-                let mut buf = [0u8; 65536];
-                loop {
-                    match socket.recv_from(&mut buf).await {
-                        Ok((size, _addr)) => {
-                            if let Ok((_, packet)) = rosc::decoder::decode_udp(&buf[..size]) {
-                                emit_packet(&app_handle, packet);
-                            }
-                        }
-                        Err(e) => {
-                            log::error!("OSC recv_from error: {}", e);
-                        }
-                    }
-                }
+        // Try the configured port first; if it's taken (common — 9000 is
+        // a popular OSC port), fall back to an OS-assigned ephemeral
+        // port so the rest of the OSC layer (especially `send_osc`)
+        // remains functional. The chosen port is logged so external
+        // senders know where to reach us.
+        let socket = match UdpSocket::bind(SocketAddr::from(([0, 0, 0, 0], receive_port))).await {
+            Ok(s) => {
+                log::info!("OSC listening on port {}", receive_port);
+                s
             }
             Err(e) => {
-                log::error!(
-                    "Failed to bind OSC UDP socket on port {}: {}",
+                log::warn!(
+                    "OSC port {} unavailable ({}); falling back to ephemeral port",
                     receive_port,
                     e
                 );
+                match UdpSocket::bind(SocketAddr::from(([0, 0, 0, 0], 0))).await {
+                    Ok(s) => {
+                        let actual = s.local_addr().map(|a| a.port()).unwrap_or(0);
+                        log::info!("OSC listening on ephemeral port {}", actual);
+                        s
+                    }
+                    Err(e2) => {
+                        log::error!("Failed to bind OSC UDP socket: {}", e2);
+                        return;
+                    }
+                }
+            }
+        };
+
+        let state: tauri::State<'_, OscState> = app_handle.state();
+        if state.socket.set(socket).is_err() {
+            log::error!("OSC socket already initialized; listener exiting");
+            return;
+        }
+        let socket = state.socket.get().expect("just set above");
+
+        let mut buf = [0u8; 65536];
+        loop {
+            match socket.recv_from(&mut buf).await {
+                Ok((size, _addr)) => {
+                    if let Ok((_, packet)) = rosc::decoder::decode_udp(&buf[..size]) {
+                        emit_packet(&app_handle, packet);
+                    }
+                }
+                Err(e) => {
+                    log::error!("OSC recv_from error: {}", e);
+                }
             }
         }
     });
