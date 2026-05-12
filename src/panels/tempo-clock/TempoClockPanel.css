@@ -1,0 +1,82 @@
+.tempo-clock-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 12px;
+  gap: 16px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tempo-clock-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tempo-clock-play {
+  background: var(--panel-accent, transparent);
+  color: #0d1326;
+  border: none;
+  font: inherit;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+
+.tempo-clock-play:hover {
+  filter: brightness(1.15);
+}
+
+.tempo-clock-bpm {
+  flex: 1;
+  background: #0d1326;
+  border: 1px solid color-mix(in srgb, var(--panel-accent, transparent) 30%, transparent);
+  color: #c5e8ee;
+  font: inherit;
+  padding: 4px 8px;
+  text-align: center;
+  outline: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.tempo-clock-bpm:focus {
+  border-color: var(--panel-accent, transparent);
+}
+
+.tempo-clock-bpm::-webkit-inner-spin-button,
+.tempo-clock-bpm::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.tempo-clock-bpm-label {
+  color: #4a6a78;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tempo-clock-beat {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 96px;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--panel-accent, transparent) 50%, transparent);
+  user-select: none;
+}
+
+.tempo-clock-beat.is-active {
+  color: var(--panel-accent, currentColor);
+  animation: tempo-clock-pulse 100ms ease-out;
+}
+
+@keyframes tempo-clock-pulse {
+  0%   { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}

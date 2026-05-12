@@ -15,6 +15,7 @@ import {
 import EditorPanel from "./panels/EditorPanel";
 import TerminalPanel from "./panels/TerminalPanel";
 import LanWebview from "./panels/LanWebview";
+import TempoClockPanel from "./panels/tempo-clock/TempoClockPanel";
 import SideGrid from "./sidegrid/SideGrid";
 import { exoPanel } from "./PanelRoot";
 import { buildDefaultLayout } from "./persistence/default-layout";
@@ -27,9 +28,10 @@ import "./App.css";
 // (not the panel) owns positioning and the accent stripe. The panel
 // itself is pure content. See src/PanelRoot.tsx for the wrapper.
 const components = {
-  editor:   exoPanel(EditorPanel,   "var(--accent-editor)"),
-  terminal: exoPanel(TerminalPanel, "var(--accent-terminal)"),
-  webview:  exoPanel(LanWebview,    "var(--accent-webview)"),
+  editor:        exoPanel(EditorPanel,     "var(--accent-editor)"),
+  terminal:      exoPanel(TerminalPanel,   "var(--accent-terminal)"),
+  webview:       exoPanel(LanWebview,      "var(--accent-webview)"),
+  "tempo-clock": exoPanel(TempoClockPanel, "var(--accent-tempo-clock)"),
 };
 
 // Choose persistence backend by environment.

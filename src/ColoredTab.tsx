@@ -14,6 +14,7 @@ const accents: Record<string, string> = {
   editor: "var(--accent-editor)",
   terminal: "var(--accent-terminal)",
   webview: "var(--accent-webview)",
+  "tempo-clock": "var(--accent-tempo-clock)",
 };
 
 const glyphs: Record<string, string> = {
@@ -21,6 +22,7 @@ const glyphs: Record<string, string> = {
   terminal: '"▸"',
   webview: '"◯"',
   settings: '"⚙"',
+  "tempo-clock": '"♩"',
 };
 
 export default function ColoredTab(props: IDockviewPanelHeaderProps) {

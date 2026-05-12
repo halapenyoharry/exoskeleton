@@ -29,4 +29,12 @@ export function buildDefaultLayout(api: DockviewApi) {
     title: "terminal",
     position: { referencePanel: "editor", direction: "below" },
   });
+
+  api.addPanel({
+    id: "tempo-clock",
+    component: "tempo-clock",
+    title: "tempo",
+    params: { bpm: 120, playing: false },
+    position: { referencePanel: "terminal", direction: "within" },
+  });
 }
