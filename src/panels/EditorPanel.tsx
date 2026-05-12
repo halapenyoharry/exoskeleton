@@ -40,8 +40,9 @@ export default function EditorPanel() {
     setDirty(false);
   }
 
+  // Pure content — the host wraps this in PanelRoot via exoPanel().
   return (
-    <div className="panel-pad panel-pad--editor">
+    <>
       <div className="panel-header">editor</div>
       <div className="panel-toolbar">
         <button onClick={openFile}>open</button>
@@ -61,6 +62,6 @@ export default function EditorPanel() {
         }}
         spellCheck={false}
       />
-    </div>
+    </>
   );
 }
