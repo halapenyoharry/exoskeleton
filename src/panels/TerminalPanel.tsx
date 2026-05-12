@@ -68,7 +68,11 @@ export default function TerminalPanel() {
 
     return () => {
       ro.disconnect();
-      try { pty?.kill(); } catch { /* */ }
+      try {
+        pty?.kill();
+      } catch (err) {
+        console.warn("[exoskeleton] pty kill failed:", err);
+      }
       term.dispose();
       termRef.current = null;
       ptyRef.current = null;
