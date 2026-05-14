@@ -25,7 +25,14 @@ const manifest: PanelManifest<PianoParams> = {
       {
         address: "/exoskeleton/piano/note-on",
         args: ["int", "int"],
-        description: "Note pressed. Args: MIDI note number (0–127), velocity (0–127).",
+        description:
+          "Note pressed. Args: MIDI note number (0–127), velocity (30–127, derived from mouse-Y within the key).",
+      },
+      {
+        address: "/exoskeleton/piano/note-off",
+        args: ["int"],
+        description:
+          "Note released. Arg: MIDI note number. Fired on mouseup, pointer-leave, and defensively on window blur to prevent hanging notes.",
       },
     ],
   },

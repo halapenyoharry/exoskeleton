@@ -8,7 +8,12 @@ interface NoteEvent {
   midi: number;
   noteName: string;
   velocity: number;
-  at: number; // performance.now() timestamp
+  at: number; // performance.now()
+}
+
+interface Voice {
+  osc: OscillatorNode;
+  gain: GainNode;
 }
 
 const NOTE_NAMES = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
@@ -22,22 +27,40 @@ function midiToFreq(midi: number) {
   return 440 * Math.pow(2, (midi - 69) / 12);
 }
 
-export interface ScopeParams {}
+export interface ScopeParams {
+  /** Whether the note-log section is shown (default true). Persisted. */
+  logVisible?: boolean;
+}
 
 const MAX_LOG = 24;
+const ATTACK = 0.01;    // 10ms
+const RELEASE = 0.15;   // 150ms
 
-export default function ScopePanel(_props: IDockviewPanelProps<ScopeParams>) {
+export default function ScopePanel(props: IDockviewPanelProps<ScopeParams>) {
   const [log, setLog] = useState<NoteEvent[]>([]);
+  const [logVisible, setLogVisible] = useState<boolean>(
+    props.params?.logVisible ?? true,
+  );
+
   const audioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  // Active voices keyed by midi note number. Sustained notes live here
+  // between their note-on and note-off; releaseVoice ramps + stops + deletes.
+  const voicesRef = useRef<Map<number, Voice>>(new Map());
   const logIdRef = useRef(0);
 
-  // One AudioContext per panel instance. AnalyserNode taps the master bus
-  // so the canvas can draw whatever the panel is currently playing.
+  // Persist logVisible into the panel's params so the next launch restores it.
+  useEffect(() => {
+    props.api.updateParameters({ logVisible });
+  }, [logVisible, props.api]);
+
+  // AudioContext + AnalyserNode per panel mount.
   useEffect(() => {
     const Ctor =
-      window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext;
     if (!Ctor) {
       console.warn("[scope] no AudioContext available");
       return;
@@ -50,17 +73,44 @@ export default function ScopePanel(_props: IDockviewPanelProps<ScopeParams>) {
     audioCtxRef.current = ctx;
     analyserRef.current = analyser;
     return () => {
+      // Stop everything before tearing down the context so unmount doesn't
+      // leak voices.
+      for (const v of voicesRef.current.values()) {
+        try {
+          v.osc.stop();
+        } catch {
+          // already stopped
+        }
+      }
+      voicesRef.current.clear();
       void ctx.close();
       audioCtxRef.current = null;
       analyserRef.current = null;
     };
   }, []);
 
-  // Subscribe to piano note-ons. On each note, synthesize a short sine with
-  // an AD envelope and log it. Voices are self-cleaning — gain ramps to 0
-  // and the oscillator stops itself after the envelope decays.
+  function releaseVoice(midi: number, releaseTime = RELEASE) {
+    const ctx = audioCtxRef.current;
+    const voice = voicesRef.current.get(midi);
+    if (!ctx || !voice) return;
+    const now = ctx.currentTime;
+    try {
+      voice.gain.gain.cancelScheduledValues(now);
+      // Anchor the ramp to the current value, then exponentially decay to
+      // near-zero. exponentialRampToValueAtTime requires > 0, so use a
+      // small floor instead of true 0.
+      voice.gain.gain.setValueAtTime(Math.max(voice.gain.gain.value, 0.0001), now);
+      voice.gain.gain.exponentialRampToValueAtTime(0.0001, now + releaseTime);
+      voice.osc.stop(now + releaseTime + 0.02);
+    } catch {
+      // osc may already be stopped (race condition); fine
+    }
+    voicesRef.current.delete(midi);
+  }
+
+  // Subscribe to piano OSC events.
   useEffect(() => {
-    const unsubP = onOsc("/exoskeleton/piano/note-on", (_addr, args) => {
+    const unsubOnP = onOsc("/exoskeleton/piano/note-on", (_addr, args) => {
       const ctx = audioCtxRef.current;
       const analyser = analyserRef.current;
       if (!ctx || !analyser) return;
@@ -69,8 +119,14 @@ export default function ScopePanel(_props: IDockviewPanelProps<ScopeParams>) {
       const velocity = (args[1]?.value as number) ?? 100;
       if (typeof midi !== "number") return;
 
-      // Browsers gate AudioContext until user gesture; first key press wakes it.
+      // Browsers gate AudioContext until a user gesture; first key wakes it.
       if (ctx.state === "suspended") void ctx.resume();
+
+      // Re-trigger: release any existing voice for this midi before starting
+      // a new one. Fast release so the new note attacks cleanly.
+      if (voicesRef.current.has(midi)) {
+        releaseVoice(midi, 0.02);
+      }
 
       const now = ctx.currentTime;
       const osc = ctx.createOscillator();
@@ -78,16 +134,17 @@ export default function ScopePanel(_props: IDockviewPanelProps<ScopeParams>) {
       osc.type = "sine";
       osc.frequency.value = midiToFreq(midi);
 
-      // Attack–decay envelope. Peak amplitude scaled by velocity.
+      // Sustain envelope: attack to peak then HOLD. No scheduled decay.
+      // Release happens on note-off via releaseVoice.
       const peak = (velocity / 127) * 0.25;
       gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(peak, now + 0.01); // 10ms attack
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.9); // ~900ms decay
+      gain.gain.linearRampToValueAtTime(peak, now + ATTACK);
 
       osc.connect(gain);
       gain.connect(analyser);
       osc.start(now);
-      osc.stop(now + 1.0);
+
+      voicesRef.current.set(midi, { osc, gain });
 
       setLog((prev) => {
         const entry: NoteEvent = {
@@ -100,14 +157,20 @@ export default function ScopePanel(_props: IDockviewPanelProps<ScopeParams>) {
         return [entry, ...prev].slice(0, MAX_LOG);
       });
     });
+
+    const unsubOffP = onOsc("/exoskeleton/piano/note-off", (_addr, args) => {
+      const midi = args[0]?.value as number;
+      if (typeof midi !== "number") return;
+      releaseVoice(midi);
+    });
+
     return () => {
-      void unsubP.then((fn) => fn());
+      void unsubOnP.then((fn) => fn());
+      void unsubOffP.then((fn) => fn());
     };
   }, []);
 
-  // Oscilloscope draw loop — reads the analyser's time-domain buffer every
-  // frame and traces a single waveform across the canvas. Not a scrolling
-  // trace; this is the *current* sound, like a real scope.
+  // Oscilloscope draw loop. Single time-domain trace, refreshed every frame.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -125,7 +188,6 @@ export default function ScopePanel(_props: IDockviewPanelProps<ScopeParams>) {
         return;
       }
 
-      // Resize the backing store to match CSS pixels at the device's DPR.
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas!.getBoundingClientRect();
       const w = Math.max(1, Math.round(rect.width * dpr));
@@ -147,10 +209,9 @@ export default function ScopePanel(_props: IDockviewPanelProps<ScopeParams>) {
       ctx2d!.lineTo(w, h / 2);
       ctx2d!.stroke();
 
-      // Waveform
-      ctx2d!.strokeStyle = "var(--panel-accent)";
-      // Read the CSS variable's computed value for stroke (Canvas can't use var()).
-      const accent = getComputedStyle(canvas!).getPropertyValue("--panel-accent").trim() || "#00ff7f";
+      const accent =
+        getComputedStyle(canvas!).getPropertyValue("--panel-accent").trim() ||
+        "#00ff7f";
       ctx2d!.strokeStyle = accent;
       ctx2d!.lineWidth = 2 * dpr;
       ctx2d!.beginPath();
@@ -172,26 +233,47 @@ export default function ScopePanel(_props: IDockviewPanelProps<ScopeParams>) {
     <>
       <div className="panel-header">scope</div>
       <div className="scope-body">
-        <div className="scope-log">
-          {log.length === 0 ? (
-            <div className="scope-log__empty">
-              waiting for OSC notes on <code>/exoskeleton/piano/note-on</code> …
-            </div>
-          ) : (
-            log.map((entry) => (
-              <div key={entry.id} className="scope-log__row">
-                <span className="scope-log__note">{entry.noteName}</span>
-                <span className="scope-log__midi">midi {entry.midi}</span>
-                <div className="scope-log__vel">
-                  <div
-                    className="scope-log__vel-bar"
-                    style={{ width: `${(entry.velocity / 127) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))
-          )}
+        <div className="scope-toolbar">
+          <button
+            type="button"
+            className="scope-toolbar__toggle"
+            onClick={() => setLogVisible((v) => !v)}
+            title={logVisible ? "hide log" : "show log"}
+          >
+            {logVisible ? "▾" : "▸"} log
+          </button>
+          <span className="scope-toolbar__hint">
+            {logVisible
+              ? "last 24 notes — name, midi #, velocity bar"
+              : "log hidden — click ▸ to show"}
+          </span>
         </div>
+        {logVisible && (
+          <div className="scope-log">
+            {log.length === 0 ? (
+              <div className="scope-log__empty">
+                waiting for OSC notes on <code>/exoskeleton/piano/note-on</code>{" "}
+                …
+              </div>
+            ) : (
+              log.map((entry) => (
+                <div key={entry.id} className="scope-log__row">
+                  <span className="scope-log__note">{entry.noteName}</span>
+                  <span className="scope-log__midi">midi {entry.midi}</span>
+                  <div
+                    className="scope-log__vel"
+                    title={`velocity ${entry.velocity} / 127`}
+                  >
+                    <div
+                      className="scope-log__vel-bar"
+                      style={{ width: `${(entry.velocity / 127) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
         <canvas ref={canvasRef} className="scope-canvas" />
       </div>
     </>

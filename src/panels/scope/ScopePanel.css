@@ -6,7 +6,40 @@
   overflow: hidden;
 }
 
-/* top half: note log */
+/* Toolbar above the log. Holds the log-visibility toggle. */
+.scope-toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px;
+  background: #0a0e27;
+  border-bottom: 1px solid color-mix(in srgb, var(--panel-accent, transparent) 20%, transparent);
+  font-size: 11px;
+}
+
+.scope-toolbar__toggle {
+  font: inherit;
+  font-size: 11px;
+  color: var(--panel-accent, #00ff7f);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--panel-accent, transparent) 30%, transparent);
+  padding: 2px 8px;
+  cursor: pointer;
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+}
+.scope-toolbar__toggle:hover {
+  background: color-mix(in srgb, var(--panel-accent, transparent) 10%, transparent);
+}
+
+.scope-toolbar__hint {
+  color: #4a6a78;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+/* note log — flex-shrink:0 so it keeps its size; canvas takes remaining */
 .scope-log {
   flex: 0 0 45%;
   background: #0a0e27;
@@ -64,9 +97,10 @@
   opacity: 0.7;
 }
 
-/* bottom half: oscilloscope canvas */
+/* Oscilloscope canvas. Grows to fill whatever's left after the log
+   (or all of the body when the log is hidden). */
 .scope-canvas {
-  flex: 1;
+  flex: 1 1 auto;
   display: block;
   width: 100%;
   background: #050818;

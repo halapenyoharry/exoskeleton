@@ -26,7 +26,13 @@ const manifest: PanelManifest<ScopeParams> = {
         address: "/exoskeleton/piano/note-on",
         args: ["int", "int"],
         description:
-          "MIDI note + velocity. Scope synthesizes a sine note with AD envelope and shows the waveform.",
+          "MIDI note + velocity. Scope synthesizes a sine voice with sustain envelope and adds it to the active voice map.",
+      },
+      {
+        address: "/exoskeleton/piano/note-off",
+        args: ["int"],
+        description:
+          "MIDI note. Scope ramps the voice's gain to zero over ~150ms and stops the oscillator.",
       },
     ],
   },
