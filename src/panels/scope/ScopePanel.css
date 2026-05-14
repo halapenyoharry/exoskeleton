@@ -1,0 +1,74 @@
+.scope-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* top half: note log */
+.scope-log {
+  flex: 0 0 45%;
+  background: #0a0e27;
+  overflow-y: auto;
+  padding: 6px 12px;
+  font-size: 11px;
+  border-bottom: 1px solid color-mix(in srgb, var(--panel-accent, transparent) 30%, transparent);
+}
+
+.scope-log__empty {
+  color: #4a6a78;
+  font-style: italic;
+  padding: 6px 0;
+}
+.scope-log__empty code {
+  background: #0d1326;
+  border: 1px solid #1a2a3a;
+  padding: 1px 5px;
+  color: #c5e8ee;
+  font-style: normal;
+  font-size: 10.5px;
+  border-radius: 2px;
+}
+
+.scope-log__row {
+  display: grid;
+  grid-template-columns: 60px 70px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  color: #c5e8ee;
+}
+
+.scope-log__note {
+  color: var(--panel-accent, #00ff7f);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.scope-log__midi {
+  color: #4a6a78;
+  font-size: 10px;
+}
+
+.scope-log__vel {
+  height: 5px;
+  background: #111838;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.scope-log__vel-bar {
+  height: 100%;
+  background: var(--panel-accent, #00ff7f);
+  opacity: 0.7;
+}
+
+/* bottom half: oscilloscope canvas */
+.scope-canvas {
+  flex: 1;
+  display: block;
+  width: 100%;
+  background: #050818;
+  min-height: 0;
+}

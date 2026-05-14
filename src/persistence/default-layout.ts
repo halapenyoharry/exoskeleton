@@ -48,6 +48,20 @@ export const panelRegistry: RegistryEntry[] = [
     position: { referencePanel: "terminal", direction: "within" },
     introducedAt: 2,
   },
+  {
+    id: "piano",
+    component: "piano",
+    title: "piano",
+    position: { referencePanel: "terminal", direction: "within" },
+    introducedAt: 4,
+  },
+  {
+    id: "scope",
+    component: "scope",
+    title: "scope",
+    position: { referencePanel: "terminal", direction: "within" },
+    introducedAt: 4,
+  },
 ];
 
 /** Build the default layout from scratch (called when no saved state exists). */

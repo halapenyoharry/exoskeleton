@@ -240,6 +240,34 @@ fn emit_packet<R: Runtime>(app: &AppHandle<R>, packet: OscPacket) {
 pub fn setup<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<dyn std::error::Error>> {
     let store = app.store("store.json")?;
 
+    // The UDP bridge is opt-in. By default Exoskeleton's OSC layer is
+    // self-contained — panels talk to each other via the in-process JS bus
+    // and nothing touches the network. The bridge is enabled only when the
+    // user explicitly sets osc.bridge.enabled = true in this store.
+    //
+    // See docs/research/osc-self-contained-by-default.md for the rationale.
+    let bridge_enabled = store
+        .get("osc.bridge.enabled")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false);
+
+    if !bridge_enabled {
+        log::info!(
+            "OSC: bridge disabled (default). Panels talk via the in-process bus; \
+             no UDP socket bound. Set osc.bridge.enabled = true in store.json to \
+             expose Exoskeleton's OSC traffic over the network."
+        );
+        // Still manage an empty OscState so #[tauri::command] send_osc has
+        // somewhere to read from — it'll return an error ("not initialized"),
+        // which the JS-side sendOsc swallows because bridgeEnabled is false.
+        app.manage(OscState {
+            socket: OnceLock::new(),
+            target_host: String::new(),
+            target_port: 0,
+        });
+        return Ok(());
+    }
+
     let receive_port = store
         .get("osc.receivePort")
         .and_then(|v| v.as_u64())

@@ -16,6 +16,8 @@ const accents: Record<string, string> = {
   webview: "var(--accent-webview)",
   "tempo-clock": "var(--accent-tempo-clock)",
   settings: "var(--accent-settings)",
+  piano: "var(--accent-piano)",
+  scope: "var(--accent-scope)",
 };
 
 const glyphs: Record<string, string> = {
@@ -24,6 +26,8 @@ const glyphs: Record<string, string> = {
   webview: '"◯"',
   settings: '"⚙"',
   "tempo-clock": '"♩"',
+  piano: '"♬"',
+  scope: '"∿"',
 };
 
 export default function ColoredTab(props: IDockviewPanelHeaderProps) {

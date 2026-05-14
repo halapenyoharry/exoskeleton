@@ -14,7 +14,9 @@ import type { SerializedDockview } from "dockview";
 //   3 — side-grid migrated to a Dockview 6 edge group inside `layout`;
 //       the standalone `sideGrid` field is gone (silently dropped from
 //       legacy state on next save). Same for preferences.sideGridVisible.
-export const CURRENT_VERSION = 3;
+//   4 — added piano + scope panels (the OSC demo pair). migrateLayout
+//       auto-adds them for existing users on next launch.
+export const CURRENT_VERSION = 4;
 
 export interface Preferences {
   // Empty for now; reserved for theme, tab-position, etc. when those land.

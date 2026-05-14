@@ -17,6 +17,8 @@ import TerminalPanel from "./panels/TerminalPanel";
 import LanWebview from "./panels/LanWebview";
 import TempoClockPanel from "./panels/tempo-clock/TempoClockPanel";
 import SettingsPanel from "./panels/settings/SettingsPanel";
+import PianoPanel from "./panels/piano/PianoPanel";
+import ScopePanel from "./panels/scope/ScopePanel";
 import { exoPanel } from "./PanelRoot";
 import { buildDefaultLayout, migrateLayout } from "./persistence/default-layout";
 import { CURRENT_VERSION, type AppState } from "./persistence/storage";
@@ -33,6 +35,8 @@ const components = {
   webview:       exoPanel(LanWebview,      "var(--accent-webview)"),
   "tempo-clock": exoPanel(TempoClockPanel, "var(--accent-tempo-clock)"),
   settings:      exoPanel(SettingsPanel,   "var(--accent-settings)"),
+  piano:         exoPanel(PianoPanel,      "var(--accent-piano)"),
+  scope:         exoPanel(ScopePanel,      "var(--accent-scope)"),
 };
 
 // Choose persistence backend by environment.
