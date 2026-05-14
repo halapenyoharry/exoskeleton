@@ -4,6 +4,7 @@ import {
   type DockviewApi,
   type DockviewReadyEvent,
 } from "dockview";
+import { listen } from "@tauri-apps/api/event";
 import ColoredTab from "./ColoredTab";
 import Watermark from "./Watermark";
 import {
@@ -79,42 +80,48 @@ export default function App() {
     storage.load().then(setSaved);
   }, []);
 
-  // Cmd+B / Ctrl+B summons or dismisses the settings panel (VS Code convention).
-  // Settings lives in a left edge group that's created on demand and torn
-  // down when its last panel closes.
-  useEffect(() => {
-    function handler(e: KeyboardEvent) {
-      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "b") return;
-      e.preventDefault();
-      const api = mainApiRef.current;
-      if (!api) return;
+  // Toggle the settings panel. Extracted as a stable named function so the
+  // menu-event handler below can invoke it; future header-action buttons or
+  // programmatic invocations can call it the same way. Settings lives in a
+  // left edge group that's created on demand and torn down when its last
+  // panel closes (see onDidLayoutChange cleanup in onMainReady).
+  function toggleSettings() {
+    const api = mainApiRef.current;
+    if (!api) return;
 
-      const existing = api.getPanel("settings");
-      if (existing) {
-        api.removePanel(existing);
-        return;
-      }
+    const existing = api.getPanel("settings");
+    if (existing) {
+      api.removePanel(existing);
+      return;
+    }
 
-      // Ensure the left edge group exists, then drop the settings panel in.
-      // The onDidLayoutChange cleanup in onMainReady handles the reverse —
-      // when the user closes the settings tab, the edge group is removed.
-      let edge = api.getEdgeGroup(SIDE_EDGE);
-      if (!edge) {
-        edge = api.addEdgeGroup(SIDE_EDGE, {
-          id: SIDE_GROUP_ID,
-          initialSize: 320,
-          minimumSize: 200,
-        });
-      }
-      api.addPanel({
-        id: "settings",
-        component: "settings",
-        title: "settings",
-        position: { referenceGroup: edge.id },
+    let edge = api.getEdgeGroup(SIDE_EDGE);
+    if (!edge) {
+      edge = api.addEdgeGroup(SIDE_EDGE, {
+        id: SIDE_GROUP_ID,
+        initialSize: 320,
+        minimumSize: 200,
       });
     }
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    api.addPanel({
+      id: "settings",
+      component: "settings",
+      title: "settings",
+      position: { referenceGroup: edge.id },
+    });
+  }
+
+  // Cmd+B / Ctrl+B is wired via a Tauri Menu accelerator on the Rust side
+  // (see src-tauri/src/lib.rs setup()). Menu accelerators fire at the OS
+  // level *before* keys reach any subview, so the shortcut works even when
+  // focus is inside the webview iframe — a window.keydown listener never
+  // sees those (events don't cross the iframe boundary, and cross-origin
+  // pages block injection of our own listener).
+  useEffect(() => {
+    const unlistenP = listen("shortcut:toggle-settings", () => toggleSettings());
+    return () => {
+      void unlistenP.then((fn) => fn());
+    };
   }, []);
 
   function onMainReady(event: DockviewReadyEvent) {

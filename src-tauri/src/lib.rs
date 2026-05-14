@@ -27,7 +27,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![crate::osc::send_osc])
         .setup(|app| {
             crate::osc::setup(app.handle())?;
-            use tauri::Manager;
+            use tauri::menu::{Menu, MenuItemBuilder, Submenu};
+            use tauri::{Emitter, Manager};
             if let Some(window) = app.get_webview_window("main") {
                 // Auto-open WebKit Inspector in debug builds so devtools is
                 // one click away (otherwise you have to hunt for the keyboard
@@ -39,6 +40,31 @@ pub fn run() {
                 // it sitting behind the IDE.
                 let _ = window.set_focus();
             }
+
+            // Menu accelerators fire at the OS level, before keys reach any
+            // subview — including iframes (LanWebview) and xterm. A
+            // window-level keydown listener can't see keys typed inside a
+            // cross-origin iframe; this is the only way to get a global
+            // shortcut that works regardless of focus.
+            let menu = Menu::default(app.handle())?;
+            let toggle_settings = MenuItemBuilder::with_id("toggle-settings", "Toggle Settings")
+                .accelerator("CmdOrCtrl+B")
+                .build(app)?;
+            let view_menu = Submenu::with_items(
+                app.handle(),
+                "View",
+                true,
+                &[&toggle_settings],
+            )?;
+            menu.append(&view_menu)?;
+            app.set_menu(menu)?;
+
+            app.handle().on_menu_event(|handle, event| {
+                if event.id() == "toggle-settings" {
+                    let _ = handle.emit("shortcut:toggle-settings", ());
+                }
+            });
+
             Ok(())
         })
         .run(tauri::generate_context!())
