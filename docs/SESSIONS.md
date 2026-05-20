@@ -117,3 +117,17 @@ Open:
 - Cymatic thumbnail React component Harold is building separately. When done, drops into scope as a replacement (or companion) for the 1D oscilloscope; same `analyserRef.current` data source.
 - OSC bridge UX — today you'd hand-edit `~/Library/Application Support/dev.harold.exoskeleton/store.json` to set `osc.bridge.enabled` (plus listenPort, targetHost, targetPort). Worth a small Settings-panel UI eventually.
 - VS Code auto-launch task occasionally fails when port 1420 is held by an orphan dev server. Already burned twice; remediation is `kill <pid>` and restart. Worth a one-shot port-clean script on task start.
+
+## 2026-05-19 (catch-up)
+
+State: clean tree on `main` at 3fed600 + `add-json-panels` branch at 84992e5 (1 ahead of main).
+Last: two things landed — (1) scope latency fix (`AudioContext({ latencyHint: "interactive" })` + `await ctx.resume()` before scheduling); (2) seven JSON panels installed from the component library (json-edit + six viewers), wired through a new `json-bus` in-process snapshot-state primitive at `src/data/json-bus.ts`. Also landed: `docs/AGENTS-FAQ.md` with two entries (cross-panel data flow rationale, three-layer state model). Component library got d3 type-generic fixes in json-circles and json-mass, plus `inbox/cymatic_square` (wave-equation membrane visualizer, candidate for Scope companion).
+Next: Harold to verify scope latency fix. Document communications and configuration internals before further building.
+Open: `add-json-panels` branch not merged to `main` yet. `md-editor-4-writers` is an empty placeholder in the component library inbox.
+
+## 2026-05-20
+
+State: both repos committed and pushed. `add-json-panels` branch 1 ahead of `main`. All working trees clean.
+Last: documented Exoskeleton's two core subsystems — communications (OSC bus, json-bus, OSC UDP bridge, Tauri events/commands) and configuration (workspace file, panel params, preferences, schema versioning, edge group). Identified seven gaps: preferences not auto-saved in the debounced save, no structured preferences UI, no layout-locking mechanism, no useOsc/useJsonDoc hooks, no per-panel settings drawer convention, no cross-window communication for popouts, no OSC bridge UI.
+Next: review the gap list with Harold and decide which to address. Jules task briefs (HUD overlay, TopoViewer typed connections, FileTree, GitStatus, LogTail) are documented and understood but parked — not urgent.
+Open: Harold has new information about the layer model (mentioned re: OSC bridge / preferences) that may reshape how preferences and communications interact. Waiting for that input before building.
