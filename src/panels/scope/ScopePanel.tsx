@@ -65,7 +65,20 @@ export default function ScopePanel(props: IDockviewPanelProps<ScopeParams>) {
       console.warn("[scope] no AudioContext available");
       return;
     }
-    const ctx = new Ctor();
+    // latencyHint: "interactive" requests the lowest practical latency from
+    // the platform audio backend. macOS WKWebView (Tauri) honors this; the
+    // default elsewhere is implementation-defined.
+    const ctx = new Ctor({ latencyHint: "interactive" });
+    // Diagnostic: surface the platform's reported audio latency on creation
+    // so latency issues are debuggable without instrumenting further. If
+    // outputLatency is on the order of hundreds of ms, the bottleneck is
+    // hardware (e.g. Bluetooth audio) — not anything this code can fix.
+    console.info("[scope] AudioContext", {
+      baseLatency: ctx.baseLatency,
+      outputLatency: ctx.outputLatency,
+      sampleRate: ctx.sampleRate,
+      state: ctx.state,
+    });
     const analyser = ctx.createAnalyser();
     analyser.fftSize = 2048;
     analyser.smoothingTimeConstant = 0;
@@ -119,43 +132,57 @@ export default function ScopePanel(props: IDockviewPanelProps<ScopeParams>) {
       const velocity = (args[1]?.value as number) ?? 100;
       if (typeof midi !== "number") return;
 
-      // Browsers gate AudioContext until a user gesture; first key wakes it.
-      if (ctx.state === "suspended") void ctx.resume();
+      // If the context is suspended (waiting for first user gesture, or
+      // suspended by the OS), we MUST await resume before reading
+      // currentTime — otherwise our schedule is referenced to a frozen
+      // timeline and audio starts at "the past" relative to when the
+      // context actually wakes up. This was a 2+ second latency in dev.
+      const schedule = async () => {
+        if (ctx.state === "suspended") {
+          try {
+            await ctx.resume();
+          } catch {
+            // resume rejected (extremely rare); audio won't play
+            return;
+          }
+        }
 
-      // Re-trigger: release any existing voice for this midi before starting
-      // a new one. Fast release so the new note attacks cleanly.
-      if (voicesRef.current.has(midi)) {
-        releaseVoice(midi, 0.02);
-      }
+        // Re-trigger: release any existing voice for this midi before
+        // starting a new one. Fast release so the new note attacks cleanly.
+        if (voicesRef.current.has(midi)) {
+          releaseVoice(midi, 0.02);
+        }
 
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.value = midiToFreq(midi);
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = midiToFreq(midi);
 
-      // Sustain envelope: attack to peak then HOLD. No scheduled decay.
-      // Release happens on note-off via releaseVoice.
-      const peak = (velocity / 127) * 0.25;
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(peak, now + ATTACK);
+        // Sustain envelope: attack to peak then HOLD. No scheduled decay.
+        // Release happens on note-off via releaseVoice.
+        const peak = (velocity / 127) * 0.25;
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(peak, now + ATTACK);
 
-      osc.connect(gain);
-      gain.connect(analyser);
-      osc.start(now);
+        osc.connect(gain);
+        gain.connect(analyser);
+        osc.start(now);
 
-      voicesRef.current.set(midi, { osc, gain });
+        voicesRef.current.set(midi, { osc, gain });
 
-      setLog((prev) => {
-        const entry: NoteEvent = {
-          id: ++logIdRef.current,
-          midi,
-          noteName: midiToName(midi),
-          velocity,
-          at: performance.now(),
-        };
-        return [entry, ...prev].slice(0, MAX_LOG);
-      });
+        setLog((prev) => {
+          const entry: NoteEvent = {
+            id: ++logIdRef.current,
+            midi,
+            noteName: midiToName(midi),
+            velocity,
+            at: performance.now(),
+          };
+          return [entry, ...prev].slice(0, MAX_LOG);
+        });
+      };
+      void schedule();
     });
 
     const unsubOffP = onOsc("/exoskeleton/piano/note-off", (_addr, args) => {

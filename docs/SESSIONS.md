@@ -81,3 +81,39 @@ Three coherent landings this round:
 Last: logging + popout + readme rewrite.
 Next: Harold's call. The "what's not yet built" list at the bottom of README is the runway.
 Open: tao's pre-filter TRACE entries (43 lines) are still at the top of the log file from the brief window before LevelFilter::Info was applied. Harmless; will age out as the log rotates.
+
+## 2026-05-15 (the big arc — long handoff, compaction point)
+
+State: clean tree, latest commit on `main` is the latency-fix for piano+scope.
+The library at `~/Projects/exoskeleton-component-library/` has matching commits. Four days, several conversational sessions, and a *lot* of architecture landed since the 5-11 entry — listing it here because the chat history is being compacted and these are the things a fresh session needs to know.
+
+**Architecture that landed:**
+- **`PanelManifest<P>` type** at [src/panel-manifest.ts](../src/panel-manifest.ts) — the integration contract every library panel satisfies (id, component, accent, glyph, defaultLayout, paramsDefault, osc, tauri, npmDependencies). The library README documents the install protocol — an agent reads a manifest, then performs the App.tsx / ColoredTab / App.css / default-layout / capabilities / Cargo / package.json edits implied by its fields.
+- **Host-owned wrapping** — `PanelRoot` + `exoPanel(Component, accent)` HOC at [src/PanelRoot.tsx](../src/PanelRoot.tsx). Panels are now pure content (return fragments, no `.panel-pad` wrapper); the host wraps each at registration time. Decision doc at [docs/panel-contract-proposal.md](panel-contract-proposal.md) (status: accepted).
+- **Side-grid migrated to Dockview 6 edge group.** No more peer `<DockviewReact>`. One Dockview, one toJSON, one source of truth. Cmd+B summons settings into a left edge group via `addEdgeGroup`; the edge group auto-removes when its last panel closes.
+- **Schema versioning + migration.** `default-layout.ts` panelRegistry entries carry `introducedAt`. On load, `migrateLayout(api, savedVersion)` adds any panels the user's saved state predates without disrupting their layout. `CURRENT_VERSION` is now 4. New panels = append to registry + bump version.
+- **Menu accelerator for Cmd+B** — `setup()` in [src-tauri/src/lib.rs](../src-tauri/src/lib.rs) builds a "View" submenu with `accelerator("CmdOrCtrl+B")` and emits `shortcut:toggle-settings`. App.tsx listens via Tauri events. Iframe focus no longer eats the shortcut.
+
+**OSC stack:**
+- **In-process bus by default**, [src/osc/index.ts](../src/osc/index.ts). `sendOsc`/`onOsc` dispatch via a JS pub/sub bus, no UDP. The Rust UDP layer (still present, [src-tauri/src/osc.rs](../src-tauri/src/osc.rs)) is dormant unless `osc.bridge.enabled = true` in the store. Decision doc: [docs/research/osc-self-contained-by-default.md](research/osc-self-contained-by-default.md).
+- **Tempo Clock**, **Piano**, **Scope** panels in the library, all installed into `src/panels/`. Tempo Clock is the master clock broadcaster. Piano is the visible sender (one octave, mouse-Y velocity, hold-to-sustain). Scope is the visible receiver (note log + Web Audio synth + canvas oscilloscope, with collapsible log section).
+
+**Research artifacts:**
+- [docs/research/dockview-constructive-vs-consumptive.md](research/dockview-constructive-vs-consumptive.md) — Dockview group API patterns (edge = constructive; floating/popout = consumptive).
+- [docs/research/osc-self-contained-by-default.md](research/osc-self-contained-by-default.md) — why OSC default-binds nothing.
+
+**Library at `~/Projects/exoskeleton-component-library/`:**
+- Renamed from `exoskeleton-componant-library` (was a misspelling).
+- Now contains: `topoviewer/` (moved out of exoskeleton early in this arc), `harolds-zerof-imagebrowser/` (Harold built this himself with the new manifest contract), `tempo-clock/`, `piano/`, `scope/`. README documents the manifest contract + install protocol.
+
+Last: latency-fix in [src/panels/scope/ScopePanel.tsx](../src/panels/scope/ScopePanel.tsx) — Harold reported ~2.5s latency from piano key press to audible sound. Three changes:
+1. `new AudioContext({ latencyHint: "interactive" })` — explicit low-latency request.
+2. Note-on handler awaits `ctx.resume()` before reading `currentTime` and scheduling audio. Previously the schedule could be referenced to a frozen timeline when the context was suspended; this was the strongest hypothesis.
+3. Diagnostic `console.info("[scope] AudioContext", { baseLatency, outputLatency, sampleRate, state })` on creation — surface platform-reported latency so future sessions don't have to instrument.
+
+Next: Harold verifies whether the fix lands the latency at imperceptible (<25ms) or whether real latency remains. If real latency remains, the prime suspect is **Bluetooth audio on the output device** — BT codecs add 150–800 ms baked-in; no code change here can address that. Check the AudioContext log line in devtools for the actual `outputLatency` value the platform reports.
+
+Open:
+- Cymatic thumbnail React component Harold is building separately. When done, drops into scope as a replacement (or companion) for the 1D oscilloscope; same `analyserRef.current` data source.
+- OSC bridge UX — today you'd hand-edit `~/Library/Application Support/dev.harold.exoskeleton/store.json` to set `osc.bridge.enabled` (plus listenPort, targetHost, targetPort). Worth a small Settings-panel UI eventually.
+- VS Code auto-launch task occasionally fails when port 1420 is held by an orphan dev server. Already burned twice; remediation is `kill <pid>` and restart. Worth a one-shot port-clean script on task start.
