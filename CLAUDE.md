@@ -41,7 +41,8 @@ Read these in order at the start of a session:
 
 1. **[docs/SESSIONS.md](docs/SESSIONS.md)** — bottom entry. Current state, last move, next move. This is the live handoff.
 2. **[README.md](README.md)** — human-facing intro and labeled caveats.
-3. **`~/.claude/projects/-Users-harold-Projects-exoskeleton/memory/`** — how Harold works (e.g. ship-concrete-start feedback). Loaded automatically; skim if relevant.
+3. **[docs/AGENTS-FAQ.md](docs/AGENTS-FAQ.md)** — running log of recurring refactor questions, in test-case shape. Skim before reinventing an answer; add an entry when you find a new one.
+4. **`~/.claude/projects/-Users-harold-Projects-exoskeleton/memory/`** — how Harold works (e.g. ship-concrete-start feedback). Loaded automatically; skim if relevant.
 
 ## Core contracts (don't redesign — extend)
 
