@@ -1,0 +1,118 @@
+:root {
+  --accent-json-graph: #06d6a0;
+}
+
+.json-graph-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.json-graph-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.json-graph-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.json-graph-reset-btn {
+  background: transparent;
+  border: 1px solid var(--accent-json-graph);
+  color: var(--accent-json-graph);
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.json-graph-reset-btn:hover {
+  background: var(--accent-json-graph);
+  color: #080c22;
+}
+
+.json-graph-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.json-graph-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.json-graph-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7ddff5;
+  opacity: 0.6;
+}
+
+.json-graph-link {
+  stroke: rgba(0, 229, 255, 0.25);
+  stroke-width: 1.5px;
+}
+
+.json-graph-link-label {
+  fill: rgba(0, 229, 255, 0.5);
+  font-size: 9px;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.json-graph-node-circle {
+  fill: #0d1233;
+  stroke: rgba(0, 229, 255, 0.5);
+  stroke-width: 1.5px;
+  cursor: grab;
+}
+
+.json-graph-node-circle:active {
+  cursor: grabbing;
+}
+
+.json-graph-node-label {
+  fill: #7ddff5;
+  font-size: 11px;
+  paint-order: stroke;
+  stroke: #0a0e26;
+  stroke-width: 3px;
+  pointer-events: none;
+}
+
+.json-graph-perf-warning {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  color: #DCE5E7;
+  background: rgba(8, 12, 34, 0.9);
+}
+
+.json-graph-perf-warning button {
+  margin-top: 12px;
+  padding: 6px 14px;
+  background: transparent;
+  color: var(--accent-json-graph);
+  border: 1px solid var(--accent-json-graph);
+  border-radius: 3px;
+  cursor: pointer;
+}

@@ -18,6 +18,13 @@ const accents: Record<string, string> = {
   settings: "var(--accent-settings)",
   piano: "var(--accent-piano)",
   scope: "var(--accent-scope)",
+  "json-edit": "var(--accent-json-edit)",
+  "json-tree": "var(--accent-json-tree)",
+  "json-circles": "var(--accent-json-circles)",
+  "json-mass": "var(--accent-json-mass)",
+  "json-cytoscape": "var(--accent-json-cytoscape)",
+  "json-graph": "var(--accent-json-graph)",
+  "json-graph3d": "var(--accent-json-graph3d)",
 };
 
 const glyphs: Record<string, string> = {
@@ -28,6 +35,13 @@ const glyphs: Record<string, string> = {
   "tempo-clock": '"♩"',
   piano: '"♬"',
   scope: '"∿"',
+  "json-edit": '"{}"',
+  "json-tree": '"ϟ"',
+  "json-circles": '"◯"',
+  "json-mass": '"M"',
+  "json-cytoscape": '"⬢"',
+  "json-graph": '"✦"',
+  "json-graph3d": '"⌬"',
 };
 
 export default function ColoredTab(props: IDockviewPanelHeaderProps) {

@@ -16,7 +16,9 @@ import type { SerializedDockview } from "dockview";
 //       legacy state on next save). Same for preferences.sideGridVisible.
 //   4 — added piano + scope panels (the OSC demo pair). migrateLayout
 //       auto-adds them for existing users on next launch.
-export const CURRENT_VERSION = 4;
+//   5 — added the seven json-* panels (json-edit + six viewers wired via
+//       json-bus). migrateLayout auto-adds them for existing users.
+export const CURRENT_VERSION = 5;
 
 export interface Preferences {
   // Empty for now; reserved for theme, tab-position, etc. when those land.

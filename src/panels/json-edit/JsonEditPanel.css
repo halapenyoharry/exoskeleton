@@ -1,0 +1,27 @@
+/* json-edit panel styles. The host's PanelRoot supplies the colored accent
+   stripe and root layout; these styles only handle in-panel concerns. */
+
+:root {
+  --accent-json-edit: #59b8ff;
+}
+
+.json-edit-body {
+  /* Monaco needs an explicit container size to mount cleanly. */
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.json-edit-doc-id {
+  font-weight: normal;
+  opacity: 0.6;
+  font-size: 0.85em;
+}
+
+.json-edit-parse-error {
+  margin-left: 8px;
+  color: #ff6b6b;
+  font-weight: normal;
+  font-size: 0.85em;
+  cursor: help;
+}

@@ -19,6 +19,13 @@ import TempoClockPanel from "./panels/tempo-clock/TempoClockPanel";
 import SettingsPanel from "./panels/settings/SettingsPanel";
 import PianoPanel from "./panels/piano/PianoPanel";
 import ScopePanel from "./panels/scope/ScopePanel";
+import JsonEditPanel from "./panels/json-edit/JsonEditPanel";
+import JsonTreePanel from "./panels/json-tree/JsonTreePanel";
+import JsonCirclesPanel from "./panels/json-circles/JsonCirclesPanel";
+import JsonMassPanel from "./panels/json-mass/JsonMassPanel";
+import JsonCytoscapePanel from "./panels/json-cytoscape/JsonCytoscapePanel";
+import JsonGraphPanel from "./panels/json-graph/JsonGraphPanel";
+import JsonGraph3DPanel from "./panels/json-graph3d/JsonGraph3DPanel";
 import { exoPanel } from "./PanelRoot";
 import { buildDefaultLayout, migrateLayout } from "./persistence/default-layout";
 import { CURRENT_VERSION, type AppState } from "./persistence/storage";
@@ -30,13 +37,20 @@ import "./App.css";
 // (not the panel) owns positioning and the accent stripe. The panel
 // itself is pure content. See src/PanelRoot.tsx for the wrapper.
 const components = {
-  editor:        exoPanel(EditorPanel,     "var(--accent-editor)"),
-  terminal:      exoPanel(TerminalPanel,   "var(--accent-terminal)"),
-  webview:       exoPanel(LanWebview,      "var(--accent-webview)"),
-  "tempo-clock": exoPanel(TempoClockPanel, "var(--accent-tempo-clock)"),
-  settings:      exoPanel(SettingsPanel,   "var(--accent-settings)"),
-  piano:         exoPanel(PianoPanel,      "var(--accent-piano)"),
-  scope:         exoPanel(ScopePanel,      "var(--accent-scope)"),
+  editor:          exoPanel(EditorPanel,        "var(--accent-editor)"),
+  terminal:        exoPanel(TerminalPanel,      "var(--accent-terminal)"),
+  webview:         exoPanel(LanWebview,         "var(--accent-webview)"),
+  "tempo-clock":   exoPanel(TempoClockPanel,    "var(--accent-tempo-clock)"),
+  settings:        exoPanel(SettingsPanel,      "var(--accent-settings)"),
+  piano:           exoPanel(PianoPanel,         "var(--accent-piano)"),
+  scope:           exoPanel(ScopePanel,         "var(--accent-scope)"),
+  "json-edit":     exoPanel(JsonEditPanel,      "var(--accent-json-edit)"),
+  "json-tree":     exoPanel(JsonTreePanel,      "var(--accent-json-tree)"),
+  "json-circles":  exoPanel(JsonCirclesPanel,   "var(--accent-json-circles)"),
+  "json-mass":     exoPanel(JsonMassPanel,      "var(--accent-json-mass)"),
+  "json-cytoscape":exoPanel(JsonCytoscapePanel, "var(--accent-json-cytoscape)"),
+  "json-graph":    exoPanel(JsonGraphPanel,     "var(--accent-json-graph)"),
+  "json-graph3d":  exoPanel(JsonGraph3DPanel,   "var(--accent-json-graph3d)"),
 };
 
 // Choose persistence backend by environment.

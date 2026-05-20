@@ -6,6 +6,13 @@
   --accent-settings: #8896a0;
   --accent-piano: #f4c075;
   --accent-scope: #00ff7f;
+  --accent-json-edit: #59b8ff;
+  --accent-json-tree: #00e5ff;
+  --accent-json-circles: #ff4d8d;
+  --accent-json-mass: #ffd166;
+  --accent-json-cytoscape: #b388ff;
+  --accent-json-graph: #06d6a0;
+  --accent-json-graph3d: #ff9f1c;
 }
 
 .app-frame {

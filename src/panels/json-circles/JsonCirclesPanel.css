@@ -1,0 +1,107 @@
+:root {
+  --accent-json-circles: #ff4d8d;
+}
+
+.json-circles-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.json-circles-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.json-circles-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.json-circles-reset-btn {
+  background: transparent;
+  border: 1px solid var(--accent-json-circles);
+  color: var(--accent-json-circles);
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.json-circles-reset-btn:hover {
+  background: var(--accent-json-circles);
+  color: #080c22;
+}
+
+.json-circles-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.json-circles-svg {
+  display: block;
+  cursor: pointer;
+  background: transparent;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.json-circle-node {
+  transition: stroke 0.15s ease;
+}
+
+.json-circle-labels {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+}
+
+.json-circle-label text {
+  fill: #DCE5E7;
+  paint-order: stroke;
+  stroke: rgba(10, 14, 39, 0.85);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.json-circle-label .container-text {
+  fill: #E6FBFF;
+}
+
+.json-circle-label .leaf-text {
+  fill: #DCE5E7;
+}
+
+.json-circles-perf-warning {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  color: #DCE5E7;
+  background: rgba(8, 12, 34, 0.9);
+}
+
+.json-circles-perf-warning button {
+  margin-top: 12px;
+  padding: 6px 14px;
+  background: transparent;
+  color: var(--accent-json-circles);
+  border: 1px solid var(--accent-json-circles);
+  border-radius: 3px;
+  cursor: pointer;
+}

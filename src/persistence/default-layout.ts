@@ -62,6 +62,58 @@ export const panelRegistry: RegistryEntry[] = [
     position: { referencePanel: "terminal", direction: "within" },
     introducedAt: 4,
   },
+  // v5 — JSON visualizer suite. The editor anchors the JSON workflow; the
+  // six viewer panels group into one tab strip (direction: "within") so
+  // users get a switchable visualization area, not six separate splits.
+  {
+    id: "json-edit",
+    component: "json-edit",
+    title: "json-edit",
+    position: { referencePanel: "editor", direction: "below" },
+    introducedAt: 5,
+  },
+  {
+    id: "json-tree",
+    component: "json-tree",
+    title: "tree",
+    position: { referencePanel: "json-edit", direction: "right" },
+    introducedAt: 5,
+  },
+  {
+    id: "json-graph",
+    component: "json-graph",
+    title: "graph",
+    position: { referencePanel: "json-tree", direction: "within" },
+    introducedAt: 5,
+  },
+  {
+    id: "json-cytoscape",
+    component: "json-cytoscape",
+    title: "cyto",
+    position: { referencePanel: "json-tree", direction: "within" },
+    introducedAt: 5,
+  },
+  {
+    id: "json-graph3d",
+    component: "json-graph3d",
+    title: "3d",
+    position: { referencePanel: "json-tree", direction: "within" },
+    introducedAt: 5,
+  },
+  {
+    id: "json-circles",
+    component: "json-circles",
+    title: "circles",
+    position: { referencePanel: "json-tree", direction: "within" },
+    introducedAt: 5,
+  },
+  {
+    id: "json-mass",
+    component: "json-mass",
+    title: "mass",
+    position: { referencePanel: "json-tree", direction: "within" },
+    introducedAt: 5,
+  },
 ];
 
 /** Build the default layout from scratch (called when no saved state exists). */

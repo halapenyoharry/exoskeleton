@@ -1,0 +1,90 @@
+:root {
+  --accent-json-graph3d: #ff9f1c;
+}
+
+.json-graph3d-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.json-graph3d-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.json-graph3d-controls select,
+.json-graph3d-controls label {
+  font-size: 11px;
+  background: transparent;
+  border: 1px solid #1a237e60;
+  color: #DCE5E7;
+  border-radius: 3px;
+  padding: 2px 4px;
+}
+
+.json-graph3d-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.json-graph3d-reset-btn {
+  background: transparent;
+  border: 1px solid var(--accent-json-graph3d);
+  color: var(--accent-json-graph3d);
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.json-graph3d-reset-btn:hover {
+  background: var(--accent-json-graph3d);
+  color: #080c22;
+}
+
+.json-graph3d-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.json-graph3d-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7ddff5;
+  opacity: 0.6;
+}
+
+.json-graph3d-perf-warning {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  color: #DCE5E7;
+  background: rgba(8, 12, 34, 0.9);
+}
+
+.json-graph3d-perf-warning button {
+  margin-top: 12px;
+  padding: 6px 14px;
+  background: transparent;
+  color: var(--accent-json-graph3d);
+  border: 1px solid var(--accent-json-graph3d);
+  border-radius: 3px;
+  cursor: pointer;
+}
