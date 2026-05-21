@@ -81,7 +81,11 @@ export default function App() {
 
   const mainApiRef = useRef<DockviewApi | null>(null);
 
-  // Single debounced save. Reads the live api ref each tick.
+  // Preferences state. Currently empty (see Preferences interface in
+  // storage.ts); included in the save so future fields persist automatically.
+  const prefsRef = useRef<AppState["preferences"]>({});
+
+  // Single debounced save. Reads the live api ref + prefs ref each tick.
   const save = useRef(
     debounce(() => {
       const main = mainApiRef.current?.toJSON();
@@ -89,6 +93,7 @@ export default function App() {
       storage.save({
         version: CURRENT_VERSION,
         layout: main,
+        preferences: prefsRef.current,
       });
     }, 400),
   ).current;
@@ -145,6 +150,8 @@ export default function App() {
   function onMainReady(event: DockviewReadyEvent) {
     mainApiRef.current = event.api;
     if (saved) {
+      // Restore preferences so the first auto-save round-trips them.
+      if (saved.preferences) prefsRef.current = saved.preferences;
       try {
         event.api.fromJSON(saved.layout);
         // Add any panels the user's saved state predates. No-op when the
