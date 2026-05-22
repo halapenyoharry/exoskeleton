@@ -4,7 +4,19 @@ import ForceGraph3D from "react-force-graph-3d";
 import type { ForceGraphMethods } from "react-force-graph-3d";
 import SpriteText from "three-spritetext";
 import type { Object3D } from "three";
-import { getJson, onJsonChange, type JsonValue } from "../../data/json-bus";
+import {
+  getJson,
+  onJsonChange,
+  type JsonValue,
+  getActiveDocumentId,
+  onActiveDocumentIdChange,
+  areGraphsConnected,
+  onGraphsConnectionChange,
+  broadcastNodeSelection,
+  onNodeSelectionBroadcast,
+  broadcastNodeFocus,
+  onNodeFocusBroadcast,
+} from "../../data/json-bus";
 import {
   detectGraph,
   type DetectedGraph,
@@ -192,13 +204,32 @@ export default function JsonGraph3DPanel(
     props.api.updateParameters({ ...params, [key]: value });
   };
 
+  const [activeDocId, setActiveDocId] = useState(params.documentId);
+  const [connected, setConnected] = useState(areGraphsConnected());
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  useEffect(() => {
+    return onGraphsConnectionChange(setConnected);
+  }, []);
+
+  useEffect(() => {
+    if (!connected) {
+      setActiveDocId(params.documentId);
+      return;
+    }
+    setActiveDocId(getActiveDocumentId());
+    return onActiveDocumentIdChange((id) => {
+      setActiveDocId(id);
+    });
+  }, [connected, params.documentId]);
+
   const [doc, setDoc] = useState<JsonValue | undefined>(() =>
-    getJson(params.documentId),
+    getJson(activeDocId),
   );
-  useEffect(
-    () => onJsonChange(params.documentId, setDoc),
-    [params.documentId],
-  );
+  useEffect(() => {
+    setDoc(getJson(activeDocId));
+    return onJsonChange(activeDocId, setDoc);
+  }, [activeDocId]);
 
   const graph = useMemo<DetectedGraph | null>(() => {
     if (doc === undefined) return null;
@@ -286,6 +317,40 @@ export default function JsonGraph3DPanel(
   const resetView = () => {
     fgRef.current?.zoomToFit(params.fitDuration, params.fitPadding);
   };
+
+  // Listen for external Selection & Focus broadcasts
+  useEffect(() => {
+    const unsubSelection = onNodeSelectionBroadcast((event) => {
+      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) {
+        return;
+      }
+      setSelectedNodeId(event.nodeId);
+    });
+
+    const unsubFocus = onNodeFocusBroadcast((event) => {
+      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) {
+        return;
+      }
+      const target = data.nodes.find((n) => n.id === event.nodeId) as (FGNode & { x?: number; y?: number; z?: number }) | undefined;
+      if (target && target.x !== undefined && target.y !== undefined && fgRef.current) {
+        const x = target.x;
+        const y = target.y;
+        const z = target.z ?? 0;
+        const distance = 80;
+        const distRatio = 1 + distance / Math.hypot(x, y, z);
+        fgRef.current.cameraPosition(
+          { x: x * distRatio, y: y * distRatio, z: z * distRatio },
+          target as { x: number; y: number; z: number },
+          1000
+        );
+      }
+    });
+
+    return () => {
+      unsubSelection();
+      unsubFocus();
+    };
+  }, [activeDocId, data, props.api.id]);
 
   const showInlineLabels = params.labelMode === "always";
   const tooltipsEnabled = params.labelMode !== "never";
@@ -375,8 +440,21 @@ export default function JsonGraph3DPanel(
             nodeRelSize={params.nodeRelSize}
             nodeVal={(n) => (n.kind && n.kind !== "node" ? 0.5 : 1)}
             nodeColor={(n) =>
-              params.nodeKindColors[n.kind ?? "node"] ?? "#00e5ff"
+              n.id === selectedNodeId
+                ? "#ff007f"
+                : (params.nodeKindColors[n.kind ?? "node"] ?? "#00e5ff")
             }
+            onNodeHover={(node) => {
+              if (areGraphsConnected()) {
+                broadcastNodeSelection(activeDocId, node ? node.id : null, props.api.id, node ? node.name : undefined);
+              }
+              setSelectedNodeId(node ? node.id : null);
+            }}
+            onNodeClick={(node) => {
+              if (node && areGraphsConnected()) {
+                broadcastNodeFocus(activeDocId, node.id, props.api.id);
+              }
+            }}
             nodeOpacity={params.nodeOpacity}
             nodeLabel={
               tooltipsEnabled

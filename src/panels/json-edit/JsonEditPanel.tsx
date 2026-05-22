@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
 import MonacoEditor from "@monaco-editor/react";
-import { setJson, getJson, type JsonValue } from "../../data/json-bus";
+import { open, save } from "@tauri-apps/plugin-dialog";
+import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import { setJson, getJson, setActiveDocumentId, type JsonValue } from "../../data/json-bus";
 import { midnightAlaska, MIDNIGHT_ALASKA } from "./themes/midnight-alaska";
 import "./JsonEditPanel.css";
 
@@ -62,6 +64,86 @@ export default function JsonEditPanel(
   const [parseError, setParseError] = useState<string | null>(null);
   const debounceRef = useRef<number | null>(null);
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [filePath, setFilePath] = useState<string | null>(null);
+
+  // Close menu on click outside
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [menuOpen]);
+
+  // Active tab coordination
+  useEffect(() => {
+    if (props.api.isActive) {
+      setActiveDocumentId(params.documentId);
+    }
+    const disposable = props.api.onDidActiveChange((e) => {
+      if (e.isActive) {
+        setActiveDocumentId(params.documentId);
+      }
+    });
+    return () => {
+      disposable.dispose();
+    };
+  }, [props.api, params.documentId]);
+
+  async function openFile() {
+    setMenuOpen(false);
+    try {
+      const picked = await open({
+        multiple: false,
+        directory: false,
+        filters: [{ name: "JSON", extensions: ["json"] }],
+      });
+      if (!picked || typeof picked !== "string") return;
+      const content = await readTextFile(picked);
+      setFilePath(picked);
+      setValue(content);
+    } catch (err) {
+      console.error("[json-edit] failed to open file:", err);
+    }
+  }
+
+  async function saveFile() {
+    setMenuOpen(false);
+    let target = filePath;
+    if (!target) {
+      const picked = await save({
+        filters: [{ name: "JSON", extensions: ["json"] }],
+      });
+      if (!picked) return;
+      target = picked;
+      setFilePath(picked);
+    }
+    try {
+      await writeTextFile(target, value);
+    } catch (err) {
+      console.error("[json-edit] failed to save file:", err);
+    }
+  }
+
+  async function saveFileAs() {
+    setMenuOpen(false);
+    try {
+      const picked = await save({
+        filters: [{ name: "JSON", extensions: ["json"] }],
+      });
+      if (!picked) return;
+      setFilePath(picked);
+      await writeTextFile(picked, value);
+    } catch (err) {
+      console.error("[json-edit] failed to save file as:", err);
+    }
+  }
+
   // Persist params to the dockview layout file so they survive a reload.
   useEffect(() => {
     props.api.updateParameters(params);
@@ -107,16 +189,52 @@ export default function JsonEditPanel(
     };
   }, [value, params.documentId, params.debounceMs]);
 
+  // Extract just the filename to show in the header for cleanliness
+  const displayFileName = filePath
+    ? filePath.split(/[/\\]/).pop()
+    : null;
+
   return (
     <>
       <div className="panel-header">
-        json-edit
-        <span className="json-edit-doc-id"> · {params.documentId}</span>
-        {parseError && (
-          <span className="json-edit-parse-error" title={parseError}>
-            ⚠ JSON parse error
-          </span>
-        )}
+        <div className="json-edit-header-container">
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <span>json-edit</span>
+            <span className="json-edit-doc-id"> · {params.documentId}</span>
+            {displayFileName && (
+              <span className="json-edit-filepath-indicator" title={filePath ?? ""}>
+                ({displayFileName})
+              </span>
+            )}
+            {parseError && (
+              <span className="json-edit-parse-error" title={parseError}>
+                ⚠ JSON parse error
+              </span>
+            )}
+          </div>
+          <div className="json-edit-menu-wrapper" ref={menuRef}>
+            <button
+              className="json-edit-hamburger-btn"
+              onClick={() => setMenuOpen(!menuOpen)}
+              title="File Actions"
+            >
+              ☰
+            </button>
+            {menuOpen && (
+              <div className="json-edit-dropdown">
+                <button className="json-edit-dropdown-item" onClick={openFile}>
+                  Open File <span>⌘O</span>
+                </button>
+                <button className="json-edit-dropdown-item" onClick={saveFile}>
+                  Save File <span>⌘S</span>
+                </button>
+                <button className="json-edit-dropdown-item" onClick={saveFileAs}>
+                  Save As... <span>⌥⌘S</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
       <div className="panel-body json-edit-body">
         <MonacoEditor

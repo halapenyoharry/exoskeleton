@@ -26,6 +26,7 @@ import JsonMassPanel from "./panels/json-mass/JsonMassPanel";
 import JsonCytoscapePanel from "./panels/json-cytoscape/JsonCytoscapePanel";
 import JsonGraphPanel from "./panels/json-graph/JsonGraphPanel";
 import JsonGraph3DPanel from "./panels/json-graph3d/JsonGraph3DPanel";
+import StatusBarPanel from "./panels/StatusBarPanel";
 import { exoPanel } from "./PanelRoot";
 import { buildDefaultLayout, migrateLayout } from "./persistence/default-layout";
 import { CURRENT_VERSION, type AppState } from "./persistence/storage";
@@ -51,6 +52,7 @@ const components = {
   "json-cytoscape":exoPanel(JsonCytoscapePanel, "var(--accent-json-cytoscape)"),
   "json-graph":    exoPanel(JsonGraphPanel,     "var(--accent-json-graph)"),
   "json-graph3d":  exoPanel(JsonGraph3DPanel,   "var(--accent-json-graph3d)"),
+  "status-bar-panel": StatusBarPanel,
 };
 
 // Choose persistence backend by environment.
@@ -80,6 +82,7 @@ export default function App() {
   const [saved, setSaved] = useState<AppState | null | undefined>(undefined);
 
   const mainApiRef = useRef<DockviewApi | null>(null);
+  const [isStatusBarVisible, setIsStatusBarVisible] = useState(false);
 
   // Preferences state. Currently empty (see Preferences interface in
   // storage.ts); included in the save so future fields persist automatically.
@@ -102,6 +105,29 @@ export default function App() {
   useEffect(() => {
     storage.load().then(setSaved);
   }, []);
+
+  function mountStatusBar(api: DockviewApi) {
+    let bottom = api.getEdgeGroup("bottom");
+    if (!bottom) {
+      bottom = api.addEdgeGroup("bottom", {
+        id: "status-bar-group",
+        initialSize: 40,
+        minimumSize: 40,
+      });
+    }
+    let panel = api.getPanel("status-bar");
+    if (!panel) {
+      panel = api.addPanel({
+        id: "status-bar",
+        component: "status-bar-panel",
+        position: { referenceGroup: bottom.id },
+      });
+    }
+    if (panel) {
+      panel.group.header.hidden = true;
+    }
+    setIsStatusBarVisible(true);
+  }
 
   // Toggle the settings panel. Extracted as a stable named function so the
   // menu-event handler below can invoke it; future header-action buttons or
@@ -170,6 +196,15 @@ export default function App() {
       buildDefaultLayout(event.api);
     }
 
+    // Check if status bar is in the restored panel list; if not, mount it.
+    const statusBarPanel = event.api.getPanel("status-bar");
+    if (!statusBarPanel) {
+      mountStatusBar(event.api);
+    } else {
+      statusBarPanel.group.header.hidden = true;
+      setIsStatusBarVisible(true);
+    }
+
     // Auto-cleanup: when the left edge group empties (e.g. user closes the
     // settings tab), remove the edge group entirely. Mirrors the old
     // "auto-hide side-grid when empty" UX from the peer-grid era.
@@ -181,6 +216,16 @@ export default function App() {
           event.api.removeEdgeGroup(SIDE_EDGE);
         }
       }
+
+      const bottom = event.api.getEdgeGroup("bottom");
+      if (bottom) {
+        const group = event.api.groups.find((g) => g.id === bottom.id);
+        if (group && group.panels.length === 0) {
+          event.api.removeEdgeGroup("bottom");
+        }
+      }
+      setIsStatusBarVisible(!!event.api.getPanel("status-bar"));
+
       save();
     });
     event.api.onDidActivePanelChange(save);
@@ -202,6 +247,15 @@ export default function App() {
         rightHeaderActionsComponent={RightHeaderActions}
         onReady={onMainReady}
       />
+      {!isStatusBarVisible && mainApiRef.current && (
+        <button
+          className="status-bar-summoner-btn"
+          onClick={() => mountStatusBar(mainApiRef.current!)}
+          title="Summon Astromech Status Bar"
+        >
+          ⌬
+        </button>
+      )}
     </div>
   );
 }

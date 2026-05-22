@@ -3,7 +3,19 @@ import type { IDockviewPanelProps } from "dockview";
 import cytoscape from "cytoscape";
 import type { Core, ElementDefinition, LayoutOptions } from "cytoscape";
 import fcose from "cytoscape-fcose";
-import { getJson, onJsonChange, type JsonValue } from "../../data/json-bus";
+import {
+  getJson,
+  onJsonChange,
+  type JsonValue,
+  getActiveDocumentId,
+  onActiveDocumentIdChange,
+  areGraphsConnected,
+  onGraphsConnectionChange,
+  broadcastNodeSelection,
+  onNodeSelectionBroadcast,
+  broadcastNodeFocus,
+  onNodeFocusBroadcast,
+} from "../../data/json-bus";
 import {
   detectGraph,
   type DetectedGraph,
@@ -29,6 +41,9 @@ export interface JsonCytoscapeParams {
   documentId: string;
   layout: CytoscapeLayoutName;
   curveEdges: boolean;
+  /** Label-primary mode: the text glyph defines the bounding box.
+   *  No circle, no chrome — the label IS the node. */
+  labelPrimary: boolean;
   layerVisibility: Record<string, boolean>;
   wheelSensitivity: number;
   minZoom: number;
@@ -48,6 +63,7 @@ export const jsonCytoscapeDefaults: JsonCytoscapeParams = {
   documentId: "default",
   layout: "fcose",
   curveEdges: true,
+  labelPrimary: false,
   layerVisibility: {},
   wheelSensitivity: 0.2,
   minZoom: 0.1,
@@ -142,13 +158,31 @@ export default function JsonCytoscapePanel(
     props.api.updateParameters({ ...params, [key]: value });
   };
 
+  const [activeDocId, setActiveDocId] = useState(params.documentId);
+  const [connected, setConnected] = useState(areGraphsConnected());
+
+  useEffect(() => {
+    return onGraphsConnectionChange(setConnected);
+  }, []);
+
+  useEffect(() => {
+    if (!connected) {
+      setActiveDocId(params.documentId);
+      return;
+    }
+    setActiveDocId(getActiveDocumentId());
+    return onActiveDocumentIdChange((id) => {
+      setActiveDocId(id);
+    });
+  }, [connected, params.documentId]);
+
   const [doc, setDoc] = useState<JsonValue | undefined>(() =>
-    getJson(params.documentId),
+    getJson(activeDocId),
   );
-  useEffect(
-    () => onJsonChange(params.documentId, setDoc),
-    [params.documentId],
-  );
+  useEffect(() => {
+    setDoc(getJson(activeDocId));
+    return onJsonChange(activeDocId, setDoc);
+  }, [activeDocId]);
 
   const graph = useMemo<DetectedGraph | null>(() => {
     if (doc === undefined) return null;
@@ -227,28 +261,52 @@ export default function JsonCytoscapePanel(
       style: [
         {
           selector: "node",
-          style: {
-            "background-color": "#0d1233",
-            "border-color": "rgba(0, 229, 255, 0.5)",
-            "border-width": 1.5,
-            label: "data(label)",
-            color: "#7ddff5",
-            "font-size": 11,
-            "text-valign": "bottom",
-            "text-margin-y": 6,
-            "text-outline-color": "#0a0e26",
-            "text-outline-width": 2,
-            width: 28,
-            height: 28,
-          },
+          style: (params.labelPrimary
+            ? {
+                // Label-primary: the text glyph IS the node.
+                // width/height: 'label' makes Cytoscape size the node
+                // to exactly the rendered text bounding box.
+                width: "label" as unknown as number,
+                height: "label" as unknown as number,
+                "background-opacity": 0,
+                "border-width": 0,
+                padding: "4px" as unknown as number,
+                label: "data(label)",
+                color: "#7ddff5",
+                "font-size": 11,
+                "text-valign": "center",
+                "text-halign": "center",
+                "text-outline-color": "#0a0e26",
+                "text-outline-width": 2,
+              }
+            : {
+                "background-color": "#0d1233",
+                "border-color": "rgba(0, 229, 255, 0.5)",
+                "border-width": 1.5,
+                label: "data(label)",
+                color: "#7ddff5",
+                "font-size": 11,
+                "text-valign": "bottom",
+                "text-margin-y": 6,
+                "text-outline-color": "#0a0e26",
+                "text-outline-width": 2,
+                width: 28,
+                height: 28,
+              }) as any,
         },
         {
           selector: "node:selected",
-          style: {
-            "border-color": "#00e5ff",
-            "border-width": 2.5,
-            "background-color": "#131940",
-          },
+          style: (params.labelPrimary
+            ? {
+                color: "#00e5ff",
+                "text-outline-color": "#131940",
+                "text-outline-width": 3,
+              }
+            : {
+                "border-color": "#00e5ff",
+                "border-width": 2.5,
+                "background-color": "#131940",
+              }) as any,
         },
         {
           selector: "node.kind-hyperedge",
@@ -349,12 +407,61 @@ export default function JsonCytoscapePanel(
         header: role ? `${label} (${role})` : label,
         attrs,
       });
+
+      if (ele.isNode() && areGraphsConnected()) {
+        broadcastNodeSelection(activeDocId, ele.id(), props.api.id, ele.data("label") || ele.id());
+      }
     });
 
-    cy.on("mouseout", "node, edge", () => setTooltip(null));
+    cy.on("mouseout", "node, edge", (evt) => {
+      const ele = evt.target;
+      if (ele.isNode() && areGraphsConnected()) {
+        broadcastNodeSelection(activeDocId, null, props.api.id);
+      }
+      setTooltip(null);
+    });
+    
     cy.on("pan zoom drag", () => setTooltip(null));
 
+    cy.on("tap", "node", (evt) => {
+      const ele = evt.target;
+      if (areGraphsConnected()) {
+        broadcastNodeFocus(activeDocId, ele.id(), props.api.id);
+      }
+    });
+
+    const unsubSelection = onNodeSelectionBroadcast((event) => {
+      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) {
+        return;
+      }
+      cy.batch(() => {
+        cy.nodes().unselect();
+        if (event.nodeId) {
+          const node = cy.getElementById(event.nodeId);
+          if (node.length > 0) {
+            node.select();
+          }
+        }
+      });
+    });
+
+    const unsubFocus = onNodeFocusBroadcast((event) => {
+      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) {
+        return;
+      }
+      const node = cy.getElementById(event.nodeId);
+      if (node.length > 0) {
+        cy.animate({
+          center: { eles: node },
+          zoom: Math.min(cy.zoom(), 1.2),
+          duration: 500,
+        });
+      }
+    });
+
     return () => {
+      unsubSelection();
+      unsubFocus();
       cy.destroy();
       cyRef.current = null;
     };
@@ -364,6 +471,7 @@ export default function JsonCytoscapePanel(
     size.height,
     params.layout,
     params.curveEdges,
+    params.labelPrimary,
     params.wheelSensitivity,
     params.minZoom,
     params.maxZoom,
@@ -420,6 +528,14 @@ export default function JsonCytoscapePanel(
               onChange={(e) => updateParam("curveEdges", e.target.checked)}
             />
             curve
+          </label>
+          <label title="Label-primary: text IS the node, no circle chrome">
+            <input
+              type="checkbox"
+              checked={params.labelPrimary}
+              onChange={(e) => updateParam("labelPrimary", e.target.checked)}
+            />
+            label
           </label>
           <button
             onClick={resetView}

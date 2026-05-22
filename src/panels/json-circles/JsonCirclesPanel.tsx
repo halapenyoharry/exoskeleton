@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
 import * as d3 from "d3";
-import { getJson, onJsonChange, type JsonValue } from "../../data/json-bus";
+import {
+  getJson,
+  onJsonChange,
+  type JsonValue,
+  getActiveDocumentId,
+  onActiveDocumentIdChange,
+  areGraphsConnected,
+  onGraphsConnectionChange,
+} from "../../data/json-bus";
 import {
   jsonToHierarchy,
   countHierarchyNodes,
@@ -131,13 +139,31 @@ export default function JsonCirclesPanel(
     props.api.updateParameters({ ...params, [key]: value });
   };
 
+  const [activeDocId, setActiveDocId] = useState(params.documentId);
+  const [connected, setConnected] = useState(areGraphsConnected());
+
+  useEffect(() => {
+    return onGraphsConnectionChange(setConnected);
+  }, []);
+
+  useEffect(() => {
+    if (!connected) {
+      setActiveDocId(params.documentId);
+      return;
+    }
+    setActiveDocId(getActiveDocumentId());
+    return onActiveDocumentIdChange((id) => {
+      setActiveDocId(id);
+    });
+  }, [connected, params.documentId]);
+
   const [doc, setDoc] = useState<JsonValue | undefined>(() =>
-    getJson(params.documentId),
+    getJson(activeDocId),
   );
-  useEffect(
-    () => onJsonChange(params.documentId, setDoc),
-    [params.documentId],
-  );
+  useEffect(() => {
+    setDoc(getJson(activeDocId));
+    return onJsonChange(activeDocId, setDoc);
+  }, [activeDocId]);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });

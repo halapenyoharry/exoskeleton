@@ -62,3 +62,119 @@ export function onJsonChange(id: string, handler: Handler): () => void {
     subscriptions.delete(sub);
   };
 }
+
+// --- Active Document Coordination ---
+let activeDocumentId = "default";
+const activeDocListeners = new Set<(id: string) => void>();
+
+export function getActiveDocumentId(): string {
+  return activeDocumentId;
+}
+
+export function setActiveDocumentId(id: string): void {
+  if (activeDocumentId === id) return;
+  activeDocumentId = id;
+  for (const listener of activeDocListeners) {
+    try {
+      listener(id);
+    } catch (e) {
+      console.error("[json-bus] active document listener threw:", e);
+    }
+  }
+}
+
+export function onActiveDocumentIdChange(listener: (id: string) => void): () => void {
+  activeDocListeners.add(listener);
+  return () => {
+    activeDocListeners.delete(listener);
+  };
+}
+
+// --- Connection / Decouple Coordination ---
+let graphsConnected = true; // Default to connected
+const connectionListeners = new Set<(connected: boolean) => void>();
+
+export function areGraphsConnected(): boolean {
+  return graphsConnected;
+}
+
+export function setGraphsConnected(connected: boolean): void {
+  if (graphsConnected === connected) return;
+  graphsConnected = connected;
+  for (const listener of connectionListeners) {
+    try {
+      listener(connected);
+    } catch (e) {
+      console.error("[json-bus] connection listener threw:", e);
+    }
+  }
+}
+
+export function onGraphsConnectionChange(listener: (connected: boolean) => void): () => void {
+  connectionListeners.add(listener);
+  return () => {
+    connectionListeners.delete(listener);
+  };
+}
+
+// --- Selection Synchronization ---
+export interface SelectionEvent {
+  documentId: string;
+  nodeId: string | null;
+  sourcePanelId: string;
+  label?: string;
+}
+type SelectionHandler = (event: SelectionEvent) => void;
+const selectionListeners = new Set<SelectionHandler>();
+let currentSelectedNode: { nodeId: string | null; label?: string } = { nodeId: null };
+
+export function getSelectedNode() {
+  return currentSelectedNode;
+}
+
+export function broadcastNodeSelection(documentId: string, nodeId: string | null, sourcePanelId: string, label?: string): void {
+  currentSelectedNode = { nodeId, label };
+  const event: SelectionEvent = { documentId, nodeId, sourcePanelId, label };
+  for (const listener of selectionListeners) {
+    try {
+      listener(event);
+    } catch (e) {
+      console.error("[json-bus] selection listener threw:", e);
+    }
+  }
+}
+
+export function onNodeSelectionBroadcast(handler: SelectionHandler): () => void {
+  selectionListeners.add(handler);
+  return () => {
+    selectionListeners.delete(handler);
+  };
+}
+
+// --- Focus / Zoom Synchronization ---
+export interface FocusEvent {
+  documentId: string;
+  nodeId: string;
+  sourcePanelId: string;
+}
+type FocusHandler = (event: FocusEvent) => void;
+const focusListeners = new Set<FocusHandler>();
+
+export function broadcastNodeFocus(documentId: string, nodeId: string, sourcePanelId: string): void {
+  const event: FocusEvent = { documentId, nodeId, sourcePanelId };
+  for (const listener of focusListeners) {
+    try {
+      listener(event);
+    } catch (e) {
+      console.error("[json-bus] focus listener threw:", e);
+    }
+  }
+}
+
+export function onNodeFocusBroadcast(handler: FocusHandler): () => void {
+  focusListeners.add(handler);
+  return () => {
+    focusListeners.delete(handler);
+  };
+}
+

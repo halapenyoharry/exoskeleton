@@ -1,7 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
 import * as d3 from "d3";
-import { getJson, onJsonChange, type JsonValue } from "../../data/json-bus";
+import {
+  getJson,
+  onJsonChange,
+  type JsonValue,
+  getActiveDocumentId,
+  onActiveDocumentIdChange,
+  areGraphsConnected,
+  onGraphsConnectionChange,
+  broadcastNodeSelection,
+  onNodeSelectionBroadcast,
+  broadcastNodeFocus,
+  onNodeFocusBroadcast,
+} from "../../data/json-bus";
 import {
   detectGraph,
   type DetectedGraph,
@@ -88,13 +100,31 @@ export default function JsonGraphPanel(
     props.api.updateParameters({ ...params, [key]: value });
   };
 
+  const [activeDocId, setActiveDocId] = useState(params.documentId);
+  const [connected, setConnected] = useState(areGraphsConnected());
+
+  useEffect(() => {
+    return onGraphsConnectionChange(setConnected);
+  }, []);
+
+  useEffect(() => {
+    if (!connected) {
+      setActiveDocId(params.documentId);
+      return;
+    }
+    setActiveDocId(getActiveDocumentId());
+    return onActiveDocumentIdChange((id) => {
+      setActiveDocId(id);
+    });
+  }, [connected, params.documentId]);
+
   const [doc, setDoc] = useState<JsonValue | undefined>(() =>
-    getJson(params.documentId),
+    getJson(activeDocId),
   );
-  useEffect(
-    () => onJsonChange(params.documentId, setDoc),
-    [params.documentId],
-  );
+  useEffect(() => {
+    setDoc(getJson(activeDocId));
+    return onJsonChange(activeDocId, setDoc);
+  }, [activeDocId]);
 
   const graph = useMemo<DetectedGraph | null>(() => {
     if (doc === undefined) return null;
@@ -298,7 +328,22 @@ export default function JsonGraphPanel(
             d.fx = null;
             d.fy = null;
           }),
-      );
+      )
+      .on("mouseover", (_event, d) => {
+        if (areGraphsConnected()) {
+          broadcastNodeSelection(activeDocId, d.id, props.api.id, d.label || d.id);
+        }
+      })
+      .on("mouseout", () => {
+        if (areGraphsConnected()) {
+          broadcastNodeSelection(activeDocId, null, props.api.id);
+        }
+      })
+      .on("click", (_event, d) => {
+        if (areGraphsConnected()) {
+          broadcastNodeFocus(activeDocId, d.id, props.api.id);
+        }
+      });
 
     node
       .append("circle")
@@ -351,7 +396,35 @@ export default function JsonGraphPanel(
       }
     }
 
+    const unsubSelection = onNodeSelectionBroadcast((event) => {
+      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) {
+        return;
+      }
+      node.classed("selected", (d) => d.id === event.nodeId);
+    });
+
+    const unsubFocus = onNodeFocusBroadcast((event) => {
+      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) {
+        return;
+      }
+      const target = nodes.find((n) => n.id === event.nodeId);
+      if (target && target.x !== undefined && target.y !== undefined) {
+        svg
+          .transition()
+          .duration(500)
+          .call(
+            zoom.transform,
+            d3.zoomIdentity
+              .translate(width / 2, height / 2)
+              .scale(1.2)
+              .translate(-target.x, -target.y)
+          );
+      }
+    });
+
     return () => {
+      unsubSelection();
+      unsubFocus();
       destroyGraph();
     };
     // freezeLayout intentionally omitted — separate effect toggles without rebuild

@@ -116,3 +116,11 @@
   border-radius: 3px;
   cursor: pointer;
 }
+
+/* Glowing Selection Style for coordinated hypergraph */
+.json-graph-node.selected .json-graph-node-circle {
+  stroke: #00e5ff;
+  stroke-width: 2.5px;
+  fill: #131940;
+  filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.7));
+}
