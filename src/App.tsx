@@ -26,6 +26,7 @@ import JsonMassPanel from "./panels/json-mass/JsonMassPanel";
 import JsonCytoscapePanel from "./panels/json-cytoscape/JsonCytoscapePanel";
 import JsonGraphPanel from "./panels/json-graph/JsonGraphPanel";
 import JsonGraph3DPanel from "./panels/json-graph3d/JsonGraph3DPanel";
+import DyadicProjectionPanel from "./panels/dyadicProjection/DyadicProjectionPanel";
 import StatusBarPanel from "./panels/StatusBarPanel";
 import { exoPanel } from "./PanelRoot";
 import { buildDefaultLayout, migrateLayout } from "./persistence/default-layout";
@@ -52,6 +53,7 @@ const components = {
   "json-cytoscape":exoPanel(JsonCytoscapePanel, "var(--accent-json-cytoscape)"),
   "json-graph":    exoPanel(JsonGraphPanel,     "var(--accent-json-graph)"),
   "json-graph3d":  exoPanel(JsonGraph3DPanel,   "var(--accent-json-graph3d)"),
+  "dyadicProjection": exoPanel(DyadicProjectionPanel, "var(--accent-dyadicProjection)"),
   "status-bar-panel": StatusBarPanel,
 };
 

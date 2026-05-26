@@ -18,7 +18,10 @@ import type { SerializedDockview } from "dockview";
 //       auto-adds them for existing users on next launch.
 //   5 — added the seven json-* panels (json-edit + six viewers wired via
 //       json-bus). migrateLayout auto-adds them for existing users.
-export const CURRENT_VERSION = 5;
+//   6 — added dyadicProjection: the first viewer in the json-* group that
+//       renders edges per their i2t:edge_category rather than as uniform
+//       connector lines. migrateLayout auto-adds it for existing users.
+export const CURRENT_VERSION = 6;
 
 export interface Preferences {
   // Empty for now; reserved for theme, tab-position, etc. when those land.

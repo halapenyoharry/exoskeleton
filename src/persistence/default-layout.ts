@@ -114,6 +114,17 @@ export const panelRegistry: RegistryEntry[] = [
     position: { referencePanel: "json-tree", direction: "within" },
     introducedAt: 5,
   },
+  // v6 — dyadicProjection: categorical viewer for TopoThink dyadic JSON.
+  // First panel in the json-* group that respects the four-category edge
+  // contract (containment / state_change / interactivity / reference);
+  // the others all render edges as uniform lines.
+  {
+    id: "dyadicProjection",
+    component: "dyadicProjection",
+    title: "dyadic",
+    position: { referencePanel: "json-tree", direction: "within" },
+    introducedAt: 6,
+  },
 ];
 
 /** Build the default layout from scratch (called when no saved state exists). */
