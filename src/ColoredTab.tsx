@@ -25,7 +25,7 @@ const accents: Record<string, string> = {
   "json-cytoscape": "var(--accent-json-cytoscape)",
   "json-graph": "var(--accent-json-graph)",
   "json-graph3d": "var(--accent-json-graph3d)",
-  dyadicProjection: "var(--accent-dyadicProjection)",
+  "json-dyadic": "var(--accent-json-dyadic)",
 };
 
 const glyphs: Record<string, string> = {
@@ -43,7 +43,7 @@ const glyphs: Record<string, string> = {
   "json-cytoscape": '"⬢"',
   "json-graph": '"✦"',
   "json-graph3d": '"⌬"',
-  dyadicProjection: '"◬"',
+  "json-dyadic": '"◬"',
 };
 
 export default function ColoredTab(props: IDockviewPanelHeaderProps) {

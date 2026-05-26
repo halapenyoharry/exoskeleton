@@ -1,13 +1,13 @@
 import type { PanelManifest } from "../../panel-manifest";
-import DyadicProjectionPanel, {
-  dyadicProjectionDefaults,
-  type DyadicProjectionParams,
-} from "./DyadicProjectionPanel";
+import JsonDyadicPanel, {
+  jsonDyadicDefaults,
+  type JsonDyadicParams,
+} from "./JsonDyadicPanel";
 
-const manifest: PanelManifest<DyadicProjectionParams> = {
-  id: "dyadicProjection",
+const manifest: PanelManifest<JsonDyadicParams> = {
+  id: "json-dyadic",
   title: "dyadic",
-  component: DyadicProjectionPanel,
+  component: JsonDyadicPanel,
   description:
     "Categorical viewer for TopoThink dyadic JSON. Renders each edge per its i2t:edge_category — containment as enclosures, state_change as gradient flows, interactivity as shared color fields, reference as low-weight tags. Never draws connector lines. Layer is the loadable unit.",
 
@@ -18,7 +18,7 @@ const manifest: PanelManifest<DyadicProjectionParams> = {
   // other graph viewers — but conceptually distinct: this is the only one
   // that respects the four-category edge contract.
   defaultLayout: { direction: "within", reference: "json-tree" },
-  paramsDefault: dyadicProjectionDefaults,
+  paramsDefault: jsonDyadicDefaults,
 };
 
 export default manifest;

@@ -21,7 +21,10 @@ import type { SerializedDockview } from "dockview";
 //   6 — added dyadicProjection: the first viewer in the json-* group that
 //       renders edges per their i2t:edge_category rather than as uniform
 //       connector lines. migrateLayout auto-adds it for existing users.
-export const CURRENT_VERSION = 6;
+//   7 — renamed dyadicProjection → json-dyadic to match the json-* family
+//       naming pattern. Saved layouts from v6 get rewritten in-place by
+//       migrateSavedLayout (default-layout.ts) before fromJSON runs.
+export const CURRENT_VERSION = 7;
 
 export interface Preferences {
   // Empty for now; reserved for theme, tab-position, etc. when those land.

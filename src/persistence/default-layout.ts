@@ -1,4 +1,4 @@
-import type { AddPanelOptions, DockviewApi } from "dockview";
+import type { AddPanelOptions, DockviewApi, SerializedDockview } from "dockview";
 
 // The default panel arrangement — what Exoskeleton looks like on first launch,
 // or after the user resets/clears their saved state.
@@ -114,18 +114,42 @@ export const panelRegistry: RegistryEntry[] = [
     position: { referencePanel: "json-tree", direction: "within" },
     introducedAt: 5,
   },
-  // v6 — dyadicProjection: categorical viewer for TopoThink dyadic JSON.
+  // v6 — json-dyadic: categorical viewer for TopoThink dyadic JSON.
   // First panel in the json-* group that respects the four-category edge
   // contract (containment / state_change / interactivity / reference);
   // the others all render edges as uniform lines.
+  // (Originally landed in v6 as id "dyadicProjection"; renamed in v7 to
+  // match the json-* family. See migrateSavedLayout below for the rewrite.)
   {
-    id: "dyadicProjection",
-    component: "dyadicProjection",
+    id: "json-dyadic",
+    component: "json-dyadic",
     title: "dyadic",
     position: { referencePanel: "json-tree", direction: "within" },
     introducedAt: 6,
   },
 ];
+
+/**
+ * Rewrite a saved layout JSON for schema-version bumps that need to mutate
+ * the persisted Dockview blob (panel id / component renames, etc.) BEFORE
+ * fromJSON runs. Called from App.tsx between `load()` and `fromJSON()`.
+ *
+ * Safe because the rewrites only target literal strings that don't appear
+ * elsewhere in the serialized layout. If that changes for a future rename,
+ * switch to a proper traversal of `panels[id].component` instead.
+ */
+export function migrateSavedLayout(
+  layout: SerializedDockview,
+  savedVersion: number,
+): SerializedDockview {
+  if (savedVersion >= 7) return layout;
+  // v6 → v7: rename "dyadicProjection" panel id + component name to "json-dyadic".
+  const json = JSON.stringify(layout).replace(
+    /"dyadicProjection"/g,
+    '"json-dyadic"',
+  );
+  return JSON.parse(json) as SerializedDockview;
+}
 
 /** Build the default layout from scratch (called when no saved state exists). */
 export function buildDefaultLayout(api: DockviewApi) {

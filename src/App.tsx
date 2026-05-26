@@ -26,10 +26,14 @@ import JsonMassPanel from "./panels/json-mass/JsonMassPanel";
 import JsonCytoscapePanel from "./panels/json-cytoscape/JsonCytoscapePanel";
 import JsonGraphPanel from "./panels/json-graph/JsonGraphPanel";
 import JsonGraph3DPanel from "./panels/json-graph3d/JsonGraph3DPanel";
-import DyadicProjectionPanel from "./panels/dyadicProjection/DyadicProjectionPanel";
+import JsonDyadicPanel from "./panels/json-dyadic/JsonDyadicPanel";
 import StatusBarPanel from "./panels/StatusBarPanel";
 import { exoPanel } from "./PanelRoot";
-import { buildDefaultLayout, migrateLayout } from "./persistence/default-layout";
+import {
+  buildDefaultLayout,
+  migrateLayout,
+  migrateSavedLayout,
+} from "./persistence/default-layout";
 import { CURRENT_VERSION, type AppState } from "./persistence/storage";
 import { tauriStorage } from "./persistence/tauri-storage";
 import "./App.css";
@@ -53,7 +57,7 @@ const components = {
   "json-cytoscape":exoPanel(JsonCytoscapePanel, "var(--accent-json-cytoscape)"),
   "json-graph":    exoPanel(JsonGraphPanel,     "var(--accent-json-graph)"),
   "json-graph3d":  exoPanel(JsonGraph3DPanel,   "var(--accent-json-graph3d)"),
-  "dyadicProjection": exoPanel(DyadicProjectionPanel, "var(--accent-dyadicProjection)"),
+  "json-dyadic":   exoPanel(JsonDyadicPanel,      "var(--accent-json-dyadic)"),
   "status-bar-panel": StatusBarPanel,
 };
 
@@ -181,7 +185,8 @@ export default function App() {
       // Restore preferences so the first auto-save round-trips them.
       if (saved.preferences) prefsRef.current = saved.preferences;
       try {
-        event.api.fromJSON(saved.layout);
+        const layout = migrateSavedLayout(saved.layout, saved.version);
+        event.api.fromJSON(layout);
         // Add any panels the user's saved state predates. No-op when the
         // saved version is already current. Without this, panels installed
         // after the user's last save would never appear unless they

@@ -22,11 +22,11 @@ import type {
   RenderableNode,
   TopoLink,
 } from "./types";
-import "./DyadicProjectionPanel.css";
+import "./JsonDyadicPanel.css";
 
 // ─── params ─────────────────────────────────────────────────────────────
 
-export interface DyadicProjectionParams {
+export interface JsonDyadicParams {
   documentId: string;
   /** null on first open — the directive forbids a default whole-graph view. */
   selectedLayer: string | null;
@@ -36,7 +36,7 @@ export interface DyadicProjectionParams {
   showCategoryLegend: boolean;
 }
 
-export const dyadicProjectionDefaults: DyadicProjectionParams = {
+export const jsonDyadicDefaults: JsonDyadicParams = {
   documentId: "default",
   selectedLayer: null,
   overlayLayers: [],
@@ -427,17 +427,17 @@ const RENDERERS: Record<
 
 // ─── panel ─────────────────────────────────────────────────────────────
 
-export default function DyadicProjectionPanel(
-  props: IDockviewPanelProps<DyadicProjectionParams>,
+export default function JsonDyadicPanel(
+  props: IDockviewPanelProps<JsonDyadicParams>,
 ) {
-  const params: DyadicProjectionParams = {
-    ...dyadicProjectionDefaults,
+  const params: JsonDyadicParams = {
+    ...jsonDyadicDefaults,
     ...(props.params ?? {}),
   };
 
-  const updateParam = <K extends keyof DyadicProjectionParams>(
+  const updateParam = <K extends keyof JsonDyadicParams>(
     key: K,
-    value: DyadicProjectionParams[K],
+    value: JsonDyadicParams[K],
   ) => {
     props.api.updateParameters({ ...params, [key]: value });
   };
@@ -472,7 +472,7 @@ export default function DyadicProjectionPanel(
   useEffect(() => {
     if (topology.warnings.length > 0) {
       console.warn(
-        "[dyadicProjection] parse warnings:",
+        "[json-dyadic] parse warnings:",
         topology.warnings,
       );
     }
@@ -492,7 +492,7 @@ export default function DyadicProjectionPanel(
   return (
     <>
       <div className="panel-header dp-header">
-        <span>dyadicProjection</span>
+        <span>json-dyadic</span>
         <span className="dp-header-doc">{activeDocId}</span>
       </div>
 

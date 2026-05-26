@@ -13,7 +13,7 @@
   --accent-json-cytoscape: #b388ff;
   --accent-json-graph: #06d6a0;
   --accent-json-graph3d: #ff9f1c;
-  --accent-dyadicProjection: #ffb86c;
+  --accent-json-dyadic: #ffb86c;
 }
 
 .app-frame {
@@ -113,3 +113,26 @@
 
 /* Active-tab underline now lives in ColoredTab.css (.dv-active-tab .colored-tab),
    since ColoredTab is fully custom and no longer wraps DockviewDefaultTab. */
+
+/* ─── dockview theme overrides ────────────────────────────────────────
+   These tweak the abyss theme variables and a couple of selectors. Kept
+   here (not in a separate file) so the small surface area is reviewable
+   alongside the accent palette above. */
+
+.dockview-theme-abyss {
+  /* The active-group underline (the bright line across the top of the
+     focused tab strip). Dockview default is 2px; Harold prefers 1px. */
+  --dv-tab-group-line-height: 1px;
+}
+
+/* Action icons in the right side of each tab strip (popout / overflow
+   chevron / etc.). They use .dv-svg with `fill: currentcolor`, so they
+   inherit whatever text color the surrounding group has — which the
+   abyss theme drops to rgba(255,255,255,0.5) on inactive groups,
+   making them effectively invisible. Force a readable floor. */
+.dockview-theme-abyss .dv-tabs-and-actions-container .dv-right-actions-container {
+  color: rgba(197, 232, 238, 0.75);
+}
+.dockview-theme-abyss .dv-tabs-and-actions-container .dv-right-actions-container:hover {
+  color: #c5e8ee;
+}
