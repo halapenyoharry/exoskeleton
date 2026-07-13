@@ -295,26 +295,31 @@ buses once popout windows need shared live state.
 
 ## 6. Observations — where code and docs disagree (factual, not prescriptive)
 
-1. **README persistence shape is stale.** The README documents a `sideGrid`
+1. ~~**README persistence shape is stale.**~~ **FIXED 2026-07-13** — README persistence section rewritten (v7 shape, migration/repair functions named).
+   Original observation:  The README documents a `sideGrid`
    field and `preferences.sideGridVisible` in the on-disk JSON; schema v3 removed
    both (per `storage.ts`), and App's `save()` writes only
    `{ version, layout, preferences }`.
-2. **Panel count.** README/CLAUDE (and the earlier sketch) say "14 panels"; the
+2. ~~**Panel count.**~~ **FIXED 2026-07-13** — README/CLAUDE counts corrected (16 components, 14 registry entries; settings + status-bar imperative). All 16 now also carry a manifest with `capabilities`.
+   Original observation:  README/CLAUDE (and the earlier sketch) say "14 panels"; the
    `components` map has **15** keys. 13 are in the default-layout registry;
    `settings` and `status-bar` are added imperatively.
-3. **The `+` add-tab button is broken for hyphenated ids.** `LeftHeaderActions`
+3. ~~**The `+` add-tab button is broken for hyphenated ids.**~~ **FIXED 2026-07-13** — `addTab` now reads `active.view.contentComponent`; accent dot shares ColoredTab's clone-aware lookup.
+   Original observation:  `LeftHeaderActions`
    computes `component: active.id.split("-")[0]`. For `json-edit` that's `"json"`,
    for `tempo-clock` that's `"tempo"` — neither is a registered component. So
    "+" only works for single-word ids (editor/terminal/webview/piano/scope/
    settings) and fails for every `json-*` and `tempo-clock` panel. The prefix
    accent-dot uses the same split and is therefore transparent for those panels;
    the `accents` map in `HeaderActions.tsx` also only lists editor/terminal/webview.
-4. **`status-bar` registered without `exoPanel`** — intentional-looking (it owns
+4. **`status-bar` registered without `exoPanel`** — CONFIRMED INTENTIONAL 2026-07-13 (comment now at the registration in App.tsx) — intentional-looking (it owns
    full-width chrome) but means it bypasses the `PanelRoot` accent convention.
-5. **The clock has no in-app listener.** `tempo-clock` emits `/exoskeleton/clock/*`
+5. ~~**The clock has no in-app listener.**~~ **FIXED 2026-07-13** — scope subscribes to `/exoskeleton/clock/beat` and shows a pulsing ♩ beat counter.
+   Original observation:  `tempo-clock` emits `/exoskeleton/clock/*`
    but `scope` subscribes only to piano addresses; nothing consumes clock ticks
    in-process today (meaningful only via the UDP bridge to an external listener).
-6. **editor content isn't persisted** (no `params`), so an open file/buffer is
+6. ~~**editor content isn't persisted**~~ **PARTLY FIXED 2026-07-13** — editor persists its open file *path* in params and reopens it; unsaved buffer text (and json-edit's buffer) still isn't persisted.
+   Original observation:  (no `params`), so an open file/buffer is
    lost on reload; `json-edit` persists config but likewise not its buffer.
 7. **Selection is both event and snapshot.** `json-bus` keeps
    `currentSelectedNode` *and* broadcasts selection as an event — mixing the two

@@ -82,4 +82,6 @@ The right-hand column is the whole list a unit might declare in its manifest:
 | `tts.engine` | swappable (local command or web API) | speak (planned) |
 | *(none)* | every host | the 7 viewers + status-bar |
 
-Concrete next step: add a `capabilities: string[]` field to `panel-manifest.ts` and fill it for all 16 — `[]` for the universal tier, `["pty"]` for terminal, and so on — so a host can refuse, at install time, anything it can't run.
+~~Concrete next step: add a `capabilities: string[]` field to `panel-manifest.ts` and fill it for all 16 — `[]` for the universal tier, `["pty"]` for terminal, and so on — so a host can refuse, at install time, anything it can't run.~~
+
+**DONE 2026-07-13**, with one refinement: the field landed as *two* arrays — `capabilities` (hard requirements, the solid arrows above) and `optionalCapabilities` (graceful degradation, the dotted arrows) — because one flat list would have collapsed the distinction this map's own diagram draws. `CapabilityId` in [src/panel-manifest.ts](../src/panel-manifest.ts) is the vocabulary table above, verbatim. All 16 panels now carry a manifest: the 11 that existed were filled in, and the 5 core panels (editor, terminal, webview, settings, status-bar) got minimal manifests (`<id>.manifest.ts` beside the component; settings follows the folder convention). Manifests also gained `companions` — every json viewer names `json-edit`, so any add path pulls the json-bus producer in alongside.

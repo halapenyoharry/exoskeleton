@@ -10,7 +10,7 @@ A running Exoskeleton gives you:
 
 - A **main grid** of panels you can drag, dock, tab, split, resize, and pop out into separate OS windows.
 - A **side-grid** (toggleable with **⌘B** / **Ctrl+B**) for app-level controls — currently a raw-JSON state editor.
-- Four default working panels in the main grid: a Markdown editor, a real-shell terminal, an iframe webview for LAN HTTP services, and a hypergraph topology viewer.
+- Sixteen panels (14 in the default layout, plus the Cmd+B settings panel and the status bar): a Markdown editor, a real-shell terminal, an iframe webview for LAN HTTP services, a tempo clock, a piano, an oscilloscope, and the JSON suite — a Monaco editor feeding seven visualizers over an in-process json-bus.
 - **Persistence**: panel arrangement, panel state (open file, webview URL, etc.), and preferences survive close + reopen. Stored as a single JSON file in `~/Library/Application Support/dev.harold.exoskeleton/`.
 - **Drag-and-drop**: rearrange tabs, split groups, tear groups out into floating or popout OS windows.
 - **WebKit Inspector**: auto-opens in debug builds, for diagnosing layout or JS issues.
@@ -90,12 +90,12 @@ The recipe is two edits to [src/App.tsx](src/App.tsx):
 The component itself comes from one of three places, in increasing order of effort:
 
 - **npm.** `npm install some-react-component`, import it, drop it in the map.
-- **Your own file** under [src/panels/](src/panels/), modeled on the existing four.
+- **Your own file** under [src/panels/](src/panels/), modeled on the existing panels.
 - **A Tauri plugin**, if the thing needs to reach outside the WebView — filesystem, notifications, subprocesses, system dialogs. Plugins are registered in [src-tauri/Cargo.toml](src-tauri/Cargo.toml) and granted permission in [src-tauri/capabilities/default.json](src-tauri/capabilities/default.json). Today's plugins (`fs`, `dialog`, `opener`, `pty`, `store`, `log`) are why the editor can save files, the terminal runs a real shell, layouts persist, and logs land in one place.
 
 ### Three rules for when a new thing earns a panel
 
-Exoskeleton runs on a small budget on purpose: panels are first-class citizens, not afterthoughts. Before adding a fifth-or-more panel, ask:
+Panels are first-class citizens, not afterthoughts. Before adding another one, ask:
 
 - **Does it have continuous state?** A panel persists across focus switches and coffee breaks — an open file, a shell session, a loaded URL. If the thing only matters while you're looking at it, it's a modal, not a panel.
 - **Is it a distinct mode of work?** A second terminal isn't a new mode — it's a tab inside the existing `terminal` panel.
@@ -154,14 +154,15 @@ State is saved automatically. Every time a panel is dragged/closed/resized, the 
 The JSON has:
 ```json
 {
-  "version": 1,
-  "layout": { /* Dockview toJSON() of the main grid */ },
-  "sideGrid": { /* Dockview toJSON() of the side-grid */ },
-  "preferences": { "sideGridVisible": false }
+  "version": 7,
+  "layout": { /* Dockview toJSON() of the whole dock (main grid + edge groups) */ },
+  "preferences": { }
 }
 ```
 
-`version: 1` is intentional — when the schema changes incompatibly, increment and write a migration. Mismatched-version state falls back to defaults silently (with a console warning).
+(Schema v3 folded the old separate `sideGrid` blob and `preferences.sideGridVisible` into the single `layout`; the settings side-grid is now a Dockview edge group inside it.)
+
+`version` tracks the schema — when it changes incompatibly, increment `CURRENT_VERSION` in `storage.ts` and write a migration (`migrateSavedLayout` rewrites the saved blob before `fromJSON`; `migrateLayout` adds panels the save predates; `repairLayout` rescues pathological saves, e.g. panels absorbed into an edge group). Mismatched-version state falls back to defaults silently (with a console warning).
 
 **To reset to defaults**: delete `exoskeleton.json` and relaunch.
 
