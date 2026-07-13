@@ -2,17 +2,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
 import * as d3 from "d3";
 import {
-  getJson,
-  onJsonChange,
-  type JsonValue,
   getActiveDocumentId,
   onActiveDocumentIdChange,
   areGraphsConnected,
   onGraphsConnectionChange,
 } from "../../data/json-bus";
+import { useJsonDoc } from "../../data/useJsonDoc";
+import { getDocStats } from "../../data/json-utils/docStats";
+import { useElementSize } from "../../useElementSize";
 import {
   jsonToHierarchy,
-  countHierarchyNodes,
   type HierarchyNode,
 } from "../../data/json-utils/jsonToHierarchy";
 import "./JsonCirclesPanel.css";
@@ -30,7 +29,6 @@ export interface JsonCirclesParams {
   leafFill: string;
   panZoomMin: number;
   panZoomMax: number;
-  bypassPerf: boolean;
   nodeThreshold: number;
 }
 
@@ -45,7 +43,6 @@ export const jsonCirclesDefaults: JsonCirclesParams = {
   leafFill: "#131940",
   panZoomMin: 0.25,
   panZoomMax: 12,
-  bypassPerf: false,
   nodeThreshold: 5000,
 };
 
@@ -157,29 +154,24 @@ export default function JsonCirclesPanel(
     });
   }, [connected, params.documentId]);
 
-  const [doc, setDoc] = useState<JsonValue | undefined>(() =>
-    getJson(activeDocId),
-  );
-  useEffect(() => {
-    setDoc(getJson(activeDocId));
-    return onJsonChange(activeDocId, setDoc);
-  }, [activeDocId]);
+  // Visibility-aware: while this tab is hidden the doc updates buffer
+  // without re-rendering (see useJsonDoc).
+  const doc = useJsonDoc(props.api, activeDocId);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [size, setSize] = useState({ width: 0, height: 0 });
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const update = () =>
-      setSize({ width: el.clientWidth, height: el.clientHeight });
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+  const size = useElementSize(containerRef);
+
+  // Perf gate BEFORE the transform: the node count comes from the shared
+  // per-document stats cache (cheap read), so a blocked viewer never pays
+  // the O(N) jsonToHierarchy. `bypassPerf` is deliberately session-only
+  // state — persisting it once froze the app on every launch by baking
+  // "render 30k nodes" into the saved layout.
+  const [bypassPerf, setBypassPerf] = useState(false);
+  const nodeCount = doc === undefined ? 0 : getDocStats(doc).hierarchyNodeCount;
+  const perfBlocked = nodeCount > params.nodeThreshold && !bypassPerf;
 
   const rootData = useMemo<HierarchyNode>(() => {
-    if (doc === undefined) return EMPTY_TREE;
+    if (doc === undefined || perfBlocked) return EMPTY_TREE;
     try {
       return jsonToHierarchy(
         doc,
@@ -190,10 +182,7 @@ export default function JsonCirclesPanel(
     } catch {
       return { name: "Invalid JSON" };
     }
-  }, [doc, params.explodePrimitives, params.showArrayIndices]);
-
-  const nodeCount = useMemo(() => countHierarchyNodes(rootData), [rootData]);
-  const perfBlocked = nodeCount > params.nodeThreshold && !params.bypassPerf;
+  }, [doc, perfBlocked, params.explodePrimitives, params.showArrayIndices]);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const resetRef = useRef<() => void>(() => {});
@@ -417,7 +406,21 @@ export default function JsonCirclesPanel(
         svgRef.current = null;
       }
     };
-  }, [rootData, size, params, perfBlocked]);
+    // Destructured primitives, not the identity-unstable `params` object —
+    // with `params` here, ANY re-render rebuilt the whole scene.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    rootData,
+    size,
+    perfBlocked,
+    params.padding,
+    params.leafFontSize,
+    params.internalGradientStart,
+    params.internalGradientEnd,
+    params.leafFill,
+    params.panZoomMin,
+    params.panZoomMax,
+  ]);
 
   return (
     <>
@@ -450,7 +453,7 @@ export default function JsonCirclesPanel(
               <strong>{nodeCount.toLocaleString()}</strong> tree nodes detected
               (threshold {params.nodeThreshold.toLocaleString()}).
             </p>
-            <button onClick={() => updateParam("bypassPerf", true)}>
+            <button onClick={() => setBypassPerf(true)}>
               Render anyway
             </button>
           </div>

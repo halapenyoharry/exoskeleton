@@ -2,9 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
 import * as d3 from "d3";
 import {
-  getJson,
-  onJsonChange,
-  type JsonValue,
   getActiveDocumentId,
   onActiveDocumentIdChange,
   areGraphsConnected,
@@ -15,10 +12,12 @@ import {
   onNodeFocusBroadcast,
 } from "../../data/json-bus";
 import {
-  detectGraph,
   type DetectedGraph,
   type GraphNode,
 } from "../../data/json-utils/graphDetect";
+import { useJsonDoc } from "../../data/useJsonDoc";
+import { getDocStats, getDetectedGraph } from "../../data/json-utils/docStats";
+import { useElementSize } from "../../useElementSize";
 import {
   buildLayerVisibility,
   colorForLayer,
@@ -57,7 +56,6 @@ export interface JsonGraphParams {
   nodeLabelMaxLength: number;
   nodeLabelOffset: number;
   // Perf
-  bypassPerf: boolean;
   nodeThreshold: number;
 }
 
@@ -81,7 +79,6 @@ export const jsonGraphDefaults: JsonGraphParams = {
   zoomMax: 8,
   nodeLabelMaxLength: 20,
   nodeLabelOffset: 28,
-  bypassPerf: false,
   nodeThreshold: 500,
 };
 
@@ -118,18 +115,23 @@ export default function JsonGraphPanel(
     });
   }, [connected, params.documentId]);
 
-  const [doc, setDoc] = useState<JsonValue | undefined>(() =>
-    getJson(activeDocId),
-  );
-  useEffect(() => {
-    setDoc(getJson(activeDocId));
-    return onJsonChange(activeDocId, setDoc);
-  }, [activeDocId]);
+  // Visibility-aware doc subscription (hidden tabs buffer, not render).
+  const doc = useJsonDoc(props.api, activeDocId);
+
+  // Perf gate BEFORE the transform: counts come from the shared cached
+  // stats, so a blocked viewer never builds the graph arrays. bypassPerf
+  // is session-only — persisted, it baked huge renders into every launch.
+  const [bypassPerf, setBypassPerf] = useState(false);
+  const stats = doc === undefined ? null : getDocStats(doc);
+  const isGraph = stats?.isGraph ?? false;
+  const nodeCount = stats?.graphNodeCount ?? 0;
+  const perfBlocked = nodeCount > params.nodeThreshold && !bypassPerf;
 
   const graph = useMemo<DetectedGraph | null>(() => {
-    if (doc === undefined) return null;
-    return detectGraph(doc);
-  }, [doc]);
+    if (doc === undefined || perfBlocked) return null;
+    // Cached per document version — shared with the other graph viewers.
+    return getDetectedGraph(doc);
+  }, [doc, perfBlocked]);
 
   // Keep layerVisibility synced with detected layers.
   useEffect(() => {
@@ -141,20 +143,7 @@ export default function JsonGraphPanel(
   }, [graph]);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [size, setSize] = useState({ width: 0, height: 0 });
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const update = () =>
-      setSize({ width: el.clientWidth, height: el.clientHeight });
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  const nodeCount = graph?.nodes.length ?? 0;
-  const perfBlocked = nodeCount > params.nodeThreshold && !params.bypassPerf;
+  const size = useElementSize(containerRef);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const simulationRef = useRef<d3.Simulation<SimNode, SimLink> | null>(null);
@@ -483,25 +472,25 @@ export default function JsonGraphPanel(
         </div>
       </div>
       <div className="panel-body json-graph-body">
-        {!graph && (
+        {!isGraph && (
           <div className="json-graph-empty">
             {doc === undefined
               ? "Waiting for JSON…"
               : "No graph structure detected in this JSON."}
           </div>
         )}
-        {graph && perfBlocked && (
+        {isGraph && perfBlocked && (
           <div className="json-graph-perf-warning">
             <p>
               <strong>{nodeCount.toLocaleString()}</strong> nodes detected
               (threshold {params.nodeThreshold.toLocaleString()}).
             </p>
-            <button onClick={() => updateParam("bypassPerf", true)}>
+            <button onClick={() => setBypassPerf(true)}>
               Render anyway
             </button>
           </div>
         )}
-        {graph && !perfBlocked && (
+        {isGraph && !perfBlocked && (
           <div className="json-graph-canvas" ref={containerRef} />
         )}
       </div>

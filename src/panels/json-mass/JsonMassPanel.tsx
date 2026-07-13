@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
 import * as d3 from "d3";
-import { getJson, onJsonChange, type JsonValue } from "../../data/json-bus";
+import { useJsonDoc } from "../../data/useJsonDoc";
+import { getDocStats } from "../../data/json-utils/docStats";
+import { useElementSize } from "../../useElementSize";
 import { jsonToHierarchy } from "../../data/json-utils/jsonToHierarchy";
 import "./JsonMassPanel.css";
 
@@ -31,7 +33,6 @@ export interface JsonMassParams {
   defaultLeafMass: number;
   panZoomMin: number;
   panZoomMax: number;
-  bypassPerf: boolean;
   nodeThreshold: number;
 }
 
@@ -46,7 +47,6 @@ export const jsonMassDefaults: JsonMassParams = {
   defaultLeafMass: 1,
   panZoomMin: 0.25,
   panZoomMax: 12,
-  bypassPerf: false,
   nodeThreshold: 5000,
 };
 
@@ -71,12 +71,6 @@ function extractTree(parsed: unknown): MassNode {
   return jsonToHierarchy(parsed, false, "root", true) as MassNode;
 }
 
-function countMassNodes(node: MassNode): number {
-  if (!node.children || node.children.length === 0) return 1;
-  let n = 1;
-  for (const c of node.children) n += countMassNodes(c);
-  return n;
-}
 
 function splitIntoLines(words: string[], n: number): string[] {
   if (n <= 1) return [words.join(" ")];
@@ -159,45 +153,27 @@ export default function JsonMassPanel(
     ...(props.params ?? {}),
   };
 
-  const updateParam = <K extends keyof JsonMassParams>(
-    key: K,
-    value: JsonMassParams[K],
-  ) => {
-    props.api.updateParameters({ ...params, [key]: value });
-  };
 
-  const [doc, setDoc] = useState<JsonValue | undefined>(() =>
-    getJson(params.documentId),
-  );
-  useEffect(
-    () => onJsonChange(params.documentId, setDoc),
-    [params.documentId],
-  );
+  // Visibility-aware doc subscription; debounced resize (see the hooks).
+  const doc = useJsonDoc(props.api, params.documentId);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [size, setSize] = useState({ width: 0, height: 0 });
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const update = () =>
-      setSize({ width: el.clientWidth, height: el.clientHeight });
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+  const size = useElementSize(containerRef);
+
+  // Perf gate BEFORE the transform (cached stats read); bypass is
+  // session-only so it never persists into the saved layout.
+  const [bypassPerf, setBypassPerf] = useState(false);
+  const nodeCount = doc === undefined ? 0 : getDocStats(doc).hierarchyNodeCount;
+  const perfBlocked = nodeCount > params.nodeThreshold && !bypassPerf;
 
   const rootData = useMemo<MassNode>(() => {
-    if (doc === undefined) return EMPTY;
+    if (doc === undefined || perfBlocked) return EMPTY;
     try {
       return extractTree(doc);
     } catch {
       return { name: "Invalid JSON", children: [] };
     }
-  }, [doc]);
-
-  const nodeCount = useMemo(() => countMassNodes(rootData), [rootData]);
-  const perfBlocked = nodeCount > params.nodeThreshold && !params.bypassPerf;
+  }, [doc, perfBlocked]);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const resetRef = useRef<() => void>(() => {});
@@ -429,7 +405,22 @@ export default function JsonMassPanel(
         svgRef.current = null;
       }
     };
-  }, [rootData, size, params, perfBlocked]);
+    // Destructured primitives, not the identity-unstable `params` object.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    rootData,
+    size,
+    perfBlocked,
+    params.padding,
+    params.leafFontSize,
+    params.textSubstrateColor,
+    params.imageSubstrateColor,
+    params.internalGradientStart,
+    params.internalGradientEnd,
+    params.defaultLeafMass,
+    params.panZoomMin,
+    params.panZoomMax,
+  ]);
 
   return (
     <>
@@ -450,7 +441,7 @@ export default function JsonMassPanel(
               <strong>{nodeCount.toLocaleString()}</strong> tree nodes detected
               (threshold {params.nodeThreshold.toLocaleString()}).
             </p>
-            <button onClick={() => updateParam("bypassPerf", true)}>
+            <button onClick={() => setBypassPerf(true)}>
               Render anyway
             </button>
           </div>

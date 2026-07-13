@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
 import * as d3 from "d3";
-import { getJson, onJsonChange, type JsonValue } from "../../data/json-bus";
+import { useJsonDoc } from "../../data/useJsonDoc";
+import { getDocStats } from "../../data/json-utils/docStats";
+import { useElementSize } from "../../useElementSize";
 import {
   jsonToHierarchy,
-  countHierarchyNodes,
   type HierarchyNode,
 } from "../../data/json-utils/jsonToHierarchy";
 import "./JsonTreePanel.css";
@@ -33,8 +34,6 @@ export interface JsonTreeParams {
   showArrayIndices: boolean;
   /** Separate primitive values from their keys into child nodes. */
   explodePrimitives: boolean;
-  /** Bypass the perf-warning gate. */
-  bypassPerf: boolean;
   /** Node-count above which the perf warning fires. */
   nodeThreshold: number;
 }
@@ -50,7 +49,6 @@ export const jsonTreeDefaults: JsonTreeParams = {
   linkColor: "#555555",
   showArrayIndices: true,
   explodePrimitives: false,
-  bypassPerf: false,
   nodeThreshold: 10000,
 };
 
@@ -71,32 +69,23 @@ export default function JsonTreePanel(
     props.api.updateParameters({ ...params, [key]: value });
   };
 
-  // Subscribe to json-bus.
-  const [doc, setDoc] = useState<JsonValue | undefined>(() =>
-    getJson(params.documentId),
-  );
-  useEffect(
-    () => onJsonChange(params.documentId, setDoc),
-    [params.documentId],
-  );
+  // Subscribe to json-bus (visibility-aware: hidden tabs buffer, not render).
+  const doc = useJsonDoc(props.api, params.documentId);
 
-  // Container + resize observer.
+  // Container + debounced resize observer.
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [size, setSize] = useState({ width: 0, height: 0 });
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const update = () =>
-      setSize({ width: el.clientWidth, height: el.clientHeight });
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+  const size = useElementSize(containerRef);
 
-  // Hierarchy derivation (cheap; recompute on every change).
+  // Perf gate BEFORE the transform — the count is a cached stats read, so
+  // a blocked tree never pays jsonToHierarchy. bypassPerf is session-only
+  // on purpose: as a persisted param, one "Render anyway" click baked a
+  // ~150k-element SVG build into every subsequent launch.
+  const [bypassPerf, setBypassPerf] = useState(false);
+  const nodeCount = doc === undefined ? 0 : getDocStats(doc).hierarchyNodeCount;
+  const perfBlocked = nodeCount > params.nodeThreshold && !bypassPerf;
+
   const rootData = useMemo<HierarchyNode>(() => {
-    if (doc === undefined) return EMPTY_TREE;
+    if (doc === undefined || perfBlocked) return EMPTY_TREE;
     try {
       return jsonToHierarchy(
         doc,
@@ -107,11 +96,7 @@ export default function JsonTreePanel(
     } catch {
       return { name: "Invalid JSON" };
     }
-  }, [doc, params.explodePrimitives, params.showArrayIndices]);
-
-  const nodeCount = useMemo(() => countHierarchyNodes(rootData), [rootData]);
-  const perfBlocked =
-    nodeCount > params.nodeThreshold && !params.bypassPerf;
+  }, [doc, perfBlocked, params.explodePrimitives, params.showArrayIndices]);
 
   // D3 rendering.
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -302,7 +287,21 @@ export default function JsonTreePanel(
         svgRef.current = null;
       }
     };
-  }, [rootData, params, size, perfBlocked]);
+    // Destructured primitives, not the identity-unstable `params` object —
+    // with `params` here, ANY re-render rebuilt the whole scene.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    rootData,
+    size,
+    perfBlocked,
+    params.layout,
+    params.direction,
+    params.spacingX,
+    params.spacingY,
+    params.fontSize,
+    params.nodeColor,
+    params.linkColor,
+  ]);
 
   return (
     <>
@@ -371,7 +370,7 @@ export default function JsonTreePanel(
               Rendering may be slow. Click to proceed anyway, or reduce the JSON
               size.
             </p>
-            <button onClick={() => updateParam("bypassPerf", true)}>
+            <button onClick={() => setBypassPerf(true)}>
               Render anyway
             </button>
           </div>

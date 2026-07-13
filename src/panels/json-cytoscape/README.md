@@ -42,7 +42,6 @@ Edges in the source JSON can carry a `layer` field (or `attrs.layer`). The panel
 | `fitPadding` | `40` | Pixel padding when calling reset / fit. |
 | `tooltipMaxAttrs` | `12` | Cap on `attrs` rows shown in the hover tooltip. |
 | `tooltipValueMaxLen` | `80` | Truncate tooltip values longer than this. |
-| `bypassPerf` | `false` | Skip the perf gate. |
 | `nodeThreshold` | `1500` | Show perf warning above this many nodes. |
 
 ## Dependencies

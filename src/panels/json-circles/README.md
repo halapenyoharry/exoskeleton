@@ -20,7 +20,6 @@ Bostock's classic circle-packing visualization (D3 `pack` layout), reading from 
 | `leafFill` | `#131940` | Leaf-node fill. |
 | `panZoomMin` | `0.25` | Minimum scroll-zoom scale. |
 | `panZoomMax` | `12` | Maximum scroll-zoom scale. |
-| `bypassPerf` | `false` | Skip the perf gate. |
 | `nodeThreshold` | `5000` | Show perf warning above this many nodes. |
 
 All params persist via `props.api.updateParameters`.

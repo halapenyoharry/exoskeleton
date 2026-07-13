@@ -11,7 +11,7 @@ import {
   getSelectedNode,
   onNodeSelectionBroadcast,
 } from "../data/json-bus";
-import { detectGraph } from "../data/json-utils/graphDetect";
+import { getDocStats } from "../data/json-utils/docStats";
 import "./StatusBarPanel.css";
 
 export default function StatusBarPanel(props: IDockviewPanelProps) {
@@ -37,17 +37,13 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
     const updateStats = (id: string) => {
       const doc = getJson(id);
       if (doc) {
-        try {
-          const graph = detectGraph(doc);
-          if (graph) {
-            setStats({
-              nodes: graph.nodes.length,
-              edges: graph.links.length,
-            });
-            return;
-          }
-        } catch (e) {
-          // JSON might not be parsed yet or invalid
+        // Cached per document version (docStats WeakMap) — a cache read
+        // on every call after the first, instead of the full detectGraph
+        // array build this used to run per debounced keystroke.
+        const s = getDocStats(doc);
+        if (s.isGraph) {
+          setStats({ nodes: s.graphNodeCount, edges: s.graphLinkCount });
+          return;
         }
       }
       setStats({ nodes: 0, edges: 0 });

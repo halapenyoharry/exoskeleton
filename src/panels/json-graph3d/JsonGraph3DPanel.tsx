@@ -5,9 +5,6 @@ import type { ForceGraphMethods } from "react-force-graph-3d";
 import SpriteText from "three-spritetext";
 import type { Object3D } from "three";
 import {
-  getJson,
-  onJsonChange,
-  type JsonValue,
   getActiveDocumentId,
   onActiveDocumentIdChange,
   areGraphsConnected,
@@ -17,10 +14,10 @@ import {
   broadcastNodeFocus,
   onNodeFocusBroadcast,
 } from "../../data/json-bus";
-import {
-  detectGraph,
-  type DetectedGraph,
-} from "../../data/json-utils/graphDetect";
+import { type DetectedGraph } from "../../data/json-utils/graphDetect";
+import { useJsonDoc } from "../../data/useJsonDoc";
+import { getDocStats, getDetectedGraph } from "../../data/json-utils/docStats";
+import { useElementSize } from "../../useElementSize";
 import {
   buildLayerVisibility,
   colorForLayer,
@@ -58,7 +55,6 @@ export interface JsonGraph3DParams {
   fitDelayMs: number;
   cooldownTicks: number;
   showNavInfo: boolean;
-  bypassPerf: boolean;
   nodeThreshold: number;
 }
 
@@ -95,9 +91,16 @@ export const jsonGraph3DDefaults: JsonGraph3DParams = {
   fitDelayMs: 800,
   cooldownTicks: 150,
   showNavInfo: false,
-  bypassPerf: false,
-  nodeThreshold: 5000,
+  // WebGL is the one renderer here built for big graphs; the gate is the
+  // fallback (malformed/absurd inputs), not the norm. Above BIG_GRAPH
+  // nodes the panel auto-degrades detail instead of blocking.
+  nodeThreshold: 50000,
 };
+
+/** Node count above which scale-aware settings kick in: shorter cooldown,
+ *  1px GL lines instead of cylinder links, no curvature/arrows/particles,
+ *  lower sphere resolution. Cosmetic detail traded for interactivity. */
+const BIG_GRAPH = 5000;
 
 interface FGLink {
   source: string;
@@ -223,18 +226,43 @@ export default function JsonGraph3DPanel(
     });
   }, [connected, params.documentId]);
 
-  const [doc, setDoc] = useState<JsonValue | undefined>(() =>
-    getJson(activeDocId),
-  );
-  useEffect(() => {
-    setDoc(getJson(activeDocId));
-    return onJsonChange(activeDocId, setDoc);
-  }, [activeDocId]);
+  // Visibility-aware doc subscription (hidden tabs buffer, not render).
+  const doc = useJsonDoc(props.api, activeDocId);
+
+  // Perf gate BEFORE the transform (cached stats read); bypass is
+  // session-only so it never persists into the saved layout.
+  const [bypassPerf, setBypassPerf] = useState(false);
+  const stats = doc === undefined ? null : getDocStats(doc);
+  const isGraph = stats?.isGraph ?? false;
+  const nodeCount = stats?.graphNodeCount ?? 0;
+  const perfBlocked = nodeCount > params.nodeThreshold && !bypassPerf;
+  const bigGraph = nodeCount > BIG_GRAPH;
+
+  // Scale-aware effective settings. User params win below BIG_GRAPH;
+  // above it, the expensive cosmetics are clamped: linkWidth 0 renders
+  // 1px GL lines instead of per-link cylinder geometry, curvature 0
+  // avoids segmented curves, arrows/particles are per-link Objects that
+  // don't survive 30k links, and a shorter cooldown stops the force sim
+  // burning frames long after the shape has emerged.
+  const fx = {
+    cooldownTicks: bigGraph
+      ? Math.min(params.cooldownTicks, 60)
+      : params.cooldownTicks,
+    curvature: bigGraph ? 0 : params.curvature,
+    linkWidth: bigGraph ? 0 : params.linkWidth,
+    linkOpacity: bigGraph
+      ? Math.min(params.linkOpacity, 0.3)
+      : params.linkOpacity,
+    particles: bigGraph ? false : params.particles,
+    arrowLength: bigGraph ? 0 : params.arrowLength,
+    nodeResolution: bigGraph ? 4 : 8,
+  };
 
   const graph = useMemo<DetectedGraph | null>(() => {
-    if (doc === undefined) return null;
-    return detectGraph(doc);
-  }, [doc]);
+    if (doc === undefined || perfBlocked) return null;
+    // Cached per document version — shared with the other graph viewers.
+    return getDetectedGraph(doc);
+  }, [doc, perfBlocked]);
 
   useEffect(() => {
     const next = buildLayerVisibility(graph, params.layerVisibility);
@@ -245,20 +273,7 @@ export default function JsonGraph3DPanel(
   }, [graph]);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [size, setSize] = useState({ width: 0, height: 0 });
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const update = () =>
-      setSize({ width: el.clientWidth, height: el.clientHeight });
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  const nodeCount = graph?.nodes.length ?? 0;
-  const perfBlocked = nodeCount > params.nodeThreshold && !params.bypassPerf;
+  const size = useElementSize(containerRef);
 
   const fgRef = useRef<ForceGraphMethods<FGNode, FGLink> | undefined>(
     undefined,
@@ -272,9 +287,10 @@ export default function JsonGraph3DPanel(
       kind: n.kind,
       attrs: n.attrs,
     }));
-    const links = annotateLinks(graph.links, params.curvature);
+    const links = annotateLinks(graph.links, fx.curvature);
     return { nodes, links };
-  }, [graph, params.curvature]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [graph, fx.curvature]);
 
   useEffect(() => {
     if (!fgRef.current || perfBlocked) return;
@@ -410,25 +426,25 @@ export default function JsonGraph3DPanel(
         </div>
       </div>
       <div className="panel-body json-graph3d-body" ref={containerRef}>
-        {!graph && (
+        {!isGraph && (
           <div className="json-graph3d-empty">
             {doc === undefined
               ? "Waiting for JSON…"
               : "No graph structure detected in this JSON."}
           </div>
         )}
-        {graph && perfBlocked && (
+        {isGraph && perfBlocked && (
           <div className="json-graph3d-perf-warning">
             <p>
               <strong>{nodeCount.toLocaleString()}</strong> nodes detected
               (threshold {params.nodeThreshold.toLocaleString()}).
             </p>
-            <button onClick={() => updateParam("bypassPerf", true)}>
+            <button onClick={() => setBypassPerf(true)}>
               Render anyway
             </button>
           </div>
         )}
-        {graph && !perfBlocked && size.width > 0 && size.height > 0 && (
+        {isGraph && !perfBlocked && size.width > 0 && size.height > 0 && (
           <ForceGraph3D<FGNode, FGLink>
             ref={fgRef}
             graphData={data}
@@ -470,22 +486,22 @@ export default function JsonGraph3DPanel(
             linkColor={(l) =>
               l.layer ? colorForLayer(l.layer) : "rgba(0, 229, 255, 0.45)"
             }
-            linkOpacity={params.linkOpacity}
-            linkWidth={params.linkWidth}
+            linkOpacity={fx.linkOpacity}
+            linkWidth={fx.linkWidth}
             linkVisibility={(l) =>
               !l.layer || params.layerVisibility[l.layer] !== false
             }
             linkCurvature={(l) => l.curvature}
             linkCurveRotation={(l) => l.rotation}
             linkDirectionalArrowLength={(l) =>
-              l.directed ? params.arrowLength : 0
+              l.directed ? fx.arrowLength : 0
             }
             linkDirectionalArrowRelPos={params.arrowRelPos}
             linkDirectionalArrowColor={(l) =>
               l.layer ? colorForLayer(l.layer) : "rgba(0, 229, 255, 0.8)"
             }
             linkDirectionalParticles={(l) =>
-              params.particles &&
+              fx.particles &&
               !params.freezeLayout &&
               (!l.layer || params.layerVisibility[l.layer] !== false)
                 ? params.particleCount
@@ -536,7 +552,9 @@ export default function JsonGraph3DPanel(
                   }
                 : undefined
             }
-            cooldownTicks={params.cooldownTicks}
+            cooldownTicks={fx.cooldownTicks}
+            warmupTicks={0}
+            nodeResolution={fx.nodeResolution}
           />
         )}
       </div>

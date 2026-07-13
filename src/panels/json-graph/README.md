@@ -32,8 +32,7 @@ Liberal exposure — every force tunable, sizing constant, and camera parameter 
 | Camera | `zoomMin` / `zoomMax` | `0.1` / `8` | Scroll zoom range. |
 | Labels | `nodeLabelMaxLength` | `20` | Truncate long labels with `...`. |
 | Labels | `nodeLabelOffset` | `28` | Y offset of node labels below the circle. |
-| Perf | `bypassPerf` | `false` | Skip the perf gate. |
-| Perf | `nodeThreshold` | `500` | Show perf warning above this. |
+| Perf | Perf | `nodeThreshold` | `500` | Show perf warning above this. |
 
 ## Dependencies
 

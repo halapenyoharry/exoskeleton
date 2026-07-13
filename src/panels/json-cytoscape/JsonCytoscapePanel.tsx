@@ -4,9 +4,6 @@ import cytoscape from "cytoscape";
 import type { Core, ElementDefinition, LayoutOptions } from "cytoscape";
 import fcose from "cytoscape-fcose";
 import {
-  getJson,
-  onJsonChange,
-  type JsonValue,
   getActiveDocumentId,
   onActiveDocumentIdChange,
   areGraphsConnected,
@@ -16,10 +13,10 @@ import {
   broadcastNodeFocus,
   onNodeFocusBroadcast,
 } from "../../data/json-bus";
-import {
-  detectGraph,
-  type DetectedGraph,
-} from "../../data/json-utils/graphDetect";
+import { type DetectedGraph } from "../../data/json-utils/graphDetect";
+import { useJsonDoc } from "../../data/useJsonDoc";
+import { getDocStats, getDetectedGraph } from "../../data/json-utils/docStats";
+import { useElementSize } from "../../useElementSize";
 import {
   buildLayerVisibility,
   colorForLayer,
@@ -55,7 +52,6 @@ export interface JsonCytoscapeParams {
   fitPadding: number;
   tooltipMaxAttrs: number;
   tooltipValueMaxLen: number;
-  bypassPerf: boolean;
   nodeThreshold: number;
 }
 
@@ -75,7 +71,6 @@ export const jsonCytoscapeDefaults: JsonCytoscapeParams = {
   fitPadding: 40,
   tooltipMaxAttrs: 12,
   tooltipValueMaxLen: 80,
-  bypassPerf: false,
   nodeThreshold: 1500,
 };
 
@@ -176,18 +171,22 @@ export default function JsonCytoscapePanel(
     });
   }, [connected, params.documentId]);
 
-  const [doc, setDoc] = useState<JsonValue | undefined>(() =>
-    getJson(activeDocId),
-  );
-  useEffect(() => {
-    setDoc(getJson(activeDocId));
-    return onJsonChange(activeDocId, setDoc);
-  }, [activeDocId]);
+  // Visibility-aware doc subscription (hidden tabs buffer, not render).
+  const doc = useJsonDoc(props.api, activeDocId);
+
+  // Perf gate BEFORE the transform (cached stats read); bypass is
+  // session-only so it never persists into the saved layout.
+  const [bypassPerf, setBypassPerf] = useState(false);
+  const stats = doc === undefined ? null : getDocStats(doc);
+  const isGraph = stats?.isGraph ?? false;
+  const nodeCount = stats?.graphNodeCount ?? 0;
+  const perfBlocked = nodeCount > params.nodeThreshold && !bypassPerf;
 
   const graph = useMemo<DetectedGraph | null>(() => {
-    if (doc === undefined) return null;
-    return detectGraph(doc);
-  }, [doc]);
+    if (doc === undefined || perfBlocked) return null;
+    // Cached per document version — shared with the other graph viewers.
+    return getDetectedGraph(doc);
+  }, [doc, perfBlocked]);
 
   // Keep params.layerVisibility in sync with the detected graph's layers.
   useEffect(() => {
@@ -199,20 +198,7 @@ export default function JsonCytoscapePanel(
   }, [graph]);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [size, setSize] = useState({ width: 0, height: 0 });
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const update = () =>
-      setSize({ width: el.clientWidth, height: el.clientHeight });
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  const nodeCount = graph?.nodes.length ?? 0;
-  const perfBlocked = nodeCount > params.nodeThreshold && !params.bypassPerf;
+  const size = useElementSize(containerRef);
 
   const cyRef = useRef<Core | null>(null);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
@@ -547,25 +533,25 @@ export default function JsonCytoscapePanel(
         </div>
       </div>
       <div className="panel-body json-cytoscape-body">
-        {!graph && (
+        {!isGraph && (
           <div className="json-cytoscape-empty">
             {doc === undefined
               ? "Waiting for JSON…"
               : "No graph structure detected in this JSON."}
           </div>
         )}
-        {graph && perfBlocked && (
+        {isGraph && perfBlocked && (
           <div className="json-cytoscape-perf-warning">
             <p>
               <strong>{nodeCount.toLocaleString()}</strong> nodes detected
               (threshold {params.nodeThreshold.toLocaleString()}).
             </p>
-            <button onClick={() => updateParam("bypassPerf", true)}>
+            <button onClick={() => setBypassPerf(true)}>
               Render anyway
             </button>
           </div>
         )}
-        {graph && !perfBlocked && (
+        {isGraph && !perfBlocked && (
           <div
             className="json-cytoscape-canvas"
             ref={containerRef}

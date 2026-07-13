@@ -22,7 +22,6 @@ Hierarchical D3 tree of the JSON document published on the `json-bus`. Pairs wit
 | `linkColor` | `#555555` | Link stroke + internal node fill. |
 | `showArrayIndices` | `true` | Show `[N]` prefix on array items. |
 | `explodePrimitives` | `false` | Separate `key: value` into `key` → `value` child node. |
-| `bypassPerf` | `false` | Skip the perf-warning gate. |
 | `nodeThreshold` | `10000` | Show warning above this many nodes. |
 
 All params persist via `props.api.updateParameters`.

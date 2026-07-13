@@ -55,8 +55,7 @@ Pin every node to its current position; orbit controls keep working, simulation 
 | Camera | `fitDelayMs` | `800` | Delay before initial fit. |
 | Camera | `cooldownTicks` | `150` | Simulation cooldown ticks. |
 | Camera | `showNavInfo` | `false` | Show navigation hint overlay. |
-| Perf | `bypassPerf` | `false` | |
-| Perf | `nodeThreshold` | `5000` | |
+| Perf | Perf | `nodeThreshold` | `50000` | Above 5,000 nodes the panel auto-degrades detail (1px links, no curvature/arrows/particles, shorter cooldown) instead of blocking. |
 
 ## Dependencies
 

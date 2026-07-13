@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
 import {
-  getJson,
-  onJsonChange,
-  type JsonValue,
   getActiveDocumentId,
   onActiveDocumentIdChange,
   areGraphsConnected,
   onGraphsConnectionChange,
 } from "../../data/json-bus";
+import { useJsonDoc } from "../../data/useJsonDoc";
+import { getDocStats } from "../../data/json-utils/docStats";
 import {
   parseTopology,
   emptyTopology,
@@ -35,6 +34,11 @@ export interface JsonDyadicParams {
   showMetadata: boolean;
   showCategoryLegend: boolean;
 }
+
+/** Doc-size (JSON node count) above which parseTopology is gated behind a
+ *  "Parse anyway" click. Generous: the parse is a single O(N) pass and the
+ *  render is layer-scoped, so this only guards truly enormous documents. */
+const PARSE_THRESHOLD = 100000;
 
 export const jsonDyadicDefaults: JsonDyadicParams = {
   documentId: "default",
@@ -455,18 +459,21 @@ export default function JsonDyadicPanel(
     return onActiveDocumentIdChange(setActiveDocId);
   }, [connected, params.documentId]);
 
-  const [doc, setDoc] = useState<JsonValue | undefined>(() =>
-    getJson(activeDocId),
-  );
-  useEffect(() => {
-    setDoc(getJson(activeDocId));
-    return onJsonChange(activeDocId, setDoc);
-  }, [activeDocId]);
+  // Visibility-aware doc subscription (hidden tabs buffer, not render).
+  const doc = useJsonDoc(props.api, activeDocId);
+
+  // Generous parse gate: the render is already layer-scoped (only the
+  // selected layer's tiles hit the DOM), so only the O(N) parse needs
+  // guarding against truly enormous documents. Session-only bypass.
+  const [bypassPerf, setBypassPerf] = useState(false);
+  const docNodeCount =
+    doc === undefined ? 0 : getDocStats(doc).hierarchyNodeCount;
+  const perfBlocked = docNodeCount > PARSE_THRESHOLD && !bypassPerf;
 
   const topology = useMemo<ParsedTopology>(() => {
-    if (doc === undefined) return emptyTopology();
+    if (doc === undefined || perfBlocked) return emptyTopology();
     return parseTopology(doc);
-  }, [doc]);
+  }, [doc, perfBlocked]);
 
   // surface warnings once per parse (dev console only)
   useEffect(() => {
@@ -554,6 +561,16 @@ export default function JsonDyadicPanel(
                 <li key={i}>{w}</li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {perfBlocked && (
+          <div className="dp-empty">
+            <p>
+              <strong>{docNodeCount.toLocaleString()}</strong> JSON nodes
+              (threshold {PARSE_THRESHOLD.toLocaleString()}).
+            </p>
+            <button onClick={() => setBypassPerf(true)}>Parse anyway</button>
           </div>
         )}
 

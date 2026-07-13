@@ -30,7 +30,6 @@ This panel expects one of three JSON shapes, in order of preference:
 | `defaultLeafMass` | `1` | Weight assigned to leaves without a `mass` field. |
 | `panZoomMin` | `0.25` | Minimum scroll-zoom scale. |
 | `panZoomMax` | `12` | Maximum scroll-zoom scale. |
-| `bypassPerf` | `false` | Skip the perf gate. |
 | `nodeThreshold` | `5000` | Show perf warning above this many nodes. |
 
 ## Native SVG tooltip
