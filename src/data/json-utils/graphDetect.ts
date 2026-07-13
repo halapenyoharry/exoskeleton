@@ -47,6 +47,7 @@ const NODE_KEYS = ["nodes", "vertices", "elements", "items"];
 const EDGE_KEYS = ["edges", "links", "connections", "relationships", "arcs"];
 const SOURCE_KEYS = ["source", "from", "src", "start", "origin"];
 const TARGET_KEYS = ["target", "to", "dst", "dest", "end", "destination"];
+const INCIDENCE_KEYS = ["incidences", "incidence", "memberships"];
 
 function findKey(
   obj: Record<string, unknown>,
@@ -206,6 +207,85 @@ export function detectGraph(json: unknown): DetectedGraph | null {
           });
           return acc;
         }, []);
+
+      // Pattern 1b: incidence-structured hypergraph (TopoThink/HIF style)
+      // — { nodes, edges, incidences: [{ edge, node, role }] }. The edges
+      // carry no source/target; connectivity lives in the incidence list.
+      // A dyadic edge (exactly two incidences) becomes a direct link;
+      // a hyperedge (3+) becomes a "hyperedge" node with one spoke link
+      // per incidence, using the incidence's role.
+      if (links.length === 0) {
+        const incKey = findKey(obj, INCIDENCE_KEYS);
+        const rawInc =
+          incKey && Array.isArray(obj[incKey])
+            ? (obj[incKey] as unknown[])
+            : null;
+        if (rawInc && rawInc.length > 0) {
+          const edgeById = new Map<string, Record<string, unknown>>();
+          rawEdges.forEach((e, i) => {
+            if (typeof e === "object" && e !== null) {
+              edgeById.set(extractId(e, i), e as Record<string, unknown>);
+            }
+          });
+
+          const byEdge = new Map<string, { node: string; role?: string }[]>();
+          for (const it of rawInc) {
+            if (typeof it !== "object" || it === null) continue;
+            const inc = it as Record<string, unknown>;
+            if (inc.edge === undefined || inc.node === undefined) continue;
+            const eid = String(inc.edge);
+            const arr = byEdge.get(eid) ?? [];
+            arr.push({
+              node: String(inc.node),
+              role: typeof inc.role === "string" ? inc.role : undefined,
+            });
+            byEdge.set(eid, arr);
+          }
+
+          for (const [eid, members] of byEdge) {
+            const edge = edgeById.get(eid);
+            const label = edge ? extractEdgeLabel(edge) : undefined;
+            const directed = edge ? extractDirected(edge) : undefined;
+            const layer = edge ? extractLayer(edge) : undefined;
+            const attrs = edge ? extractAttrs(edge) : undefined;
+
+            if (members.length === 2) {
+              const srcIdx = members.findIndex((m) => m.role === "source");
+              const src = members[srcIdx >= 0 ? srcIdx : 0];
+              const tgt = members[srcIdx === 1 ? 0 : 1];
+              links.push({
+                source: src.node,
+                target: tgt.node,
+                label,
+                directed,
+                layer,
+                attrs,
+              });
+            } else if (members.length > 2) {
+              if (!nodeIds.has(eid)) {
+                nodes.push({
+                  id: eid,
+                  label: label ?? eid,
+                  kind: "hyperedge",
+                  attrs,
+                });
+                nodeIds.add(eid);
+              }
+              for (const m of members) {
+                links.push({
+                  source: m.node,
+                  target: eid,
+                  label,
+                  directed,
+                  role: m.role,
+                  layer,
+                  attrs,
+                });
+              }
+            }
+          }
+        }
+      }
 
       for (const link of links) {
         if (!nodeIds.has(link.source)) {
