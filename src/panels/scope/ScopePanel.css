@@ -37,6 +37,21 @@
   color: #4a6a78;
   font-size: 10px;
   letter-spacing: 0.04em;
+  flex: 1;
+}
+
+/* tempo-clock beat counter. Pulses on each /exoskeleton/clock/beat. */
+.scope-toolbar__clock {
+  color: #4a6a78;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  transition: color 0.25s, text-shadow 0.25s;
+}
+
+.scope-toolbar__clock--pulse {
+  color: var(--panel-accent, #00ff7f);
+  text-shadow: 0 0 6px var(--panel-accent, #00ff7f);
+  transition: none;
 }
 
 /* note log — flex-shrink:0 so it keeps its size; canvas takes remaining */

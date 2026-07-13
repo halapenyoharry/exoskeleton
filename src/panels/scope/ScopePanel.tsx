@@ -41,6 +41,11 @@ export default function ScopePanel(props: IDockviewPanelProps<ScopeParams>) {
   const [logVisible, setLogVisible] = useState<boolean>(
     props.params?.logVisible ?? true,
   );
+  // tempo-clock's beat counter (null until the first beat arrives).
+  // Scope is the in-app consumer of the clock — before this, the clock's
+  // OSC only mattered over the UDP bridge (hypergraph observation #5).
+  const [clockBeat, setClockBeat] = useState<number | null>(null);
+  const [clockPulse, setClockPulse] = useState(false);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -197,6 +202,25 @@ export default function ScopePanel(props: IDockviewPanelProps<ScopeParams>) {
     };
   }, []);
 
+  // Subscribe to tempo-clock beats. Quarter notes only — the PPQ-rate
+  // /clock/tick stream is deliberately ignored here (24/quarter would
+  // just churn React state without adding visible information).
+  useEffect(() => {
+    let pulseTimer: number | undefined;
+    const unsubBeat = onOsc("/exoskeleton/clock/beat", (_addr, args) => {
+      const beat = args[0]?.value as number;
+      if (typeof beat !== "number") return;
+      setClockBeat(beat);
+      setClockPulse(true);
+      if (pulseTimer) window.clearTimeout(pulseTimer);
+      pulseTimer = window.setTimeout(() => setClockPulse(false), 120);
+    });
+    return () => {
+      if (pulseTimer) window.clearTimeout(pulseTimer);
+      void unsubBeat.then((fn) => fn());
+    };
+  }, []);
+
   // Oscilloscope draw loop. Single time-domain trace, refreshed every frame.
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -273,6 +297,14 @@ export default function ScopePanel(props: IDockviewPanelProps<ScopeParams>) {
             {logVisible
               ? "last 24 notes — name, midi #, velocity bar"
               : "log hidden — click ▸ to show"}
+          </span>
+          <span
+            className={`scope-toolbar__clock${
+              clockPulse ? " scope-toolbar__clock--pulse" : ""
+            }`}
+            title="tempo-clock beats (/exoskeleton/clock/beat)"
+          >
+            ♩ {clockBeat ?? "–"}
           </span>
         </div>
         {logVisible && (

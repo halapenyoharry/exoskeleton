@@ -38,6 +38,12 @@ const manifest: PanelManifest<ScopeParams> = {
         description:
           "MIDI note. Scope ramps the voice's gain to zero over ~150ms and stops the oscillator.",
       },
+      {
+        address: "/exoskeleton/clock/beat",
+        args: ["int"],
+        description:
+          "tempo-clock quarter-note beat index. Shown as the pulsing ♩ counter in the toolbar — scope is the clock's in-app listener.",
+      },
     ],
   },
 };
