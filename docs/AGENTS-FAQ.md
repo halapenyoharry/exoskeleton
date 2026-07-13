@@ -74,3 +74,21 @@ useEffect(() => onJsonChange("default", setDoc), []);
 **Open hazard:** Layer 2 is the least developed. The `Preferences` interface is empty; the SettingsPanel is raw JSON. Built-on-top apps that need user preferences today have nowhere structured to put them. A single-file-on-disk pattern dedicated to layer-2 preferences (separate from the workspace state file) is a candidate to resolve this — open for discussion.
 
 **See also:** [README.md](../README.md) (the schema/state split, currently covers layer 1 only), [src/persistence/storage.ts](../src/persistence/storage.ts) (the `AppState` shape), [src/osc/index.ts](../src/osc/index.ts), [src/data/json-bus.ts](../src/data/json-bus.ts).
+
+## Q: My panel consumes json-bus documents. What must it do to stay usable on large documents?
+
+*(Added 2026-07-13 after the 30k-JSON-node freeze: seven viewers + the status bar each re-walked the document synchronously on every debounced keystroke, gates only stopped the final draw, and a persisted "Render anyway" baked a 150k-element SVG build into every launch.)*
+
+Four conventions, all with existing implementations to reuse:
+
+1. **Never count or transform the document yourself — read the shared cache.** [src/data/json-utils/docStats.ts](../src/data/json-utils/docStats.ts) exposes `getDocStats(doc)` (hierarchy node count, graph node/link counts) and `getDetectedGraph(doc)` (the full `DetectedGraph`). Both are WeakMap-cached per document *value*, so the O(N) pass happens once per edit across the whole app and self-invalidates when json-edit publishes a new parse. The status bar and all seven viewers already work this way.
+
+2. **Gate the transform, not just the render.** Compute `perfBlocked` from `getDocStats` *before* your `useMemo` transform, and return your empty model when blocked. A gate that only skips the draw still pays the full O(N) transform + allocation on every change. Template: any viewer, e.g. [JsonCirclesPanel.tsx](../src/panels/json-circles/JsonCirclesPanel.tsx).
+
+3. **"Render anyway" (`bypassPerf`) is session-only `useState`, never a persisted param.** Persisted, one click bakes the huge render into the saved layout and the gate never protects again (this is what froze json-tree on every launch). `nodeThreshold` stays a persisted param; the bypass does not.
+
+4. **Subscribe via `useJsonDoc(props.api, documentId)`** ([src/data/useJsonDoc.ts](../src/data/useJsonDoc.ts)), not raw `getJson`/`onJsonChange`. Dockview keeps inactive tab panels mounted, and the bus fan-out is synchronous — raw subscriptions mean every hidden viewer re-renders (and re-transforms) on every edit. The hook buffers while `api.isVisible` is false and flushes on `onDidVisibilityChange`.
+
+Corollary for anything that rebuilds a scene from a measured size: use [src/useElementSize.ts](../src/useElementSize.ts) (debounced ResizeObserver) and put *destructured primitives* in the rebuild effect's deps, never the whole `params` object (its identity changes every render, so any sibling re-render rebuilds your scene).
+
+**Scale expectations by renderer:** SVG/DOM viewers (tree, circles, mass, graph) are element-bound — thresholds in the hundreds-to-thousands are correct, don't raise them. Canvas (cytoscape) mid-thousands. WebGL (`json-graph3d`) is the designated big-graph surface: threshold 50k, and above ~5k nodes it auto-degrades cosmetics (1px GL lines, no curvature/arrows/particles, shorter cooldown) instead of blocking.
