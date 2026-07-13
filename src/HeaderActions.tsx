@@ -1,11 +1,7 @@
 import type { IDockviewHeaderActionsProps } from "dockview";
+import { panelAccent } from "./ColoredTab";
+import { ensureCompanions } from "./persistence/default-layout";
 import "./HeaderActions.css";
-
-const accents: Record<string, string> = {
-  editor: "var(--accent-editor)",
-  terminal: "var(--accent-terminal)",
-  webview: "var(--accent-webview)",
-};
 
 /**
  * prefixHeaderActionsComponent — renders BEFORE the tabs in the header bar.
@@ -13,12 +9,15 @@ const accents: Record<string, string> = {
  * Shows the slot exists and that you can read the group's active panel.
  */
 export function PrefixHeaderActions(props: IDockviewHeaderActionsProps) {
-  const activeId = props.activePanel?.id;
-  const baseId = activeId?.split("-")[0] ?? "";
-  const accent = accents[baseId] ?? "transparent";
+  // panelAccent resolves the id (clone-aware: "json-tree-x3f9" → the
+  // json-tree accent). "inherit" means unknown — render transparent.
+  const accent = props.activePanel ? panelAccent(props.activePanel.id) : "inherit";
   return (
     <div className="header-actions header-actions--prefix">
-      <span className="header-dot" style={{ background: accent }} />
+      <span
+        className="header-dot"
+        style={{ background: accent === "inherit" ? "transparent" : accent }}
+      />
     </div>
   );
 }
@@ -32,14 +31,20 @@ export function LeftHeaderActions(props: IDockviewHeaderActionsProps) {
   function addTab() {
     const active = props.activePanel;
     if (!active) return;
-    const baseId = active.id.split("-")[0];
-    const newId = `${baseId}-${Math.random().toString(36).slice(2, 6)}`;
+    // The panel's real component name — NOT a substring of its id.
+    // (The old `id.split("-")[0]` produced "json"/"tempo" for every
+    // hyphenated panel, which isn't a registered component, so + threw
+    // for the whole json-* family. Hypergraph observation #3.)
+    const component = active.view.contentComponent;
+    const newId = `${component}-${Math.random().toString(36).slice(2, 6)}`;
     props.containerApi.addPanel({
       id: newId,
-      component: baseId,
-      title: baseId,
+      component,
+      title: active.title ?? component,
       position: { referenceGroup: props.group },
     });
+    // A cloned json viewer needs its json-bus producer too.
+    ensureCompanions(props.containerApi, component);
   }
   return (
     <div className="header-actions header-actions--left">
