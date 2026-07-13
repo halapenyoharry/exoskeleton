@@ -1,16 +1,22 @@
 import type { IWatermarkPanelProps } from "dockview";
-import { buildDefaultLayout } from "./persistence/default-layout";
+import {
+  addOrFocusPanel,
+  buildDefaultLayout,
+  panelRegistry,
+  repairLayout,
+} from "./persistence/default-layout";
+import { panelAccent, panelGlyph } from "./ColoredTab";
 import "./Watermark.css";
 
 export default function Watermark(props: IWatermarkPanelProps) {
   const api = props.containerApi;
 
+  // Both paths are idempotent: repairLayout rescues panels hidden in an
+  // edge group (the "grid looks empty but every id already exists" trap),
+  // buildDefaultLayout then adds only what's actually missing.
   function restoreAll() {
+    repairLayout(api);
     buildDefaultLayout(api);
-  }
-
-  function restoreOne(id: "editor" | "terminal" | "webview") {
-    api.addPanel({ id, component: id, title: id });
   }
 
   return (
@@ -25,26 +31,18 @@ export default function Watermark(props: IWatermarkPanelProps) {
         <button className="watermark-restore" onClick={restoreAll}>
           restore default layout
         </button>
-        <p className="watermark-hint">or restore one panel at a time:</p>
+        <p className="watermark-hint">or summon one panel at a time:</p>
         <div className="watermark-buttons">
-          <button
-            className="watermark-btn watermark-btn--editor"
-            onClick={() => restoreOne("editor")}
-          >
-            ◆ editor
-          </button>
-          <button
-            className="watermark-btn watermark-btn--terminal"
-            onClick={() => restoreOne("terminal")}
-          >
-            ▸ terminal
-          </button>
-          <button
-            className="watermark-btn watermark-btn--webview"
-            onClick={() => restoreOne("webview")}
-          >
-            ◯ webview
-          </button>
+          {panelRegistry.map((entry) => (
+            <button
+              key={entry.id}
+              className="watermark-btn"
+              style={{ color: panelAccent(entry.id) }}
+              onClick={() => addOrFocusPanel(api, entry.id)}
+            >
+              {panelGlyph(entry.id)} {entry.id}
+            </button>
+          ))}
         </div>
       </div>
     </div>

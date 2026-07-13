@@ -136,3 +136,95 @@
 .dockview-theme-abyss .dv-tabs-and-actions-container .dv-right-actions-container:hover {
   color: #c5e8ee;
 }
+
+/* Floating ⊞ add-panel button + menu — app-level chrome, same
+   glassmorphic family as .status-bar-summoner-btn (StatusBarPanel.css).
+   Sits to the left of the summoner's bottom-right corner slot. */
+.add-panel-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 58px;
+  z-index: 9999;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(10, 14, 38, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  color: #00e5ff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 229, 255, 0.2);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.add-panel-btn:hover {
+  transform: scale(1.1);
+  border-color: #00e5ff;
+  background: rgba(0, 229, 255, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 229, 255, 0.5);
+  color: #ffffff;
+}
+
+.add-panel-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 9998;
+}
+
+.add-panel-menu {
+  position: absolute;
+  bottom: 58px;
+  right: 12px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 10px;
+  background: rgba(10, 14, 38, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.add-panel-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #c5e8ee;
+  font: inherit;
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.add-panel-item:hover {
+  background: rgba(0, 229, 255, 0.12);
+  color: #ffffff;
+}
+
+.add-panel-glyph {
+  width: 1.2em;
+  text-align: center;
+}
+
+.add-panel-name {
+  flex: 1;
+}
+
+.add-panel-state {
+  opacity: 0.55;
+  font-size: 0.75rem;
+}

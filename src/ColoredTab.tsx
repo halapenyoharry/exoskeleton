@@ -46,10 +46,38 @@ const glyphs: Record<string, string> = {
   "json-dyadic": '"◬"',
 };
 
+/** Resolve a panel id to the component key the accent/glyph maps use.
+ *  Exact match first; then longest-prefix match so spawned clones
+ *  ("json-tree-x3f9" from the header + button) inherit their family's
+ *  identity instead of falling back to the neutral dot. */
+export function resolveComponentKey(id: string): string | undefined {
+  if (id in glyphs || id in accents) return id;
+  let best: string | undefined;
+  for (const key of Object.keys(glyphs)) {
+    if (id.startsWith(`${key}-`) && (!best || key.length > best.length)) {
+      best = key;
+    }
+  }
+  return best;
+}
+
+/** Accent CSS value for a panel id (clone-aware). */
+export function panelAccent(id: string): string {
+  const key = resolveComponentKey(id);
+  return key ? (accents[key] ?? "inherit") : "inherit";
+}
+
+/** Bare glyph character for a panel id (clone-aware, no CSS quoting). */
+export function panelGlyph(id: string): string {
+  const key = resolveComponentKey(id);
+  return (key ? (glyphs[key] ?? '"·"') : '"·"').replace(/"/g, "");
+}
+
 export default function ColoredTab(props: IDockviewPanelHeaderProps) {
   const id = props.api.id;
-  const accent = accents[id] ?? "inherit";
-  const glyph = glyphs[id] ?? '"·"';
+  const key = resolveComponentKey(id) ?? id;
+  const accent = accents[key] ?? "inherit";
+  const glyph = glyphs[key] ?? '"·"';
 
   return (
     <DockviewDefaultTab

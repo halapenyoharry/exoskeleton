@@ -11,7 +11,7 @@
 .watermark-card {
   text-align: center;
   padding: 28px 32px;
-  max-width: 420px;
+  max-width: 480px;
   background: #0a0e27;
   border: 1px solid #1a2a3a;
   border-radius: 4px;
@@ -70,25 +70,26 @@
 
 .watermark-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
   margin-top: 8px;
 }
 
+/* Each button carries its panel's accent as inline `color`; the border
+   and hover wash derive from it via currentColor, so the full registry
+   roster needs no per-panel classes. */
 .watermark-btn {
   background: transparent;
-  border: 1px solid;
+  border: 1px solid currentColor;
   padding: 6px 10px;
   font: inherit;
   font-size: 11px;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition: background 0.12s, filter 0.12s;
 }
 
-.watermark-btn--editor   { border-color: var(--accent-editor);   color: var(--accent-editor);   }
-.watermark-btn--terminal { border-color: var(--accent-terminal); color: var(--accent-terminal); }
-.watermark-btn--webview  { border-color: var(--accent-webview);  color: var(--accent-webview);  }
-
-.watermark-btn--editor:hover   { background: var(--accent-editor);   color: #0d1326; }
-.watermark-btn--terminal:hover { background: var(--accent-terminal); color: #0d1326; }
-.watermark-btn--webview:hover  { background: var(--accent-webview);  color: #0d1326; }
+.watermark-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  filter: brightness(1.3);
+}

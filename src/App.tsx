@@ -30,10 +30,14 @@ import JsonDyadicPanel from "./panels/json-dyadic/JsonDyadicPanel";
 import StatusBarPanel from "./panels/StatusBarPanel";
 import { exoPanel } from "./PanelRoot";
 import {
+  addOrFocusPanel,
   buildDefaultLayout,
   migrateLayout,
   migrateSavedLayout,
+  panelRegistry,
+  repairLayout,
 } from "./persistence/default-layout";
+import { panelAccent, panelGlyph } from "./ColoredTab";
 import { CURRENT_VERSION, type AppState } from "./persistence/storage";
 import { tauriStorage } from "./persistence/tauri-storage";
 import "./App.css";
@@ -58,6 +62,8 @@ const components = {
   "json-graph":    exoPanel(JsonGraphPanel,     "var(--accent-json-graph)"),
   "json-graph3d":  exoPanel(JsonGraph3DPanel,   "var(--accent-json-graph3d)"),
   "json-dyadic":   exoPanel(JsonDyadicPanel,      "var(--accent-json-dyadic)"),
+  // Registered raw (no exoPanel wrapper) on purpose: the status bar owns
+  // its full-width chrome and doesn't take the accent-stripe convention.
   "status-bar-panel": StatusBarPanel,
 };
 
@@ -89,6 +95,10 @@ export default function App() {
 
   const mainApiRef = useRef<DockviewApi | null>(null);
   const [isStatusBarVisible, setIsStatusBarVisible] = useState(false);
+  // Floating ⊞ add-panel menu (bottom-right, next to the astromech
+  // summoner). The roster is read fresh from the registry on each open,
+  // so open/closed markers stay accurate without extra subscriptions.
+  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
 
   // Preferences state. Currently empty (see Preferences interface in
   // storage.ts); included in the save so future fields persist automatically.
@@ -197,11 +207,19 @@ export default function App() {
           "[exoskeleton] main fromJSON failed, falling back to defaults:",
           e,
         );
+        // fromJSON can partially apply before throwing; clear the wreckage
+        // so buildDefaultLayout starts from a clean grid.
+        event.api.clear();
         buildDefaultLayout(event.api);
       }
     } else {
       buildDefaultLayout(event.api);
     }
+
+    // Rescue pathological saved layouts (panels absorbed into an edge
+    // group, empty main grid). No-op when the layout is healthy; the
+    // repaired arrangement is persisted by the next debounced save.
+    repairLayout(event.api);
 
     // Check if status bar is in the restored panel list; if not, mount it.
     const statusBarPanel = event.api.getPanel("status-bar");
@@ -262,6 +280,49 @@ export default function App() {
         >
           ⌬
         </button>
+      )}
+      {mainApiRef.current && (
+        <button
+          className="add-panel-btn"
+          onClick={() => setIsAddMenuOpen((v) => !v)}
+          title="add a panel"
+        >
+          ⊞
+        </button>
+      )}
+      {isAddMenuOpen && mainApiRef.current && (
+        <>
+          <div
+            className="add-panel-backdrop"
+            onClick={() => setIsAddMenuOpen(false)}
+          />
+          <div className="add-panel-menu">
+            {panelRegistry.map((entry) => {
+              const open = !!mainApiRef.current?.getPanel(entry.id);
+              return (
+                <button
+                  key={entry.id}
+                  className="add-panel-item"
+                  onClick={() => {
+                    addOrFocusPanel(mainApiRef.current!, entry.id);
+                    setIsAddMenuOpen(false);
+                  }}
+                >
+                  <span
+                    className="add-panel-glyph"
+                    style={{ color: panelAccent(entry.id) }}
+                  >
+                    {panelGlyph(entry.id)}
+                  </span>
+                  <span className="add-panel-name">{entry.id}</span>
+                  <span className="add-panel-state">
+                    {open ? "●" : "+"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );

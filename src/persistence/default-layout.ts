@@ -1,4 +1,10 @@
-import type { AddPanelOptions, DockviewApi, SerializedDockview } from "dockview";
+import type {
+  AddPanelOptions,
+  AddPanelPositionOptions,
+  DockviewApi,
+  IDockviewPanel,
+  SerializedDockview,
+} from "dockview";
 
 // The default panel arrangement — what Exoskeleton looks like on first launch,
 // or after the user resets/clears their saved state.
@@ -10,8 +16,15 @@ export const DEFAULT_WEBVIEW_URL = "https://dockview.dev";
 
 /** A panel registry entry: addPanel options + the schema version that
  *  introduced this panel. `introducedAt` lets `migrateLayout` add new
- *  panels to old saved state without disrupting the user's customizations. */
-type RegistryEntry = AddPanelOptions & { introducedAt: number };
+ *  panels to old saved state without disrupting the user's customizations.
+ *  `companions` names panel ids that should exist for this panel to be
+ *  useful (e.g. the json viewers read from json-edit via the json-bus);
+ *  every add path creates missing companions alongside. Mirrors
+ *  PanelManifest.companions. */
+type RegistryEntry = AddPanelOptions & {
+  introducedAt: number;
+  companions?: string[];
+};
 
 /** The full set of panels Exoskeleton knows how to add. Order matters for
  *  `buildDefaultLayout` (the first entry fills the empty grid, subsequent
@@ -78,6 +91,7 @@ export const panelRegistry: RegistryEntry[] = [
     title: "tree",
     position: { referencePanel: "json-edit", direction: "right" },
     introducedAt: 5,
+    companions: ["json-edit"],
   },
   {
     id: "json-graph",
@@ -85,6 +99,7 @@ export const panelRegistry: RegistryEntry[] = [
     title: "graph",
     position: { referencePanel: "json-tree", direction: "within" },
     introducedAt: 5,
+    companions: ["json-edit"],
   },
   {
     id: "json-cytoscape",
@@ -92,6 +107,7 @@ export const panelRegistry: RegistryEntry[] = [
     title: "cyto",
     position: { referencePanel: "json-tree", direction: "within" },
     introducedAt: 5,
+    companions: ["json-edit"],
   },
   {
     id: "json-graph3d",
@@ -99,6 +115,7 @@ export const panelRegistry: RegistryEntry[] = [
     title: "3d",
     position: { referencePanel: "json-tree", direction: "within" },
     introducedAt: 5,
+    companions: ["json-edit"],
   },
   {
     id: "json-circles",
@@ -106,6 +123,7 @@ export const panelRegistry: RegistryEntry[] = [
     title: "circles",
     position: { referencePanel: "json-tree", direction: "within" },
     introducedAt: 5,
+    companions: ["json-edit"],
   },
   {
     id: "json-mass",
@@ -113,6 +131,7 @@ export const panelRegistry: RegistryEntry[] = [
     title: "mass",
     position: { referencePanel: "json-tree", direction: "within" },
     introducedAt: 5,
+    companions: ["json-edit"],
   },
   // v6 — json-dyadic: categorical viewer for TopoThink dyadic JSON.
   // First panel in the json-* group that respects the four-category edge
@@ -126,6 +145,7 @@ export const panelRegistry: RegistryEntry[] = [
     title: "dyadic",
     position: { referencePanel: "json-tree", direction: "within" },
     introducedAt: 6,
+    companions: ["json-edit"],
   },
 ];
 
@@ -151,11 +171,109 @@ export function migrateSavedLayout(
   return JSON.parse(json) as SerializedDockview;
 }
 
-/** Build the default layout from scratch (called when no saved state exists). */
+/** Look up a registry entry by panel id (id === component for all entries). */
+export function getRegistryEntry(id: string): RegistryEntry | undefined {
+  return panelRegistry.find((e) => e.id === id);
+}
+
+/** Panels that legitimately live in an edge group. Anything else found in
+ *  one is treated as misplaced by `repairLayout`. (status-bar → bottom,
+ *  settings → the Cmd+B side-grid.) */
+const EDGE_RESIDENTS = new Set(["status-bar", "settings"]);
+
+/** First panel living in the main grid — the anchor for position
+ *  fallbacks when a registry reference panel doesn't exist. */
+function mainGridAnchor(api: DockviewApi): IDockviewPanel | undefined {
+  return api.panels.find((p) => p.api.location.type === "grid");
+}
+
+/**
+ * Add one registry panel, safely and idempotently:
+ * - no-op (returns the existing panel) if the id is already present;
+ * - if the registry position's reference panel is missing — or the entry
+ *   has no position — anchor to the main grid instead. NEVER fall back to
+ *   "no position": Dockview then targets the ACTIVE group, which can be
+ *   an edge group. That's exactly how every panel got absorbed into the
+ *   118px status-bar strip in pre-repair saved states.
+ * - per-panel try/catch so one failure can't abort a whole build/migrate.
+ * `extraParams` (e.g. params rescued by repairLayout) override the
+ * registry defaults.
+ */
+export function addRegistryPanel(
+  api: DockviewApi,
+  entry: RegistryEntry,
+  extraParams?: Record<string, unknown>,
+): IDockviewPanel | undefined {
+  const existing = api.getPanel(entry.id);
+  if (existing) return existing;
+
+  // Registry entries never use `floating`; strip it (and the registry-only
+  // fields) so the rebuilt options satisfy Dockview's position/floating
+  // union cleanly.
+  const {
+    introducedAt: _i,
+    companions: _c,
+    position: registryPosition,
+    floating: _f,
+    ...base
+  } = entry as RegistryEntry & {
+    position?: AddPanelPositionOptions;
+    floating?: unknown;
+  };
+
+  let position = registryPosition;
+  const referenceMissing =
+    position &&
+    "referencePanel" in position &&
+    typeof position.referencePanel === "string" &&
+    !api.getPanel(position.referencePanel);
+  if (!position || referenceMissing) {
+    const anchor = mainGridAnchor(api);
+    position = anchor
+      ? { referencePanel: anchor.id, direction: "within" }
+      : { direction: "right" }; // absolute → targets the grid, not the active group
+  }
+
+  try {
+    return api.addPanel({
+      ...base,
+      position,
+      params: extraParams ? { ...base.params, ...extraParams } : base.params,
+    });
+  } catch (e) {
+    console.warn(`[exoskeleton] addRegistryPanel ${entry.id} failed:`, e);
+    return undefined;
+  }
+}
+
+/** Add any missing companion panels declared by the registry entry for
+ *  `id` (e.g. a json viewer pulls in json-edit, its json-bus producer). */
+export function ensureCompanions(api: DockviewApi, id: string) {
+  for (const cid of getRegistryEntry(id)?.companions ?? []) {
+    const centry = getRegistryEntry(cid);
+    if (centry) addRegistryPanel(api, centry);
+  }
+}
+
+/** The one call sites should use to summon a panel by id: focuses it if
+ *  it's already open, adds it (at its registry position) if not, and
+ *  ensures its companions exist either way. */
+export function addOrFocusPanel(api: DockviewApi, id: string) {
+  const existing = api.getPanel(id);
+  if (existing) {
+    existing.api.setActive();
+  } else {
+    const entry = getRegistryEntry(id);
+    if (entry) addRegistryPanel(api, entry);
+  }
+  ensureCompanions(api, id);
+}
+
+/** Build the default layout (called when no saved state exists). Safe to
+ *  call on a non-empty grid: existing panels are kept, missing ones added. */
 export function buildDefaultLayout(api: DockviewApi) {
   for (const entry of panelRegistry) {
-    const { introducedAt: _, ...opts } = entry;
-    api.addPanel(opts);
+    addRegistryPanel(api, entry);
   }
 }
 
@@ -164,35 +282,74 @@ export function buildDefaultLayout(api: DockviewApi) {
  * add any panels they predate — i.e., panels whose `introducedAt` is
  * greater than the schema version that produced their saved state. The
  * user's existing arrangement is preserved; new panels are slotted in
- * via their registry position, or floated freely if the reference panel
- * isn't around anymore.
+ * via their registry position, or anchored to the main grid if the
+ * reference panel isn't around anymore.
  */
 export function migrateLayout(api: DockviewApi, savedVersion: number) {
-  const existing = new Set<string>();
-  api.panels.forEach((p) => existing.add(p.id));
-
   for (const entry of panelRegistry) {
     if (entry.introducedAt <= savedVersion) continue;
-    if (existing.has(entry.id)) continue;
+    addRegistryPanel(api, entry);
+  }
+}
 
-    const { introducedAt: _, ...opts } = entry;
-    // If the reference panel was closed by the user, drop the position
-    // so addPanel still succeeds (panel lands in a default location).
-    // Dockview's position type is a union (RelativePanel | RelativeGroup
-    // | absolute), so narrow to entries that reference a panel by id.
-    const safeOpts =
-      opts.position &&
-      "referencePanel" in opts.position &&
-      typeof opts.position.referencePanel === "string" &&
-      !existing.has(opts.position.referencePanel)
-        ? { ...opts, position: undefined }
-        : opts;
+/**
+ * Rescue pathological saved layouts. Observed failure mode (the pre-v7
+ * saves): panels added without a position land in the ACTIVE group; when
+ * that was the status-bar edge group, every panel got absorbed into the
+ * bottom strip, the main grid serialized empty, and the watermark's
+ * add-panel buttons all threw duplicate-id errors against panels the user
+ * couldn't see.
+ *
+ * Detection: any panel living in an edge group that isn't a legitimate
+ * edge resident (status-bar, settings). Repair: remove and re-add each
+ * one into the main grid in registry order, preserving its params — no
+ * state is wiped. Panels with no registry entry (spawned clones like
+ * `json-tree-x3f9`) are re-added with their serialized component.
+ *
+ * Returns true if anything was repaired.
+ */
+export function repairLayout(api: DockviewApi): boolean {
+  const misplaced = api.panels.filter(
+    (p) => p.api.location.type === "edge" && !EDGE_RESIDENTS.has(p.id),
+  );
+  if (misplaced.length === 0) return false;
 
+  console.warn(
+    "[exoskeleton] repairLayout: rescuing panels from edge groups:",
+    misplaced.map((p) => p.id),
+  );
+
+  const captured = misplaced.map((p) => ({
+    id: p.id,
+    component: p.view.contentComponent,
+    title: p.title,
+    params: p.params ? { ...p.params } : undefined,
+  }));
+  for (const p of misplaced) api.removePanel(p);
+
+  const byId = new Map(captured.map((c) => [c.id, c]));
+  for (const entry of panelRegistry) {
+    const c = byId.get(entry.id);
+    if (!c) continue;
+    addRegistryPanel(api, entry, c.params);
+    byId.delete(entry.id);
+  }
+  // Leftovers (ids the registry doesn't know): back into the main grid.
+  for (const c of byId.values()) {
+    const anchor = mainGridAnchor(api);
     try {
-      api.addPanel(safeOpts);
-      existing.add(entry.id);
+      api.addPanel({
+        id: c.id,
+        component: c.component,
+        title: c.title,
+        params: c.params,
+        position: anchor
+          ? { referencePanel: anchor.id, direction: "within" }
+          : { direction: "right" },
+      });
     } catch (e) {
-      console.warn(`[exoskeleton] migrate: addPanel ${entry.id} failed:`, e);
+      console.warn(`[exoskeleton] repairLayout: re-add ${c.id} failed:`, e);
     }
   }
+  return true;
 }
