@@ -16,6 +16,10 @@ const manifest: PanelManifest<JsonEditParams> = {
   accent: "#59b8ff",
   glyph: "{}",
 
+  // Runs anywhere; file open/save is the one feature lost off-Tauri.
+  capabilities: [],
+  optionalCapabilities: ["fs"],
+
   // layout — anchors the empty grid on first launch; visualizer panels
   // position themselves "right" or "within" relative to this id.
   paramsDefault: jsonEditDefaults,

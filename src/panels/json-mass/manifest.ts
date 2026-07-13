@@ -14,6 +14,11 @@ const manifest: PanelManifest<JsonMassParams> = {
   accent: "#ffd166",
   glyph: "M",
 
+  // Universal tier: needs nothing from the host (docs/panel-capability-map.md).
+  // json-edit is the json-bus producer this viewer reads from.
+  capabilities: [],
+  companions: ["json-edit"],
+
   defaultLayout: { direction: "within", reference: "json-tree" },
   paramsDefault: jsonMassDefaults,
 

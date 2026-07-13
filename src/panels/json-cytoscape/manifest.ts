@@ -14,6 +14,11 @@ const manifest: PanelManifest<JsonCytoscapeParams> = {
   accent: "#b388ff",
   glyph: "⬢",
 
+  // Universal tier: needs nothing from the host (docs/panel-capability-map.md).
+  // json-edit is the json-bus producer this viewer reads from.
+  capabilities: [],
+  companions: ["json-edit"],
+
   defaultLayout: { direction: "within", reference: "json-tree" },
   paramsDefault: jsonCytoscapeDefaults,
 

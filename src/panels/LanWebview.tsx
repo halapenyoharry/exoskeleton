@@ -4,7 +4,7 @@ import "./LanWebview.css";
 
 const FALLBACK_URL = "https://dockview.dev";
 
-interface LanWebviewParams {
+export interface LanWebviewParams {
   url?: string;
 }
 

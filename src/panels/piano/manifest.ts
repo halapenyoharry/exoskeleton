@@ -15,6 +15,10 @@ const manifest: PanelManifest<PianoParams> = {
   accent: "#f4c075",
   glyph: "♬",
 
+  // Runs anywhere; network OSC is the one feature lost off-Tauri.
+  capabilities: [],
+  optionalCapabilities: ["osc.udp"],
+
   // layout — default visible position for the demo flow alongside scope
   defaultLayout: { direction: "within", reference: "terminal" },
   paramsDefault: {},

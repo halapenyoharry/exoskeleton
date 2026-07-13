@@ -16,6 +16,11 @@ const manifest: PanelManifest<JsonTreeParams> = {
   accent: "#00e5ff",
   glyph: "ϟ",
 
+  // Universal tier: needs nothing from the host (docs/panel-capability-map.md).
+  // json-edit is the json-bus producer this viewer reads from.
+  capabilities: [],
+  companions: ["json-edit"],
+
   // layout — splits right of the editor on first launch; sibling viewer
   // panels (graph, cyto, 3d, circles, mass) tab into this group.
   defaultLayout: { direction: "right", reference: "json-edit" },

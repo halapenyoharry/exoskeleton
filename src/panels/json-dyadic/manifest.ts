@@ -14,6 +14,11 @@ const manifest: PanelManifest<JsonDyadicParams> = {
   accent: "#ffb86c",
   glyph: "◬",
 
+  // Universal tier: needs nothing from the host (docs/panel-capability-map.md).
+  // json-edit is the json-bus producer this viewer reads from.
+  capabilities: [],
+  companions: ["json-edit"],
+
   // Tabs into the json viewer group anchored by json-tree, alongside the
   // other graph viewers — but conceptually distinct: this is the only one
   // that respects the four-category edge contract.

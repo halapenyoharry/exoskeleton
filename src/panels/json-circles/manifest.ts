@@ -14,6 +14,11 @@ const manifest: PanelManifest<JsonCirclesParams> = {
   accent: "#ff4d8d",
   glyph: "◯",
 
+  // Universal tier: needs nothing from the host (docs/panel-capability-map.md).
+  // json-edit is the json-bus producer this viewer reads from.
+  capabilities: [],
+  companions: ["json-edit"],
+
   // Tabs into the viewer group anchored by json-tree.
   defaultLayout: { direction: "within", reference: "json-tree" },
   paramsDefault: jsonCirclesDefaults,

@@ -20,6 +20,10 @@ const manifest: PanelManifest<TempoClockParams> = {
   accent: "#ff6b9d",
   glyph: "♩",
 
+  // Runs anywhere; network OSC is the one feature lost off-Tauri.
+  capabilities: [],
+  optionalCapabilities: ["osc.udp"],
+
   // layout
   defaultLayout: { direction: "below", reference: "editor" },
   paramsDefault: { bpm: 120, playing: false },

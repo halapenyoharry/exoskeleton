@@ -60,6 +60,28 @@ export interface PanelOscDecl {
   listens?: OscAddressDecl[];
 }
 
+/**
+ * The declarable host-capability vocabulary — the full list a panel might
+ * need from whatever host it's installed into. See
+ * [docs/panel-capability-map.md](../docs/panel-capability-map.md) for the
+ * tier map (which capabilities exist where, and which panels use them).
+ *
+ * - `pty`               spawn a real shell — Tauri only
+ * - `osc.udp`           network OSC in/out — Tauri only
+ * - `iframe.permissive` iframe without web-platform embedding limits — Tauri only
+ * - `fs`                file read/write + open/save dialogs — native on
+ *                       Tauri, adapter on web/vscode hosts
+ * - `persistence`       layout/params storage — every host has one
+ * - `tts.engine`        text-to-speech behind a request/response seam
+ */
+export type CapabilityId =
+  | "pty"
+  | "osc.udp"
+  | "iframe.permissive"
+  | "fs"
+  | "persistence"
+  | "tts.engine";
+
 /** Where to position the panel in the default first-launch layout.
  *  Mirrors Dockview's `addPanel` position option. */
 export interface PanelLayoutPosition {
@@ -140,6 +162,25 @@ export interface PanelManifest<P extends Record<string, any> = Record<string, an
   paramsDefault?: P;
 
   // ─── runtime contracts ───────────────────────────────────────
+
+  /** Host capabilities this panel REQUIRES. A host that can't provide
+   *  one refuses the install up front — better than a panel that mounts
+   *  and dies. `[]` (or omitted) = universal tier: runs in any host.
+   *  Kept separate from `optionalCapabilities` because the capability
+   *  map distinguishes hard welds (solid arrows) from graceful
+   *  degradation (dotted) — one flat list would lose that. */
+  capabilities?: CapabilityId[];
+
+  /** Capabilities this panel USES when the host provides them but
+   *  degrades gracefully without — e.g. piano still plays in-app with
+   *  no `osc.udp`; json-edit still edits with no `fs`. */
+  optionalCapabilities?: CapabilityId[];
+
+  /** Panel ids that should exist alongside this one for it to be useful
+   *  (e.g. every json viewer names `json-edit`, its json-bus producer).
+   *  Hosts add missing companions on install/add. Mirrors
+   *  `RegistryEntry.companions` in persistence/default-layout.ts. */
+  companions?: string[];
 
   /** OSC integration declaration. Omit if this panel doesn't speak OSC. */
   osc?: PanelOscDecl;
