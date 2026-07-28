@@ -158,3 +158,10 @@ Also found: `npm test` runs only 1 of 2 test files (`sh` doesn't expand `**` rec
 Harold's four decisions, recorded in the plan so they don't get re-litigated: **public GitHub release**; **minimal default layout** with the wide registry preserved behind ⊞; **both** app-managed named workspaces *and* export/import files; **both** window mechanisms, popout repaired first.
 Next: execute [ship-plan.md](ship-plan.md) Phase 0 (WP-1 through WP-6 — Monaco, popout, test glob, shell, error boundary, save flush). One work package per commit.
 Open: three decisions still belong to Harold and are flagged in the plan rather than guessed — which license (WP-15), signing/notarization vs. documented `xattr` workaround vs. source-only (WP-19), and the plan-B popout design if `NewWindowResponse::Allow` doesn't yield a usable window (WP-2). Phase 5 (TopoThink fork) stays parked until Phases 0–4 land.
+
+## 2026-07-28 (WP-0 complete)
+
+State: clean tree on `add-json-panels` at e8ae00c. `npm run build && npm test` green (11/11 passing across 2 files).
+Last: completed WP-0. Quoted test glob in package.json (discoverable across subdirs); added in-repo synthetic topology fixture (`src/panels/json-dyadic/__fixtures__/synthetic-topology.json`); updated `parse.test.ts` to test against synthetic fixture by default (with optional `EXO_TOPOLOGY_DIR` override); removed `runOn: folderOpen` trigger from `.vscode/tasks.json` to prevent port 1420 orphans.
+Next: WP-1 — Replace Monaco with CodeMirror 6 in `json-edit` (bundle locally, port Midnight Alaska theme, update params/migrations).
+Open: none for WP-0.
