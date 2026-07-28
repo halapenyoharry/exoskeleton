@@ -13,6 +13,8 @@ import "./JsonEditPanel.css";
 export interface JsonEditParams {
   /** json-bus document id to write into. Defaults to "default". */
   documentId: string;
+  /** Active JSON file path if loaded from or saved to disk. */
+  filePath?: string;
   /** Debounce window (ms) between editor edits and json-bus publishes. */
   debounceMs: number;
   /** Theme id. "midnight-alaska" is the bundled default. */
@@ -192,6 +194,21 @@ export default function JsonEditPanel(
     }
   }, [value]);
 
+  // On mount, restore file content if filePath param exists
+  useEffect(() => {
+    const initialPath = rawParams.filePath;
+    if (initialPath && typeof initialPath === "string") {
+      setFilePath(initialPath);
+      readTextFile(initialPath)
+        .then((content) => {
+          setValue(content);
+        })
+        .catch((err) => {
+          console.warn("[json-edit] failed to restore file:", initialPath, err);
+        });
+    }
+  }, []);
+
   async function openFile() {
     setMenuOpen(false);
     try {
@@ -204,6 +221,7 @@ export default function JsonEditPanel(
       const content = await readTextFile(picked);
       setFilePath(picked);
       setValue(content);
+      props.api.updateParameters({ ...params, filePath: picked });
     } catch (err) {
       console.error("[json-edit] failed to open file:", err);
     }
@@ -219,6 +237,7 @@ export default function JsonEditPanel(
       if (!picked) return;
       target = picked;
       setFilePath(picked);
+      props.api.updateParameters({ ...params, filePath: picked });
     }
     try {
       await writeTextFile(target, value);
@@ -235,6 +254,7 @@ export default function JsonEditPanel(
       });
       if (!picked) return;
       setFilePath(picked);
+      props.api.updateParameters({ ...params, filePath: picked });
       await writeTextFile(picked, value);
     } catch (err) {
       console.error("[json-edit] failed to save file as:", err);
@@ -243,7 +263,10 @@ export default function JsonEditPanel(
 
   // Persist params to the dockview layout file so they survive a reload.
   useEffect(() => {
-    props.api.updateParameters(params);
+    props.api.updateParameters({
+      ...params,
+      ...(filePath ? { filePath } : {}),
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     params.documentId,
@@ -254,6 +277,7 @@ export default function JsonEditPanel(
     params.tabSize,
     params.lineNumbers,
     params.formatOnPaste,
+    filePath,
     props.api,
   ]);
 
