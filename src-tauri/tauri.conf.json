@@ -10,16 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "windows": [
-      {
-        "title": "Exoskeleton",
-        "width": 1200,
-        "height": 800,
-        "minWidth": 800,
-        "minHeight": 500,
-        "dragDropEnabled": false
-      }
-    ],
+    "windows": [],
     "security": {
       "csp": null
     }

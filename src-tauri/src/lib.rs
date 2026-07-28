@@ -28,18 +28,23 @@ pub fn run() {
         .setup(|app| {
             crate::osc::setup(app.handle())?;
             use tauri::menu::{Menu, MenuItemBuilder, Submenu};
-            use tauri::{Emitter, Manager};
-            if let Some(window) = app.get_webview_window("main") {
-                // Auto-open WebKit Inspector in debug builds so devtools is
-                // one click away (otherwise you have to hunt for the keyboard
-                // shortcut, which varies by platform / WebKit version).
-                #[cfg(debug_assertions)]
-                window.open_devtools();
-                // Activate the app and bring the window forward, so an
-                // auto-launch (VS Code's runOn:folderOpen task) doesn't leave
-                // it sitting behind the IDE.
-                let _ = window.set_focus();
-            }
+            use tauri::webview::{NewWindowResponse, WebviewWindowBuilder};
+            use tauri::Emitter;
+
+            let window = WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::default())
+                .title("Exoskeleton")
+                .inner_size(1200.0, 800.0)
+                .min_inner_size(800.0, 500.0)
+                .disable_drag_drop_handler()
+                // Dockview pops out groups via window.open(). Without this handler
+                // WKWebView returns nil and the popout silently no-ops.
+                .on_new_window(|_url, _features| NewWindowResponse::Allow)
+                .build()?;
+
+            #[cfg(debug_assertions)]
+            window.open_devtools();
+
+            let _ = window.set_focus();
 
             // Menu accelerators fire at the OS level, before keys reach any
             // subview — including iframes (LanWebview) and xterm. A
