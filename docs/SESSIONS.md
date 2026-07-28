@@ -243,3 +243,9 @@ Last: completed WP-12. Created `src/persistence/workspace-file.ts` for `.exo.jso
 Next: WP-13 — `json-edit` remembers its document (`filePath` persistence in panel params).
 Open: none for WP-12.
 
+## 2026-07-28 (WP-13 complete)
+
+State: clean tree on `add-json-panels` at 3b61acd. `npm run build && npm test` green (39/39 tests passing). Phase 2 complete!
+Last: completed WP-13. Added `filePath?: string` to `JsonEditParams` interface in `src/panels/json-edit/JsonEditPanel.tsx`, updated file operations to write back `filePath` to panel params, and added startup effect to read and restore file content from `rawParams.filePath`.
+Next: Phase 3 — Workspace windows (WP-14 New Window opens an independent workspace).
+Open: Phase 2 complete. Ready for Phase 3.
