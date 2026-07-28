@@ -20,11 +20,18 @@ test("isCompatible should return false for objects missing the version property"
 });
 
 test("isCompatible should return true for any known schema version", () => {
-  // CURRENT_VERSION itself is accepted.
-  assert.strictEqual(isCompatible({ version: CURRENT_VERSION }), true);
-  assert.strictEqual(isCompatible({ version: CURRENT_VERSION, layout: {} }), true);
-  // Older schema versions are accepted too — migrateLayout brings them
-  // up to current on load. Version 1 (the original) must always work.
+  // Valid v8 (CURRENT_VERSION) state is accepted.
+  const validV8 = {
+    version: CURRENT_VERSION,
+    activeWorkspaceId: "default",
+    workspaces: {
+      default: { id: "default", name: "Default", layout: {}, updatedAt: 1 },
+    },
+  };
+  assert.strictEqual(isCompatible(validV8), true);
+  // Older schema versions (1..7) are accepted too — migrateToV8 brings them
+  // up to current on load. Version 1 and 7 must work.
+  assert.strictEqual(isCompatible({ version: 7, layout: {} }), true);
   assert.strictEqual(isCompatible({ version: 1 }), true);
 });
 

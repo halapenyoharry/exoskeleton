@@ -1,6 +1,6 @@
 import { LazyStore } from "@tauri-apps/plugin-store";
-import type { Storage, AppState } from "./storage";
-import { isCompatible } from "./storage";
+import type { Storage, AppState, AppStateV8 } from "./storage";
+import { isCompatible, migrateToV8 } from "./storage";
 
 // Backed by tauri-plugin-store, which writes JSON into the OS's per-user
 // app data dir (macOS: ~/Library/Application Support/dev.harold.exoskeleton/).
@@ -12,7 +12,7 @@ const STATE_KEY = "state";
 const store = new LazyStore(STORE_FILE);
 
 export const tauriStorage: Storage = {
-  async load() {
+  async load(): Promise<AppStateV8 | null> {
     try {
       const raw = await store.get(STATE_KEY);
       if (!isCompatible(raw)) {
@@ -24,13 +24,13 @@ export const tauriStorage: Storage = {
         }
         return null;
       }
-      return raw;
+      return migrateToV8(raw as AppState);
     } catch (e) {
       console.warn("[exoskeleton] failed to load state:", e);
       return null;
     }
   },
-  async save(state: AppState) {
+  async save(state: AppStateV8) {
     try {
       await store.set(STATE_KEY, state);
       await store.save();

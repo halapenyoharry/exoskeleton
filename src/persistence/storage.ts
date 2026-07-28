@@ -24,38 +24,204 @@ import type { SerializedDockview } from "dockview";
 //   7 — renamed dyadicProjection → json-dyadic to match the json-* family
 //       naming pattern. Saved layouts from v6 get rewritten in-place by
 //       migrateSavedLayout (default-layout.ts) before fromJSON runs.
-export const CURRENT_VERSION = 7;
+//   8 — multi-workspace support. Saved layout is encapsulated within named
+//       `workspaces` objects; `activeWorkspaceId` selects the active grid.
+export const CURRENT_VERSION = 8;
 
 export interface Preferences {
   // Empty for now; reserved for theme, tab-position, etc. when those land.
-  // Removed in v3: sideGridVisible (now implicit in the edge group's presence
-  // within `layout`).
 }
 
-export interface AppState {
-  version: number;
-  /** Main grid layout (editor / terminal / webview / tempo-clock / settings
-   *  edge group / ...). Settings + the left edge group are part of this
-   *  blob since v3 — no longer a separate field. */
+export interface Workspace {
+  id: string;
+  name: string;
   layout: SerializedDockview;
-  /** User preferences. Merged on top of schema defaults at load time. */
+  updatedAt: number; // Date.now()
+}
+
+export interface AppStateV7 {
+  version: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  layout: SerializedDockview;
   preferences?: Preferences;
 }
 
+export interface AppStateV8 {
+  version: 8;
+  activeWorkspaceId: string;
+  workspaces: Record<string, Workspace>;
+  preferences: Preferences;
+}
+
+export type AppState = AppStateV8 | AppStateV7;
+
 export interface Storage {
-  load(): Promise<AppState | null>;
-  save(state: AppState): Promise<void>;
+  load(): Promise<AppStateV8 | null>;
+  save(state: AppStateV8): Promise<void>;
   clear(): Promise<void>;
+}
+
+export function isAppStateV8(state: unknown): state is AppStateV8 {
+  if (!state || typeof state !== "object") return false;
+  const s = state as AppStateV8;
+  return (
+    s.version === 8 &&
+    typeof s.activeWorkspaceId === "string" &&
+    typeof s.workspaces === "object" &&
+    s.workspaces !== null &&
+    s.activeWorkspaceId in s.workspaces
+  );
+}
+
+/**
+ * Migrates any legacy AppState (v1-v7 or partial v8) to a valid AppStateV8 object.
+ */
+export function migrateToV8(state: AppState): AppStateV8 {
+  if (isAppStateV8(state)) {
+    return state;
+  }
+
+  const legacyLayout = (state as AppStateV7).layout || {
+    grid: { root: { type: "branch", data: [] } },
+    panels: {},
+  };
+
+  const defaultWorkspace: Workspace = {
+    id: "default",
+    name: "Default Workspace",
+    layout: legacyLayout,
+    updatedAt: Date.now(),
+  };
+
+  return {
+    version: 8,
+    activeWorkspaceId: "default",
+    workspaces: {
+      default: defaultWorkspace,
+    },
+    preferences: state.preferences || {},
+  };
 }
 
 /**
  * Decide if a loaded blob is usable in this code version. Accepts any
- * known schema version from 1 through CURRENT_VERSION — older states get
- * migrated at load time by `migrateLayout` in default-layout.ts.
- * Future versions are rejected (downgrade is not supported).
+ * known schema version from 1 through CURRENT_VERSION. Older states get
+ * migrated at load time by `migrateToV8`.
+ * Future versions or malformed v8 objects are rejected.
  */
 export function isCompatible(state: unknown): state is AppState {
   if (!state || typeof state !== "object") return false;
-  const v = (state as AppState).version;
-  return typeof v === "number" && v >= 1 && v <= CURRENT_VERSION;
+  const v = (state as { version?: unknown }).version;
+  if (typeof v !== "number" || v < 1 || v > CURRENT_VERSION) return false;
+  if (v === 8) {
+    return isAppStateV8(state);
+  }
+  return true;
+}
+
+// ─── Pure Workspace CRUD Helpers ───────────────────────────────────────────
+
+export function listWorkspaces(state: AppStateV8): Workspace[] {
+  return Object.values(state.workspaces).sort((a, b) => b.updatedAt - a.updatedAt);
+}
+
+export function getActiveWorkspace(state: AppStateV8): Workspace {
+  return state.workspaces[state.activeWorkspaceId] || Object.values(state.workspaces)[0];
+}
+
+export function updateActiveWorkspaceLayout(
+  state: AppStateV8,
+  layout: SerializedDockview,
+): AppStateV8 {
+  const activeId = state.activeWorkspaceId;
+  const active = state.workspaces[activeId];
+  if (!active) return state;
+
+  return {
+    ...state,
+    workspaces: {
+      ...state.workspaces,
+      [activeId]: {
+        ...active,
+        layout,
+        updatedAt: Date.now(),
+      },
+    },
+  };
+}
+
+export function switchWorkspace(state: AppStateV8, id: string): AppStateV8 {
+  if (!state.workspaces[id]) return state;
+  return {
+    ...state,
+    activeWorkspaceId: id,
+  };
+}
+
+export function createWorkspace(
+  state: AppStateV8,
+  name: string,
+  initialLayout?: SerializedDockview,
+): { state: AppStateV8; workspace: Workspace } {
+  const id = `ws_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+  const activeLayout = getActiveWorkspace(state)?.layout || {
+    grid: { root: { type: "branch", data: [] } },
+    panels: {},
+  };
+  const workspace: Workspace = {
+    id,
+    name: name.trim() || "Untitled Workspace",
+    layout: initialLayout || activeLayout,
+    updatedAt: Date.now(),
+  };
+
+  const nextState: AppStateV8 = {
+    ...state,
+    activeWorkspaceId: id,
+    workspaces: {
+      ...state.workspaces,
+      [id]: workspace,
+    },
+  };
+
+  return { state: nextState, workspace };
+}
+
+export function deleteWorkspace(state: AppStateV8, id: string): AppStateV8 {
+  const ids = Object.keys(state.workspaces);
+  if (ids.length <= 1 || !state.workspaces[id]) {
+    return state; // Prevent deleting the last workspace
+  }
+
+  const { [id]: _deleted, ...remainingWorkspaces } = state.workspaces;
+  let nextActiveId = state.activeWorkspaceId;
+  if (id === state.activeWorkspaceId) {
+    nextActiveId = Object.keys(remainingWorkspaces)[0];
+  }
+
+  return {
+    ...state,
+    activeWorkspaceId: nextActiveId,
+    workspaces: remainingWorkspaces,
+  };
+}
+
+export function renameWorkspace(
+  state: AppStateV8,
+  id: string,
+  newName: string,
+): AppStateV8 {
+  const target = state.workspaces[id];
+  if (!target) return state;
+
+  return {
+    ...state,
+    workspaces: {
+      ...state.workspaces,
+      [id]: {
+        ...target,
+        name: newName.trim() || target.name,
+        updatedAt: Date.now(),
+      },
+    },
+  };
 }

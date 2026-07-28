@@ -39,7 +39,11 @@ import {
   repairLayout,
 } from "./persistence/default-layout";
 import { panelAccent, panelGlyph } from "./ColoredTab";
-import { CURRENT_VERSION, type AppState } from "./persistence/storage";
+import {
+  getActiveWorkspace,
+  updateActiveWorkspaceLayout,
+  type AppStateV8,
+} from "./persistence/storage";
 import { tauriStorage } from "./persistence/tauri-storage";
 import { createDebounce } from "./utils/debounce";
 import { DEFAULT_PRESET_ID } from "./persistence/presets";
@@ -83,9 +87,15 @@ const SIDE_GROUP_ID = "side-grid";
 
 export default function App() {
   // Initial-load gate. `undefined` = loading; null = no saved state; an
-  // AppState = restored from disk. We don't mount Dockview until this is
-  // resolved so we don't briefly flash a default layout.
-  const [saved, setSaved] = useState<AppState | null | undefined>(undefined);
+  // AppStateV8 = restored from disk or initialized with default workspace.
+  const [appState, setAppState] = useState<AppStateV8 | null | undefined>(undefined);
+  const appStateRef = useRef<AppStateV8 | null>(null);
+
+  useEffect(() => {
+    if (appState !== undefined) {
+      appStateRef.current = appState;
+    }
+  }, [appState]);
 
   const mainApiRef = useRef<DockviewApi | null>(null);
   const [isStatusBarVisible, setIsStatusBarVisible] = useState(false);
@@ -96,18 +106,17 @@ export default function App() {
 
   // Preferences state. Currently empty (see Preferences interface in
   // storage.ts); included in the save so future fields persist automatically.
-  const prefsRef = useRef<AppState["preferences"]>({});
+  const prefsRef = useRef<AppStateV8["preferences"]>({});
 
-  // Single debounced save. Reads the live api ref + prefs ref each tick.
+  // Single debounced save. Reads the live api ref + current AppStateV8 each tick.
   const save = useRef(
     createDebounce(() => {
       const main = mainApiRef.current?.toJSON();
-      if (!main) return;
-      storage.save({
-        version: CURRENT_VERSION,
-        layout: main,
-        preferences: prefsRef.current,
-      });
+      const current = appStateRef.current;
+      if (!main || !current) return;
+      const next = updateActiveWorkspaceLayout(current, main);
+      appStateRef.current = next;
+      storage.save(next);
     }, 400),
   ).current;
 
@@ -144,7 +153,7 @@ export default function App() {
 
   // Initial load.
   useEffect(() => {
-    storage.load().then(setSaved);
+    storage.load().then(setAppState);
   }, []);
 
   function mountStatusBar(api: DockviewApi) {
@@ -216,17 +225,18 @@ export default function App() {
 
   function onMainReady(event: DockviewReadyEvent) {
     mainApiRef.current = event.api;
-    if (saved) {
+    if (appState) {
+      const activeWs = getActiveWorkspace(appState);
       // Restore preferences so the first auto-save round-trips them.
-      if (saved.preferences) prefsRef.current = saved.preferences;
+      if (appState.preferences) prefsRef.current = appState.preferences;
       try {
-        const layout = migrateSavedLayout(saved.layout, saved.version);
+        const layout = migrateSavedLayout(activeWs.layout, appState.version);
         event.api.fromJSON(layout);
         // Add any panels the user's saved state predates. No-op when the
         // saved version is already current. Without this, panels installed
         // after the user's last save would never appear unless they
         // cleared state — a real UX trap for library-panel installs.
-        migrateLayout(event.api, saved.version);
+        migrateLayout(event.api, appState.version);
       } catch (e) {
         console.warn(
           "[exoskeleton] main fromJSON failed, falling back to defaults:",
@@ -281,7 +291,7 @@ export default function App() {
     event.api.onDidActivePanelChange(save);
   }
 
-  if (saved === undefined) {
+  if (appState === undefined) {
     return <div className="app-frame app-frame--loading" />;
   }
 
