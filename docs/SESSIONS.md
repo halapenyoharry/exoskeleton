@@ -228,3 +228,10 @@ State: clean tree on `add-json-panels` at 4bb97b1. `npm run build && npm test` g
 Last: completed WP-10. Introduced schema v8 in `src/persistence/storage.ts` with `Workspace` interface, `AppStateV8` type, `migrateToV8()` legacy save converter, and pure CRUD helpers (`listWorkspaces`, `getActiveWorkspace`, `updateActiveWorkspaceLayout`, `switchWorkspace`, `createWorkspace`, `deleteWorkspace`, `renameWorkspace`). Added unit tests in `src/persistence/workspace.test.ts` and updated `tauri-storage.ts` and `App.tsx`.
 Next: WP-11 — Workspace UI & File Menu (WP-11a workspace selector UI, WP-11b File menu export/import, WP-11c json-edit raw-JSON apply fix).
 Open: none for WP-10.
+
+## 2026-07-28 (WP-11 complete)
+
+State: clean tree on `add-json-panels` at 89edc3e. `npm run build && npm test` green (34/34 tests passing).
+Last: completed WP-11. Added `applyWorkspaceState` helper in `src/persistence/default-layout.ts`, added Workspaces section to floating ⊞ menu in `App.tsx` (+ New, Rename, Delete, active indicator), styled in `App.css`, and updated `SettingsPanel.tsx` to trigger live layout updates via `exoskeleton:state-applied`.
+Next: WP-12 — Export/import workspace files (`.exo.json` workspace documents).
+Open: none for WP-11.
