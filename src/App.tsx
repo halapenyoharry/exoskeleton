@@ -40,6 +40,7 @@ import {
 import { panelAccent, panelGlyph } from "./ColoredTab";
 import { CURRENT_VERSION, type AppState } from "./persistence/storage";
 import { tauriStorage } from "./persistence/tauri-storage";
+import { createDebounce } from "./utils/debounce";
 import "./App.css";
 
 // SCHEMA — what panels exist and which React components fill them.
@@ -78,15 +79,6 @@ const storage = tauriStorage;
 const SIDE_EDGE = "left" as const;
 const SIDE_GROUP_ID = "side-grid";
 
-// Debounce helper for save-on-change.
-function debounce<T extends (...args: never[]) => void>(fn: T, ms: number) {
-  let t: ReturnType<typeof setTimeout> | undefined;
-  return (...args: Parameters<T>) => {
-    if (t) clearTimeout(t);
-    t = setTimeout(() => fn(...args), ms);
-  };
-}
-
 export default function App() {
   // Initial-load gate. `undefined` = loading; null = no saved state; an
   // AppState = restored from disk. We don't mount Dockview until this is
@@ -106,7 +98,7 @@ export default function App() {
 
   // Single debounced save. Reads the live api ref + prefs ref each tick.
   const save = useRef(
-    debounce(() => {
+    createDebounce(() => {
       const main = mainApiRef.current?.toJSON();
       if (!main) return;
       storage.save({
@@ -116,6 +108,37 @@ export default function App() {
       });
     }, 400),
   ).current;
+
+  // Flush pending save immediately on window unload or Tauri window close.
+  useEffect(() => {
+    const handleUnload = () => {
+      save.flush();
+    };
+    window.addEventListener("beforeunload", handleUnload);
+
+    let unlistenClose: (() => void) | undefined;
+    import("@tauri-apps/api/window")
+      .then(({ getCurrentWindow }) => {
+        getCurrentWindow()
+          .onCloseRequested(() => {
+            save.flush();
+          })
+          .then((unlisten) => {
+            unlistenClose = unlisten;
+          })
+          .catch(() => {
+            /* ignore window error */
+          });
+      })
+      .catch(() => {
+        /* off-Tauri context */
+      });
+
+    return () => {
+      window.removeEventListener("beforeunload", handleUnload);
+      if (unlistenClose) unlistenClose();
+    };
+  }, [save]);
 
   // Initial load.
   useEffect(() => {
