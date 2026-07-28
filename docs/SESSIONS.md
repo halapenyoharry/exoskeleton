@@ -179,3 +179,10 @@ State: clean tree on `add-json-panels` at b9050c6. `cargo check` and `npm run bu
 Last: completed WP-2. Repaired popout group button (added `public/popout.html` shell document, configured `on_new_window` handler returning `NewWindowResponse::Allow` on main window builder in `lib.rs`, cleared `app.windows` in `tauri.conf.json`).
 Next: WP-4 — Cross-platform shell in `TerminalPanel.tsx` (extract `resolveShell` pure helper with `SHELL` env and per-platform fallbacks).
 Open: none for WP-2.
+
+## 2026-07-28 (WP-4 complete)
+
+State: clean tree on `add-json-panels` at ccca204. `npm run build && npm test` green (16/16 tests passing).
+Last: completed WP-4. Extracted `resolveShell` pure helper to `src/panels/terminal-shell.ts`, added unit tests in `src/panels/terminal-shell.test.ts`, and updated `TerminalPanel.tsx` to resolve default shell by OS and `SHELL` env.
+Next: WP-5 — Per-panel error boundary in `PanelRoot.tsx` (`PanelErrorBoundary` with Retry, Close, and panel accent stripe).
+Open: none for WP-4. Tested on macOS; Pop!_OS fallback to `/bin/bash` ready.
