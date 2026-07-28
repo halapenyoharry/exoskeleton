@@ -32,6 +32,7 @@ import { exoPanel } from "./PanelRoot";
 import {
   addOrFocusPanel,
   buildDefaultLayout,
+  buildPreset,
   migrateLayout,
   migrateSavedLayout,
   panelRegistry,
@@ -41,6 +42,7 @@ import { panelAccent, panelGlyph } from "./ColoredTab";
 import { CURRENT_VERSION, type AppState } from "./persistence/storage";
 import { tauriStorage } from "./persistence/tauri-storage";
 import { createDebounce } from "./utils/debounce";
+import { DEFAULT_PRESET_ID } from "./persistence/presets";
 import "./App.css";
 
 // SCHEMA — what panels exist and which React components fill them.
@@ -344,6 +346,26 @@ export default function App() {
                 </button>
               );
             })}
+            <div className="add-panel-divider" />
+            <button
+              className="add-panel-item add-panel-reset"
+              onClick={() => {
+                if (
+                  window.confirm(
+                    "Reset layout to default (Minimal)? Any unsaved panel position changes will be cleared.",
+                  )
+                ) {
+                  mainApiRef.current?.clear();
+                  buildPreset(mainApiRef.current!, DEFAULT_PRESET_ID);
+                  setIsAddMenuOpen(false);
+                }
+              }}
+            >
+              <span className="add-panel-glyph" style={{ color: "#ff5252" }}>
+                ↺
+              </span>
+              <span className="add-panel-name">Reset layout...</span>
+            </button>
           </div>
         </>
       )}
