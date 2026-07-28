@@ -172,3 +172,10 @@ State: clean tree on `add-json-panels` at 673b0e7. `npm run build && npm test` g
 Last: completed WP-1. Replaced Monaco with CodeMirror 6 in `json-edit` (swapped npm dependencies, ported Midnight Alaska theme to CodeMirror EditorView.theme + HighlightStyle, updated JsonEditPanel.tsx with lineWrapping and paste formatting, updated manifest and migrateSavedLayout).
 Next: WP-2 — Repair the popout button (add `public/popout.html`, configure `on_new_window` in `lib.rs`, update `tauri.conf.json`).
 Open: none for WP-1.
+
+## 2026-07-28 (WP-2 complete)
+
+State: clean tree on `add-json-panels` at b9050c6. `cargo check` and `npm run build && npm test` green.
+Last: completed WP-2. Repaired popout group button (added `public/popout.html` shell document, configured `on_new_window` handler returning `NewWindowResponse::Allow` on main window builder in `lib.rs`, cleared `app.windows` in `tauri.conf.json`).
+Next: WP-4 — Cross-platform shell in `TerminalPanel.tsx` (extract `resolveShell` pure helper with `SHELL` env and per-platform fallbacks).
+Open: none for WP-2.
