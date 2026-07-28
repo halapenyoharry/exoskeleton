@@ -235,3 +235,11 @@ State: clean tree on `add-json-panels` at 89edc3e. `npm run build && npm test` g
 Last: completed WP-11. Added `applyWorkspaceState` helper in `src/persistence/default-layout.ts`, added Workspaces section to floating ⊞ menu in `App.tsx` (+ New, Rename, Delete, active indicator), styled in `App.css`, and updated `SettingsPanel.tsx` to trigger live layout updates via `exoskeleton:state-applied`.
 Next: WP-12 — Export/import workspace files (`.exo.json` workspace documents).
 Open: none for WP-11.
+
+## 2026-07-28 (WP-12 complete)
+
+State: clean tree on `add-json-panels` at 067ce54. `npm run build && npm test` green (39/39 tests passing).
+Last: completed WP-12. Created `src/persistence/workspace-file.ts` for `.exo.json` document serialization and validation (`serializeWorkspaceDocument`, `parseWorkspaceDocument`), added unit tests in `src/persistence/workspace-file.test.ts`, and added Export and Import buttons to the floating ⊞ menu in `App.tsx`.
+Next: WP-13 — `json-edit` remembers its document (`filePath` persistence in panel params).
+Open: none for WP-12.
+
