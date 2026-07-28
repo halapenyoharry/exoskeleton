@@ -249,3 +249,10 @@ State: clean tree on `add-json-panels` at 3b61acd. `npm run build && npm test` g
 Last: completed WP-13. Added `filePath?: string` to `JsonEditParams` interface in `src/panels/json-edit/JsonEditPanel.tsx`, updated file operations to write back `filePath` to panel params, and added startup effect to read and restore file content from `rawParams.filePath`.
 Next: Phase 3 — Workspace windows (WP-14 New Window opens an independent workspace).
 Open: Phase 2 complete. Ready for Phase 3.
+
+## 2026-07-28 (WP-14 complete)
+
+State: clean tree on `add-json-panels` at 02c90ae. `npm run build && npm test` green (39/39 tests passing), `cargo check` green. Phase 3 complete!
+Last: completed WP-14. Registered `open_workspace_window` command in `src-tauri/src/lib.rs`, updated `src-tauri/capabilities/default.json` with `windows: ["*"]`, updated `App.tsx` startup effect for `?workspace=<id>` URL search param scoping, and added popout button (❐) to Workspaces menu items.
+Next: Phase 4 — Public-release hygiene (WP-15 through WP-21: LICENSE, CSP, CI, code splitting, documentation, README, pre-publication privacy sweep).
+Open: Phase 3 complete. Ready for Phase 4.
