@@ -214,3 +214,10 @@ State: clean tree on `add-json-panels` at 7a0aafc. `npm run build && npm test` g
 Last: completed WP-8. Added `autoAdd?: boolean` to `RegistryEntry`, extracted pure decision helper `panelsToAutoAdd(savedVersion, registry)` in `src/persistence/default-layout.ts`, added unit tests in `src/persistence/migration.test.ts`, and updated `migrateLayout` to auto-mount version-newer panels only when `autoAdd === true`.
 Next: WP-9 — Visible reset and preset switching (Watermark preset chooser, ⊞ menu reset option).
 Open: none for WP-8.
+
+## 2026-07-28 (WP-9 complete)
+
+State: clean tree on `add-json-panels` at 1c75b36. `npm run build && npm test` green (30/30 tests passing). Phase 1 complete!
+Last: completed WP-9. Added preset selection cards (Minimal, JSON Lab, AV Lab, Everything) in `Watermark.tsx` and a "Reset layout..." action with confirmation in the floating ⊞ menu in `App.tsx`. Styled in `Watermark.css` and `App.css`.
+Next: Phase 2 (WP-10 through WP-13) — Workspaces (schema v8 storage model, workspace UI, export/import `.exo.json`, json-edit persistence).
+Open: Phase 1 complete. Ready for Phase 2.
