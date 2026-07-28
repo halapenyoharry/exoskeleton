@@ -1,5 +1,21 @@
 mod osc;
 
+#[tauri::command]
+fn open_workspace_window(app: tauri::AppHandle, workspace_id: String) -> Result<(), String> {
+    use tauri::webview::NewWindowResponse;
+    let label = format!("ws-{}", workspace_id);
+    let url = format!("index.html?workspace={}", workspace_id);
+    tauri::WebviewWindowBuilder::new(&app, &label, tauri::WebviewUrl::App(url.into()))
+        .title("Exoskeleton")
+        .inner_size(1200.0, 800.0)
+        .min_inner_size(800.0, 500.0)
+        .disable_drag_drop_handler()
+        .on_new_window(|_url, _features| NewWindowResponse::Allow)
+        .build()
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -24,7 +40,10 @@ pub fn run() {
                 .level(log::LevelFilter::Info)
                 .build(),
         )
-        .invoke_handler(tauri::generate_handler![crate::osc::send_osc])
+        .invoke_handler(tauri::generate_handler![
+            crate::osc::send_osc,
+            open_workspace_window
+        ])
         .setup(|app| {
             crate::osc::setup(app.handle())?;
             use tauri::menu::{Menu, MenuItemBuilder, Submenu};

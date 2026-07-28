@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import {
   DockviewReact,
   type DockviewApi,
@@ -163,9 +164,22 @@ export default function App() {
     };
   }, [save]);
 
-  // Initial load.
+  // Initial load: inspect URL search params for ?workspace=<id> override
   useEffect(() => {
-    storage.load().then(setAppState);
+    storage.load().then((loaded) => {
+      if (loaded) {
+        const searchParams = new URLSearchParams(window.location.search);
+        const wsParam = searchParams.get("workspace");
+        if (wsParam && loaded.workspaces && loaded.workspaces[wsParam]) {
+          setAppState({
+            ...loaded,
+            activeWorkspaceId: wsParam,
+          });
+          return;
+        }
+      }
+      setAppState(loaded);
+    });
   }, []);
 
   // Listen for raw JSON state applications from SettingsPanel or file imports
@@ -424,6 +438,15 @@ export default function App() {
     setIsAddMenuOpen(false);
   }
 
+  function handleOpenWorkspaceInNewWindow(workspaceId: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    save.flush();
+    invoke("open_workspace_window", { workspaceId }).catch((err) => {
+      console.error("[exoskeleton] failed to open workspace window:", err);
+    });
+    setIsAddMenuOpen(false);
+  }
+
   if (appState === undefined) {
     return <div className="app-frame app-frame--loading" />;
   }
@@ -517,7 +540,16 @@ export default function App() {
                         onClick={() => handleSwitchWorkspace(ws.id)}
                       >
                         <span className="workspace-name">{ws.name}</span>
-                        {isActive && <span className="workspace-indicator">●</span>}
+                        <div className="workspace-item-controls">
+                          <button
+                            className="workspace-popout-btn"
+                            onClick={(e) => handleOpenWorkspaceInNewWindow(ws.id, e)}
+                            title="Open workspace in new window"
+                          >
+                            ❐
+                          </button>
+                          {isActive && <span className="workspace-indicator">●</span>}
+                        </div>
                       </button>
                     );
                   })}
