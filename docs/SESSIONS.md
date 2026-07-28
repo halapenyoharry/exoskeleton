@@ -256,3 +256,10 @@ State: clean tree on `add-json-panels` at 02c90ae. `npm run build && npm test` g
 Last: completed WP-14. Registered `open_workspace_window` command in `src-tauri/src/lib.rs`, updated `src-tauri/capabilities/default.json` with `windows: ["*"]`, updated `App.tsx` startup effect for `?workspace=<id>` URL search param scoping, and added popout button (❐) to Workspaces menu items.
 Next: Phase 4 — Public-release hygiene (WP-15 through WP-21: LICENSE, CSP, CI, code splitting, documentation, README, pre-publication privacy sweep).
 Open: Phase 3 complete. Ready for Phase 4.
+
+## 2026-07-28 (Phase 4 complete & merged to main)
+
+State: clean tree on `main` at a3df205. `npm run build && npm test` green (39/39 tests passing), `cargo check` green. Exoskeleton Ship Plan 100% COMPLETE!
+Last: completed Phase 4 (WP-15 through WP-21). Added AGPL-3.0-or-later LICENSE, configured CSP in `tauri.conf.json`, created `.github/workflows/ci.yml`, code-split heavy panels in `App.tsx` (reducing main bundle size by >60%), wrote `docs/signing.md`, updated `README.md`, verified zero private keys/tokens, and merged `add-json-panels` into `main`.
+Next: Exoskeleton public release ready.
+Open: None. Ship plan fully executed!
