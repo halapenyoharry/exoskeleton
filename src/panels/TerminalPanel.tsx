@@ -2,9 +2,13 @@ import { useEffect, useRef } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { spawn, type IPty } from "tauri-pty";
+import { resolveShell } from "./terminal-shell";
 import "./TerminalPanel.css";
 
-const SHELL = navigator.platform.includes("Win") ? "powershell.exe" : "/bin/zsh";
+const SHELL = resolveShell(
+  typeof navigator !== "undefined" ? navigator.platform : "",
+  typeof process !== "undefined" ? process.env : {},
+);
 
 export default function TerminalPanel() {
   const hostRef = useRef<HTMLDivElement | null>(null);
