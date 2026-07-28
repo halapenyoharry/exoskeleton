@@ -1,30 +1,36 @@
 import { test } from "node:test";
 import assert from "node:assert";
 import { readFileSync, readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { parseTopology } from "./parse.ts";
 
-// Run parseTopology against the real speak topology JSON so the indices
-// it builds are checked against a known-good source rather than a
-// synthetic fixture. If the file isn't present (e.g. running on a fresh
-// clone without speak/, or the file's been renamed), the test is skipped
-// instead of failing — the schema lives in two repos and we don't want
-// one to break the other.
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const DEFAULT_FIXTURE_PATH = join(__dirname, "__fixtures__", "synthetic-topology.json");
 
-const SPEAK_DIR = "/Users/harold/Projects/speak/topology";
-
-function loadSpeakOrSkip(): unknown | null {
-  try {
-    const entries = readdirSync(SPEAK_DIR);
-    // Prefer the original audit file; fall back to any *.normalized-dyadic.json
-    // that isn't a target/baseline.
-    const candidate =
-      entries.find((f) => f.includes("audit") && f.endsWith(".normalized-dyadic.json")) ??
-      entries.find((f) => f.endsWith(".normalized-dyadic.json") && !f.includes("target"));
-    if (!candidate) return null;
-    return JSON.parse(readFileSync(`${SPEAK_DIR}/${candidate}`, "utf8"));
-  } catch {
-    return null;
+function loadTopologyDoc(): { doc: unknown; isOverride: boolean } {
+  const overrideDir = process.env.EXO_TOPOLOGY_DIR;
+  if (overrideDir) {
+    try {
+      const entries = readdirSync(overrideDir);
+      const candidate =
+        entries.find((f) => f.includes("audit") && f.endsWith(".normalized-dyadic.json")) ??
+        entries.find((f) => f.endsWith(".normalized-dyadic.json") && !f.includes("target"));
+      if (candidate) {
+        return {
+          doc: JSON.parse(readFileSync(join(overrideDir, candidate), "utf8")),
+          isOverride: true,
+        };
+      }
+    } catch {
+      // Fallback to synthetic fixture
+    }
   }
+  return {
+    doc: JSON.parse(readFileSync(DEFAULT_FIXTURE_PATH, "utf8")),
+    isOverride: false,
+  };
 }
 
 test("parseTopology rejects non-object input", () => {
@@ -113,26 +119,19 @@ test("parseTopology takes mode of categories from dyadic links when no reificati
   assert.strictEqual(result.layers.get("L")?.primaryCategory, "interactivity");
 });
 
-test("parseTopology against a real speak topology file", (t) => {
-  const doc = loadSpeakOrSkip();
-  if (!doc) {
-    t.skip("speak topology file not present at expected path");
-    return;
-  }
+test("parseTopology against a topology file (synthetic fixture or EXO_TOPOLOGY_DIR override)", () => {
+  const { doc, isOverride } = loadTopologyDoc();
+  assert.ok(doc, "expected a loaded topology document");
   const result = parseTopology(doc);
 
-  // Structural assertions — the exact counts drift as Harold edits the
-  // source file, but the shape must always hold.
-
-  // Some nodes, some reifications, both > 0.
+  // Structural assertions — shape must always hold.
   assert.ok(result.nodesById.size > 0, "expected real nodes");
   assert.ok(
     result.reificationsById.size > 0,
-    "expected at least one c: reification (file is a dyadic projection)",
+    "expected at least one c: reification",
   );
 
-  // Disjoint maps — a c: id must never appear as a real node, otherwise
-  // the renderer could draw it as a tile.
+  // Disjoint maps — a c: id must never appear as a real node
   for (const id of result.reificationsById.keys()) {
     assert.ok(
       !result.nodesById.has(id),
@@ -140,9 +139,7 @@ test("parseTopology against a real speak topology file", (t) => {
     );
   }
 
-  // Every reification carries a primary edge_category — this is the
-  // primary visual switch the panel reads, so an absent category would
-  // mean the renderer falls back to "reference" (low-weight) silently.
+  // Every reification carries a primary edge_category
   for (const [id, rel] of result.reificationsById) {
     assert.ok(
       rel.attrs?.["i2t:edge_category"],
@@ -161,11 +158,25 @@ test("parseTopology against a real speak topology file", (t) => {
     );
   }
 
-  // No warnings (in the well-formed file case). If this fires, the file
-  // has structural surprises worth investigating before shipping.
-  assert.deepStrictEqual(
-    result.warnings,
-    [],
-    `parser warnings on the real file: ${result.warnings.join("; ")}`,
-  );
+  // In override mode, warnings should be empty. For synthetic fixture, malformed/dangling warnings are expected.
+  if (isOverride) {
+    assert.deepStrictEqual(
+      result.warnings,
+      [],
+      `parser warnings on the real file: ${result.warnings.join("; ")}`,
+    );
+  } else {
+    // Confirm three-member hyperedge reification is present
+    const triadLayer = result.layers.get("triad_layer");
+    const threeMember = triadLayer?.reifications.find((r) => r.relation.id === "c:rel-three-member");
+    assert.ok(threeMember, "expected three-member hyperedge reification");
+    assert.strictEqual(threeMember.spokes.length, 3, "expected 3 spokes for three-member hyperedge");
+
+    // Confirm all 4 canonical edge categories are represented in layers
+    const categories = new Set(Array.from(result.layers.values()).map((l) => l.primaryCategory));
+    assert.ok(categories.has("containment"), "missing containment layer");
+    assert.ok(categories.has("state_change"), "missing state_change layer");
+    assert.ok(categories.has("interactivity"), "missing interactivity layer");
+    assert.ok(categories.has("reference"), "missing reference layer");
+  }
 });

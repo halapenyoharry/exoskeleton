@@ -1,0 +1,136 @@
+{
+  "nodes": [
+    {
+      "id": "engine:a",
+      "kind": "node",
+      "attrs": { "label": "Node A" }
+    },
+    {
+      "id": "engine:b",
+      "kind": "node",
+      "attrs": { "label": "Node B" }
+    },
+    {
+      "id": "engine:c",
+      "kind": "node",
+      "attrs": { "label": "Node C" }
+    },
+    {
+      "id": "engine:d",
+      "kind": "node",
+      "attrs": { "label": "Node D" }
+    },
+    {
+      "id": "c:rel-containment",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:edge_category": "containment"
+      }
+    },
+    {
+      "id": "c:rel-state_change",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "transforms",
+        "i2t:edge_category": "state_change"
+      }
+    },
+    {
+      "id": "c:rel-interactivity",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "triggers",
+        "i2t:edge_category": "interactivity"
+      }
+    },
+    {
+      "id": "c:rel-reference",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "refers_to",
+        "i2t:edge_category": "reference"
+      }
+    },
+    {
+      "id": "c:rel-three-member",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "triad",
+        "i2t:edge_category": "containment"
+      }
+    },
+    { "invalid": "entry_missing_id" }
+  ],
+  "links": [
+    {
+      "source": "c:rel-containment",
+      "target": "engine:a",
+      "layer": "containment_layer",
+      "role": "container"
+    },
+    {
+      "source": "c:rel-containment",
+      "target": "engine:b",
+      "layer": "containment_layer",
+      "role": "contained"
+    },
+    {
+      "source": "c:rel-state_change",
+      "target": "engine:b",
+      "layer": "state_layer",
+      "role": "input"
+    },
+    {
+      "source": "c:rel-state_change",
+      "target": "engine:c",
+      "layer": "state_layer",
+      "role": "output"
+    },
+    {
+      "source": "c:rel-interactivity",
+      "target": "engine:c",
+      "layer": "interactive_layer",
+      "role": "actor"
+    },
+    {
+      "source": "c:rel-reference",
+      "target": "engine:d",
+      "layer": "ref_layer",
+      "role": "target"
+    },
+    {
+      "source": "c:rel-three-member",
+      "target": "engine:a",
+      "layer": "triad_layer",
+      "role": "member1"
+    },
+    {
+      "source": "c:rel-three-member",
+      "target": "engine:b",
+      "layer": "triad_layer",
+      "role": "member2"
+    },
+    {
+      "source": "c:rel-three-member",
+      "target": "engine:c",
+      "layer": "triad_layer",
+      "role": "member3"
+    },
+    {
+      "source": "engine:a",
+      "target": "engine:d",
+      "layer": "dyadic_layer",
+      "attrs": { "i2t:edge_category": "reference" }
+    },
+    {
+      "source": "c:rel-reference",
+      "target": "engine:dangling_target",
+      "layer": "ref_layer",
+      "role": "dangling"
+    },
+    {
+      "source": "engine:a"
+    }
+  ]
+}

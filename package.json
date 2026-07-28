@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "test": "node --experimental-strip-types --test src/**/*.test.ts"
+    "test": "node --experimental-strip-types --test --test-reporter=spec \"src/**/*.test.ts\""
   },
   "dependencies": {
     "@marktext/muya": "^0.2.5",

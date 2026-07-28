@@ -13,10 +13,6 @@
         "echo": true,
         "showReuseMessage": false,
         "clear": false
-      },
-      "runOptions": {
-        "runOn": "folderOpen"
-      },
       "isBackground": true,
       "problemMatcher": []
     }

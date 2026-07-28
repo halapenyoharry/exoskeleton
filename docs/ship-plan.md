@@ -284,58 +284,118 @@ breaking one assertion and confirming the suite goes red.
 commit. If it fails, that is a genuine finding — report it, don't weaken the
 assertion to get green.
 
-## WP-1 — Bundle Monaco locally, kill the CDN fetch
+## WP-1 — Replace Monaco with CodeMirror 6
 
-**Test first (manual + CI guard):** there is no unit test for "did a bundler inline a dependency." Write the guard as a shell assertion you run after building, and hand it to WP-17 to put in CI:
+**Test first (manual + CI guard):** there is no unit test for "did a bundler
+inline a dependency." Write the guard as a shell assertion you run after
+building, and hand it to WP-17 to put in CI:
 `npm run build && ! grep -rq "jsdelivr\|unpkg" dist/assets/`
 Run it before the fix and confirm it *fails*. That failing command is your red.
 
 **Why:** the shipped bundle fetches Monaco from `cdn.jsdelivr.net` at runtime.
 Violates rule 3, breaks `json-edit` offline, and loads a different version
-(0.55.1) than the one pinned in `package.json` (0.55.0).
+(0.55.1) than the one pinned in `package.json` (0.55.0). Monaco also needs
+separate web worker setup, a Vite `?worker` suffix dance, and adds ~2.5 MB to
+the bundle — all for a JSON editor, not a full IDE. CodeMirror 6 is pure ESM,
+bundles with zero configuration, needs no workers, has no CDN behaviour, and
+adds ~150 KB with full JSON support (syntax highlighting, validation, folding).
 
-**Files:** new `src/monaco-setup.ts`; edit `src/main.tsx`.
+**Decision — 2026-07-28:** Monaco is not a constraint on this project. Harold
+confirmed: replace it with CodeMirror 6 rather than working around its bundling
+problems.
+
+**Files:** edit `src/panels/json-edit/JsonEditPanel.tsx`,
+`src/panels/json-edit/themes/midnight-alaska.ts`; edit `package.json`.
 
 **Steps:**
 
-1. Create `src/monaco-setup.ts`:
+1. **Swap dependencies** in `package.json`:
 
-```ts
-// Monaco must be bundled, never fetched. @monaco-editor/react defaults to a
-// jsDelivr <script> injection unless loader.config() is given a local monaco.
-import * as monaco from "monaco-editor";
-import { loader } from "@monaco-editor/react";
-import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
+   ```diff
+   - "@monaco-editor/react": "^4.7.0",
+   - "monaco-editor": "^0.55.0",
+   + "codemirror": "^6.0.0",
+   + "@codemirror/lang-json": "^6.0.0",
+   + "@codemirror/theme-one-dark": "^6.0.0",
+   ```
 
-self.MonacoEnvironment = {
-  getWorker(_workerId: string, label: string) {
-    return label === "json" ? new jsonWorker() : new editorWorker();
-  },
-};
+   Then `npm install`.
 
-loader.config({ monaco });
-```
+2. **Port the Midnight Alaska theme** to CodeMirror's `EditorTheme` /
+   `HighlightStyle` format. The colour values stay identical — what changes is
+   the structure. Monaco uses `IStandaloneThemeData` (rules + colours);
+   CodeMirror uses `EditorView.theme()` for chrome and a `HighlightStyle` from
+   `@lezer/highlight` for syntax tokens. Map:
 
-2. In `src/main.tsx`, import it **before** `App`:
-   `import "./monaco-setup";`
-3. Align the pin: set `"monaco-editor": "0.55.1"` in `package.json` (exact, no
-   caret — a floating Monaco is how versions drift), then `npm install`.
+   | Monaco token | CodeMirror tag | Colour |
+   | --- | --- | --- |
+   | `string.key.json` | `tags.propertyName` | `#59b8ff` |
+   | `string.value.json` | `tags.string` | `#DCE5E7` |
+   | `number` | `tags.number` | `#e8c479` |
+   | `keyword.json` | `tags.bool` / `tags.null` | `#00DC7D` |
+   | `delimiter` | `tags.punctuation` | `#636363` |
+
+   Chrome colours (`editor.background`, cursor, selection, etc.) go into
+   `EditorView.theme()`.
+
+3. **Rewrite `JsonEditPanel.tsx`** to use CodeMirror instead of the Monaco
+   component. The panel's interface is simple: a controlled editor that calls
+   `onChange` with the buffer text. Use `EditorView` directly (not a React
+   wrapper) — mount it in a `useRef` div, and sync `value` via
+   `EditorView.dispatch` when the file changes. Read the buffer on
+   `EditorView.updateListener` for the debounced json-bus publish.
+
+   Key mappings to preserve:
+   - `onChange` → `EditorView.updateListener.of(update => ...)`, check
+     `update.docChanged`
+   - `automaticLayout` → use the `useElementSize` hook already in the codebase
+     or CodeMirror's own resize observer (it handles this natively)
+   - `formatOnPaste` → CodeMirror doesn't have this built-in; add a paste
+     handler that tries `JSON.stringify(JSON.parse(pasted), null, tabSize)` and
+     replaces if it parses. If it doesn't parse, paste as-is. This is a small
+     `EditorView.domEventHandlers({ paste })` extension.
+
+4. **Simplify `JsonEditParams`.** Several params are Monaco-specific and have
+   no CodeMirror equivalent worth preserving:
+   - `theme` — keep as a string id, but the only shipped theme is Midnight
+     Alaska. Remove the `beforeMount` callback entirely.
+   - `wordWrap` — CodeMirror's `EditorView.lineWrapping` is boolean. Simplify
+     to `lineWrapping: boolean`.
+   - `minimap` — CodeMirror has no minimap. Remove. (It was already defaulted
+     to `false`.)
+   - `lineNumbers` — keep; CodeMirror supports `lineNumbers()` extension.
+   - `fontSize`, `tabSize`, `formatOnPaste` — keep as-is.
+
+   **This is a params shape change.** Any saved layout that contains
+   `minimap`, `wordWrap: "on"`, or `theme: "midnight-alaska"` in the
+   `json-edit` panel params must be handled gracefully — either ignore
+   unknown keys (CodeMirror won't see them) or write a small migration in
+   `migrateSavedLayout` that rewrites `wordWrap: "on"` → `lineWrapping: true`
+   and drops `minimap`. Prefer the migration: silent dead keys in saved state
+   accumulate.
+
+5. **Delete `src/monaco-setup.ts`** if it was created during an earlier
+   attempt. There is no equivalent file to create — CodeMirror needs no
+   setup beyond importing it.
 
 **Acceptance:**
 
 ```bash
 npm run build
 grep -r "jsdelivr\|unpkg\|cdn\." dist/assets/ ; echo "exit=$?"   # must find nothing (exit=1)
+grep -r "monaco" dist/assets/ ; echo "exit=$?"                   # must find nothing (exit=1)
 ```
 
-Then launch and confirm `json-edit` renders with syntax highlighting, and that
-the Network tab shows no external requests. **Turn Wi-Fi off and relaunch** —
-this is the real test.
+Then launch and confirm `json-edit` renders with syntax highlighting, JSON
+validation errors are visible, folding works, and the json-bus publishes on
+edit (all viewers update). **Turn Wi-Fi off and relaunch** — this is the real
+test. The Network tab should show zero external requests.
 
-**Risk:** Monaco's worker imports need Vite's `?worker` suffix; if the build
-errors on the worker imports, check that `vite.config.ts` has no `worker`
-overrides (it currently has none) before improvising.
+**Risk:** CodeMirror's `EditorView` is imperative, not declarative like the
+Monaco React component. The controlled-value pattern needs care — don't
+feed the editor's own output back into `EditorView.dispatch` or it will
+loop. The standard pattern: track a `lastExternalValue` ref and only
+dispatch when the new value differs from what the editor already holds.
 
 ## WP-2 — Repair the popout button
 
@@ -475,7 +535,7 @@ panel.
 **Test first:** `presets.ts` is pure. Test before building any UI: every preset id is unique; every `panelIds` entry names a real `panelRegistry` id (this catches typos permanently); `minimal` contains exactly editor, terminal, webview; the `everything` preset resolves to the full registry. Add a `resolvePresetPanelIds(id)` helper so the empty-array-means-all rule is tested rather than duplicated at call sites.
 
 **Why:** first launch currently mounts all fourteen registry panels — PTY,
-WebGL, Cytoscape, Monaco, Web Audio, iframe, all at once. Per Harold's
+WebGL, Cytoscape, CodeMirror, Web Audio, iframe, all at once. Per Harold's
 decision: minimal default, everything still discoverable.
 
 **Files:** new `src/persistence/presets.ts`; edit
@@ -506,7 +566,7 @@ export const presets: LayoutPreset[] = [
   {
     id: "json-lab",
     name: "JSON Lab",
-    description: "Monaco JSON editor feeding the tree, graph, and 3D viewers.",
+    description: "JSON editor feeding the tree, graph, and 3D viewers.",
     // The status bar is JSON-aware (node/edge counts, selection), so it earns
     // its place here and nowhere else. In Minimal it would sit showing zeros.
     panelIds: ["json-edit", "json-tree", "json-graph3d", "status-bar"],
@@ -851,7 +911,7 @@ it — reimplement the idea or leave it.
 
 ## WP-16 — Content Security Policy
 
-**Test first (manual, all sixteen panels):** a CSP that breaks Cytoscape or three.js fails at runtime in ways the build cannot catch. Open every panel with devtools console visible and confirm zero CSP violations logged. Pay particular attention to Monaco (needs `worker-src blob:`), the 3D graph, and the iframe.
+**Test first (manual, all sixteen panels):** a CSP that breaks Cytoscape or three.js fails at runtime in ways the build cannot catch. Open every panel with devtools console visible and confirm zero CSP violations logged. Pay particular attention to the 3D graph and the iframe.
 
 Set a real CSP in `tauri.conf.json` instead of `null`. It must allow the
 webview panel to keep embedding arbitrary LAN and web pages while locking down
@@ -861,14 +921,15 @@ the app origin. Starting point, to be tested against every panel:
 default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';
 img-src 'self' data: blob:; font-src 'self' data:;
 connect-src 'self' ipc: http://ipc.localhost;
-frame-src *; worker-src 'self' blob:
+frame-src *; worker-src 'self'
 ```
 
 `frame-src *` is deliberate — the iframe panel exists to load whatever the user
 points it at, and cross-origin iframes cannot reach Tauri IPC. `worker-src
-blob:` is required by Monaco after WP-1. **Test all sixteen panels** after this
-change; a CSP that breaks Cytoscape or three.js is worse than none, because it
-fails at runtime in ways the build won't catch.
+'self'` is sufficient now that Monaco (which needed `blob:` workers) has been
+replaced by CodeMirror. **Test all sixteen panels** after this change; a CSP
+that breaks Cytoscape or three.js is worse than none, because it fails at
+runtime in ways the build won't catch.
 
 ## WP-17 — CI
 
@@ -880,9 +941,10 @@ Add a `tauri build` job on tag push producing `.dmg` and `.AppImage` artifacts.
 
 ## WP-18 — Code splitting
 
-One 2.93 MB chunk today. With a minimal default layout, the heavy panels
-(`json-graph3d` → three.js, `json-cytoscape` → cytoscape, `json-edit` → Monaco,
-`terminal` → xterm) should load on demand. Wrap those four in `React.lazy` with
+One large chunk today (smaller now that Monaco is gone, but still significant).
+With a minimal default layout, the heavy panels (`json-graph3d` → three.js,
+`json-cytoscape` → cytoscape, `terminal` → xterm) should load on demand.
+Wrap those three in `React.lazy` with
 a `Suspense` fallback inside `exoPanel`, and confirm Vite emits separate chunks.
 
 Do not lazy-load panels in the minimal preset — they're needed at first paint
