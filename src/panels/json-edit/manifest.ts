@@ -10,7 +10,7 @@ const manifest: PanelManifest<JsonEditParams> = {
   title: "json-edit",
   component: JsonEditPanel,
   description:
-    "Monaco JSON editor. Publishes parsed JSON to the json-bus (default channel 'default'); JSON-visualizer panels subscribe to render.",
+    "CodeMirror 6 JSON editor. Publishes parsed JSON to the json-bus (default channel 'default'); JSON-visualizer panels subscribe to render.",
 
   // chrome
   accent: "#59b8ff",
@@ -25,8 +25,8 @@ const manifest: PanelManifest<JsonEditParams> = {
   paramsDefault: jsonEditDefaults,
 
   npmDependencies: {
-    "@monaco-editor/react": "^4.7.0",
-    "monaco-editor": "^0.55.0",
+    "codemirror": "^6.0.0",
+    "@codemirror/lang-json": "^6.0.0",
   },
 };
 

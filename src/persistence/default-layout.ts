@@ -162,12 +162,16 @@ export function migrateSavedLayout(
   layout: SerializedDockview,
   savedVersion: number,
 ): SerializedDockview {
-  if (savedVersion >= 7) return layout;
-  // v6 → v7: rename "dyadicProjection" panel id + component name to "json-dyadic".
-  const json = JSON.stringify(layout).replace(
-    /"dyadicProjection"/g,
-    '"json-dyadic"',
-  );
+  let json = JSON.stringify(layout);
+  if (savedVersion < 7) {
+    // v6 → v7: rename "dyadicProjection" panel id + component name to "json-dyadic".
+    json = json.replace(/"dyadicProjection"/g, '"json-dyadic"');
+  }
+  // Migrate legacy Monaco params to CodeMirror 6
+  json = json
+    .replace(/"wordWrap"\s*:\s*"on"/g, '"lineWrapping":true')
+    .replace(/"wordWrap"\s*:\s*"off"/g, '"lineWrapping":false')
+    .replace(/"minimap"\s*:\s*(true|false),?/g, "");
   return JSON.parse(json) as SerializedDockview;
 }
 

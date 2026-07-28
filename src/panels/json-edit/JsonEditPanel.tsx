@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
-import MonacoEditor from "@monaco-editor/react";
+import { EditorView, lineNumbers } from "@codemirror/view";
+import { EditorState } from "@codemirror/state";
+import { json } from "@codemirror/lang-json";
+import { indentUnit } from "@codemirror/language";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { setJson, getJson, setActiveDocumentId, type JsonValue } from "../../data/json-bus";
-import { midnightAlaska, MIDNIGHT_ALASKA } from "./themes/midnight-alaska";
+import { midnightAlaskaExtension, MIDNIGHT_ALASKA } from "./themes/midnight-alaska";
 import "./JsonEditPanel.css";
 
 export interface JsonEditParams {
@@ -12,18 +15,16 @@ export interface JsonEditParams {
   documentId: string;
   /** Debounce window (ms) between editor edits and json-bus publishes. */
   debounceMs: number;
-  /** Monaco theme id. "midnight-alaska" is the bundled default. */
+  /** Theme id. "midnight-alaska" is the bundled default. */
   theme: string;
   /** Editor font size (px). */
   fontSize: number;
-  /** Word wrap mode: "on" | "off" | "bounded" | "wordWrapColumn". */
-  wordWrap: "on" | "off" | "bounded" | "wordWrapColumn";
+  /** Enable line wrapping. */
+  lineWrapping: boolean;
   /** Indent width in spaces. */
   tabSize: number;
-  /** Show / hide Monaco's minimap. */
-  minimap: boolean;
-  /** Line-numbers mode. "on" | "off" | "relative" | "interval". */
-  lineNumbers: "on" | "off" | "relative" | "interval";
+  /** Line-numbers mode. "on" | "off". */
+  lineNumbers: "on" | "off";
   /** Auto-format the buffer on paste. */
   formatOnPaste: boolean;
 }
@@ -33,9 +34,8 @@ export const jsonEditDefaults: JsonEditParams = {
   debounceMs: 250,
   theme: MIDNIGHT_ALASKA,
   fontSize: 13,
-  wordWrap: "on",
+  lineWrapping: true,
   tabSize: 2,
-  minimap: false,
   lineNumbers: "on",
   formatOnPaste: true,
 };
@@ -53,9 +53,15 @@ function initialValue(documentId: string): string {
 export default function JsonEditPanel(
   props: IDockviewPanelProps<JsonEditParams>,
 ) {
+  const rawParams = props.params ?? {};
+  // Handle layout migration gracefully if saved params carry legacy keys
   const params: JsonEditParams = {
     ...jsonEditDefaults,
-    ...(props.params ?? {}),
+    ...rawParams,
+    lineWrapping:
+      typeof rawParams.lineWrapping === "boolean"
+        ? rawParams.lineWrapping
+        : (rawParams as unknown as Record<string, unknown>).wordWrap === "on" || jsonEditDefaults.lineWrapping,
   };
 
   const [value, setValue] = useState<string>(() =>
@@ -66,6 +72,10 @@ export default function JsonEditPanel(
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [filePath, setFilePath] = useState<string | null>(null);
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const editorViewRef = useRef<EditorView | null>(null);
+  const lastExternalValueRef = useRef<string>(value);
 
   // Close menu on click outside
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -94,6 +104,93 @@ export default function JsonEditPanel(
       disposable.dispose();
     };
   }, [props.api, params.documentId]);
+
+  // Mount CodeMirror 6 EditorView
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const extensions = [
+      json(),
+      midnightAlaskaExtension,
+      indentUnit.of(" ".repeat(params.tabSize)),
+      EditorState.tabSize.of(params.tabSize),
+      EditorView.theme({
+        "&": {
+          fontSize: `${params.fontSize}px`,
+        },
+      }),
+      EditorView.updateListener.of((update) => {
+        if (update.docChanged) {
+          const docText = update.state.doc.toString();
+          lastExternalValueRef.current = docText;
+          setValue(docText);
+        }
+      }),
+      EditorView.domEventHandlers({
+        paste(event, view) {
+          if (!params.formatOnPaste) return false;
+          const text = event.clipboardData?.getData("text/plain");
+          if (!text) return false;
+          try {
+            const parsed = JSON.parse(text);
+            const formatted = JSON.stringify(parsed, null, params.tabSize);
+            event.preventDefault();
+            view.dispatch(view.state.replaceSelection(formatted));
+            return true;
+          } catch {
+            return false;
+          }
+        },
+      }),
+    ];
+
+    if (params.lineNumbers !== "off") {
+      extensions.push(lineNumbers());
+    }
+    if (params.lineWrapping) {
+      extensions.push(EditorView.lineWrapping);
+    }
+
+    const state = EditorState.create({
+      doc: value,
+      extensions,
+    });
+
+    const view = new EditorView({
+      state,
+      parent: containerRef.current,
+    });
+
+    editorViewRef.current = view;
+
+    return () => {
+      view.destroy();
+      editorViewRef.current = null;
+    };
+    // Recreate EditorView when key settings change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    params.fontSize,
+    params.lineWrapping,
+    params.tabSize,
+    params.lineNumbers,
+    params.formatOnPaste,
+  ]);
+
+  // Sync external value changes into CodeMirror without echo loops
+  useEffect(() => {
+    const view = editorViewRef.current;
+    if (!view) return;
+    if (value !== lastExternalValueRef.current) {
+      lastExternalValueRef.current = value;
+      const currentDoc = view.state.doc.toString();
+      if (currentDoc !== value) {
+        view.dispatch({
+          changes: { from: 0, to: currentDoc.length, insert: value },
+        });
+      }
+    }
+  }, [value]);
 
   async function openFile() {
     setMenuOpen(false);
@@ -147,18 +244,14 @@ export default function JsonEditPanel(
   // Persist params to the dockview layout file so they survive a reload.
   useEffect(() => {
     props.api.updateParameters(params);
-    // intentionally omitting `params` from deps — params object identity
-    // changes on every render, but its contents are stable across renders
-    // unless something below updates them. updateParameters is idempotent.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     params.documentId,
     params.debounceMs,
     params.theme,
     params.fontSize,
-    params.wordWrap,
+    params.lineWrapping,
     params.tabSize,
-    params.minimap,
     params.lineNumbers,
     params.formatOnPaste,
     props.api,
@@ -236,35 +329,7 @@ export default function JsonEditPanel(
           </div>
         </div>
       </div>
-      <div className="panel-body json-edit-body">
-        <MonacoEditor
-          language="json"
-          value={value}
-          onChange={(v) => setValue(v ?? "")}
-          theme={params.theme}
-          beforeMount={(monaco) => {
-            monaco.editor.defineTheme(MIDNIGHT_ALASKA, midnightAlaska);
-          }}
-          options={{
-            minimap: { enabled: params.minimap },
-            fontSize: params.fontSize,
-            fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', monospace",
-            scrollBeyondLastLine: false,
-            automaticLayout: true,
-            tabSize: params.tabSize,
-            wordWrap: params.wordWrap,
-            lineNumbers: params.lineNumbers,
-            padding: { top: 12 },
-            renderLineHighlight: "gutter",
-            guides: {
-              indentation: true,
-              bracketPairs: true,
-            },
-            bracketPairColorization: { enabled: true },
-            formatOnPaste: params.formatOnPaste,
-          }}
-        />
-      </div>
+      <div className="panel-body json-edit-body" ref={containerRef} />
     </>
   );
 }
