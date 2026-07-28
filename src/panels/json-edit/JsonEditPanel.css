@@ -6,7 +6,7 @@
 }
 
 .json-edit-body {
-  /* Monaco needs an explicit container size to mount cleanly. */
+  /* CodeMirror needs an explicit container size to mount cleanly. */
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
