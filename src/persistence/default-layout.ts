@@ -13,6 +13,7 @@ import type {
 // State (the JSON saved between sessions) is a delta on top of this.
 
 import { DEFAULT_PRESET_ID, resolvePresetPanelIds } from "./presets.ts";
+import { CURRENT_VERSION } from "./storage.ts";
 
 export const DEFAULT_WEBVIEW_URL = "https://dockview.dev";
 
@@ -297,6 +298,32 @@ export function buildPreset(api: DockviewApi, presetId: string) {
  *  to buildPreset with DEFAULT_PRESET_ID ("minimal"). */
 export function buildDefaultLayout(api: DockviewApi) {
   buildPreset(api, DEFAULT_PRESET_ID);
+}
+
+/**
+ * Safely applies a workspace layout to the live Dockview grid.
+ * Clears existing panels and groups first to prevent orphan tabs,
+ * migrates the layout JSON if needed, executes fromJSON(), and repairs layout.
+ */
+export function applyWorkspaceState(
+  api: DockviewApi,
+  layout: SerializedDockview,
+  version: number = CURRENT_VERSION,
+) {
+  api.clear();
+  try {
+    const migrated = migrateSavedLayout(layout, version);
+    api.fromJSON(migrated);
+    migrateLayout(api, version);
+  } catch (e) {
+    console.warn(
+      "[exoskeleton] applyWorkspaceState fromJSON failed, falling back to defaults:",
+      e,
+    );
+    api.clear();
+    buildDefaultLayout(api);
+  }
+  repairLayout(api);
 }
 
 /**

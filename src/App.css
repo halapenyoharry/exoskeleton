@@ -239,3 +239,102 @@
   background: rgba(255, 82, 82, 0.15);
   color: #ff5252;
 }
+
+/* ─── Workspaces Menu Section ────────────────────────────────────────── */
+.workspace-menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.workspace-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+}
+
+.workspace-menu-title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #4a6a78;
+  font-weight: 600;
+}
+
+.workspace-menu-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.workspace-action-btn {
+  background: transparent;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  color: #00e5ff;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.workspace-action-btn:hover {
+  background: rgba(0, 229, 255, 0.15);
+  color: #ffffff;
+}
+
+.workspace-action-btn--danger {
+  border-color: rgba(255, 82, 82, 0.4);
+  color: #ff5252;
+}
+
+.workspace-action-btn--danger:hover {
+  background: rgba(255, 82, 82, 0.2);
+  color: #ffffff;
+}
+
+.workspace-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.workspace-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #c5e8ee;
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.workspace-item:hover {
+  background: rgba(0, 229, 255, 0.1);
+  color: #ffffff;
+}
+
+.workspace-item--active {
+  background: rgba(0, 229, 255, 0.15);
+  color: #00e5ff;
+  font-weight: 600;
+}
+
+.workspace-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-indicator {
+  font-size: 0.7rem;
+  color: #00e5ff;
+}

@@ -31,6 +31,7 @@ import StatusBarPanel from "./panels/StatusBarPanel";
 import { exoPanel } from "./PanelRoot";
 import {
   addOrFocusPanel,
+  applyWorkspaceState,
   buildDefaultLayout,
   buildPreset,
   migrateLayout,
@@ -40,7 +41,14 @@ import {
 } from "./persistence/default-layout";
 import { panelAccent, panelGlyph } from "./ColoredTab";
 import {
+  createWorkspace,
+  deleteWorkspace,
   getActiveWorkspace,
+  isCompatible,
+  listWorkspaces,
+  migrateToV8,
+  renameWorkspace,
+  switchWorkspace,
   updateActiveWorkspaceLayout,
   type AppStateV8,
 } from "./persistence/storage";
@@ -154,6 +162,25 @@ export default function App() {
   // Initial load.
   useEffect(() => {
     storage.load().then(setAppState);
+  }, []);
+
+  // Listen for raw JSON state applications from SettingsPanel or file imports
+  useEffect(() => {
+    const handleStateApplied = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail && isCompatible(detail)) {
+        const v8 = migrateToV8(detail);
+        setAppState(v8);
+        const activeWs = getActiveWorkspace(v8);
+        if (mainApiRef.current && activeWs) {
+          applyWorkspaceState(mainApiRef.current, activeWs.layout, v8.version);
+        }
+      }
+    };
+    window.addEventListener("exoskeleton:state-applied", handleStateApplied);
+    return () => {
+      window.removeEventListener("exoskeleton:state-applied", handleStateApplied);
+    };
   }, []);
 
   function mountStatusBar(api: DockviewApi) {
@@ -291,6 +318,59 @@ export default function App() {
     event.api.onDidActivePanelChange(save);
   }
 
+  function handleSwitchWorkspace(id: string) {
+    if (!appState || id === appState.activeWorkspaceId) return;
+    save.flush();
+    const next = switchWorkspace(appState, id);
+    setAppState(next);
+    const targetWs = next.workspaces[id];
+    if (targetWs && mainApiRef.current) {
+      applyWorkspaceState(mainApiRef.current, targetWs.layout, next.version);
+    }
+    setIsAddMenuOpen(false);
+  }
+
+  function handleCreateWorkspace() {
+    if (!appState) return;
+    const name = window.prompt("New Workspace Name:", "New Workspace");
+    if (!name || !name.trim()) return;
+    save.flush();
+    const { state: next, workspace: newWs } = createWorkspace(appState, name);
+    setAppState(next);
+    if (mainApiRef.current) {
+      applyWorkspaceState(mainApiRef.current, newWs.layout, next.version);
+    }
+    setIsAddMenuOpen(false);
+  }
+
+  function handleRenameWorkspace() {
+    if (!appState) return;
+    const activeWs = getActiveWorkspace(appState);
+    const name = window.prompt("Rename Workspace:", activeWs.name);
+    if (!name || !name.trim() || name.trim() === activeWs.name) return;
+    const next = renameWorkspace(appState, activeWs.id, name);
+    setAppState(next);
+  }
+
+  function handleDeleteWorkspace() {
+    if (!appState) return;
+    const activeWs = getActiveWorkspace(appState);
+    const all = listWorkspaces(appState);
+    if (all.length <= 1) {
+      alert("Cannot delete the only remaining workspace.");
+      return;
+    }
+    if (window.confirm(`Delete workspace "${activeWs.name}"?`)) {
+      save.flush();
+      const next = deleteWorkspace(appState, activeWs.id);
+      setAppState(next);
+      const nextActiveWs = getActiveWorkspace(next);
+      if (nextActiveWs && mainApiRef.current) {
+        applyWorkspaceState(mainApiRef.current, nextActiveWs.layout, next.version);
+      }
+    }
+  }
+
   if (appState === undefined) {
     return <div className="app-frame app-frame--loading" />;
   }
@@ -320,7 +400,7 @@ export default function App() {
         <button
           className="add-panel-btn"
           onClick={() => setIsAddMenuOpen((v) => !v)}
-          title="add a panel"
+          title="add a panel or manage workspaces"
         >
           ⊞
         </button>
@@ -332,6 +412,52 @@ export default function App() {
             onClick={() => setIsAddMenuOpen(false)}
           />
           <div className="add-panel-menu">
+            {appState && (
+              <div className="workspace-menu-section">
+                <div className="workspace-menu-header">
+                  <span className="workspace-menu-title">Workspaces</span>
+                  <div className="workspace-menu-actions">
+                    <button
+                      className="workspace-action-btn"
+                      onClick={handleCreateWorkspace}
+                      title="Create new workspace"
+                    >
+                      + New
+                    </button>
+                    <button
+                      className="workspace-action-btn"
+                      onClick={handleRenameWorkspace}
+                      title="Rename active workspace"
+                    >
+                      ✎
+                    </button>
+                    <button
+                      className="workspace-action-btn workspace-action-btn--danger"
+                      onClick={handleDeleteWorkspace}
+                      title="Delete active workspace"
+                    >
+                      🗑
+                    </button>
+                  </div>
+                </div>
+                <div className="workspace-list">
+                  {listWorkspaces(appState).map((ws) => {
+                    const isActive = ws.id === appState.activeWorkspaceId;
+                    return (
+                      <button
+                        key={ws.id}
+                        className={`workspace-item ${isActive ? "workspace-item--active" : ""}`}
+                        onClick={() => handleSwitchWorkspace(ws.id)}
+                      >
+                        <span className="workspace-name">{ws.name}</span>
+                        {isActive && <span className="workspace-indicator">●</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="add-panel-divider" />
+              </div>
+            )}
             {panelRegistry.map((entry) => {
               const open = !!mainApiRef.current?.getPanel(entry.id);
               return (

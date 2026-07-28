@@ -6,11 +6,7 @@ import "./SettingsPanel.css";
  * A raw JSON editor showing the full app state on disk
  * (~/Library/Application Support/dev.harold.exoskeleton/exoskeleton.json).
  *
- * MVP scope: refresh + apply. The user can read, edit, and apply changes
- * to layout, sideGrid, and preferences. Invalid JSON shows an error; apply
- * is disabled until JSON parses. Future iteration: a friendlier preferences-
- * focused UI for non-developers, plus live sync of the editor when state
- * changes from elsewhere (currently you hit Refresh).
+ * Allows viewing, editing, and live-applying changes to layout and preferences.
  */
 export default function SettingsPanel() {
   const [text, setText] = useState("");
@@ -45,9 +41,9 @@ export default function SettingsPanel() {
       await tauriStorage.save(parsed);
       setDirty(false);
       setError(null);
-      // Note: the main grid won't re-render to reflect layout changes
-      // automatically — those are read on app startup. For now, mention
-      // the need to relaunch in the hint area.
+      window.dispatchEvent(
+        new CustomEvent("exoskeleton:state-applied", { detail: parsed }),
+      );
     } catch (e) {
       setError((e as Error).message);
     }
@@ -62,7 +58,7 @@ export default function SettingsPanel() {
         <button
           onClick={apply}
           disabled={!dirty || error !== null}
-          title="parse + write state back to disk"
+          title="parse + write state back to disk and apply live"
         >
           apply
         </button>
@@ -83,7 +79,7 @@ export default function SettingsPanel() {
         spellCheck={false}
       />
       <div className="settings-panel__hint">
-        layout changes apply on next launch. preferences changes apply immediately on next render.
+        Edits to workspace layout and preferences take effect live on apply.
       </div>
     </div>
   );
