@@ -630,16 +630,17 @@ and lazying them just adds a flash.
 
 ## WP-19 — Signing and notarization
 
-**Decision needed from Harold.** An unsigned `.dmg` shows macOS users a
-"damaged and can't be opened" dialog, which strangers read as *broken*. Options,
-in order of user experience:
+**Decided 2026-07-28: ship unsigned.** No Apple Developer Program for now.
 
-1. Apple Developer Program ($99/yr) → sign + notarize in CI. Best experience.
-2. Ship unsigned, and document the `xattr -dr com.apple.quarantine` workaround
-   prominently in the README with an explanation of why it's needed.
-3. Ship source-only; tell users to `npm run tauri build` themselves.
+An unsigned `.dmg` shows macOS users a "damaged and can't be opened" dialog,
+which reads as *broken* rather than *unsigned*. So the README must document the
+`xattr -dr com.apple.quarantine /Applications/Exoskeleton.app` step
+prominently, at the install instructions themselves — not buried in a
+troubleshooting section — with one plain sentence explaining why it's needed.
+Do the same for the Linux `.AppImage` chmod step.
 
-Do not pick for him. Present the three and take the answer.
+This is cheap to reverse later: notarization is a CI-and-secrets change, not an
+architecture change. Nothing in the plan depends on staying unsigned.
 
 ## WP-20 — README for strangers
 
