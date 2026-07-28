@@ -23,9 +23,10 @@ export const DEFAULT_WEBVIEW_URL = "https://dockview.dev";
  *  useful (e.g. the json viewers read from json-edit via the json-bus);
  *  every add path creates missing companions alongside. Mirrors
  *  PanelManifest.companions. */
-type RegistryEntry = AddPanelOptions & {
+export type RegistryEntry = AddPanelOptions & {
   introducedAt: number;
   companions?: string[];
+  autoAdd?: boolean;
 };
 
 /** The full set of panels Exoskeleton knows how to add. Order matters for
@@ -299,16 +300,28 @@ export function buildDefaultLayout(api: DockviewApi) {
 }
 
 /**
+ * Pure decision helper: returns registry entries that should be automatically added
+ * to a saved layout of `savedVersion`. Only returns entries introduced after `savedVersion`
+ * that explicitly set `autoAdd === true`.
+ */
+export function panelsToAutoAdd(
+  savedVersion: number,
+  registry: RegistryEntry[] = panelRegistry,
+): RegistryEntry[] {
+  return registry.filter(
+    (entry) => entry.introducedAt > savedVersion && entry.autoAdd === true,
+  );
+}
+
+/**
  * After `fromJSON(saved.layout)` has restored a user's customized layout,
- * add any panels they predate — i.e., panels whose `introducedAt` is
- * greater than the schema version that produced their saved state. The
- * user's existing arrangement is preserved; new panels are slotted in
+ * add any panels that explicitly opt into auto-addition (`autoAdd: true`).
+ * The user's existing arrangement is preserved; new opt-in panels are slotted in
  * via their registry position, or anchored to the main grid if the
  * reference panel isn't around anymore.
  */
 export function migrateLayout(api: DockviewApi, savedVersion: number) {
-  for (const entry of panelRegistry) {
-    if (entry.introducedAt <= savedVersion) continue;
+  for (const entry of panelsToAutoAdd(savedVersion)) {
     addRegistryPanel(api, entry);
   }
 }
