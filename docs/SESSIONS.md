@@ -207,3 +207,10 @@ State: clean tree on `add-json-panels` at 3f5b85f. `npm run build && npm test` g
 Last: completed WP-7. Created `src/persistence/presets.ts` (minimal default preset with editor, terminal, webview), added unit test suite in `src/persistence/presets.test.ts`, added `buildPreset` in `src/persistence/default-layout.ts`, and updated `buildDefaultLayout` to delegate to minimal preset.
 Next: WP-8 — Stop force-adding new panels to existing layouts (`autoAdd?: boolean` on `RegistryEntry`).
 Open: none for WP-7.
+
+## 2026-07-28 (WP-8 complete)
+
+State: clean tree on `add-json-panels` at 7a0aafc. `npm run build && npm test` green (30/30 tests passing).
+Last: completed WP-8. Added `autoAdd?: boolean` to `RegistryEntry`, extracted pure decision helper `panelsToAutoAdd(savedVersion, registry)` in `src/persistence/default-layout.ts`, added unit tests in `src/persistence/migration.test.ts`, and updated `migrateLayout` to auto-mount version-newer panels only when `autoAdd === true`.
+Next: WP-9 — Visible reset and preset switching (Watermark preset chooser, ⊞ menu reset option).
+Open: none for WP-8.
