@@ -12,6 +12,8 @@ import type {
 // This is the SCHEMA's idea of "what panels exist and how they're arranged."
 // State (the JSON saved between sessions) is a delta on top of this.
 
+import { DEFAULT_PRESET_ID, resolvePresetPanelIds } from "./presets.ts";
+
 export const DEFAULT_WEBVIEW_URL = "https://dockview.dev";
 
 /** A panel registry entry: addPanel options + the schema version that
@@ -273,12 +275,27 @@ export function addOrFocusPanel(api: DockviewApi, id: string) {
   ensureCompanions(api, id);
 }
 
-/** Build the default layout (called when no saved state exists). Safe to
- *  call on a non-empty grid: existing panels are kept, missing ones added. */
-export function buildDefaultLayout(api: DockviewApi) {
+/** Build a specific layout preset on the given Dockview grid.
+ *  Iterates panelRegistry in registry order and calls addRegistryPanel for entries
+ *  whose ID is in the resolved preset panel IDs. */
+export function buildPreset(api: DockviewApi, presetId: string) {
+  const targetIds = new Set(
+    resolvePresetPanelIds(
+      presetId,
+      panelRegistry.map((e) => e.id),
+    ),
+  );
   for (const entry of panelRegistry) {
-    addRegistryPanel(api, entry);
+    if (targetIds.has(entry.id)) {
+      addRegistryPanel(api, entry);
+    }
   }
+}
+
+/** Build the default layout (called when no saved state exists). Delegates
+ *  to buildPreset with DEFAULT_PRESET_ID ("minimal"). */
+export function buildDefaultLayout(api: DockviewApi) {
+  buildPreset(api, DEFAULT_PRESET_ID);
 }
 
 /**
