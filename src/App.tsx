@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   DockviewReact,
@@ -19,15 +19,10 @@ import LanWebview from "./panels/LanWebview";
 import TempoClockPanel from "./panels/tempo-clock/TempoClockPanel";
 import SettingsPanel from "./panels/settings/SettingsPanel";
 import PianoPanel from "./panels/piano/PianoPanel";
-import ScopePanel from "./panels/scope/ScopePanel";
 import JsonEditPanel from "./panels/json-edit/JsonEditPanel";
 import JsonTreePanel from "./panels/json-tree/JsonTreePanel";
 import JsonCirclesPanel from "./panels/json-circles/JsonCirclesPanel";
-import JsonMassPanel from "./panels/json-mass/JsonMassPanel";
-import JsonCytoscapePanel from "./panels/json-cytoscape/JsonCytoscapePanel";
 import JsonGraphPanel from "./panels/json-graph/JsonGraphPanel";
-import JsonGraph3DPanel from "./panels/json-graph3d/JsonGraph3DPanel";
-import JsonDyadicPanel from "./panels/json-dyadic/JsonDyadicPanel";
 import StatusBarPanel from "./panels/StatusBarPanel";
 import { exoPanel } from "./PanelRoot";
 import {
@@ -62,10 +57,27 @@ import {
 } from "./persistence/workspace-file";
 import "./App.css";
 
+// Lazy-loaded heavy visualization panels for optimal initial startup performance
+const JsonCytoscapePanel = lazy(() => import("./panels/json-cytoscape/JsonCytoscapePanel"));
+const JsonGraph3DPanel = lazy(() => import("./panels/json-graph3d/JsonGraph3DPanel"));
+const JsonDyadicPanel = lazy(() => import("./panels/json-dyadic/JsonDyadicPanel"));
+const JsonMassPanel = lazy(() => import("./panels/json-mass/JsonMassPanel"));
+const ScopePanel = lazy(() => import("./panels/scope/ScopePanel"));
+
+function lazyPanel(Component: React.ComponentType<any>, accent: string) {
+  const Wrapped = exoPanel(Component, accent);
+  return function LazyWrapper(props: any) {
+    return (
+      <Suspense fallback={<div className="panel-loading-fallback" />}>
+        <Wrapped {...props} />
+      </Suspense>
+    );
+  };
+}
+
 // SCHEMA — what panels exist and which React components fill them.
-// Each entry is wrapped with `exoPanel(Component, accent)` so the host
-// (not the panel) owns positioning and the accent stripe. The panel
-// itself is pure content. See src/PanelRoot.tsx for the wrapper.
+// Each entry is wrapped with `exoPanel(Component, accent)` or `lazyPanel` so the host
+// (not the panel) owns positioning and the accent stripe.
 const components = {
   editor:          exoPanel(EditorPanel,        "var(--accent-editor)"),
   terminal:        exoPanel(TerminalPanel,      "var(--accent-terminal)"),
@@ -73,15 +85,15 @@ const components = {
   "tempo-clock":   exoPanel(TempoClockPanel,    "var(--accent-tempo-clock)"),
   settings:        exoPanel(SettingsPanel,      "var(--accent-settings)"),
   piano:           exoPanel(PianoPanel,         "var(--accent-piano)"),
-  scope:           exoPanel(ScopePanel,         "var(--accent-scope)"),
+  scope:           lazyPanel(ScopePanel,        "var(--accent-scope)"),
   "json-edit":     exoPanel(JsonEditPanel,      "var(--accent-json-edit)"),
   "json-tree":     exoPanel(JsonTreePanel,      "var(--accent-json-tree)"),
   "json-circles":  exoPanel(JsonCirclesPanel,   "var(--accent-json-circles)"),
-  "json-mass":     exoPanel(JsonMassPanel,      "var(--accent-json-mass)"),
-  "json-cytoscape":exoPanel(JsonCytoscapePanel, "var(--accent-json-cytoscape)"),
+  "json-mass":     lazyPanel(JsonMassPanel,     "var(--accent-json-mass)"),
+  "json-cytoscape":lazyPanel(JsonCytoscapePanel, "var(--accent-json-cytoscape)"),
   "json-graph":    exoPanel(JsonGraphPanel,     "var(--accent-json-graph)"),
-  "json-graph3d":  exoPanel(JsonGraph3DPanel,   "var(--accent-json-graph3d)"),
-  "json-dyadic":   exoPanel(JsonDyadicPanel,      "var(--accent-json-dyadic)"),
+  "json-graph3d":  lazyPanel(JsonGraph3DPanel,  "var(--accent-json-graph3d)"),
+  "json-dyadic":   lazyPanel(JsonDyadicPanel,   "var(--accent-json-dyadic)"),
   // Registered raw (no exoPanel wrapper) on purpose: the status bar owns
   // its full-width chrome and doesn't take the accent-stripe convention.
   "status-bar-panel": StatusBarPanel,
