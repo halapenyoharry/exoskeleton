@@ -17,6 +17,8 @@ Decisions already made by Harold (do not re-litigate, do not ask again):
 | First launch | **Minimal preset**, with all 16 panels one click away in the ⊞ menu and watermark. |
 | Saving | **Both** — app-managed named workspaces *and* export/import to a file. |
 | New window | **Both, in order** — repair popout first, then independent workspace windows. |
+| License | **AGPL-3.0-or-later**, with commercial licenses offered separately. See WP-15. |
+| macOS signing | **Unsigned for now.** Document the quarantine workaround. See WP-19. |
 
 ---
 
@@ -81,6 +83,57 @@ Baseline verification, run after every package:
 ```bash
 npm run build && npm test
 ```
+
+## Operating notes — traps this environment actually sets
+
+Read these before your first command. Each has bitten a previous session.
+
+**Running the app is your job, not Harold's.** Never hand him a command and ask
+what happened. Launch it yourself in the background, drive it, read the logs,
+and only report once it works. Three places to look when it doesn't: the
+auto-opened WebKit Inspector, `~/Library/Logs/dev.harold.exoskeleton/`, and the
+`npm run tauri dev` terminal output.
+
+**Port 1420 orphans.** A stale dev server holding 1420 has broken the launch
+twice. `strictPort: true` means Vite fails rather than picking another port.
+Check with `lsof -i :1420` and kill the orphan before assuming a real failure.
+
+**The first Rust compile takes 5–15 minutes.** Subsequent builds are seconds. A
+long first build is not a hang — do not kill it and do not "fix" it.
+
+**HMR does not preserve bus state.** The json-bus is in-memory, so any code
+reload empties every viewer. When verifying JSON work, re-open a document after
+each reload; a blank viewer after HMR is expected, not a regression.
+
+**A dev server and an app instance may already be running** when you start.
+Check before launching a second one.
+
+**Cross-repo coupling.** Panels are developed in
+`~/Projects/exoskeleton-component-library/` against the `PanelManifest`
+contract in [src/panel-manifest.ts](../src/panel-manifest.ts). If you add a
+field to `RegistryEntry` that mirrors a manifest field — WP-8's `autoAdd` is
+exactly this — add it to `PanelManifest` too and tell Harold, so the library
+README stays truthful. A silent divergence between the two breaks every future
+panel install.
+
+**Scope discipline.** Gemini-class models tend to over-deliver here, and it
+costs more than it gives:
+
+- No refactors beyond the work package you're on.
+- No reformatting files you're otherwise editing. Diff noise makes review
+  expensive and hides the real change.
+- No dependency upgrades that a package doesn't name.
+- No new test framework. The project deliberately uses node's built-in test
+  runner; do not introduce vitest or jest.
+- No new documentation files unless a package asks for one. Extend
+  [AGENTS-FAQ.md](AGENTS-FAQ.md) instead.
+
+**Stop and ask Harold when:** a package's acceptance criteria can't be met; a
+fix requires changing one of the invariants above; a migration might destroy
+existing user layouts; a decision changes visible behaviour in a way this plan
+doesn't specify; or you find yourself about to delete something. Report the
+finding and wait. A blocked package that's clearly reported is a good outcome;
+a guessed-at product decision is not.
 
 ---
 
@@ -582,14 +635,48 @@ revision-gated IPC approach — that's a separate project.
 
 ## WP-15 — LICENSE and metadata
 
-Without a license, a public repo grants nobody any rights. **Ask Harold which
-license** (MIT and Apache-2.0 are the usual choices; MIT is simplest, Apache-2.0
-adds a patent grant) — do not pick one unilaterally, it's not a reversible
-technical detail.
+**Decided 2026-07-28: AGPL-3.0-or-later, with commercial licenses available
+separately.** `LICENSE` (canonical FSF text) and `CONTRIBUTING.md` are already
+committed. What remains is the metadata and the README wording.
 
-Then: add `LICENSE` at the repo root, `"license"` in `package.json`, `license`
-in `Cargo.toml`, and a Tauri bundle `copyright` string. Add a `publisher` and a
-`shortDescription`/`longDescription` to the bundle config while you're there.
+The reasoning, so nobody undoes it by accident: Harold wants genuine open
+source *and* wants large businesses to have a reason to make contact. Those
+only coexist through **copyleft plus dual licensing**. Anyone may use, study,
+modify, and share Exoskeleton, including commercially; but distributing a
+derived work — or running a modified version as a network service — obliges
+them to release their source under the AGPL too. Companies that want to build
+something proprietary on it therefore come and ask for commercial terms. This
+is the MySQL / Qt / Grafana model.
+
+Dependency compatibility was verified before choosing: every npm and Cargo
+dependency is MIT, ISC, or Apache-2.0, and a scan found no GPL/AGPL/SSPL
+anywhere in the tree. Apache-2.0 is compatible with GPLv3-family licenses
+specifically, so AGPL-3.0 is clean here. **If you ever add a dependency, check
+its license before adding it** — a GPLv2-only dependency would be incompatible
+and would poison the dual-licensing model.
+
+Remaining steps:
+
+1. `package.json`: `"license": "AGPL-3.0-or-later"`.
+2. `src-tauri/Cargo.toml`: `license = "AGPL-3.0-or-later"`.
+3. `tauri.conf.json` bundle block: `"copyright": "© 2026 Harold Tajchman"`,
+   plus `publisher`, `shortDescription`, and `longDescription`.
+4. README gets a **License** section, in plain language: free and open source
+   under AGPL-3.0; use it, fork it, study it; if you want to ship something
+   proprietary built on it, email halapenyoharry@gmail.com. Do not write this
+   as legal boilerplate — write it as an invitation.
+5. Link `CONTRIBUTING.md` from the README.
+
+**Do not add per-file AGPL headers** unless Harold asks. The license section
+the AGPL recommends adding to every source file would add noise to sixteen
+panels and every module, and the repo-root LICENSE is sufficient for a project
+distributed whole.
+
+**Why `CONTRIBUTING.md` is load-bearing, not paperwork:** dual licensing only
+works while Harold holds the rights to the entire codebase. One merged pull
+request without the inbound grant permanently blocks commercial licensing of
+that file. If someone opens a pull request and declines the grant, do not merge
+it — reimplement the idea or leave it.
 
 ## WP-16 — Content Security Policy
 
