@@ -55,6 +55,10 @@ import {
 import { tauriStorage } from "./persistence/tauri-storage";
 import { createDebounce } from "./utils/debounce";
 import { DEFAULT_PRESET_ID } from "./persistence/presets";
+import {
+  parseWorkspaceDocument,
+  serializeWorkspaceDocument,
+} from "./persistence/workspace-file";
 import "./App.css";
 
 // SCHEMA — what panels exist and which React components fill them.
@@ -371,6 +375,55 @@ export default function App() {
     }
   }
 
+  function handleExportWorkspace() {
+    if (!appState) return;
+    save.flush();
+    const activeWs = getActiveWorkspace(appState);
+    const jsonStr = serializeWorkspaceDocument(activeWs);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const safeName = activeWs.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    a.download = `${safeName || "workspace"}.exo.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setIsAddMenuOpen(false);
+  }
+
+  function handleImportWorkspace() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json,.exo.json";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const raw = event.target?.result as string;
+          const importedWs = parseWorkspaceDocument(raw);
+          if (!appState) return;
+          save.flush();
+          const newId = `ws_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+          const workspaceToInsert = { ...importedWs, id: newId, updatedAt: Date.now() };
+          const { state: next } = createWorkspace(appState, workspaceToInsert.name, workspaceToInsert.layout);
+          setAppState(next);
+          if (mainApiRef.current) {
+            applyWorkspaceState(mainApiRef.current, workspaceToInsert.layout, next.version);
+          }
+        } catch (err) {
+          alert(`Failed to import workspace: ${(err as Error).message}`);
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+    setIsAddMenuOpen(false);
+  }
+
   if (appState === undefined) {
     return <div className="app-frame app-frame--loading" />;
   }
@@ -423,6 +476,20 @@ export default function App() {
                       title="Create new workspace"
                     >
                       + New
+                    </button>
+                    <button
+                      className="workspace-action-btn"
+                      onClick={handleExportWorkspace}
+                      title="Export active workspace (.exo.json)"
+                    >
+                      Export
+                    </button>
+                    <button
+                      className="workspace-action-btn"
+                      onClick={handleImportWorkspace}
+                      title="Import workspace document (.exo.json)"
+                    >
+                      Import
                     </button>
                     <button
                       className="workspace-action-btn"
