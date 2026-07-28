@@ -60,8 +60,9 @@ costs almost nothing and is usually welcome.
 6. **Commit as `halapenyoharry`.** Never attribute commits to an AI. Commit and
    push after every work package, without exception — an uncommitted tree is
    the single most common way progress gets lost on this project. Stay on
-   `add-json-panels` or a branch off it; **do not commit to `main` without
-   asking.**
+   `add-json-panels` or a branch off it; **do not commit to `main`, and do not
+   merge into it** — `main` is parked on purpose as a known-good fallback, and
+   WP-21 is where that changes.
 7. **Append a dated entry to [SESSIONS.md](SESSIONS.md)** before ending a
    session, in the existing format: State / Last / Next / Open.
 8. **Read before you invent.** [AGENTS-FAQ.md](AGENTS-FAQ.md) already answers
@@ -920,6 +921,20 @@ React tree" claim is wrong and misleads anyone reasoning about state.
 **This is the final package before the repo goes public, and Harold flips that
 switch himself — you never do.** Your job is to leave the tree in a state where
 flipping it is safe and boring.
+
+**Merge `add-json-panels` into `main` here — not before.** Decided 2026-07-28:
+`main` is deliberately parked at the last state Harold ran and trusted, so it
+stays a known-good fallback for the whole length of this plan. Do not
+fast-forward it mid-project to tidy up; that fallback is worth more than branch
+hygiene while twenty packages of surgery are in flight. At this point it should
+still be a clean fast-forward (`main` has no commits of its own), so the merge
+is a pointer move with no conflicts. Verify that's still true with
+`git rev-list --count add-json-panels..main` — it must be `0`. If it isn't,
+something committed to `main` behind your back: stop and report.
+
+The reason this belongs *here* rather than earlier: the only thing the merge
+changes is what a stranger sees when they clone, and until Harold makes the
+repository public there are no strangers.
 
 The repository has been private its whole life, so personal material has
 accumulated in it that was never meant for strangers. Move it into a gitignored
