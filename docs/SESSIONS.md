@@ -193,3 +193,10 @@ State: clean tree on `add-json-panels` at d544be6. `npm run build && npm test` g
 Last: completed WP-5. Added `PanelErrorBoundary` in `src/PanelRoot.tsx` to catch panel exceptions, displaying inline fallback UI with panel name, error message, Retry button, Close panel button, and accent stripe. Wrapped `exoPanel` HOC.
 Next: WP-6 — Flush pending saves on quit in `src/App.tsx` (extract debounce helper with `.flush()`, listen to `beforeunload` and `onCloseRequested`).
 Open: none for WP-5.
+
+## 2026-07-28 (WP-6 complete)
+
+State: clean tree on `add-json-panels` at df07755. `npm run build && npm test` green (20/20 tests passing). Phase 0 complete!
+Last: completed WP-6. Extracted `createDebounce` helper module to `src/utils/debounce.ts` with `.flush()` and `.cancel()`, added unit tests in `src/utils/debounce.test.ts`, and updated `App.tsx` to flush pending layout saves on `beforeunload` and Tauri `onCloseRequested`.
+Next: Phase 1 (WP-7 through WP-9) — First Open & Presets (layout presets minimal by default, registry auto-add control, preset reset UI).
+Open: Phase 0 correctness blockers finished. Ready for Phase 1.
