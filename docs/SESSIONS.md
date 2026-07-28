@@ -200,3 +200,10 @@ State: clean tree on `add-json-panels` at df07755. `npm run build && npm test` g
 Last: completed WP-6. Extracted `createDebounce` helper module to `src/utils/debounce.ts` with `.flush()` and `.cancel()`, added unit tests in `src/utils/debounce.test.ts`, and updated `App.tsx` to flush pending layout saves on `beforeunload` and Tauri `onCloseRequested`.
 Next: Phase 1 (WP-7 through WP-9) — First Open & Presets (layout presets minimal by default, registry auto-add control, preset reset UI).
 Open: Phase 0 correctness blockers finished. Ready for Phase 1.
+
+## 2026-07-28 (WP-7 complete)
+
+State: clean tree on `add-json-panels` at 3f5b85f. `npm run build && npm test` green (26/26 tests passing).
+Last: completed WP-7. Created `src/persistence/presets.ts` (minimal default preset with editor, terminal, webview), added unit test suite in `src/persistence/presets.test.ts`, added `buildPreset` in `src/persistence/default-layout.ts`, and updated `buildDefaultLayout` to delegate to minimal preset.
+Next: WP-8 — Stop force-adding new panels to existing layouts (`autoAdd?: boolean` on `RegistryEntry`).
+Open: none for WP-7.
