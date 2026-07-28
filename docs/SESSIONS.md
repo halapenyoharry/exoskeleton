@@ -221,3 +221,10 @@ State: clean tree on `add-json-panels` at 1c75b36. `npm run build && npm test` g
 Last: completed WP-9. Added preset selection cards (Minimal, JSON Lab, AV Lab, Everything) in `Watermark.tsx` and a "Reset layout..." action with confirmation in the floating ⊞ menu in `App.tsx`. Styled in `Watermark.css` and `App.css`.
 Next: Phase 2 (WP-10 through WP-13) — Workspaces (schema v8 storage model, workspace UI, export/import `.exo.json`, json-edit persistence).
 Open: Phase 1 complete. Ready for Phase 2.
+
+## 2026-07-28 (WP-10 complete)
+
+State: clean tree on `add-json-panels` at 4bb97b1. `npm run build && npm test` green (34/34 tests passing).
+Last: completed WP-10. Introduced schema v8 in `src/persistence/storage.ts` with `Workspace` interface, `AppStateV8` type, `migrateToV8()` legacy save converter, and pure CRUD helpers (`listWorkspaces`, `getActiveWorkspace`, `updateActiveWorkspaceLayout`, `switchWorkspace`, `createWorkspace`, `deleteWorkspace`, `renameWorkspace`). Added unit tests in `src/persistence/workspace.test.ts` and updated `tauri-storage.ts` and `App.tsx`.
+Next: WP-11 — Workspace UI & File Menu (WP-11a workspace selector UI, WP-11b File menu export/import, WP-11c json-edit raw-JSON apply fix).
+Open: none for WP-10.
