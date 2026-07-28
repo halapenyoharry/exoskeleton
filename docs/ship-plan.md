@@ -24,8 +24,23 @@ Decisions already made by Harold (do not re-litigate, do not ask again):
 
 ## Rules of engagement
 
-These are Harold's standing rules. Violating one costs more than the work
-package is worth.
+Two kinds of rule follow, and the difference matters.
+
+**Hard constraints (1–4) are about trust and irreversibility.** Follow them.
+They are not optimization targets, and no cleverness justifies working around
+one.
+
+**Strong defaults (5–8, plus the scope rules further down) encode a reason.**
+Follow them by default — but if you can see a genuinely better way, *say so and
+ask*. Harold's explicit instruction on this, 2026-07-28: a constraint he set
+shouldn't be honoured past the point where another approach is clearly better.
+What he doesn't want is either failure mode — rigidly complying into a worse
+outcome because a rule said so, or quietly deviating because you decided you
+knew better. Name the tension, propose the alternative, and let him choose. A
+one-line "this rule says X, but Y is better here because Z — which do you want?"
+costs almost nothing and is usually welcome.
+
+### Hard constraints
 
 1. **Never delete files with `rm`.** Use `trash <path>`. Never delete anything
    without asking first.
@@ -35,18 +50,23 @@ package is worth.
    no remote fonts, no telemetry. WP-1 exists because this rule was broken.
    The one sanctioned network surface is the webview panel's iframe, because
    loading URLs is its purpose.
-4. **Never create standalone scripts** without asking. Prefer npm scripts,
-   Makefile targets, or one-liners.
-5. **Commit as `halapenyoharry`.** Never attribute commits to an AI. Commit and
+4. **Never attribute a commit to an AI.** Commits are authored as
+   `halapenyoharry`.
+
+### Strong defaults
+
+5. **Don't create standalone scripts** without asking. Prefer npm scripts,
+   Makefile targets, or one-liners — scattered scripts rot and get forgotten.
+6. **Commit as `halapenyoharry`.** Never attribute commits to an AI. Commit and
    push after every work package, without exception — an uncommitted tree is
    the single most common way progress gets lost on this project. Stay on
    `add-json-panels` or a branch off it; **do not commit to `main` without
    asking.**
-6. **Append a dated entry to [SESSIONS.md](SESSIONS.md)** before ending a
+7. **Append a dated entry to [SESSIONS.md](SESSIONS.md)** before ending a
    session, in the existing format: State / Last / Next / Open.
-7. **Read before you invent.** [AGENTS-FAQ.md](AGENTS-FAQ.md) already answers
+8. **Read before you invent.** [AGENTS-FAQ.md](AGENTS-FAQ.md) already answers
    the recurring design questions. Add an entry when you resolve a new one.
-8. **Ask when a decision is genuinely ambiguous.** Do not guess at product
+9. **Ask when a decision is genuinely ambiguous.** Do not guess at product
    behaviour and do not silently pick a default that changes UX.
 
 ## Invariants — breaking these regresses fixed bugs
@@ -187,8 +207,12 @@ costs more than it gives:
 - No reformatting files you're otherwise editing. Diff noise makes review
   expensive and hides the real change.
 - No dependency upgrades that a package doesn't name.
-- No new test framework. The project deliberately uses node's built-in test
-  runner; do not introduce vitest or jest.
+- No new test framework *by default*. The project deliberately uses node's
+  built-in test runner, and the TDD protocol is built around that constraint.
+  But if you hit a package where the only honest verification needs a DOM — and
+  you can show which package and why manual verification isn't enough — propose
+  it rather than either silently adding jsdom or shipping an untested change.
+  Harold decides; don't decide for him in either direction.
 - No new documentation files unless a package asks for one. Extend
   [AGENTS-FAQ.md](AGENTS-FAQ.md) instead.
 
@@ -233,14 +257,23 @@ It should report 5 passing. That number is the "before" you're fixing.
 1. `package.json`: quote the glob so node expands it instead of `sh` —
    `"test": "node --experimental-strip-types --test --test-reporter=spec \"src/**/*.test.ts\""`.
    If node's version balks, use `--test src` for directory recursion.
-2. Copy one small `*.normalized-dyadic.json` fixture from the speak topology
-   directory into `src/panels/json-dyadic/__fixtures__/` and commit it, so the
-   parse tests assert against real data on every machine. **Ask Harold first**
-   — that content belongs to another project and he decides what becomes
-   public. If he says no, generate a synthetic fixture of the same shape.
-3. Replace the hardcoded `SPEAK_DIR` with the in-repo fixture path. Keep an
-   optional `process.env.EXO_TOPOLOGY_DIR` override for local runs against the
-   real corpus, defaulting to the fixture.
+2. **Build a synthetic fixture** at `src/panels/json-dyadic/__fixtures__/`,
+   hand-written to exercise the edge cases the parser actually has to get
+   right: a dyadic incidence, a three-member hyperedge, each of the four
+   `i2t:edge_category` values, a dangling reference, and a malformed entry.
+   Do **not** copy the real corpus in — decided 2026-07-28. A 500-node real
+   document is a poor unit-test fixture (slow, and a failure tells you
+   "something changed" rather than which case broke), and that content belongs
+   to another project that isn't going public.
+3. Replace the hardcoded `SPEAK_DIR` with the in-repo fixture path, keeping an
+   optional `process.env.EXO_TOPOLOGY_DIR` override so Harold can still run the
+   suite against the real corpus locally. The fixture is the default.
+4. **Remove `"runOn": "folderOpen"` from `.vscode/tasks.json`.** Pulled forward
+   from WP-21 deliberately: that trigger spawns a dev server every time the
+   folder opens, which is what leaves orphans holding port 1420 — the trap
+   documented in the operating notes. It will bite you repeatedly across a
+   twenty-package run, so fix it in the first hour rather than the last. Keep
+   the task itself; only the automatic trigger goes.
 
 **Acceptance:** `npm test` reports tests from **both** files, and the dyadic
 assertions actually execute rather than skipping. Verify by temporarily
@@ -473,7 +506,9 @@ export const presets: LayoutPreset[] = [
     id: "json-lab",
     name: "JSON Lab",
     description: "Monaco JSON editor feeding the tree, graph, and 3D viewers.",
-    panelIds: ["json-edit", "json-tree", "json-graph3d"],
+    // The status bar is JSON-aware (node/edge counts, selection), so it earns
+    // its place here and nowhere else. In Minimal it would sit showing zeros.
+    panelIds: ["json-edit", "json-tree", "json-graph3d", "status-bar"],
   },
   {
     id: "av-lab",
@@ -904,22 +939,28 @@ this list ages:
 
 | Item | Why it moves |
 | --- | --- |
-| `docs/SESSIONS.md` | Internal lab notebook. Names an unpublished novel's dataset (`elinor-jones`), personal working process, and machine-specific paths. |
-| `docs/ship-plan.md`, `docs/ship-review-2026-07-28.md` | Candid internal critique plus Harold's personal working rules. Useful to the project, not to strangers. |
-| `hud.pxd` | An 18 MB binary design file from the pre-rename era. Nothing builds from it, and it weighs on every clone. |
+| `hud.pxd` | An 18 MB binary design file from the pre-rename era. Nothing builds from it, and it weighs on every clone forever. |
 | `exoskeleton-ANTIGRAV.code-workspace` | Personal multi-root editor config pointing at a sibling checkout. The plain `exoskeleton.code-workspace` stays. |
 
-**Also fix, without moving:**
+**That is the whole move list. Deliberately short** — an earlier draft of this
+package also moved `docs/SESSIONS.md` and the two ship documents, and that was
+reconsidered on 2026-07-28. `SESSIONS.md` is the most valuable document in the
+repository for anyone trying to understand or fork it: a real record of how a
+workspace gets built, mistakes and reversals included. Hiding it to avoid a
+handful of personal references trades a genuine asset for very little. Same for
+the ship review — a project that publishes its own candid critique reads as
+confident rather than sloppy.
 
-- `.vscode/tasks.json` auto-runs `npm run tauri dev` on folder open
-  (`runOn: folderOpen`). For someone who just cloned the repo, an editor that
-  spontaneously starts compiling Rust is alarming. Remove the `runOn` trigger
-  and keep the task available manually. This is also the source of the port-1420
-  orphan trap.
-- `CLAUDE.md` references Harold's private agent-memory directory. Agent
-  instruction files are normal in public repos now, so **sanitize rather than
-  remove**: drop the memory-path reference and the personal-working-style line,
-  keep the architectural guidance.
+**Redact instead of moving:**
+
+- `docs/SESSIONS.md` — remove the references to `elinor-jones` (an unpublished
+  novel's dataset) and the machine-specific absolute paths. Replace the dataset
+  name with a neutral description like "a 30k-value hypergraph document"; the
+  engineering content is what matters and it survives redaction intact. Leave
+  the "Harold does X" phrasing — it's a lab notebook, and that reads fine.
+- `CLAUDE.md` — drop the reference to the private agent-memory directory and the
+  personal-working-style line; keep all the architectural guidance. Agent
+  instruction files are normal in public repos now.
 - Confirm WP-0 removed the hardcoded `/Users/harold/Projects/speak/topology`
   path from `parse.test.ts`. If it's still there, it must not ship.
 
@@ -933,24 +974,29 @@ git log --all --pretty=format: --name-only --diff-filter=A | sort -u | grep -iE 
 A clean scan was recorded on 2026-07-28 — no keys, no `.env`, no credential
 files in any commit. Verify it's still clean rather than assuming.
 
-**The history question — stop and ask Harold, do not decide this.** Moving a
-file out of the index does not remove it from history. Once the repo is public,
-anyone can `git log -p` and read every private doc, and `hud.pxd` stays in the
-pack files whether or not it's in the working tree. Three options, and they
-have different costs:
+**The history question — decided 2026-07-28: rewrite, narrowly.** Moving a file
+out of the index does not remove it from history; `hud.pxd` stays in the pack
+files whether or not it's in the working tree, and every future clone pays for
+it. Normally rewriting history is dangerous because it invalidates everyone's
+existing clones — but this repository has never been public and has a single
+contributor, so there are no clones to break. That objection doesn't apply here.
 
-1. **Accept it.** Simplest. The history contains no credentials — only personal
-   notes and a large binary. Clone size stays inflated by ~18 MB.
-2. **Rewrite history** with `git-filter-repo` to drop `hud.pxd` and the private
-   docs. Cleanest result, but it rewrites every commit hash and requires a
-   force-push. Destructive; needs explicit approval and a full backup first.
-3. **Publish a fresh repository** from a clean tree, keeping this one private as
-   the archive. Loses public history but is the safest and least clever option.
+So: **use `git-filter-repo` to drop `hud.pxd` and nothing else.** Leave the
+document history alone — it contains no credentials, and the engineering
+narrative is an asset rather than a liability.
 
-Present these three, take Harold's answer, and do nothing until he gives it.
+This is still a destructive, hash-rewriting operation. Before running it:
+
+1. Take a full backup: `git clone --mirror` the repo to a bundle outside the
+   working tree, and confirm the bundle is readable.
+2. Tell Harold you are about to force-push and get an explicit go-ahead **for
+   this specific run** — a decision recorded in a document is not the same as
+   permission at the moment of execution.
+3. Verify afterwards that `git log --all --diff-filter=A --name-only | grep
+   hud.pxd` returns nothing, and report the new clone size.
 
 **Acceptance:** `git ls-files` shows no personal material; `private/` exists,
-is gitignored, and still contains every moved file on disk; the secret scan is
+is gitignored, and still contains both moved files on disk; the secret scan is
 clean; a fresh clone into a temp directory produces a tree you would be
 comfortable handing to a stranger. Report what a `du -sh` of that fresh clone
 comes to, so Harold knows the download cost.
