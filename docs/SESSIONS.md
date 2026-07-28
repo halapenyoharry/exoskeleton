@@ -186,3 +186,10 @@ State: clean tree on `add-json-panels` at ccca204. `npm run build && npm test` g
 Last: completed WP-4. Extracted `resolveShell` pure helper to `src/panels/terminal-shell.ts`, added unit tests in `src/panels/terminal-shell.test.ts`, and updated `TerminalPanel.tsx` to resolve default shell by OS and `SHELL` env.
 Next: WP-5 — Per-panel error boundary in `PanelRoot.tsx` (`PanelErrorBoundary` with Retry, Close, and panel accent stripe).
 Open: none for WP-4. Tested on macOS; Pop!_OS fallback to `/bin/bash` ready.
+
+## 2026-07-28 (WP-5 complete)
+
+State: clean tree on `add-json-panels` at d544be6. `npm run build && npm test` green (16/16 tests passing).
+Last: completed WP-5. Added `PanelErrorBoundary` in `src/PanelRoot.tsx` to catch panel exceptions, displaying inline fallback UI with panel name, error message, Retry button, Close panel button, and accent stripe. Wrapped `exoPanel` HOC.
+Next: WP-6 — Flush pending saves on quit in `src/App.tsx` (extract debounce helper with `.flush()`, listen to `beforeunload` and `onCloseRequested`).
+Open: none for WP-5.
