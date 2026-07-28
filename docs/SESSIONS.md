@@ -165,3 +165,10 @@ State: clean tree on `add-json-panels` at e8ae00c. `npm run build && npm test` g
 Last: completed WP-0. Quoted test glob in package.json (discoverable across subdirs); added in-repo synthetic topology fixture (`src/panels/json-dyadic/__fixtures__/synthetic-topology.json`); updated `parse.test.ts` to test against synthetic fixture by default (with optional `EXO_TOPOLOGY_DIR` override); removed `runOn: folderOpen` trigger from `.vscode/tasks.json` to prevent port 1420 orphans.
 Next: WP-1 — Replace Monaco with CodeMirror 6 in `json-edit` (bundle locally, port Midnight Alaska theme, update params/migrations).
 Open: none for WP-0.
+
+## 2026-07-28 (WP-1 complete)
+
+State: clean tree on `add-json-panels` at 673b0e7. `npm run build && npm test` green. Zero CDN requests or Monaco artifacts in `dist/assets/`.
+Last: completed WP-1. Replaced Monaco with CodeMirror 6 in `json-edit` (swapped npm dependencies, ported Midnight Alaska theme to CodeMirror EditorView.theme + HighlightStyle, updated JsonEditPanel.tsx with lineWrapping and paste formatting, updated manifest and migrateSavedLayout).
+Next: WP-2 — Repair the popout button (add `public/popout.html`, configure `on_new_window` in `lib.rs`, update `tauri.conf.json`).
+Open: none for WP-1.
