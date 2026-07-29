@@ -1,6 +1,6 @@
 # Ship plan
 
-**Audience: the agent executing this plan (Gemini 3.6 Flash — High).**
+**Audience: the coding agent executing this plan.**
 **Author: review pass of 2026-07-28. Evidence for every claim here lives in
 [ship-review-2026-07-28.md](ship-review-2026-07-28.md) — read that first.**
 
@@ -105,10 +105,9 @@ handoff, not your memory of the conversation.**
 
 ### What your actual limits are, and what follows from them
 
-Running as Gemini 3.6 Flash (High) in Antigravity you have a 1,048,576-token
-input window, a 65,536-token output cap per response, and the IDE summarizes
-conversation history at a 7,500-token threshold. Each of those implies
-something concrete:
+Running with a roughly 1M-token input window, a capped output size per
+response, and an IDE that summarizes conversation history past a threshold.
+Each of those implies something concrete:
 
 - **Input is not your constraint — use it.** This entire repo is roughly 11,000
   lines of source. You can afford to *read the actual files* before editing
@@ -201,8 +200,8 @@ exactly this — add it to `PanelManifest` too and tell Harold, so the library
 README stays truthful. A silent divergence between the two breaks every future
 panel install.
 
-**Scope discipline.** Gemini-class models tend to over-deliver here, and it
-costs more than it gives:
+**Scope discipline.** Larger, more capable models tend to over-deliver here,
+and it costs more than it gives:
 
 - No refactors beyond the work package you're on.
 - No reformatting files you're otherwise editing. Diff noise makes review
@@ -1035,7 +1034,7 @@ confident rather than sloppy.
   name with a neutral description like "a 30k-value hypergraph document"; the
   engineering content is what matters and it survives redaction intact. Leave
   the "Harold does X" phrasing — it's a lab notebook, and that reads fine.
-- `CLAUDE.md` — drop the reference to the private agent-memory directory and the
+- `AGENTS.md` (then `CLAUDE.md`) — drop the reference to the private agent-memory directory and the
   personal-working-style line; keep all the architectural guidance. Agent
   instruction files are normal in public repos now.
 - Confirm WP-0 removed the hardcoded `/Users/harold/Projects/speak/topology`

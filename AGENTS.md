@@ -1,4 +1,4 @@
-# Exoskeleton — project context for Claude
+# Exoskeleton — project context for AI coding agents
 
 ## What this is
 
@@ -61,7 +61,7 @@ These are the type-level contracts that library panels and other tooling depend 
 
 These look like they might be sacred but aren't. Free to change with normal review:
 
-- **Panel accent colors** (cyan/amber/mint). Harold asked for distinct colors so he could tell panels apart while thinking — pragmatic, not a design system. The earlier CLAUDE.md treated this as untouchable; that was over-canonization on my part (clarified 2026-05-10).
+- **Panel accent colors** (cyan/amber/mint). Harold asked for distinct colors so he could tell panels apart while thinking — pragmatic, not a design system. The earlier version of this file treated colors as untouchable; that was over-canonization, clarified 2026-05-10.
 
 ## Convention: end-of-session handoff
 

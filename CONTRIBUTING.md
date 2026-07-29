@@ -33,7 +33,7 @@ proper one.)*
 
 ## Practical notes
 
-- **Read [CLAUDE.md](CLAUDE.md) and [docs/AGENTS-FAQ.md](docs/AGENTS-FAQ.md)
+- **Read [AGENTS.md](AGENTS.md) and [docs/AGENTS-FAQ.md](docs/AGENTS-FAQ.md)
   first.** Most recurring design questions are already answered there, in
   test-case shape. Don't re-derive an answer that exists.
 - **Panels come from the component library.** New panels are usually developed

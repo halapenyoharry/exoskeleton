@@ -22,7 +22,7 @@ components), `src/osc/{index,types}.ts`, `src/data/json-bus.ts`,
 `src-tauri/src/{lib.rs,osc.rs}`, `src/panel-manifest.ts`, and the docs
 (`AGENTS-FAQ`, `panel-contract-proposal`, `patchbay-spec`,
 `research/dockview-constructive-vs-consumptive`, the HIF doc, both repo READMEs +
-CLAUDE + SESSIONS). Not opened (treated as low-risk, behaviour inferred from
+AGENTS + SESSIONS). Not opened (treated as low-risk, behaviour inferred from
 their consumers and the proposal doc): `ColoredTab.tsx`, `PanelRoot.tsx`,
 `Watermark.tsx`, the `.css` files, `json-utils/jsonToHierarchy.ts`,
 `research/osc-self-contained-by-default.md`. See §7 for the full coverage table.
@@ -300,8 +300,8 @@ buses once popout windows need shared live state.
    field and `preferences.sideGridVisible` in the on-disk JSON; schema v3 removed
    both (per `storage.ts`), and App's `save()` writes only
    `{ version, layout, preferences }`.
-2. ~~**Panel count.**~~ **FIXED 2026-07-13** — README/CLAUDE counts corrected (16 components, 14 registry entries; settings + status-bar imperative). All 16 now also carry a manifest with `capabilities`.
-   Original observation:  README/CLAUDE (and the earlier sketch) say "14 panels"; the
+2. ~~**Panel count.**~~ **FIXED 2026-07-13** — README/AGENTS counts corrected (16 components, 14 registry entries; settings + status-bar imperative). All 16 now also carry a manifest with `capabilities`.
+   Original observation:  README/AGENTS (and the earlier sketch) say "14 panels"; the
    `components` map has **15** keys. 13 are in the default-layout registry;
    `settings` and `status-bar` are added imperatively.
 3. ~~**The `+` add-tab button is broken for hyphenated ids.**~~ **FIXED 2026-07-13** — `addTab` now reads `active.view.contentComponent`; accent dot shares ColoredTab's clone-aware lookup.
@@ -333,7 +333,7 @@ buses once popout windows need shared live state.
 `json-bus`; `lib.rs`; `osc.rs`; `persistence/{storage,tauri-storage,default-layout}`;
 `HeaderActions`; `json-utils/{graphDetect,layers}`; `panel-manifest`; and the docs
 (`panel-contract-proposal`, `patchbay-spec`, `dockview-constructive-vs-consumptive`,
-HIF, READMEs/CLAUDE/SESSIONS).
+HIF, READMEs/AGENTS/SESSIONS).
 
 **Not opened (low risk; behaviour inferred):** `ColoredTab.tsx`, `PanelRoot.tsx`,
 `Watermark.tsx`, the `.css` files, `json-utils/jsonToHierarchy.ts`,

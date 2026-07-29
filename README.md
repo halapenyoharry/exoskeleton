@@ -4,7 +4,34 @@ A cross-platform desktop workspace built on Tauri 2 and Dockview — structure y
 
 Licensed under the **GNU Affero General Public License v3.0 or later** ([AGPL-3.0-or-later](LICENSE)).
 
-<!-- TODO: screenshot of the default Minimal layout goes here -->
+![Exoskeleton: three synced graph layouts of the same Gilgamesh-epic dataset — a node selected in the 3D force graph (center, magenta) lights up simultaneously in the 2D graph panel (right) via identity, not position](docs/images/screenshot-hero.jpg)
+
+---
+
+## Why this is different
+
+Draw the same network twice and you get two different pictures — not because
+one is wrong, but because there's no single correct way to flatten a tangle of
+connections onto a screen. Every layout makes some relationships obvious and
+hides others. Most software picks one arrangement and commits to it.
+
+Exoskeleton runs several graph layouts of the same source at once — 2D force,
+cytoscape/fcose, 3D force — and keeps them synchronized by **identity rather
+than position**. Hover a node in one panel and the same node lights up in the
+others. Click it and each panel flies its own camera to that node, in its own
+coordinate space, preserving its own embedding. Nothing positional ever
+crosses a panel boundary — a sync event names a node; each renderer resolves
+that name independently. A node that sits among one crowd in one layout and a
+different crowd in another is telling you something neither layout could have
+told you alone.
+
+Camera moves animate rather than cut (a tuned transition per renderer), so
+each panel stays a place you learn across many selections instead of
+re-encountering from scratch on every click.
+
+See [docs/cross-panel-sync.md](docs/cross-panel-sync.md) for the technical
+contract, the design rationale, and an honest status table of what's wired up
+today versus what the architecture merely makes possible.
 
 ---
 
@@ -86,6 +113,8 @@ On first launch Exoskeleton opens with the **Minimal** preset: just the editor, 
 - switch to a different preset (**JSON Lab**, **AV Lab**, **Everything**),
 - create, rename, or delete named workspaces,
 - export or import a workspace as a portable `.exo.json` file.
+
+<img src="docs/images/screenshot-menu.png" alt="The floating panel menu, showing several JSON viewers and a Reset layout action" width="360" />
 
 The **Watermark** screen (shown whenever the active workspace's grid is empty) offers the same preset choices as a set of cards.
 
@@ -175,6 +204,7 @@ exoskeleton/
 │   ├── tauri.conf.json              Content Security Policy (CSP) & app config
 │   └── Cargo.toml
 ├── docs/
+│   ├── cross-panel-sync.md          Identity-based graph sync: contract & rationale
 │   ├── ship-plan.md                 Exoskeleton release plan
 │   ├── SESSIONS.md                  Handoff & session execution log
 │   └── signing.md                   macOS signing & notarization guide
