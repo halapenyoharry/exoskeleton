@@ -46,4 +46,3 @@ proper one.)*
 - **Run `npm run build && npm test`** before opening a pull request.
 - **One coherent change per pull request.** Drive-by reformatting makes review
   disproportionately expensive.
-</content>

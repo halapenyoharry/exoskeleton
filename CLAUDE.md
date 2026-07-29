@@ -35,7 +35,7 @@ Sixteen panels via Dockview, registered in [src/App.tsx](src/App.tsx)'s `compone
 - **terminal** (amber) — [src/panels/TerminalPanel.tsx](src/panels/TerminalPanel.tsx) — xterm wired to a real PTY
 - **webview** (mint) — [src/panels/LanWebview.tsx](src/panels/LanWebview.tsx) — iframe with URL bar, defaults to `https://dockview.dev` (the layout library's docs). Named `LanWebview` to label what it's *for* — LAN HTTP services and similar iframe-friendly surfaces. The panel id `webview` (and the mint color identity) are kept because they describe the panel's *role*, not its implementation.
 
-The rest: `tempo-clock`, `piano`, `scope` (OSC instruments), and the JSON suite — `json-edit` (Monaco) feeding seven viewers (`json-tree`, `json-graph`, `json-cytoscape`, `json-graph3d`, `json-circles`, `json-mass`, `json-dyadic`) over the in-process json-bus. Every panel has a manifest declaring `capabilities` / `optionalCapabilities` / `companions` (see [docs/panel-capability-map.md](docs/panel-capability-map.md)).
+The rest: `tempo-clock`, `piano`, `scope` (OSC instruments), and the JSON suite — `json-edit` (CodeMirror 6) feeding seven viewers (`json-tree`, `json-graph`, `json-cytoscape`, `json-graph3d`, `json-circles`, `json-mass`, `json-dyadic`) over the in-process json-bus. Every panel has a manifest declaring `capabilities` / `optionalCapabilities` / `companions` (see [docs/panel-capability-map.md](docs/panel-capability-map.md)).
 
 ## Where to look first
 

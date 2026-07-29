@@ -1123,4 +1123,3 @@ Shipping is a state, not a feeling. It's reached when all of these hold:
       secret scan clean, and the history question answered by Harold.
 - [ ] SESSIONS.md has an entry per session; every package committed and pushed
       as `halapenyoharry`.
-</content>

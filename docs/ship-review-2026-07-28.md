@@ -305,4 +305,3 @@ earned their shape:
   right distinction, and staying dependency-free fits the project.
 - **The wide registry.** Sixteen panels available is intentional posture, not
   clutter.
-</content>

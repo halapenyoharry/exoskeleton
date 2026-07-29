@@ -17,7 +17,6 @@
     "@codemirror/state": "^6.5.2",
     "@codemirror/view": "^6.36.3",
     "@lezer/highlight": "^1.2.1",
-    "@marktext/muya": "^0.2.5",
     "@tauri-apps/api": "^2.11.0",
     "@tauri-apps/plugin-dialog": "^2.7.1",
     "@tauri-apps/plugin-fs": "^2.5.1",
