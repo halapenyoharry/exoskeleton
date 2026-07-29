@@ -2,13 +2,17 @@ name: CI
 
 on:
   push:
-    branches: [ main, add-json-panels ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, add-json-panels ]
+    branches: [ main ]
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout repository
@@ -21,6 +25,7 @@ jobs:
           cache: 'npm'
 
       - name: Install system dependencies for Tauri (Linux)
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
