@@ -49,5 +49,35 @@ export function parseWorkspaceDocument(raw: string): Workspace {
     throw new Error("Invalid workspace structure: missing string id or name");
   }
 
-  return ws as Workspace;
+  return stripLocalFilePaths(ws as Workspace);
+}
+
+/**
+ * Strips `filePath` from every panel's params in an imported layout.
+ *
+ * A workspace document is untrusted input — it's explicitly designed to be
+ * shared between machines (export/import, starter workspaces for forks).
+ * `EditorPanel` and `JsonEditPanel` both read `params.filePath` from disk
+ * unconditionally on mount, with no confirmation. Without this, a crafted
+ * .exo.json could point a panel at any file the app has fs access to (the
+ * whole home directory) and have it silently read and displayed the moment
+ * the workspace activates. Dropping the path is enough: the panel falls back
+ * to its normal empty-buffer state, same as a file that's been deleted, and
+ * the user re-opens the file themselves if they want it.
+ */
+function stripLocalFilePaths(workspace: Workspace): Workspace {
+  const panels = workspace.layout?.panels;
+  if (!panels || typeof panels !== "object") return workspace;
+
+  const sanitizedPanels: typeof panels = {};
+  for (const [id, panel] of Object.entries(panels)) {
+    if (panel && typeof panel === "object" && panel.params && "filePath" in panel.params) {
+      const { filePath: _filePath, ...restParams } = panel.params;
+      sanitizedPanels[id] = { ...panel, params: restParams };
+    } else {
+      sanitizedPanels[id] = panel;
+    }
+  }
+
+  return { ...workspace, layout: { ...workspace.layout, panels: sanitizedPanels } };
 }

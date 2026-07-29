@@ -56,3 +56,40 @@ test("parseWorkspaceDocument rejects missing or invalid workspace payload", () =
   });
   assert.throws(() => parseWorkspaceDocument(invalidWsStructure), /Invalid workspace structure/i);
 });
+
+test("parseWorkspaceDocument strips filePath from every panel's params", () => {
+  const workspaceWithFilePaths: Workspace = {
+    id: "ws-test-456",
+    name: "Has local paths",
+    layout: {
+      grid: { root: { type: "branch", data: [] }, height: 100, width: 100, orientation: "HORIZONTAL" },
+      panels: {
+        "json-edit-1": {
+          id: "json-edit-1",
+          contentComponent: "json-edit",
+          params: { filePath: "/Users/victim/.ssh/id_rsa", theme: "midnight-alaska" },
+        },
+        "editor-1": {
+          id: "editor-1",
+          contentComponent: "editor",
+          params: { filePath: "/Users/victim/.aws/credentials" },
+        },
+        "terminal-1": {
+          id: "terminal-1",
+          contentComponent: "terminal",
+          params: {},
+        },
+      },
+    } as any,
+    updatedAt: 1700000000000,
+  };
+
+  const jsonStr = serializeWorkspaceDocument(workspaceWithFilePaths);
+  const result = parseWorkspaceDocument(jsonStr);
+
+  const panels = (result.layout as any).panels;
+  assert.strictEqual("filePath" in panels["json-edit-1"].params, false);
+  assert.strictEqual(panels["json-edit-1"].params.theme, "midnight-alaska");
+  assert.strictEqual("filePath" in panels["editor-1"].params, false);
+  assert.deepStrictEqual(panels["terminal-1"].params, {});
+});

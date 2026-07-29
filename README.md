@@ -131,7 +131,7 @@ npm run tauri build
 Exoskeleton schema v8 introduces multi-workspace support and workspace document portable serialization.
 
 - **Workspace Switcher**: Click the **⊞** button in the bottom floating toolbar to switch between saved workspaces, create new ones, rename, or delete.
-- **Export / Import**: Save any workspace configuration as a portable `.exo.json` file to share or back up, and import `.exo.json` files seamlessly.
+- **Export / Import**: Save any workspace configuration as a portable `.exo.json` file to share or back up, and import `.exo.json` files seamlessly. Imported files are treated as untrusted: any file path a panel had open is dropped on import, so importing someone else's workspace never silently opens a file from your machine — you re-open documents yourself if you want them.
 - **Multi-Window Workspaces**: Click **❐** next to any workspace to open it in a separate, independent OS window.
 
 ---

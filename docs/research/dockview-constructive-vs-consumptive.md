@@ -62,6 +62,6 @@ defaultLayout?:
 
 ## See also
 
-- [docs/dockview/whatsnew.md](../dockview/whatsnew.md) — Dockview 6.0 release notes (introduced edge groups).
+- [Dockview 6.0 release notes](https://dockview.dev) — introduced edge groups. (Previously a local copy lived at `docs/dockview/whatsnew.md`; removed 2026-07-29 as an unattributed mirror of Dockview's own docs site — see `local/dockview/` if you kept a copy.)
 - [src/HeaderActions.tsx](../../src/HeaderActions.tsx) — current popout button uses the consumptive pattern: `containerApi.addPopoutGroup(props.group)`.
 - [src/App.tsx](../../src/App.tsx) — current Cmd+B handler uses the constructive pattern for edge groups: `api.addEdgeGroup(...)` then `api.addPanel({ ..., position: { referenceGroup: edge.id }})`.
