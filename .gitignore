@@ -17,3 +17,6 @@ src-tauri/gen
 !.vscode/extensions.json
 !.vscode/settings.json
 !.vscode/tasks.json
+
+# personal material not meant for a public clone (see docs/ship-plan.md WP-21)
+private/
