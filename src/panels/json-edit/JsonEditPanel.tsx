@@ -6,7 +6,8 @@ import { json } from "@codemirror/lang-json";
 import { indentUnit } from "@codemirror/language";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
-import { setJson, getJson, setActiveDocumentId, type JsonValue } from "../../data/json-bus";
+import { setJson, getJson, type JsonValue } from "../../data/json-bus";
+import { setActiveDocumentId } from "../../osc/channels";
 import { midnightAlaskaExtension, MIDNIGHT_ALASKA } from "./themes/midnight-alaska";
 import "./JsonEditPanel.css";
 

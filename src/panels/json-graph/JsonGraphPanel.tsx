@@ -10,7 +10,7 @@ import {
   onNodeSelectionBroadcast,
   broadcastNodeFocus,
   onNodeFocusBroadcast,
-} from "../../data/json-bus";
+} from "../../osc/channels";
 import {
   type DetectedGraph,
   type GraphNode,

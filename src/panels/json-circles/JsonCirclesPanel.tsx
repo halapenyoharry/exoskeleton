@@ -6,7 +6,7 @@ import {
   onActiveDocumentIdChange,
   areGraphsConnected,
   onGraphsConnectionChange,
-} from "../../data/json-bus";
+} from "../../osc/channels";
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats } from "../../data/json-utils/docStats";
 import { useElementSize } from "../../useElementSize";

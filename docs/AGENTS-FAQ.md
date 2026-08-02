@@ -12,6 +12,8 @@ Newest at the bottom.
 
 **Date:** 2026-05-19
 
+> **Partly superseded 2026-08-02** — see the last entry in this file. The decision below (the JSON document gets its own holder) still stands and its reasoning is still correct. The *rule* it states — ephemeral-event vs snapshot-state — does not: it is not decidable for real channels, and following it put four coordination channels in json-bus that belonged on OSC. Read the bottom entry for the rule that replaced it.
+
 **Test case:** An editor panel produces a JSON document. One or more visualizer panels render it. They share a window, not a process boundary. (Concrete instance: refactoring `json-visual-viewer` into exoskeleton.)
 
 **Framing trap:** "Cross-panel data flow isn't standardized in exoskeleton — tempo-clock uses OSC, but JSON is too big for OSC messages."
@@ -92,3 +94,59 @@ Four conventions, all with existing implementations to reuse:
 Corollary for anything that rebuilds a scene from a measured size: use [src/useElementSize.ts](../src/useElementSize.ts) (debounced ResizeObserver) and put *destructured primitives* in the rebuild effect's deps, never the whole `params` object (its identity changes every render, so any sibling re-render rebuilds your scene).
 
 **Scale expectations by renderer:** SVG/DOM viewers (tree, circles, mass, graph) are element-bound — thresholds in the hundreds-to-thousands are correct, don't raise them. Canvas (cytoscape) mid-thousands. WebGL (`json-graph3d`) is the designated big-graph surface: threshold 50k, and above ~5k nodes it auto-degrades cosmetics (1px GL lines, no curvature/arrows/particles, shorter cooldown) instead of blocking.
+
+---
+
+## Q: I'm adding a new cross-panel channel. Does it go on OSC, or in json-bus?
+
+**Date:** 2026-08-02
+
+**Supersedes:** the 2026-05-19 entry above ("How should a panel feed structured data to other panels?"). That entry's *decision* still stands — the JSON document has its own holder — but its *rule* does not. It drew the line at ephemeral-event vs snapshot-state, and that line put selection, focus, the active-document id and the graphs-connected flag on the wrong side of it. See [issue #4](https://github.com/halapenyoharry/exoskeleton/issues/4) for the full archaeology.
+
+**Test case:** You have a value one panel produces and others consume. Hover selection, camera focus, which document is active, a toggle, a playhead position, whatever comes next. Two modules look like they could hold it and both have a subscription API.
+
+**Framing trap:** "Is this an event or is this state?" It sounds like the right question. It is not decidable — hover selection is fire-and-forget *and* the status bar needs its current value on mount. Every future channel will have the same double character, and answering by feel is what produced a document primitive quietly carrying four coordination channels.
+
+**The rule — two parts, both required:**
+
+> **If it fits in an OSC arg and is cheap to send, send it as OSC.**
+> **If something needs to know the last value, retain the address.**
+
+Part one is mechanically checkable: does it typecheck as `OscArg` ([src/osc/types.ts](../src/osc/types.ts))? int, float, string, blob, time, bool, array, midi, color, nil, inf. There is deliberately no arbitrary-object case.
+
+Part two of part one — *cheap* — is what stops the rule collapsing. A parsed document technically "fits" as `{type:"string", value: JSON.stringify(doc)}`. That is not cheap: it reintroduces serialization on every keystroke, the exact cost in-process dispatch avoids by passing an object reference. State both halves or the rule gets misapplied by the next person who reads only the first.
+
+Retention is then a *separate* question with a separate answer — see below — not a property that decides which module you use.
+
+**Decision:** One bus. `sendOsc`/`subscribeOsc` carry everything that passes the rule; [src/data/json-bus.ts](../src/data/json-bus.ts) holds the one payload that doesn't. Typed facades live in [src/osc/channels/](../src/osc/channels/) so panels keep structs and the positional-arg layout stays in one tested module ([codecs.ts](../src/osc/channels/codecs.ts)).
+
+**Why not a retain flag on the message (MQTT-style):** the OSC wire has no broker to honor it. A "retained" message would work in-process and silently vanish across the UDP bridge — divergent semantics either side of a boundary, which is the worst kind of bug to chase. The retainer is a local cache instead ([src/osc/retainer.ts](../src/osc/retainer.ts)), so `sendOsc` and the bridge are untouched and any process that wants memory keeps its own.
+
+**Three constraints that are not obvious, and are already implemented:**
+
+1. **The retainer is privileged, not an ordinary subscriber.** It updates inside `dispatchLocal` *before* the subscriber loop. If it registered via `subscribeOsc`, dispatch order would decide whether a handler re-reading `getLast()` sees the new value or the previous one.
+2. **Retention is opt-in per address pattern, declared at module init.** [src/osc/retained.ts](../src/osc/retained.ts) is the one registration site. A `retain()` call inside a consumer's effect only caches values sent *after* that consumer mounts — strictly worse than the module-level variable it replaced. And a retainer that cached everything would also cache `/exoskeleton/clock/tick` at 24 PPQ.
+3. **Bridged channels can feed themselves.** In-process, `sourcePanelId` echo suppression is enough because there is one dispatcher. Over the bridge, any loopback config turns hover-highlight into an unbounded loop. [src/osc/local-sources.ts](../src/osc/local-sources.ts) drops inbound-from-bridge messages whose `sourcePanelId` belongs to a panel in this process. Genuine external senders carry an unknown id (decoded as `"external"`), match no local panel, and dispatch normally.
+
+**Retention decisions so far, and the reasoning shape to copy:**
+
+| Address | Retained | Why |
+| --- | --- | --- |
+| `/json/{doc}/select` | yes | the status bar renders current selection on mount |
+| `/json/{doc}/focus` | **no** | focus is a verb; a panel opened an hour later must not fly its camera |
+| `/json/active` | yes | a panel mounting later needs the current document |
+| `/json/graphs/connected` | yes | the status bar renders the toggle state on mount |
+| `/exoskeleton/clock/*` | **no** | 24 PPQ of churn; a retained tick means nothing |
+| `/exoskeleton/piano/*` | **no** | a retained note-on is a stuck note |
+
+Ask "would a panel mounting right now be wrong to not know this?" — not "is this important."
+
+**Rejected alternatives:**
+
+- *Rewriting the graph panels to raw address strings.* The hot paths in the three graph panels have no automated coverage (the test runner is `node --test` over `src/**/*.test.ts` — no `.tsx`, no DOM). Typed facades meant the migration was an import-line change in six panels, and put the logic where tests can reach it. Same wire behaviour, a fraction of the regression surface.
+- *Widening `OscArg` with an object case.* It stops being OSC, and that arg would silently fail to cross the bridge — the failure would surface as "works for me, broken for the person with a controller."
+- *Leaving it alone because nothing is broken.* Nothing was. But json-bus channels are unreachable from outside the heap **permanently**, and OSC channels are not: the Rust side already emits globally ([src-tauri/src/osc.rs](../src-tauri/src/osc.rs)), so inbound UDP reaches every webview including Tauri popouts. Multi-window sync is a small local-fanout change away for anything on OSC, and impossible for anything not.
+
+**Open hazard:** the retainer is per-heap, so a popout window still starts with no retained state even though it now receives live traffic. Multi-window state-sync remains its own problem; the difference is that it is now solvable.
+
+**See also:** [src/osc/index.ts](../src/osc/index.ts), [src/osc/channels/index.ts](../src/osc/channels/index.ts), [src/data/json-bus.ts](../src/data/json-bus.ts), [docs/research/osc-self-contained-by-default.md](research/osc-self-contained-by-default.md), [issue #4](https://github.com/halapenyoharry/exoskeleton/issues/4).

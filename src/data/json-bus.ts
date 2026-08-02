@@ -1,13 +1,24 @@
 // Exoskeleton's json-bus: in-process snapshot state for cross-panel JSON
-// documents. The shape mirrors src/osc/index.ts (subscription set, snapshot
-// iteration to allow mid-dispatch unsubscribe) but the semantics are
-// different: this is current-value-with-subscription, not an event stream.
+// documents. One job — holding the document.
 //
-// OSC is for ephemeral events (clock ticks, MIDI notes) — fire-and-forget,
-// late subscribers miss prior events. json-bus is for documents — a viewer
-// panel that mounts AFTER the editor has set a value should see that value
-// on its first render via getJson(id), then react to subsequent edits via
-// onJsonChange(id, handler). That two-step matches the React useState +
+// This module used to also carry selection, focus, the active-document id and
+// the graphs-connected flag. Those were event-shaped and all four fit in OSC
+// args, so they moved to src/osc/channels/ (issue #4). The document is the one
+// payload that stayed, and the rule says why:
+//
+//   If it fits in an OSC arg and is cheap to send, send it as OSC.
+//   If something needs to know the last value, retain the address.
+//
+// A parsed document fits only as {type:"string", value: JSON.stringify(doc)},
+// which is not cheap — it reintroduces serialization on every keystroke, the
+// exact cost in-process dispatch avoids by passing an object reference. So it
+// keeps its own holder here. Widening OscArg with an object case was the other
+// option and is worse: it stops being OSC, and that arg would silently fail to
+// cross the UDP bridge.
+//
+// A viewer panel that mounts AFTER the editor has set a value should see that
+// value on its first render via getJson(id), then react to subsequent edits
+// via onJsonChange(id, handler). That two-step matches the React useState +
 // useEffect idiom.
 //
 // Documents are keyed by id so multiple JSON documents can coexist
@@ -16,8 +27,8 @@
 //
 // Scope: in-process only. Same React tree, same JS heap. If a panel opens
 // in a separate Tauri WebviewWindow (popout group via addPopoutGroup), this
-// bus does not reach it — Tauri events become the right answer for that
-// case. See docs/AGENTS-FAQ.md for the full reasoning.
+// bus does not reach it, and — unlike the channels that moved to OSC — it
+// has no path to ever reaching it. See docs/AGENTS-FAQ.md.
 
 export type JsonValue =
   | null
@@ -62,119 +73,3 @@ export function onJsonChange(id: string, handler: Handler): () => void {
     subscriptions.delete(sub);
   };
 }
-
-// --- Active Document Coordination ---
-let activeDocumentId = "default";
-const activeDocListeners = new Set<(id: string) => void>();
-
-export function getActiveDocumentId(): string {
-  return activeDocumentId;
-}
-
-export function setActiveDocumentId(id: string): void {
-  if (activeDocumentId === id) return;
-  activeDocumentId = id;
-  for (const listener of activeDocListeners) {
-    try {
-      listener(id);
-    } catch (e) {
-      console.error("[json-bus] active document listener threw:", e);
-    }
-  }
-}
-
-export function onActiveDocumentIdChange(listener: (id: string) => void): () => void {
-  activeDocListeners.add(listener);
-  return () => {
-    activeDocListeners.delete(listener);
-  };
-}
-
-// --- Connection / Decouple Coordination ---
-let graphsConnected = true; // Default to connected
-const connectionListeners = new Set<(connected: boolean) => void>();
-
-export function areGraphsConnected(): boolean {
-  return graphsConnected;
-}
-
-export function setGraphsConnected(connected: boolean): void {
-  if (graphsConnected === connected) return;
-  graphsConnected = connected;
-  for (const listener of connectionListeners) {
-    try {
-      listener(connected);
-    } catch (e) {
-      console.error("[json-bus] connection listener threw:", e);
-    }
-  }
-}
-
-export function onGraphsConnectionChange(listener: (connected: boolean) => void): () => void {
-  connectionListeners.add(listener);
-  return () => {
-    connectionListeners.delete(listener);
-  };
-}
-
-// --- Selection Synchronization ---
-export interface SelectionEvent {
-  documentId: string;
-  nodeId: string | null;
-  sourcePanelId: string;
-  label?: string;
-}
-type SelectionHandler = (event: SelectionEvent) => void;
-const selectionListeners = new Set<SelectionHandler>();
-let currentSelectedNode: { nodeId: string | null; label?: string } = { nodeId: null };
-
-export function getSelectedNode() {
-  return currentSelectedNode;
-}
-
-export function broadcastNodeSelection(documentId: string, nodeId: string | null, sourcePanelId: string, label?: string): void {
-  currentSelectedNode = { nodeId, label };
-  const event: SelectionEvent = { documentId, nodeId, sourcePanelId, label };
-  for (const listener of selectionListeners) {
-    try {
-      listener(event);
-    } catch (e) {
-      console.error("[json-bus] selection listener threw:", e);
-    }
-  }
-}
-
-export function onNodeSelectionBroadcast(handler: SelectionHandler): () => void {
-  selectionListeners.add(handler);
-  return () => {
-    selectionListeners.delete(handler);
-  };
-}
-
-// --- Focus / Zoom Synchronization ---
-export interface FocusEvent {
-  documentId: string;
-  nodeId: string;
-  sourcePanelId: string;
-}
-type FocusHandler = (event: FocusEvent) => void;
-const focusListeners = new Set<FocusHandler>();
-
-export function broadcastNodeFocus(documentId: string, nodeId: string, sourcePanelId: string): void {
-  const event: FocusEvent = { documentId, nodeId, sourcePanelId };
-  for (const listener of focusListeners) {
-    try {
-      listener(event);
-    } catch (e) {
-      console.error("[json-bus] focus listener threw:", e);
-    }
-  }
-}
-
-export function onNodeFocusBroadcast(handler: FocusHandler): () => void {
-  focusListeners.add(handler);
-  return () => {
-    focusListeners.delete(handler);
-  };
-}
-

@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
+import { getJson, onJsonChange } from "../data/json-bus";
 import {
   areGraphsConnected,
   setGraphsConnected,
   onGraphsConnectionChange,
   getActiveDocumentId,
   onActiveDocumentIdChange,
-  getJson,
-  onJsonChange,
   getSelectedNode,
   onNodeSelectionBroadcast,
-} from "../data/json-bus";
+} from "../osc/channels";
 import { getDocStats } from "../data/json-utils/docStats";
 import "./StatusBarPanel.css";
 
