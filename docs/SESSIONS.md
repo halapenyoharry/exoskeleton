@@ -318,3 +318,10 @@ Last: Harold asked for three things — total authorship (no AI-company credit a
 **Screenshots.** Two JPEGs from `local/inbox/`: `screenshot-exo.jpg` (clean, full-window, shows a node selected in the 3D graph panel lighting up simultaneously in the 2D graph panel — a direct illustration of the identity-sync feature) and `bottomrightcorner menu.jpg` (a hand-composited image with a visible seam and duplicated text — only the bottom portion, showing the ⊞ menu's tail end and Reset-layout action, was artifact-free). Resized/optimized both with `imagemagick` (`-resize`, `-strip`) into `docs/images/`: `screenshot-hero.jpg` (1800px wide, 248K, used as the README's main image) and `screenshot-menu.png` (480px wide, 72K, used inline in the First Run section). Flagged the seam artifact rather than shipping it silently — Harold may want to recapture a clean full menu screenshot later.
 Next: tag-triggered `.dmg`/`.AppImage` CI build job still open if wanted. A clean, full (not partial) screenshot of the ⊞ menu would improve the First Run illustration.
 Open: none blocking — see Next.
+
+## 2026-08-10
+
+State: `main` clean with `text-viewer` integrated and running via `npm run tauri dev`.
+Last: Integrated `TextViewerPanel` as a read-only document flow viewer for the JSON graph, complete with native markdown rendering and full two-way sync with the 3D/2D graph visualizers.
+Next: Harold's call. The pipeline for actually ingesting/extracting documents into the JSON format is a separate upcoming component.
+Open: None.

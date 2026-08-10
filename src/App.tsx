@@ -24,6 +24,7 @@ import JsonTreePanel from "./panels/json-tree/JsonTreePanel";
 import JsonCirclesPanel from "./panels/json-circles/JsonCirclesPanel";
 import JsonGraphPanel from "./panels/json-graph/JsonGraphPanel";
 import StatusBarPanel from "./panels/StatusBarPanel";
+import TextViewerPanel from "./panels/text-viewer/TextViewerPanel";
 import { exoPanel } from "./PanelRoot";
 import {
   addOrFocusPanel,
@@ -94,6 +95,7 @@ const components = {
   "json-graph":    exoPanel(JsonGraphPanel,     "var(--accent-json-graph)"),
   "json-graph3d":  lazyPanel(JsonGraph3DPanel,  "var(--accent-json-graph3d)"),
   "json-dyadic":   lazyPanel(JsonDyadicPanel,   "var(--accent-json-dyadic)"),
+  "text-viewer":   exoPanel(TextViewerPanel,    "var(--accent-editor)"),
   // Registered raw (no exoPanel wrapper) on purpose: the status bar owns
   // its full-width chrome and doesn't take the accent-stripe convention.
   "status-bar-panel": StatusBarPanel,

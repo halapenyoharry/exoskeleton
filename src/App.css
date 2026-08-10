@@ -130,11 +130,16 @@
    inherit whatever text color the surrounding group has — which the
    abyss theme drops to rgba(255,255,255,0.5) on inactive groups,
    making them effectively invisible. Force a readable floor. */
+/* Make tab toolbar icons white and more visible */
 .dockview-theme-abyss .dv-tabs-and-actions-container .dv-right-actions-container {
-  color: rgba(197, 232, 238, 0.75);
+  color: #ffffff;
 }
 .dockview-theme-abyss .dv-tabs-and-actions-container .dv-right-actions-container:hover {
-  color: #c5e8ee;
+  color: #ffffff;
+}
+/* Make the close icon on the tab itself white as well */
+.dockview-theme-abyss .dv-default-tab-action {
+  color: #ffffff;
 }
 
 /* Floating ⊞ add-panel button + menu — app-level chrome, same

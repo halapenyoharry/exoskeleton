@@ -58,6 +58,13 @@ export const panelRegistry: RegistryEntry[] = [
     introducedAt: 1,
   },
   {
+    id: "text-viewer",
+    component: "text-viewer",
+    title: "text-viewer",
+    position: { referencePanel: "editor", direction: "within" },
+    introducedAt: 8,
+  },
+  {
     id: "tempo-clock",
     component: "tempo-clock",
     title: "tempo",
