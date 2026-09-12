@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
 import { EditorView, lineNumbers } from "@codemirror/view";
-import { EditorState } from "@codemirror/state";
+import { EditorState, EditorSelection } from "@codemirror/state";
+import { basicSetup } from "codemirror";
 import { json } from "@codemirror/lang-json";
 import { indentUnit } from "@codemirror/language";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { setJson, getJson, type JsonValue } from "../../data/json-bus";
-import { setActiveDocumentId } from "../../osc/channels";
+import { setActiveDocumentId, onNodeSelectionBroadcast } from "../../osc/channels";
 import { midnightAlaskaExtension, MIDNIGHT_ALASKA } from "./themes/midnight-alaska";
 import "./JsonEditPanel.css";
 
@@ -113,6 +114,7 @@ export default function JsonEditPanel(
     if (!containerRef.current) return;
 
     const extensions = [
+      basicSetup,
       json(),
       midnightAlaskaExtension,
       indentUnit.of(" ".repeat(params.tabSize)),
@@ -194,6 +196,26 @@ export default function JsonEditPanel(
       }
     }
   }, [value]);
+
+  // Subscribe to OSC node selection
+  useEffect(() => {
+    const unsubscribe = onNodeSelectionBroadcast((evt) => {
+      if (evt.documentId !== params.documentId) return;
+      const view = editorViewRef.current;
+      if (!view) return;
+      const docStr = view.state.doc.toString();
+      // Try to find the exact id line
+      const targetStr = `"id": "${evt.nodeId}"`;
+      const pos = docStr.indexOf(targetStr);
+      if (pos >= 0) {
+        view.dispatch({
+          selection: EditorSelection.single(pos, pos + targetStr.length),
+          effects: EditorView.scrollIntoView(pos, { y: "center" })
+        });
+      }
+    });
+    return () => unsubscribe();
+  }, [params.documentId]);
 
   // On mount, restore file content if filePath param exists
   useEffect(() => {

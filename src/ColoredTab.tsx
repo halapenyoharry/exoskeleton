@@ -26,6 +26,7 @@ const accents: Record<string, string> = {
   "json-graph": "var(--accent-json-graph)",
   "json-graph3d": "var(--accent-json-graph3d)",
   "json-dyadic": "var(--accent-json-dyadic)",
+  "topology-extract": "var(--accent-topology-extract)",
 };
 
 const glyphs: Record<string, string> = {
@@ -44,6 +45,7 @@ const glyphs: Record<string, string> = {
   "json-graph": '"✦"',
   "json-graph3d": '"⌬"',
   "json-dyadic": '"◬"',
+  "topology-extract": '"⚗"',
 };
 
 /** Resolve a panel id to the component key the accent/glyph maps use.
