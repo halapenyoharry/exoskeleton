@@ -26,7 +26,9 @@ import type { SerializedDockview } from "dockview";
 //       migrateSavedLayout (default-layout.ts) before fromJSON runs.
 //   8 — multi-workspace support. Saved layout is encapsulated within named
 //       `workspaces` objects; `activeWorkspaceId` selects the active grid.
-export const CURRENT_VERSION = 8;
+//   9 — topology-extract panel: ingestion furnace for the info2topo
+//       pipeline. Pushes normalized-dyadic topology JSON to json-bus.
+export const CURRENT_VERSION = 9;
 
 export interface Preferences {
   // Empty for now; reserved for theme, tab-position, etc. when those land.

@@ -325,3 +325,10 @@ State: `main` clean with `text-viewer` integrated and running via `npm run tauri
 Last: Integrated `TextViewerPanel` as a read-only document flow viewer for the JSON graph, complete with native markdown rendering and full two-way sync with the 3D/2D graph visualizers.
 Next: Harold's call. The pipeline for actually ingesting/extracting documents into the JSON format is a separate upcoming component.
 Open: None.
+
+## 2026-09-12
+
+State: `osc-retainer-unification` clean with `topology-extract` panel added. Schema version bumped to 9. `npm test` passes 103/103; `npm run build` passes (pre-existing TS errors in Harold's uncommitted TextViewerPanel edits are unrelated).
+Last: Built the `topology-extract` panel — the i2t-funnel entry point for the info2topo pipeline. New panel at `src/panels/topology-extract/` with five files: `TopologyExtractPanel.tsx` (React component with provider-agnostic shell), `TopologyExtractPanel.css` (dark theme, 4-category color pills), `openrouter.ts` (pure-fetch wrapper for OpenRouter chat completions), `prompts.ts` (default system prompt teaching the model to output TopoDocument JSON with `i2t:edge_category`), `manifest.ts` (magenta `#e040fb`, glyph ⚗, companions `json-dyadic`). Wired into App.tsx (lazy-loaded), ColoredTab (accent + glyph), App.css (CSS var), default-layout registry (v9, within json-edit group), json-lab preset, and panel-capability-map (Degrades Gracefully tier, optional fs). Provider dropdown has OpenRouter wired; Local CLI and Direct API show "coming soon" state. System prompt is editable via a collapsible Advanced section and persisted in panel params.
+Next: Harold to test with an OpenRouter API key. Follow-up candidates: strip API key on `.exo.json` export (like `stripLocalFilePaths` does for `filePath`); wire Local CLI provider; iterate on the system prompt.
+Open: API key is stored in panel params (survives workspace export) — should be stripped on export as a follow-up.

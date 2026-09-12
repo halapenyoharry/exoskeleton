@@ -64,6 +64,7 @@ const JsonGraph3DPanel = lazy(() => import("./panels/json-graph3d/JsonGraph3DPan
 const JsonDyadicPanel = lazy(() => import("./panels/json-dyadic/JsonDyadicPanel"));
 const JsonMassPanel = lazy(() => import("./panels/json-mass/JsonMassPanel"));
 const ScopePanel = lazy(() => import("./panels/scope/ScopePanel"));
+const TopologyExtractPanel = lazy(() => import("./panels/topology-extract/TopologyExtractPanel"));
 
 function lazyPanel(Component: React.ComponentType<any>, accent: string) {
   const Wrapped = exoPanel(Component, accent);
@@ -96,6 +97,7 @@ const components = {
   "json-graph3d":  lazyPanel(JsonGraph3DPanel,  "var(--accent-json-graph3d)"),
   "json-dyadic":   lazyPanel(JsonDyadicPanel,   "var(--accent-json-dyadic)"),
   "text-viewer":   exoPanel(TextViewerPanel,    "var(--accent-editor)"),
+  "topology-extract": lazyPanel(TopologyExtractPanel, "var(--accent-topology-extract)"),
   // Registered raw (no exoPanel wrapper) on purpose: the status bar owns
   // its full-width chrome and doesn't take the accent-stripe convention.
   "status-bar-panel": StatusBarPanel,

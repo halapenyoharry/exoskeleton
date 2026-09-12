@@ -1,6 +1,6 @@
 # Panel Capability Map
 
-What each of the 16 exoskeleton panels needs from its host — and therefore where it can run. A unit runs in any host that provides the capabilities it declares. Most declare nothing.
+What each of the 17 exoskeleton panels needs from its host — and therefore where it can run. A unit runs in any host that provides the capabilities it declares. Most declare nothing.
 
 ## How to read it
 
@@ -25,6 +25,7 @@ flowchart LR
     Scope["scope"]
     JsonEdit["json-edit"]
     Webview["webview"]
+    TopoExtract["topology-extract"]
   end
 
   subgraph HOSTBOUND["Host-bound — needs a host superpower"]
@@ -48,6 +49,7 @@ flowchart LR
   Clock -.optional.-> OSCUDP
   Scope -.optional.-> OSCUDP
   Webview -.optional.-> IFRAME
+  TopoExtract -.optional.-> FS
   Speak -.swappable.-> TTS
 
   classDef portable fill:#10271b,stroke:#39cf7a,color:#d6fae5;
@@ -57,7 +59,7 @@ flowchart LR
   classDef capAny fill:#10271b,stroke:#39cf7a,color:#d6fae5;
   classDef capAdapt fill:#2a2410,stroke:#d8b34a,color:#f5ecca;
   class U,Speak portable;
-  class Piano,Clock,Scope,JsonEdit,Webview degrade;
+  class Piano,Clock,Scope,JsonEdit,Webview,TopoExtract degrade;
   class Terminal,Editor,Settings bound;
   class PTY,OSCUDP,IFRAME capTauri;
   class PERSIST capAny;
@@ -66,7 +68,7 @@ flowchart LR
 
 ## The takeaway
 
-One hard weld (`terminal` → `pty`), two glue-points (`editor` and `json-edit` need a filesystem adapter; `settings` needs persistence, which every host already has), and everything else free. All seven JSON viewers — including the new `json-dyadic` — plus the status bar are universal today. `speak` lands in the universal tier with its TTS engine behind a swappable request/response seam.
+One hard weld (`terminal` → `pty`), two glue-points (`editor` and `json-edit` need a filesystem adapter; `settings` needs persistence, which every host already has), and everything else free. All seven JSON viewers — including the new `json-dyadic` — plus the status bar are universal today. `topology-extract` degrades gracefully (loses file load/save off-Tauri but extraction via fetch still works). `speak` lands in the universal tier with its TTS engine behind a swappable request/response seam.
 
 ## The declarable capability vocabulary
 
@@ -77,7 +79,7 @@ The right-hand column is the whole list a unit might declare in its manifest:
 | `pty` | Tauri only | terminal (required) |
 | `osc.udp` | Tauri only | piano, tempo-clock, scope (optional) |
 | `iframe.permissive` | Tauri only | webview (optional) |
-| `fs` (read/write/dialog) | native on Tauri, adapter on web/vscode | editor (required), json-edit (optional) |
+| `fs` (read/write/dialog) | native on Tauri, adapter on web/vscode | editor (required), json-edit (optional), topology-extract (optional) |
 | `persistence` | every host | settings (required) |
 | `tts.engine` | swappable (local command or web API) | speak (planned) |
 | *(none)* | every host | the 7 viewers + status-bar |

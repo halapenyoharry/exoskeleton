@@ -158,6 +158,18 @@ export const panelRegistry: RegistryEntry[] = [
     introducedAt: 6,
     companions: ["json-edit"],
   },
+  // v9 — topology-extract: ingestion furnace for the info2topo pipeline.
+  // Takes source text, runs AI extraction, and pushes normalized-dyadic
+  // topology JSON to the json-bus where json-dyadic and other viewers
+  // consume it. Not in the minimal preset; appears in json-lab.
+  {
+    id: "topology-extract",
+    component: "topology-extract",
+    title: "topology-extract",
+    position: { referencePanel: "json-edit", direction: "within" },
+    introducedAt: 9,
+    companions: ["json-dyadic"],
+  },
 ];
 
 /**

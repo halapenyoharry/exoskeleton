@@ -1,0 +1,448 @@
+/* topology-extract panel — the ingestion furnace.
+ *
+ * Four-category color tokens reused from the json-dyadic CSS convention
+ * so the extraction summary colors match the viewer's rendering. */
+
+.topo-extract-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  color: #e8ecf4;
+  overflow: hidden;
+}
+
+/* ── Header bar ─────────────────────────────────────────────────── */
+
+.topo-extract-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(224, 64, 251, 0.06);
+  border-bottom: 1px solid rgba(224, 64, 251, 0.15);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.topo-extract-header label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #7e879b;
+  white-space: nowrap;
+}
+
+.topo-extract-header select,
+.topo-extract-header input[type="text"] {
+  background: #171a22;
+  color: #e8ecf4;
+  border: 1px solid #242935;
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.topo-extract-header select:focus,
+.topo-extract-header input[type="text"]:focus {
+  border-color: #e040fb;
+}
+
+.topo-extract-header select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.topo-extract-model-input {
+  width: 180px;
+}
+
+.topo-extract-coming-soon {
+  font-size: 9px;
+  color: #7e879b;
+  font-style: italic;
+  padding: 2px 6px;
+  background: rgba(127, 138, 168, 0.1);
+  border-radius: 3px;
+}
+
+/* ── API key row ────────────────────────────────────────────────── */
+
+.topo-extract-key-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  background: rgba(224, 64, 251, 0.03);
+  border-bottom: 1px solid rgba(224, 64, 251, 0.08);
+  flex-shrink: 0;
+}
+
+.topo-extract-key-input {
+  flex: 1;
+  background: #171a22;
+  color: #e8ecf4;
+  border: 1px solid #242935;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.topo-extract-key-input:focus {
+  border-color: #e040fb;
+}
+
+.topo-extract-key-toggle {
+  background: none;
+  border: none;
+  color: #7e879b;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  transition: color 0.15s;
+}
+
+.topo-extract-key-toggle:hover {
+  color: #e8ecf4;
+}
+
+/* ── Source input area ──────────────────────────────────────────── */
+
+.topo-extract-source {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 8px 12px;
+}
+
+.topo-extract-textarea {
+  flex: 1;
+  background: #0d0e12;
+  color: #e8ecf4;
+  border: 1px solid #242935;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.topo-extract-textarea:focus {
+  border-color: rgba(224, 64, 251, 0.5);
+  box-shadow: 0 0 0 2px rgba(224, 64, 251, 0.1);
+}
+
+.topo-extract-textarea::placeholder {
+  color: #4c556b;
+}
+
+.topo-extract-source-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.topo-extract-source-btn {
+  background: #171a22;
+  color: #b0b8c8;
+  border: 1px solid #242935;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.topo-extract-source-btn:hover {
+  background: #1e2230;
+  color: #e8ecf4;
+  border-color: #3a4050;
+}
+
+.topo-extract-token-estimate {
+  font-size: 10px;
+  color: #4c556b;
+  margin-left: auto;
+}
+
+/* ── Extract trigger ────────────────────────────────────────────── */
+
+.topo-extract-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-top: 1px solid #242935;
+  flex-shrink: 0;
+}
+
+.topo-extract-btn {
+  background: linear-gradient(135deg, #e040fb 0%, #ab47bc 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s, box-shadow 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+
+.topo-extract-btn:hover:not(:disabled) {
+  box-shadow: 0 0 16px rgba(224, 64, 251, 0.35);
+  transform: translateY(-1px);
+}
+
+.topo-extract-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.topo-extract-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.topo-extract-btn--cancel {
+  background: linear-gradient(135deg, #e06a6a 0%, #c62828 100%);
+}
+
+.topo-extract-auto-push {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #7e879b;
+  margin-left: auto;
+}
+
+.topo-extract-auto-push input[type="checkbox"] {
+  accent-color: #e040fb;
+}
+
+/* ── Spinner ────────────────────────────────────────────────────── */
+
+.topo-extract-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: topo-spin 0.6s linear infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+@keyframes topo-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Result area ────────────────────────────────────────────────── */
+
+.topo-extract-result {
+  flex-shrink: 0;
+  padding: 10px 12px;
+  border-top: 1px solid #242935;
+  max-height: 40%;
+  overflow-y: auto;
+}
+
+.topo-extract-result-empty {
+  font-size: 11px;
+  color: #4c556b;
+  font-style: italic;
+  text-align: center;
+  padding: 8px;
+}
+
+.topo-extract-result-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.topo-extract-result-stats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.topo-extract-result-stats .success-icon {
+  color: #6dffaa;
+}
+
+.topo-extract-result-stats .error-icon {
+  color: #e06a6a;
+}
+
+/* Category pills — colors match json-dyadic conventions */
+.topo-extract-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.topo-extract-cat-pill {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.topo-extract-cat-pill--containment {
+  background: rgba(109, 255, 170, 0.12);
+  color: #6dffaa;
+  border: 1px solid rgba(109, 255, 170, 0.3);
+}
+
+.topo-extract-cat-pill--state_change {
+  background: rgba(24, 255, 255, 0.1);
+  color: #18ffff;
+  border: 1px solid rgba(24, 255, 255, 0.3);
+}
+
+.topo-extract-cat-pill--interactivity {
+  background: rgba(255, 179, 0, 0.1);
+  color: #ffb300;
+  border: 1px solid rgba(255, 179, 0, 0.3);
+}
+
+.topo-extract-cat-pill--reference {
+  background: rgba(127, 138, 168, 0.1);
+  color: #7f8aa8;
+  border: 1px solid rgba(127, 138, 168, 0.25);
+}
+
+.topo-extract-cat-pill--unknown {
+  background: rgba(127, 138, 168, 0.06);
+  color: #4c556b;
+  border: 1px solid rgba(127, 138, 168, 0.15);
+}
+
+.topo-extract-result-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.topo-extract-result-btn {
+  background: #171a22;
+  color: #b0b8c8;
+  border: 1px solid #242935;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.topo-extract-result-btn:hover {
+  background: #1e2230;
+  color: #e8ecf4;
+  border-color: #3a4050;
+}
+
+.topo-extract-result-btn--primary {
+  background: rgba(224, 64, 251, 0.15);
+  color: #e040fb;
+  border-color: rgba(224, 64, 251, 0.3);
+}
+
+.topo-extract-result-btn--primary:hover {
+  background: rgba(224, 64, 251, 0.25);
+  border-color: rgba(224, 64, 251, 0.5);
+}
+
+.topo-extract-usage {
+  font-size: 10px;
+  color: #4c556b;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* ── Error display ──────────────────────────────────────────────── */
+
+.topo-extract-error {
+  padding: 8px 12px;
+  background: rgba(224, 106, 106, 0.08);
+  border: 1px solid rgba(224, 106, 106, 0.25);
+  border-radius: 4px;
+  font-size: 11px;
+  color: #e06a6a;
+  margin-top: 4px;
+}
+
+/* ── Advanced / prompt editor toggle ────────────────────────────── */
+
+.topo-extract-advanced-toggle {
+  background: none;
+  border: none;
+  color: #4c556b;
+  font-size: 10px;
+  cursor: pointer;
+  padding: 4px 12px;
+  transition: color 0.15s;
+  text-align: left;
+  flex-shrink: 0;
+}
+
+.topo-extract-advanced-toggle:hover {
+  color: #7e879b;
+}
+
+.topo-extract-prompt-editor {
+  padding: 0 12px 8px;
+  flex-shrink: 0;
+}
+
+.topo-extract-prompt-textarea {
+  width: 100%;
+  min-height: 120px;
+  max-height: 200px;
+  background: #0d0e12;
+  color: #b0b8c8;
+  border: 1px solid #242935;
+  border-radius: 4px;
+  padding: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  resize: vertical;
+  outline: none;
+}
+
+.topo-extract-prompt-textarea:focus {
+  border-color: rgba(224, 64, 251, 0.4);
+}
+
+.topo-extract-prompt-reset {
+  background: none;
+  border: none;
+  color: #4c556b;
+  font-size: 10px;
+  cursor: pointer;
+  padding: 2px 0;
+  margin-top: 2px;
+}
+
+.topo-extract-prompt-reset:hover {
+  color: #e040fb;
+}
