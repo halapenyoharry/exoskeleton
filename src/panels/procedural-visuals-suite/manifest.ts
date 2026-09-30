@@ -4,7 +4,7 @@ import ControlPanel from "./ControlPanel";
 import BouncingBallsPanel from "./BouncingBallsPanel";
 import FountainPanel from "./FountainPanel";
 import RecursiveSubdivisionPanel from "./RecursiveSubdivisionPanel";
-import TopologicalSurfacesPanel from "./TopologicalSurfacesPanel";
+import ManifoldPanel from "./ManifoldPanel";
 
 export const controlManifest: PanelManifest<ProceduralSuiteParams> = {
   id: "procedural-visuals-control",
@@ -12,7 +12,7 @@ export const controlManifest: PanelManifest<ProceduralSuiteParams> = {
   component: ControlPanel,
   description: "Centralized control hub for the procedural visuals suite, emitting real-time OSC parameters.",
   accent: "#f5a623",
-  glyph: "🎛️",
+  glyph: "▦",
   capabilities: ["persistence"],
   paramsDefault: {
     documentId: "default",
@@ -34,7 +34,7 @@ export const bouncingBallsManifest: PanelManifest<ProceduralSuiteParams> = {
   component: BouncingBallsPanel,
   description: "2D canvas physics simulation with gravity, elastic restitution, and real-time ball count modulation.",
   accent: "#7c6af5",
-  glyph: "⚽",
+  glyph: "○",
   capabilities: ["persistence"],
   paramsDefault: { documentId: "default" },
   osc: {
@@ -49,7 +49,7 @@ export const fountainManifest: PanelManifest<ProceduralSuiteParams> = {
   component: FountainPanel,
   description: "High-performance procedural particle fountain with trail fade, multi-source emission, and color maps.",
   accent: "#4ecca3",
-  glyph: "⛲",
+  glyph: "≈",
   capabilities: ["persistence"],
   paramsDefault: { documentId: "default" },
   osc: {
@@ -64,7 +64,7 @@ export const recursiveManifest: PanelManifest<ProceduralSuiteParams> = {
   component: RecursiveSubdivisionPanel,
   description: "SVG recursive quadrant subdivision generator with probabilistic split thresholds and palette shifts.",
   accent: "#f26d85",
-  glyph: "🖼️",
+  glyph: "▣",
   capabilities: ["persistence"],
   paramsDefault: { documentId: "default" },
   osc: {
@@ -73,17 +73,17 @@ export const recursiveManifest: PanelManifest<ProceduralSuiteParams> = {
   }
 };
 
-export const topologicalManifest: PanelManifest<ProceduralSuiteParams> = {
-  id: "procedural-visuals-topological",
-  title: "Topological Surfaces",
-  component: TopologicalSurfacesPanel,
-  description: "Interactive 3D manifold visualizer (Klein bottle, Torus, Möebius, Trefoil) with procedural GLSL shaders.",
+export const manifoldManifest: PanelManifest<ProceduralSuiteParams> = {
+  id: "procedural-visuals-manifold",
+  title: "Manifold",
+  component: ManifoldPanel,
+  description: "Interactive 3D manifold visualizer (Klein bottle, Torus, Möbius, Trefoil) with procedural GLSL shaders.",
   accent: "#61c0ff",
-  glyph: "🍩",
+  glyph: "◎",
   capabilities: ["persistence"],
   paramsDefault: { documentId: "default" },
   osc: {
-    emits: [{ address: "/procedural-suite/{doc}/topological-surfaces/available", args: ["bool"], description: "Reports availability" }],
-    listens: [{ address: "/procedural-suite/{doc}/topological-surfaces/control/*", args: ["float"], description: "Receives control updates" }]
+    emits: [{ address: "/procedural-suite/{doc}/manifold/available", args: ["bool"], description: "Reports availability" }],
+    listens: [{ address: "/procedural-suite/{doc}/manifold/control/*", args: ["float"], description: "Receives control updates" }]
   }
 };

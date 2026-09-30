@@ -69,7 +69,7 @@ const ProceduralControlPanel = lazy(() => import("./panels/procedural-visuals-su
 const BouncingBallsPanel = lazy(() => import("./panels/procedural-visuals-suite/BouncingBallsPanel"));
 const FountainPanel = lazy(() => import("./panels/procedural-visuals-suite/FountainPanel"));
 const RecursiveSubdivisionPanel = lazy(() => import("./panels/procedural-visuals-suite/RecursiveSubdivisionPanel"));
-const TopologicalSurfacesPanel = lazy(() => import("./panels/procedural-visuals-suite/TopologicalSurfacesPanel"));
+const ManifoldPanel = lazy(() => import("./panels/procedural-visuals-suite/ManifoldPanel"));
 
 function lazyPanel(Component: React.ComponentType<any>, accent: string) {
   const Wrapped = exoPanel(Component, accent);
@@ -107,7 +107,7 @@ const components = {
   "procedural-visuals-balls":       lazyPanel(BouncingBallsPanel,        "var(--accent-procedural-balls)"),
   "procedural-visuals-fountain":    lazyPanel(FountainPanel,             "var(--accent-procedural-fountain)"),
   "procedural-visuals-recursive":   lazyPanel(RecursiveSubdivisionPanel, "var(--accent-procedural-recursive)"),
-  "procedural-visuals-topological": lazyPanel(TopologicalSurfacesPanel,  "var(--accent-procedural-topological)"),
+  "procedural-visuals-manifold": lazyPanel(ManifoldPanel,  "var(--accent-procedural-manifold)"),
   // Registered raw (no exoPanel wrapper) on purpose: the status bar owns
   // its full-width chrome and doesn't take the accent-stripe convention.
   "status-bar-panel": StatusBarPanel,

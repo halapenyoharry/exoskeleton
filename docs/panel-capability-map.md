@@ -16,7 +16,7 @@ Capability color tells you where that power exists: **green** = every host has i
 flowchart LR
   subgraph PORTABLE["Universal — needs nothing — runs in EVERY host"]
     U["8 units: the 7 JSON viewers<br/>(tree, mass, circles, graph, graph3d,<br/>cytoscape, dyadic) + status-bar"]
-    Proc["5 units: Procedural Visuals Suite<br/>(proc-control, topology-3d, balls,<br/>fountain, recursive)"]
+    Proc["5 units: Procedural Visuals Suite<br/>(proc-control, manifold, balls,<br/>fountain, recursive)"]
     Speak["speak (planned)"]
   end
 

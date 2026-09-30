@@ -33,7 +33,7 @@ export const presets: LayoutPreset[] = [
     description: "Generative visualizers and 3D topological manifolds driven by central OSC controls.",
     panelIds: [
       "procedural-visuals-control",
-      "procedural-visuals-topological",
+      "procedural-visuals-manifold",
       "procedural-visuals-balls",
       "procedural-visuals-fountain",
       "procedural-visuals-recursive",

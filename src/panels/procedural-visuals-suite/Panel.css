@@ -13,7 +13,7 @@
   --proc-balls: #7c6af5;
   --proc-fountain: #4ecca3;
   --proc-recursive: #f26d85;
-  --proc-topological: #61c0ff;
+  --proc-manifold: #61c0ff;
 }
 
 /* Base Visualization Container */
@@ -119,7 +119,7 @@
 .status-pill.pill-balls.active .dot { background: var(--proc-balls); box-shadow: 0 0 6px var(--proc-balls); }
 .status-pill.pill-fountain.active .dot { background: var(--proc-fountain); box-shadow: 0 0 6px var(--proc-fountain); }
 .status-pill.pill-recursive.active .dot { background: var(--proc-recursive); box-shadow: 0 0 6px var(--proc-recursive); }
-.status-pill.pill-topological.active .dot { background: var(--proc-topological); box-shadow: 0 0 6px var(--proc-topological); }
+.status-pill.pill-manifold.active .dot { background: var(--proc-manifold); box-shadow: 0 0 6px var(--proc-manifold); }
 
 /* Instrument Rack */
 .instrument-rack {
@@ -150,7 +150,7 @@
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
 }
 
-.instrument-module.module-topological.active { border-color: rgba(97, 192, 255, 0.45); }
+.instrument-module.module-manifold.active { border-color: rgba(97, 192, 255, 0.45); }
 .instrument-module.module-balls.active { border-color: rgba(124, 106, 245, 0.45); }
 .instrument-module.module-fountain.active { border-color: rgba(78, 204, 163, 0.45); }
 .instrument-module.module-recursive.active { border-color: rgba(242, 109, 133, 0.45); }
@@ -226,7 +226,7 @@
 }
 
 .visual-chip-btn.selected {
-  background: var(--proc-topological);
+  background: var(--proc-manifold);
   color: #050d18;
   font-weight: 700;
   box-shadow: 0 0 8px rgba(97, 192, 255, 0.5);
@@ -329,7 +329,7 @@
 
 .toggle-chip-btn.active {
   background: rgba(97, 192, 255, 0.18);
-  border-color: var(--proc-topological);
+  border-color: var(--proc-manifold);
   color: #fff;
 }
 

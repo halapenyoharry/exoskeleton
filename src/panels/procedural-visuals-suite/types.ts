@@ -2,7 +2,7 @@ export interface ProceduralSuiteParams {
   documentId?: string;
 }
 
-export type VizType = 'bouncing-balls' | 'fountain' | 'recursive-subdivision' | 'topological-surfaces';
+export type VizType = 'bouncing-balls' | 'fountain' | 'recursive-subdivision' | 'manifold';
 
 export interface SuiteState {
   activeVisualizations: Record<VizType, boolean>;
@@ -29,7 +29,7 @@ export interface RecursiveSubdivisionState {
   triggerSeed: number; // A number to trigger new seed generation
 }
 
-export interface TopologicalSurfacesState {
+export interface ManifoldState {
   surface: string;
   shaderMode: number;
   colorPalette: number;

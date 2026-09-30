@@ -56,7 +56,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
     depth: 5, variation: 60, hue: '#7c6af5'
   });
 
-  const [topologicalState, setTopologicalState] = useState({
+  const [manifoldState, setManifoldState] = useState({
     surface: 'klein', shaderMode: 0, colorPalette: 0, speed: 1.0, frequency: 5.5,
     intensity: 1.0, roughness: 26.0, fresnel: 2.3, wireframe: false, wireframeOpacity: 0.15,
     autoRotate: true, autoRotateSpeed: 0.8
@@ -95,7 +95,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
     if (viz === 'bouncing-balls') setBouncingBallsState(prev => ({ ...prev, [param]: value }));
     else if (viz === 'fountain') setFountainState(prev => ({ ...prev, [param]: value }));
     else if (viz === 'recursive-subdivision') setRecursiveState(prev => ({ ...prev, [param]: value }));
-    else if (viz === 'topological-surfaces') setTopologicalState(prev => ({ ...prev, [param]: value }));
+    else if (viz === 'manifold') setManifoldState(prev => ({ ...prev, [param]: value }));
   };
 
   const handleTrigger = (viz: string, action: string) => {
@@ -106,36 +106,36 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
     <div className="procedural-suite-control-root">
       <div className="control-header">
         <div className="control-brand">
-          <span className="control-brand-glyph">🎛</span>
+          <span className="control-brand-glyph">▦</span>
           <span className="control-brand-title">Procedural Visuals</span>
         </div>
         <div className="panel-status-indicators">
           <div className={`status-pill pill-balls ${activePanels['bouncing-balls'] ? 'active' : ''}`} title="Bouncing Balls">
-            <span className="glyph">⚽</span>
+            <span className="glyph">○</span>
             <span className="dot"></span>
           </div>
           <div className={`status-pill pill-fountain ${activePanels['fountain'] ? 'active' : ''}`} title="Fountain">
-            <span className="glyph">⛲</span>
+            <span className="glyph">≈</span>
             <span className="dot"></span>
           </div>
           <div className={`status-pill pill-recursive ${activePanels['recursive-subdivision'] ? 'active' : ''}`} title="Recursive Subdivision">
-            <span className="glyph">🖼</span>
+            <span className="glyph">▣</span>
             <span className="dot"></span>
           </div>
-          <div className={`status-pill pill-topological ${activePanels['topological-surfaces'] ? 'active' : ''}`} title="Topological Surfaces">
-            <span className="glyph">🍩</span>
+          <div className={`status-pill pill-manifold ${activePanels['manifold'] ? 'active' : ''}`} title="Manifold">
+            <span className="glyph">◎</span>
             <span className="dot"></span>
           </div>
         </div>
       </div>
 
       <div className="instrument-rack">
-        {/* Topological Surfaces Controls */}
-        <div className={`instrument-module module-topological ${activePanels['topological-surfaces'] ? 'active' : 'inactive'}`}>
+        {/* Manifold Controls */}
+        <div className={`instrument-module module-manifold ${activePanels['manifold'] ? 'active' : 'inactive'}`}>
           <div className="module-header">
-            <span className="module-glyph">🍩</span>
-            <span className="module-title">Topological Surfaces</span>
-            <span className={`status-indicator ${activePanels['topological-surfaces'] ? 'live' : ''}`} />
+            <span className="module-glyph">◎</span>
+            <span className="module-title">Manifold</span>
+            <span className={`status-indicator ${activePanels['manifold'] ? 'live' : ''}`} />
           </div>
           <div className="module-controls">
             {/* Visual Surface Selector */}
@@ -143,9 +143,9 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
               {TOPO_SURFACES.map(s => (
                 <button
                   key={s.id}
-                  className={`visual-chip-btn ${topologicalState.surface === s.id ? 'selected' : ''}`}
+                  className={`visual-chip-btn ${manifoldState.surface === s.id ? 'selected' : ''}`}
                   title={s.title}
-                  onClick={() => handleControlChange('topological-surfaces', 'surface', s.id, 'string')}
+                  onClick={() => handleControlChange('manifold', 'surface', s.id, 'string')}
                 >
                   <span className="chip-icon">{s.glyph}</span>
                 </button>
@@ -157,9 +157,9 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
               {TOPO_SHADERS.map(s => (
                 <button
                   key={s.id}
-                  className={`visual-chip-btn ${topologicalState.shaderMode === s.id ? 'selected' : ''}`}
+                  className={`visual-chip-btn ${manifoldState.shaderMode === s.id ? 'selected' : ''}`}
                   title={s.title}
-                  onClick={() => handleControlChange('topological-surfaces', 'shaderMode', s.id, 'int')}
+                  onClick={() => handleControlChange('manifold', 'shaderMode', s.id, 'int')}
                 >
                   <span className="chip-icon">{s.glyph}</span>
                 </button>
@@ -171,9 +171,9 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
               {TOPO_PALETTES.map(p => (
                 <button
                   key={p.id}
-                  className={`palette-chip ${topologicalState.colorPalette === p.id ? 'selected' : ''}`}
+                  className={`palette-chip ${manifoldState.colorPalette === p.id ? 'selected' : ''}`}
                   style={{ background: p.gradient }}
-                  onClick={() => handleControlChange('topological-surfaces', 'colorPalette', p.id, 'int')}
+                  onClick={() => handleControlChange('manifold', 'colorPalette', p.id, 'int')}
                 />
               ))}
             </div>
@@ -182,26 +182,26 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
             <div className="control-slider-group">
               <div className="slider-meta">
                 <span>Speed</span>
-                <span className="slider-val">{topologicalState.speed.toFixed(2)}</span>
+                <span className="slider-val">{manifoldState.speed.toFixed(2)}</span>
               </div>
               <input
                 type="range"
                 min="0"
                 max="3"
                 step="0.05"
-                value={topologicalState.speed}
-                onChange={e => handleControlChange('topological-surfaces', 'speed', parseFloat(e.target.value))}
+                value={manifoldState.speed}
+                onChange={e => handleControlChange('manifold', 'speed', parseFloat(e.target.value))}
               />
             </div>
 
             <div className="module-actions-row">
               <button
-                className={`toggle-chip-btn ${topologicalState.wireframe ? 'active' : ''}`}
-                onClick={() => handleControlChange('topological-surfaces', 'wireframe', !topologicalState.wireframe, 'bool')}
+                className={`toggle-chip-btn ${manifoldState.wireframe ? 'active' : ''}`}
+                onClick={() => handleControlChange('manifold', 'wireframe', !manifoldState.wireframe, 'bool')}
               >
-                🕸 Wireframe
+                Wireframe
               </button>
-              <button className="bang-action-btn" onClick={() => handleTrigger('topological-surfaces', 'resetCamera')}>
+              <button className="bang-action-btn" onClick={() => handleTrigger('manifold', 'resetCamera')}>
                 ↺ Reset View
               </button>
             </div>
@@ -211,7 +211,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
         {/* Bouncing Balls Controls */}
         <div className={`instrument-module module-balls ${activePanels['bouncing-balls'] ? 'active' : 'inactive'}`}>
           <div className="module-header">
-            <span className="module-glyph">⚽</span>
+            <span className="module-glyph">○</span>
             <span className="module-title">Bouncing Balls</span>
             <span className={`status-indicator ${activePanels['bouncing-balls'] ? 'live' : ''}`} />
           </div>
@@ -256,7 +256,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
               />
             </div>
             <button className="bang-action-btn" onClick={() => handleTrigger('bouncing-balls', 'reset')}>
-              ⚡ Scatter Balls
+              Scatter Balls
             </button>
           </div>
         </div>
@@ -264,7 +264,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
         {/* Fountain Controls */}
         <div className={`instrument-module module-fountain ${activePanels['fountain'] ? 'active' : 'inactive'}`}>
           <div className="module-header">
-            <span className="module-glyph">⛲</span>
+            <span className="module-glyph">≈</span>
             <span className="module-title">Particle Fountain</span>
             <span className={`status-indicator ${activePanels['fountain'] ? 'live' : ''}`} />
           </div>
@@ -329,7 +329,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
         {/* Recursive Subdivision Controls */}
         <div className={`instrument-module module-recursive ${activePanels['recursive-subdivision'] ? 'active' : 'inactive'}`}>
           <div className="module-header">
-            <span className="module-glyph">🖼</span>
+            <span className="module-glyph">▣</span>
             <span className="module-title">Recursive Subdivision</span>
             <span className={`status-indicator ${activePanels['recursive-subdivision'] ? 'live' : ''}`} />
           </div>
@@ -373,7 +373,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
               </div>
             </div>
             <button className="bang-action-btn" onClick={() => handleTrigger('recursive-subdivision', 'new-seed')}>
-              🎲 New Seed
+              New Seed
             </button>
           </div>
         </div>

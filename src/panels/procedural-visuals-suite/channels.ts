@@ -13,5 +13,5 @@ export const VIZ_PANELS = {
   'bouncing-balls': 'Bouncing Balls',
   'fountain': 'Fountain',
   'recursive-subdivision': 'Recursive Subdivision',
-  'topological-surfaces': 'Topological Surfaces',
+  'manifold': 'Manifold',
 };
