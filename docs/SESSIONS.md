@@ -332,3 +332,17 @@ State: `osc-retainer-unification` clean with `topology-extract` panel added. Sch
 Last: Built the `topology-extract` panel — the i2t-funnel entry point for the info2topo pipeline. New panel at `src/panels/topology-extract/` with five files: `TopologyExtractPanel.tsx` (React component with provider-agnostic shell), `TopologyExtractPanel.css` (dark theme, 4-category color pills), `openrouter.ts` (pure-fetch wrapper for OpenRouter chat completions), `prompts.ts` (default system prompt teaching the model to output TopoDocument JSON with `i2t:edge_category`), `manifest.ts` (magenta `#e040fb`, glyph ⚗, companions `json-dyadic`). Wired into App.tsx (lazy-loaded), ColoredTab (accent + glyph), App.css (CSS var), default-layout registry (v9, within json-edit group), json-lab preset, and panel-capability-map (Degrades Gracefully tier, optional fs). Provider dropdown has OpenRouter wired; Local CLI and Direct API show "coming soon" state. System prompt is editable via a collapsible Advanced section and persisted in panel params.
 Next: Harold to test with an OpenRouter API key. Follow-up candidates: strip API key on `.exo.json` export (like `stripLocalFilePaths` does for `filePath`); wire Local CLI provider; iterate on the system prompt.
 Open: API key is stored in panel params (survives workspace export) — should be stripped on export as a follow-up.
+
+## 2026-09-30
+
+State: `osc-retainer-unification` with `procedural-visuals-suite` added and tested. Schema version bumped to 10. `npm test` passes 103/103; `npm run build` green; browser subagent verified live execution at `http://localhost:1420/`.
+Last:
+1. Clarified that `exoskeleton-component-library` was abandoned in favor of developing directly within `src/panels/` in `exoskeleton`. Added deprecation notices across `AGENTS.md` and `docs/AGENTS-FAQ.md`.
+2. Created `SuiteManifest` engine in `src/suite-manifest.ts` providing first-class definitions for panel suites and multi-panel layout slots.
+3. Integrated the `procedural-visuals-suite` (`src/panels/procedural-visuals-suite/`) containing 5 panels: `procedural-control`, `procedural-surfaces` (3D WebGL topological surfaces with custom GLSL shaders), `procedural-balls` (2D multi-surface bouncing physics), `procedural-fountain` (particle emitter), and `procedural-subdivision` (recursive quadtree visualizer).
+4. Fixed unmount promise rejections by adopting `subscribeOsc` for synchronous React cleanup and strictly typed OSC arguments to `OscArg`. Scoped canvas animation state inside `useRef` to eliminate instance leaks.
+5. Re-architected `ControlPanel.tsx` and `Panel.css` with a high-tactility, Eurorack-inspired design: interactive spectrum color swatches (Viridis, Turbo, Magma, Rainbow, Neon, Ocean, Prismatic), iconic topological surface glyphs, shader mode selectors, and hardware faders with live readouts.
+6. Added `procedural-lab` preset, updated `ColoredTab.tsx` and `App.css` color variables (`#ff0055`), and updated `docs/panel-capability-map.md`.
+7. Verified live in browser: WebGL canvas renders smoothly at ~120 FPS across 13k+ vertices with live OSC reactivity.
+Next: Harold to review in browser (`http://localhost:1420/`). Merge `osc-retainer-unification` into `main` when ready.
+Open: None blocking.

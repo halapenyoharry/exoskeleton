@@ -150,3 +150,16 @@ Ask "would a panel mounting right now be wrong to not know this?" — not "is th
 **Open hazard:** the retainer is per-heap, so a popout window still starts with no retained state even though it now receives live traffic. Multi-window state-sync remains its own problem; the difference is that it is now solvable.
 
 **See also:** [src/osc/index.ts](../src/osc/index.ts), [src/osc/channels/index.ts](../src/osc/channels/index.ts), [src/data/json-bus.ts](../src/data/json-bus.ts), [docs/research/osc-self-contained-by-default.md](research/osc-self-contained-by-default.md), [issue #4](https://github.com/halapenyoharry/exoskeleton/issues/4).
+ 
+---
+ 
+## Q: What is the status of ~/Projects/exoskeleton-component-library/?
+ 
+**Date:** 2026-09-30
+ 
+**Test case:** An agent or developer considers looking up, editing, installing, or modifying panels in `~/Projects/exoskeleton-component-library/`.
+ 
+**Framing trap:** "There is an exoskeleton repository and an exoskeleton-component-library repository; maybe new or reusable panels belong in the component library."
+ 
+**Decision:** `~/Projects/exoskeleton-component-library/` was **abandoned**. All panel development, refactoring, and integration happens directly inside `exoskeleton` at `src/panels/`. Do not open, edit, or install from the component library. The single source of truth is `/Users/harold/Projects/exoskeleton`.
+

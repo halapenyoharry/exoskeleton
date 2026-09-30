@@ -76,9 +76,10 @@ export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerPar
       
       return {
         id: node.id,
-        title: node.label || node.id,
+        title: node.label || attrs.label || attrs.name || node.id,
         content: text ? (typeof text === "string" ? text : JSON.stringify(text)) : null,
-        allAttrs: attrs
+        allAttrs: attrs,
+        color: attrs['instagraph:color'] || attrs.color || null,
       };
     });
   }, [graph]);
@@ -98,6 +99,11 @@ export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerPar
               let className = "text-viewer-block";
               if (isSelected) className += " selected";
 
+              const blockStyle: React.CSSProperties = isSelected && block.color 
+                ? { borderColor: block.color as string, boxShadow: `0 0 10px ${block.color}40` } 
+                : {};
+              const titleStyle: React.CSSProperties = block.color ? { color: block.color as string } : {};
+
               return (
                 <div 
                   key={block.id}
@@ -106,21 +112,25 @@ export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerPar
                     else nodeRefs.current.delete(block.id);
                   }}
                   className={className}
-                  onClick={() => handleNodeClick(block.id, block.title)}
+                  style={blockStyle}
+                  onClick={() => handleNodeClick(block.id, String(block.title))}
                 >
-                  <h3 className="text-viewer-block-title">{block.title}</h3>
+                  <h3 className="text-viewer-block-title" style={titleStyle}>{String(block.title)}</h3>
                   {block.content && (
                     <div className="text-viewer-block-content">
                       <ReactMarkdown>{block.content}</ReactMarkdown>
                     </div>
                   )}
-                  {!block.content && (
-                     <div className="text-viewer-block-attrs">
-                       {Object.entries(block.allAttrs).slice(0, 3).map(([k, v]) => (
-                         <span key={k} className="text-viewer-pill">{k}: {String(v)}</span>
-                       ))}
-                     </div>
-                  )}
+                  <div className="text-viewer-block-attrs">
+                    <span className="text-viewer-pill">id: {block.id}</span>
+                    {Object.entries(block.allAttrs).map(([k, v]) => {
+                      if (['text', 'description', 'content', 'detail', 'theme', 'narrative_arc'].includes(k) && block.content) return null;
+                      if (k === 'label' || k === 'name') return null; // already the title
+                      return (
+                        <span key={k} className="text-viewer-pill">{k}: {String(v)}</span>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             })}

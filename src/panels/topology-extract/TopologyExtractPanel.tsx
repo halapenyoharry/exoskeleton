@@ -7,6 +7,7 @@ import {
   ExtractionError,
   type ExtractionResult,
 } from "./openrouter";
+import { runLocalInfo2TopoCli } from "./local-cli";
 import type { EdgeCategory, TopoDocument } from "../json-dyadic/types";
 import "./TopologyExtractPanel.css";
 
@@ -21,7 +22,7 @@ interface ProviderOption {
 
 const PROVIDERS: ProviderOption[] = [
   { id: "openrouter", label: "OpenRouter", available: true },
-  { id: "local-cli", label: "Local CLI", available: false },
+  { id: "local-cli", label: "Local CLI", available: true },
   { id: "direct-api", label: "Direct API", available: false },
 ];
 
@@ -41,6 +42,8 @@ export interface TopologyExtractParams {
   systemPrompt: string;
   /** Auto-push result to json-bus on successful extraction. */
   autoPush: boolean;
+  /** CLI adapter to run for local-cli */
+  adapter: string;
 }
 
 export const topologyExtractDefaults: TopologyExtractParams = {
@@ -50,6 +53,7 @@ export const topologyExtractDefaults: TopologyExtractParams = {
   apiKey: "",
   systemPrompt: "",
   autoPush: false,
+  adapter: "extract",
 };
 
 // ── Category stat helpers ────────────────────────────────────────────
@@ -97,10 +101,13 @@ export default function TopologyExtractPanel(
   const [showKey, setShowKey] = useState(false);
   const [sourceText, setSourceText] = useState("");
   const [autoPush, setAutoPush] = useState(params.autoPush);
+  const [adapter, setAdapter] = useState(params.adapter || "extract");
   const [systemPrompt, setSystemPrompt] = useState(
     params.systemPrompt || DEFAULT_SYSTEM_PROMPT,
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [sourceFile, setSourceFile] = useState<string | null>(null);
+  const [progressLog, setProgressLog] = useState<string[]>([]);
 
   // Extraction state
   const [extracting, setExtracting] = useState(false);
@@ -117,10 +124,11 @@ export default function TopologyExtractPanel(
       model,
       apiKey,
       autoPush,
+      adapter,
       systemPrompt: systemPrompt === DEFAULT_SYSTEM_PROMPT ? "" : systemPrompt,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [provider, model, apiKey, autoPush, systemPrompt, props.api]);
+  }, [provider, model, apiKey, autoPush, adapter, systemPrompt, props.api]);
 
   const pushToJsonBus = useCallback(
     (doc: TopoDocument) => {
@@ -146,13 +154,33 @@ export default function TopologyExtractPanel(
     abortRef.current = controller;
 
     try {
-      const res = await extractTopology({
-        apiKey,
-        model,
-        systemPrompt,
-        sourceText,
-        signal: controller.signal,
-      });
+      let res: ExtractionResult;
+      
+      if (provider === "local-cli") {
+        setProgressLog([]);
+        const input = sourceFile 
+          ? { type: "file" as const, path: sourceFile } 
+          : { type: "text" as const, data: sourceText };
+
+        const dyadicDoc = await runLocalInfo2TopoCli(
+          input, 
+          { apiKey, model, adapter },
+          (msg) => setProgressLog(prev => [...prev, msg].slice(-100))
+        );
+        res = {
+          document: dyadicDoc,
+          rawJson: JSON.stringify(dyadicDoc, null, 2),
+        };
+      } else {
+        res = await extractTopology({
+          apiKey,
+          model,
+          systemPrompt,
+          sourceText,
+          signal: controller.signal,
+        });
+      }
+      
       setResult(res);
 
       if (autoPush) {
@@ -187,8 +215,15 @@ export default function TopologyExtractPanel(
         ],
       });
       if (!picked || typeof picked !== "string") return;
-      const content = await readTextFile(picked);
-      setSourceText(content);
+      
+      if (provider === "local-cli") {
+        setSourceFile(picked);
+        setSourceText(`[File Mode] Selected for local extraction:\n${picked}`);
+      } else {
+        const content = await readTextFile(picked);
+        setSourceText(content);
+        setSourceFile(null);
+      }
     } catch (err) {
       console.warn("[topology-extract] file open failed (off-Tauri?):", err);
     }
@@ -198,6 +233,7 @@ export default function TopologyExtractPanel(
     try {
       const text = await navigator.clipboard.readText();
       setSourceText(text);
+      setSourceFile(null);
     } catch (err) {
       console.warn("[topology-extract] clipboard read failed:", err);
     }
@@ -232,7 +268,7 @@ export default function TopologyExtractPanel(
   const canExtract =
     providerAvailable &&
     apiKey.trim() !== "" &&
-    sourceText.trim() !== "" &&
+    (sourceText.trim() !== "" || sourceFile !== null) &&
     !extracting;
 
   const categories = result ? countCategories(result.document) : null;
@@ -268,6 +304,22 @@ export default function TopologyExtractPanel(
               onChange={(e) => setModel(e.target.value)}
               placeholder={DEFAULT_MODEL}
             />
+          </label>
+        )}
+
+        {provider === "local-cli" && (
+          <label>
+            Adapter
+            <select
+              value={adapter}
+              onChange={(e) => setAdapter(e.target.value)}
+              className="topo-extract-model-input"
+              style={{ width: '140px' }}
+            >
+              <option value="extract">Generic Prose (extract)</option>
+              <option value="manuscript">Manuscript Pipeline</option>
+              <option value="propgraph">Property Graph</option>
+            </select>
           </label>
         )}
 
@@ -308,7 +360,11 @@ export default function TopologyExtractPanel(
         <textarea
           className="topo-extract-textarea"
           value={sourceText}
-          onChange={(e) => setSourceText(e.target.value)}
+          onChange={(e) => {
+            setSourceText(e.target.value);
+            setSourceFile(null); // Revert to text mode if typing
+          }}
+          disabled={sourceFile !== null && provider === "local-cli"}
           placeholder="Paste or type source text here…&#10;&#10;Drop a document, paste from clipboard, or load a file — then hit Extract Topology to run the AI extraction pipeline."
         />
         <div className="topo-extract-source-actions">
@@ -377,6 +433,15 @@ export default function TopologyExtractPanel(
           Auto-push to viewers
         </label>
       </div>
+
+      {/* ── Progress display ─────────────────────────── */}
+      {extracting && provider === "local-cli" && progressLog.length > 0 && (
+        <div className="topo-extract-progress-log" style={{ fontSize: '11px', fontFamily: 'monospace', background: '#1e1e1e', color: '#ccc', padding: '8px', margin: '8px 12px', borderRadius: '4px', maxHeight: '150px', overflowY: 'auto' }}>
+          {progressLog.map((line, i) => (
+            <div key={i}>{line}</div>
+          ))}
+        </div>
+      )}
 
       {/* ── Error display ────────────────────────────── */}
       {error && <div className="topo-extract-error">{error}</div>}

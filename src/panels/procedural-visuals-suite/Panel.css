@@ -1,0 +1,393 @@
+/* Root variables for procedural suite */
+:root {
+  --suite-bg: #0a0b12;
+  --suite-surface: #121420;
+  --suite-surface-hover: #191c2c;
+  --suite-border: #232738;
+  --suite-border-active: #3a4260;
+  --suite-accent: #f5a623;
+  --suite-text: #e8ecf8;
+  --suite-muted: #747d96;
+  --suite-active: #4ecca3;
+  
+  --proc-balls: #7c6af5;
+  --proc-fountain: #4ecca3;
+  --proc-recursive: #f26d85;
+  --proc-topological: #61c0ff;
+}
+
+/* Base Visualization Container */
+.procedural-viz-root {
+  width: 100%;
+  height: 100%;
+  background: var(--suite-bg);
+  color: var(--suite-text);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.procedural-viz-root canvas,
+.procedural-viz-root svg,
+.procedural-viz-root iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: none;
+}
+
+/* Control Panel Root */
+.procedural-suite-control-root {
+  width: 100%;
+  height: 100%;
+  background: var(--suite-bg);
+  color: var(--suite-text);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  user-select: none;
+}
+
+/* Header */
+.control-header {
+  padding: 0.75rem 1rem;
+  background: rgba(10, 11, 18, 0.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--suite-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.control-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.control-brand-glyph {
+  font-size: 1.1rem;
+  filter: drop-shadow(0 0 6px rgba(245, 166, 35, 0.4));
+}
+
+.control-brand-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.panel-status-indicators {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 12px;
+  background: var(--suite-surface);
+  border: 1px solid var(--suite-border);
+  font-size: 0.75rem;
+  opacity: 0.45;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: default;
+}
+
+.status-pill .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--suite-muted);
+}
+
+.status-pill.active {
+  opacity: 1;
+  background: var(--suite-surface-hover);
+  border-color: var(--suite-border-active);
+}
+
+.status-pill.pill-balls.active .dot { background: var(--proc-balls); box-shadow: 0 0 6px var(--proc-balls); }
+.status-pill.pill-fountain.active .dot { background: var(--proc-fountain); box-shadow: 0 0 6px var(--proc-fountain); }
+.status-pill.pill-recursive.active .dot { background: var(--proc-recursive); box-shadow: 0 0 6px var(--proc-recursive); }
+.status-pill.pill-topological.active .dot { background: var(--proc-topological); box-shadow: 0 0 6px var(--proc-topological); }
+
+/* Instrument Rack */
+.instrument-rack {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.85rem;
+  padding: 0.85rem;
+}
+
+.instrument-module {
+  background: var(--suite-surface);
+  border: 1px solid var(--suite-border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.instrument-module.inactive {
+  opacity: 0.55;
+  filter: saturate(0.7);
+}
+
+.instrument-module.active {
+  opacity: 1;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+.instrument-module.module-topological.active { border-color: rgba(97, 192, 255, 0.45); }
+.instrument-module.module-balls.active { border-color: rgba(124, 106, 245, 0.45); }
+.instrument-module.module-fountain.active { border-color: rgba(78, 204, 163, 0.45); }
+.instrument-module.module-recursive.active { border-color: rgba(242, 109, 133, 0.45); }
+
+/* Module Header */
+.module-header {
+  padding: 0.45rem 0.75rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid var(--suite-border);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--suite-muted);
+}
+
+.module-header .module-title {
+  color: #fff;
+  flex: 1;
+}
+
+.module-header .status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #333;
+}
+
+.module-header .status-indicator.live {
+  background: var(--suite-active);
+  box-shadow: 0 0 6px var(--suite-active);
+}
+
+/* Module Controls Area */
+.module-controls {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+/* Visual Selectors (Icon Chips) */
+.visual-selector-row {
+  display: flex;
+  gap: 0.3rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.2rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.visual-chip-btn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--suite-muted);
+  border-radius: 4px;
+  padding: 0.3rem 0;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.visual-chip-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.visual-chip-btn.selected {
+  background: var(--proc-topological);
+  color: #050d18;
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(97, 192, 255, 0.5);
+}
+
+/* Color Palette Chips */
+.palette-chip-row {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.2rem 0;
+}
+
+.palette-chip {
+  flex: 1;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+}
+
+.palette-chip:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.15);
+}
+
+.palette-chip.selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3), 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+/* Faders / Sliders */
+.control-slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.slider-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.68rem;
+  color: var(--suite-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.slider-meta .slider-val {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: #d1d8ec;
+  font-weight: 600;
+}
+
+.control-slider-group input[type="range"] {
+  width: 100%;
+  height: 5px;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.control-slider-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #e1e7f5;
+  border: 2px solid var(--suite-surface);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+  transition: transform 0.1s ease, background 0.1s ease;
+}
+
+.control-slider-group input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  background: #fff;
+}
+
+/* Module Action Buttons */
+.module-actions-row {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.2rem;
+}
+
+.toggle-chip-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--suite-border);
+  color: var(--suite-muted);
+  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toggle-chip-btn.active {
+  background: rgba(97, 192, 255, 0.18);
+  border-color: var(--proc-topological);
+  color: #fff;
+}
+
+.bang-action-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--suite-border);
+  color: var(--suite-text);
+  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.bang-action-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.bang-action-btn:active {
+  transform: scale(0.97);
+}
+
+/* Color Picker Row */
+.color-swatch-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.swatch-wrap {
+  position: relative;
+  width: 28px;
+  height: 18px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.native-color-picker {
+  opacity: 0;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.color-preview {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}

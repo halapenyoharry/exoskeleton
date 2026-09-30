@@ -28,6 +28,18 @@ export const presets: LayoutPreset[] = [
     panelIds: ["tempo-clock", "piano", "scope"],
   },
   {
+    id: "procedural-lab",
+    name: "Procedural Lab",
+    description: "Generative visualizers and 3D topological manifolds driven by central OSC controls.",
+    panelIds: [
+      "procedural-visuals-control",
+      "procedural-visuals-topological",
+      "procedural-visuals-balls",
+      "procedural-visuals-fountain",
+      "procedural-visuals-recursive",
+    ],
+  },
+  {
     id: "everything",
     name: "Everything",
     description: "The full omni-workshop — every panel in the registry.",

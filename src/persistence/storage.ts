@@ -28,7 +28,9 @@ import type { SerializedDockview } from "dockview";
 //       `workspaces` objects; `activeWorkspaceId` selects the active grid.
 //   9 — topology-extract panel: ingestion furnace for the info2topo
 //       pipeline. Pushes normalized-dyadic topology JSON to json-bus.
-export const CURRENT_VERSION = 9;
+//  10 — procedural-visuals suite: OSC-controlled generative canvases and
+//       3D topological manifolds.
+export const CURRENT_VERSION = 10;
 
 export interface Preferences {
   // Empty for now; reserved for theme, tab-position, etc. when those land.

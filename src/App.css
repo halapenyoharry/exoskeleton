@@ -15,6 +15,11 @@
   --accent-json-graph3d: #ff9f1c;
   --accent-json-dyadic: #ffb86c;
   --accent-topology-extract: #e040fb;
+  --accent-procedural-control: #f5a623;
+  --accent-procedural-balls: #7c6af5;
+  --accent-procedural-fountain: #4ecca3;
+  --accent-procedural-recursive: #f26d85;
+  --accent-procedural-topological: #61c0ff;
 }
 
 .app-frame {

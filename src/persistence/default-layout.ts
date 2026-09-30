@@ -170,6 +170,46 @@ export const panelRegistry: RegistryEntry[] = [
     introducedAt: 9,
     companions: ["json-dyadic"],
   },
+  // v10 — procedural-visuals: OSC-controlled generative canvases and 3D topological manifolds.
+  {
+    id: "procedural-visuals-control",
+    component: "procedural-visuals-control",
+    title: "proc-control",
+    position: { referencePanel: "editor", direction: "below" },
+    introducedAt: 10,
+  },
+  {
+    id: "procedural-visuals-topological",
+    component: "procedural-visuals-topological",
+    title: "topology-3d",
+    position: { referencePanel: "procedural-visuals-control", direction: "right" },
+    introducedAt: 10,
+    companions: ["procedural-visuals-control"],
+  },
+  {
+    id: "procedural-visuals-balls",
+    component: "procedural-visuals-balls",
+    title: "balls",
+    position: { referencePanel: "procedural-visuals-topological", direction: "within" },
+    introducedAt: 10,
+    companions: ["procedural-visuals-control"],
+  },
+  {
+    id: "procedural-visuals-fountain",
+    component: "procedural-visuals-fountain",
+    title: "fountain",
+    position: { referencePanel: "procedural-visuals-topological", direction: "within" },
+    introducedAt: 10,
+    companions: ["procedural-visuals-control"],
+  },
+  {
+    id: "procedural-visuals-recursive",
+    component: "procedural-visuals-recursive",
+    title: "recursive",
+    position: { referencePanel: "procedural-visuals-topological", direction: "within" },
+    introducedAt: 10,
+    companions: ["procedural-visuals-control"],
+  },
 ];
 
 /**
