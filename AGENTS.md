@@ -18,6 +18,8 @@ The repo was originally named `hud` (heads-up display); renamed 2026-05-09 becau
 
 Full stack details and caveats live in [README.md](README.md). Don't duplicate them here.
 
+**Web version:** [exo-skeleton.org](https://github.com/halapenyoharry/exo-skeleton.org) is the browser build of this app (localStorage/IndexedDB via `web-storage.ts`, all panels, static `dist/` + Docker/nginx), live at https://exo-skeleton.org. It tracks this repo as upstream. Generic panel changes land here first, then merge downstream.
+
 ## How to run
 
 ```

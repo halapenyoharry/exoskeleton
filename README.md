@@ -425,5 +425,5 @@ Same shape at every level, no architectural depth limit — only the practical o
 - A friendlier preferences UI than the raw JSON editor.
 - Undo/redo across layout changes (the JSON format leaves room).
 - Cross-window state sync via revision-gated IPC (workspace windows are deliberately isolated for now — see [Multi-window](#multi-window) above).
-- A non-Tauri build target (web / VSCode webview). The persistence layer is split to make this slot-in.
+- A VSCode webview build target. (The web target exists: see [exo-skeleton.org](https://github.com/halapenyoharry/exo-skeleton.org), the browser version that tracks this repo, live at https://exo-skeleton.org.)
 - Code signing and notarization for macOS builds (documented, not yet executed — see [docs/signing.md](docs/signing.md)).
