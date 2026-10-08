@@ -158,6 +158,16 @@ export const panelRegistry: RegistryEntry[] = [
     introducedAt: 6,
     companions: ["json-edit"],
   },
+  // v11 — json-graph3d-inspect: reading-oriented sibling of json-graph3d.
+  // Text-sprite nodes, inline edge roles, category colors, containment hulls.
+  {
+    id: "json-graph3d-inspect",
+    component: "json-graph3d-inspect",
+    title: "3D-Inspect",
+    position: { referencePanel: "json-graph3d", direction: "within" },
+    introducedAt: 11,
+    companions: ["json-edit"],
+  },
   // v9 — topology-extract: ingestion furnace for the info2topo pipeline.
   // Takes source text, runs AI extraction, and pushes normalized-dyadic
   // topology JSON to the json-bus where json-dyadic and other viewers

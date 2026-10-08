@@ -527,7 +527,10 @@ export default function JsonGraph3DPanel(
             linkThreeObject={
               showInlineLabels
                 ? ((l: FGLink) => {
-                    const sprite = new SpriteText(l.label || "");
+                    // Spokes of a reified relation carry a role, not a
+                    // label; without this fallback "always" drew empty
+                    // sprites on every TopoThink dyadic document.
+                    const sprite = new SpriteText(l.label || l.role || "");
                     sprite.color = "#7ddff5";
                     sprite.textHeight = params.inlineLabelTextHeight;
                     sprite.backgroundColor = params.inlineLabelBg;

@@ -1,6 +1,6 @@
 # Panel Capability Map
 
-What each of the 22 exoskeleton panels needs from its host — and therefore where it can run. A unit runs in any host that provides the capabilities it declares. Most declare nothing.
+What each of the 23 exoskeleton panels needs from its host — and therefore where it can run. A unit runs in any host that provides the capabilities it declares. Most declare nothing.
 
 ## How to read it
 
@@ -15,7 +15,7 @@ Capability color tells you where that power exists: **green** = every host has i
 ```mermaid
 flowchart LR
   subgraph PORTABLE["Universal — needs nothing — runs in EVERY host"]
-    U["8 units: the 7 JSON viewers<br/>(tree, mass, circles, graph, graph3d,<br/>cytoscape, dyadic) + status-bar"]
+    U["9 units: the 8 JSON viewers<br/>(tree, mass, circles, graph, graph3d,<br/>graph3d-inspect, cytoscape, dyadic) + status-bar"]
     Proc["5 units: Procedural Visuals Suite<br/>(proc-control, manifold, balls,<br/>fountain, recursive)"]
     Speak["speak (planned)"]
   end

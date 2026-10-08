@@ -61,6 +61,7 @@ import "./App.css";
 // Lazy-loaded heavy visualization panels for optimal initial startup performance
 const JsonCytoscapePanel = lazy(() => import("./panels/json-cytoscape/JsonCytoscapePanel"));
 const JsonGraph3DPanel = lazy(() => import("./panels/json-graph3d/JsonGraph3DPanel"));
+const JsonGraph3DInspectPanel = lazy(() => import("./panels/json-graph3d-inspect/JsonGraph3DInspectPanel"));
 const JsonDyadicPanel = lazy(() => import("./panels/json-dyadic/JsonDyadicPanel"));
 const JsonMassPanel = lazy(() => import("./panels/json-mass/JsonMassPanel"));
 const ScopePanel = lazy(() => import("./panels/scope/ScopePanel"));
@@ -100,6 +101,7 @@ const components = {
   "json-cytoscape":lazyPanel(JsonCytoscapePanel, "var(--accent-json-cytoscape)"),
   "json-graph":    exoPanel(JsonGraphPanel,     "var(--accent-json-graph)"),
   "json-graph3d":  lazyPanel(JsonGraph3DPanel,  "var(--accent-json-graph3d)"),
+  "json-graph3d-inspect": lazyPanel(JsonGraph3DInspectPanel, "var(--accent-json-graph3d-inspect)"),
   "json-dyadic":   lazyPanel(JsonDyadicPanel,   "var(--accent-json-dyadic)"),
   "text-viewer":   exoPanel(TextViewerPanel,    "var(--accent-editor)"),
   "topology-extract": lazyPanel(TopologyExtractPanel, "var(--accent-topology-extract)"),

@@ -19,7 +19,7 @@ export const presets: LayoutPreset[] = [
     id: "json-lab",
     name: "JSON Lab",
     description: "JSON editor feeding the tree, graph, and 3D viewers.",
-    panelIds: ["json-edit", "json-tree", "json-graph3d", "topology-extract"],
+    panelIds: ["json-edit", "json-tree", "json-graph3d", "json-graph3d-inspect", "topology-extract"],
   },
   {
     id: "av-lab",
