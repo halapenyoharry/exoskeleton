@@ -5,8 +5,9 @@ A copy of [`json-graph3d`](../json-graph3d/README.md) rebuilt for *reading* a to
 | | json-graph3d | json-graph3d-inspect |
 |---|---|---|
 | Node | sphere | the node's label as a text sprite (first `labelMaxWords` words, default 5) |
-| Node size | per kind | `degree` (sqrt-scaled between `nodeTextHeightMin` and `Max`) or `uniform` |
-| Edge label | sprite of `label` when `always` | sprite of **role** on spokes, **predicate** on dyadic links; `always` by default |
+| Node size | per kind | `degree` — `(degree/max)^nodeSizeExponent` mapped between `nodeTextHeightMin` and `Max` — or `uniform` |
+| Edge label | sprite of `label` when `always` | **role** on spokes, **predicate** on dyadic links; `always` by default; lies **along the edge** (`----- label ---->`, hinged billboard) or faces the viewer |
+| Relation nodes (hyperedges) | sphere + id | their **predicate** as smaller text in category color, or a junction `dot`, or the raw `id` |
 | Edge color | layer hash | i2t **category** by default; `layer` or `predicate` hashing; any of them overridable |
 | Edge width | uniform | scaled per category (state_change 1.4 · interactivity 1.0 · reference 0.4 · containment hairline) |
 | Containment | lines like everything else | transparent **hull** around participants; spoke lines hidden (`showContainmentLinks` to bring them back) |
@@ -62,7 +63,7 @@ One mesh per containment hyperedge, enclosing every participant (container and c
 - `ellipsoid` (default, "blob") — axis-aligned bounding box of the participants, padded by `hullPadding`, drawn as a sphere scaled to it. Robust for any member count, 2D or 3D.
 - `convex` — `ConvexGeometry` over the padded participant points (3D only, ≥4 points; falls back to the ellipsoid otherwise).
 
-Hulls are refit every `hullRebuildEveryTicks` simulation ticks and stay put when the layout is frozen.
+Hulls are refit from the panel's own animation loop (every `hullRebuildEveryTicks` frames), not from simulation ticks, so they survive the sim cooling down, resizes and camera moves. They skip frustum culling and depth testing on purpose — a background blob must never be hidden by a sprite or a zoomed-in camera. The same loop re-hinges along-edge labels toward the camera between ticks.
 
 ## Params
 
@@ -75,18 +76,21 @@ Hulls are refit every `hullRebuildEveryTicks` simulation ticks and stay put when
 | | `fontWeight`, `fontResolution` | `"700"`, `120` |
 | | `strokeWidth`, `strokeColor` | `0.08`, `#05071a` |
 | | `nodeSizeBy` | `"degree"` |
-| | `nodeTextHeightMin`, `nodeTextHeightMax` | `3.5`, `9` |
-| | `hyperedgeTextScale` | `0.7` |
+| | `nodeTextHeightMin`, `nodeTextHeightMax` | `3.5`, `16` |
+| | `nodeSizeExponent` | `1.4` (>1 makes hubs stand out more) |
+| | `hyperedgeTextScale` | `0.6` |
+| | `hyperedgeLabel` | `"predicate"` / `"dot"` / `"id"` |
 | | `nodeDefaultColor`, `selectedColor` | `#dff6ff`, `#ff007f` |
 | Edges | `edgeLabels` | `"always"` |
-| | `edgeLabelTextHeight` | `1.8` |
+| | `edgeLabelTextHeight` | `2.6` |
+| | `edgeLabelOrientation` | `"along"` / `"billboard"` |
 | | `edgeColorBy` | `"category"` |
 | | `colorOverrides` | `{}` |
 | | `linkWidth`, `linkOpacity`, `arrowLength`, `curvature` | `0.8`, `0.55`, `3.5`, `0.25` |
 | | `showContainmentLinks` | `false` |
 | | `particles`, `particleCount`, `particleSpeed` | `false`, `2`, `0.006` |
 | Hulls | `hulls`, `hullMode`, `hullOpacity`, `hullPadding`, `hullRebuildEveryTicks` | `true`, `"ellipsoid"`, `0.12`, `8`, `2` |
-| Misc | `showLegend` | `true` |
+| Misc | `showLegend` | `false` (header checkbox) |
 | | `tooltipMaxAttrs`, `tooltipValueMaxLen` | `12`, `80` |
 | | `fitDuration`, `fitPadding`, `fitDelayMs`, `cooldownTicks` | `600`, `60`, `800`, `200` |
 | Perf | `nodeThreshold` | `5000` (one text sprite per node is heavier than a sphere) |

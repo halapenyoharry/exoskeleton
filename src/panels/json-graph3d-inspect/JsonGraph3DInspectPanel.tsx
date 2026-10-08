@@ -35,11 +35,14 @@ import {
   type ContainmentGroup,
   type EdgeColorBy,
 } from "./inspect-model";
+import { makeTextPlane, orientAlong, type TextPlane } from "./text-plane";
 import "./JsonGraph3DInspectPanel.css";
 
 export type InspectLabelMode = "always" | "hover" | "never";
 export type NodeSizeBy = "degree" | "uniform";
 export type HullMode = "ellipsoid" | "convex";
+export type EdgeLabelOrientation = "along" | "billboard";
+export type HyperedgeLabel = "predicate" | "id" | "dot";
 
 export interface JsonGraph3DInspectParams {
   documentId: string;
@@ -58,13 +61,22 @@ export interface JsonGraph3DInspectParams {
   nodeSizeBy: NodeSizeBy;
   nodeTextHeightMin: number;
   nodeTextHeightMax: number;
+  /** Exponent on degree/maxDegree. 1 = linear; <1 lifts the small end,
+   *  >1 pushes everything but the hubs down (hubs stand out more). */
+  nodeSizeExponent: number;
   hyperedgeTextScale: number;
+  /** How a reified relation (kind: "hyperedge") is drawn: its predicate
+   *  as text, its raw id, or a small junction dot. */
+  hyperedgeLabel: HyperedgeLabel;
   nodeDefaultColor: string;
   selectedColor: string;
 
   // Edges
   edgeLabels: InspectLabelMode;
   edgeLabelTextHeight: number;
+  /** "along": label lies on the edge, ----- label ---->, hinged billboard.
+   *  "billboard": always faces the viewer (the json-graph3d behaviour). */
+  edgeLabelOrientation: EdgeLabelOrientation;
   edgeColorBy: EdgeColorBy;
   colorOverrides: ColorOverrides;
   linkWidth: number;
@@ -111,13 +123,16 @@ export const jsonGraph3DInspectDefaults: JsonGraph3DInspectParams = {
   strokeColor: "#05071a",
   nodeSizeBy: "degree",
   nodeTextHeightMin: 3.5,
-  nodeTextHeightMax: 9,
-  hyperedgeTextScale: 0.7,
+  nodeTextHeightMax: 16,
+  nodeSizeExponent: 1.4,
+  hyperedgeTextScale: 0.6,
+  hyperedgeLabel: "predicate",
   nodeDefaultColor: "#dff6ff",
   selectedColor: "#ff007f",
 
   edgeLabels: "always",
-  edgeLabelTextHeight: 1.8,
+  edgeLabelTextHeight: 2.6,
+  edgeLabelOrientation: "along",
   edgeColorBy: "category",
   colorOverrides: {},
   linkWidth: 0.8,
@@ -135,7 +150,7 @@ export const jsonGraph3DInspectDefaults: JsonGraph3DInspectParams = {
   hullPadding: 8,
   hullRebuildEveryTicks: 2,
 
-  showLegend: true,
+  showLegend: false,
   tooltipMaxAttrs: 12,
   tooltipValueMaxLen: 80,
   fitDuration: 600,
@@ -356,20 +371,36 @@ export default function JsonGraph3DInspectPanel(
     params.nodeSizeBy,
     params.nodeTextHeightMin,
     params.nodeTextHeightMax,
+    params.nodeSizeExponent,
     params.hyperedgeTextScale,
+    params.hyperedgeLabel,
     maxDegree,
   ].join("|");
 
   const nodeThreeObject = useCallback(
     (n: FGNode) => {
       const p = paramsRef.current;
-      const sprite = new SpriteText(slug(n.name, p.labelMaxWords));
+      const isHyper = n.kind === "hyperedge";
+      if (isHyper && p.hyperedgeLabel === "dot") {
+        const dot = new THREE.Mesh(
+          new THREE.SphereGeometry(p.nodeTextHeightMin * 0.35, 10, 8),
+          new THREE.MeshBasicMaterial({ color: new THREE.Color(n.color) }),
+        );
+        spritesRef.current.delete(n.id);
+        return dot as unknown as THREE.Object3D;
+      }
+      let text = n.name;
+      if (isHyper && p.hyperedgeLabel === "predicate") {
+        const pred = n.attrs?.["i2t:predicate"];
+        if (typeof pred === "string" && pred) text = pred;
+      }
+      const sprite = new SpriteText(slug(text, p.labelMaxWords));
       const t =
         p.nodeSizeBy === "degree"
-          ? Math.sqrt(n.degree / Math.max(1, maxDegree))
+          ? Math.pow(n.degree / Math.max(1, maxDegree), p.nodeSizeExponent)
           : 0.5;
       let height = p.nodeTextHeightMin + t * (p.nodeTextHeightMax - p.nodeTextHeightMin);
-      if (n.kind === "hyperedge") height *= p.hyperedgeTextScale;
+      if (isHyper) height *= p.hyperedgeTextScale;
       sprite.textHeight = height;
       sprite.fontFace = p.fontFace;
       sprite.fontWeight = p.fontWeight;
@@ -401,13 +432,42 @@ export default function JsonGraph3DInspectPanel(
     prevSelectedRef.current = selectedNodeId;
   }, [selectedNodeId, nodesById]);
 
-  // --- Edge label sprites -------------------------------------------------
+  // --- Edge labels ----------------------------------------------------------
+  // "along" labels are orientable planes (text-plane.ts) hinged on the
+  // edge; "billboard" labels are SpriteText like json-graph3d. The plane
+  // objects are tracked so their textures get disposed on rebuild.
   const showEdgeLabels = params.edgeLabels === "always";
   const tooltipsEnabled = params.edgeLabels !== "never";
-  const edgeStyleKey = `${params.edgeLabelTextHeight}|${params.fontFace}|${params.strokeWidth}|${params.strokeColor}`;
+  const edgeStyleKey = `${params.edgeLabelTextHeight}|${params.edgeLabelOrientation}|${params.fontFace}|${params.strokeWidth}|${params.strokeColor}|${params.fontResolution}`;
+  const planesRef = useRef(new Set<TextPlane>());
+  useEffect(() => {
+    const planes = planesRef.current;
+    return () => {
+      for (const pl of planes) pl.dispose();
+      planes.clear();
+    };
+  }, [edgeStyleKey, data]);
+
   const linkThreeObject = useCallback(
     (l: FGLink) => {
       const p = paramsRef.current;
+      if (p.edgeLabelOrientation === "along") {
+        const plane = makeTextPlane(l.text, {
+          textHeight: p.edgeLabelTextHeight,
+          color: l.color,
+          fontFace: p.fontFace,
+          fontWeight: "600",
+          resolution: p.fontResolution,
+          strokeWidth: p.strokeWidth,
+          strokeColor: p.strokeColor,
+          padding: 0.15,
+        });
+        planesRef.current.add(plane);
+        // The loop below re-orients planes toward the camera between
+        // engine ticks; it needs the link to find the endpoints.
+        plane.mesh.userData.link = l;
+        return plane.mesh as unknown as THREE.Object3D;
+      }
       const sprite = new SpriteText(l.text);
       sprite.color = l.color;
       sprite.textHeight = p.edgeLabelTextHeight;
@@ -424,10 +484,41 @@ export default function JsonGraph3DInspectPanel(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [edgeStyleKey],
   );
+  const _start = useRef(new THREE.Vector3()).current;
+  const _end = useRef(new THREE.Vector3()).current;
+
+  /** Re-hinge every along-edge label toward the current camera. After the
+   *  sim cools, linkPositionUpdate stops firing, but the user keeps
+   *  orbiting — without this the labels drift edge-on or mirrored. */
+  const reorientEdgeLabels = useCallback(() => {
+    const fg = fgRef.current;
+    if (!fg || paramsRef.current.edgeLabelOrientation !== "along") return;
+    const camera = fg.camera();
+    for (const pl of planesRef.current) {
+      const m = pl.mesh;
+      if (!m.visible || !m.parent) continue;
+      const l = m.userData.link as { source: unknown; target: unknown } | undefined;
+      if (!l) continue;
+      const s = l.source as { x?: number; y?: number; z?: number };
+      const t = l.target as { x?: number; y?: number; z?: number };
+      if (typeof s !== "object" || typeof t !== "object" || s.x === undefined || t.x === undefined) continue;
+      _start.set(s.x, s.y ?? 0, s.z ?? 0);
+      _end.set(t.x, t.y ?? 0, t.z ?? 0);
+      orientAlong(m, _start, _end, camera);
+    }
+  }, [_start, _end]);
 
   // --- Containment hulls --------------------------------------------------
+  // Hulls are refit from a rAF loop owned by this panel, NOT from engine
+  // ticks: the force sim cools down and stops ticking, and anything that
+  // rebuilt the meshes after that (a resize, a param change) left them
+  // invisible until the next reheat. The loop is cheap (a dozen groups)
+  // and makes the hulls independent of simulation state. Meshes also skip
+  // frustum culling and depth testing so a zoomed-in camera or a sprite
+  // writing depth can never hide a background blob.
   const hullsRef = useRef<HullHandle[]>([]);
   const tickRef = useRef(0);
+  const [graphReady, setGraphReady] = useState(0);
 
   useEffect(() => {
     const fg = fgRef.current;
@@ -443,16 +534,19 @@ export default function JsonGraph3DInspectPanel(
           transparent: true,
           opacity: params.hullOpacity,
           depthWrite: false,
+          depthTest: false,
           side: THREE.DoubleSide,
         });
         const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 18), material);
         mesh.visible = false;
+        mesh.frustumCulled = false;
         mesh.renderOrder = -1;
         scene.add(mesh);
         handles.push({ group, mesh, material });
       }
     }
     hullsRef.current = handles;
+    tickRef.current = 0;
     return () => {
       for (const h of handles) {
         scene.remove(h.mesh);
@@ -461,7 +555,7 @@ export default function JsonGraph3DInspectPanel(
       }
       hullsRef.current = [];
     };
-  }, [groups, nodesById, params.hulls, params.hullOpacity, params.hullMode, perfBlocked, isGraph, size.width, size.height]);
+  }, [groups, nodesById, params.hulls, params.hullOpacity, params.hullMode, perfBlocked, graphReady]);
 
   const updateHulls = useCallback(() => {
     const p = paramsRef.current;
@@ -528,6 +622,27 @@ export default function JsonGraph3DInspectPanel(
       h.mesh.scale.copy(radii);
     }
   }, [nodesById]);
+
+  // The refit loop. Runs while the panel is mounted and a graph is shown;
+  // first frame also flips the "graph is live" flag so the hull effect
+  // above can attach to a scene that now exists (fgRef is unset on the
+  // very first render, when that effect first runs).
+  useEffect(() => {
+    if (!isGraph || perfBlocked) return;
+    let raf = 0;
+    let announced = false;
+    const loop = () => {
+      if (!announced && fgRef.current) {
+        announced = true;
+        setGraphReady((v) => v + 1);
+      }
+      updateHulls();
+      reorientEdgeLabels();
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [isGraph, perfBlocked, updateHulls, reorientEdgeLabels]);
 
   // --- Camera / freeze / sync ---------------------------------------------
   useEffect(() => {
@@ -654,6 +769,23 @@ export default function JsonGraph3DInspectPanel(
             />
             contain-lines
           </label>
+          <select
+            value={params.hyperedgeLabel}
+            onChange={(e) => updateParam("hyperedgeLabel", e.target.value as HyperedgeLabel)}
+            title="How reified relations (hyperedge nodes) are drawn"
+          >
+            <option value="predicate">relations: predicate</option>
+            <option value="dot">relations: dot</option>
+            <option value="id">relations: id</option>
+          </select>
+          <select
+            value={params.edgeLabelOrientation}
+            onChange={(e) => updateParam("edgeLabelOrientation", e.target.value as EdgeLabelOrientation)}
+            title="Edge label orientation"
+          >
+            <option value="along">labels: along edge</option>
+            <option value="billboard">labels: face viewer</option>
+          </select>
           <label title="Freeze the physics simulation">
             <input
               type="checkbox"
@@ -661,6 +793,14 @@ export default function JsonGraph3DInspectPanel(
               onChange={(e) => updateParam("freezeLayout", e.target.checked)}
             />
             freeze
+          </label>
+          <label title="Show the category legend">
+            <input
+              type="checkbox"
+              checked={params.showLegend}
+              onChange={(e) => updateParam("showLegend", e.target.checked)}
+            />
+            legend
           </label>
           <button onClick={resetView} title="Fit graph to view" className="json-graph3d-inspect-reset-btn">
             ⤢
@@ -748,22 +888,28 @@ export default function JsonGraph3DInspectPanel(
             linkThreeObject={showEdgeLabels ? linkThreeObject : undefined}
             linkPositionUpdate={
               showEdgeLabels
-                ? (sprite, { start, end }, link) => {
+                ? (obj, { start, end }, link) => {
                     const l = link as unknown as FGLink;
-                    if (!linkVisible(l)) {
-                      (sprite as unknown as THREE.Object3D).visible = false;
+                    const o = obj as unknown as THREE.Object3D;
+                    if (!linkVisible(l) || l.text.length === 0) {
+                      o.visible = false;
                       return;
                     }
-                    (sprite as unknown as THREE.Object3D).visible = l.text.length > 0;
-                    Object.assign((sprite as unknown as { position: { x: number; y: number; z: number } }).position, {
-                      x: start.x + (end.x - start.x) / 2,
-                      y: start.y + (end.y - start.y) / 2,
-                      z: start.z + (end.z - start.z) / 2,
-                    });
+                    o.visible = true;
+                    if (paramsRef.current.edgeLabelOrientation === "along" && fgRef.current) {
+                      _start.set(start.x, start.y, start.z);
+                      _end.set(end.x, end.y, end.z);
+                      orientAlong(o, _start, _end, fgRef.current.camera());
+                    } else {
+                      o.position.set(
+                        start.x + (end.x - start.x) / 2,
+                        start.y + (end.y - start.y) / 2,
+                        start.z + (end.z - start.z) / 2,
+                      );
+                    }
                   }
                 : undefined
             }
-            onEngineTick={updateHulls}
             cooldownTicks={params.cooldownTicks}
             warmupTicks={0}
           />
