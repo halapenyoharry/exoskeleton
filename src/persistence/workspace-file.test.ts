@@ -93,3 +93,48 @@ test("parseWorkspaceDocument strips filePath from every panel's params", () => {
   assert.strictEqual("filePath" in panels["editor-1"].params, false);
   assert.deepStrictEqual(panels["terminal-1"].params, {});
 });
+
+test("serializeWorkspaceDocument strips apiKey from panel params without mutating input", () => {
+  const ws: Workspace = {
+    ...mockWorkspace,
+    layout: {
+      ...(mockWorkspace.layout as any),
+      panels: {
+        "topology-1": {
+          id: "topology-1",
+          contentComponent: "topology-extract",
+          params: { documentId: "default", provider: "openrouter", apiKey: "sk-or-secret" },
+        },
+      },
+    } as any,
+  };
+
+  const jsonStr = serializeWorkspaceDocument(ws);
+  assert.strictEqual(jsonStr.includes("sk-or-secret"), false);
+
+  const exported = JSON.parse(jsonStr).workspace.layout.panels["topology-1"].params;
+  assert.strictEqual("apiKey" in exported, false);
+  assert.strictEqual(exported.provider, "openrouter");
+
+  // Live state keeps the key — only the exported document loses it.
+  assert.strictEqual((ws.layout as any).panels["topology-1"].params.apiKey, "sk-or-secret");
+});
+
+test("parseWorkspaceDocument drops apiKey from a hand-crafted document", () => {
+  const raw = JSON.stringify({
+    type: "exoskeleton-workspace",
+    version: 8,
+    workspace: {
+      ...mockWorkspace,
+      layout: {
+        ...(mockWorkspace.layout as any),
+        panels: {
+          "topology-1": { id: "topology-1", params: { apiKey: "sk-or-foreign", model: "x" } },
+        },
+      },
+    },
+  });
+  const params = (parseWorkspaceDocument(raw).layout as any).panels["topology-1"].params;
+  assert.strictEqual("apiKey" in params, false);
+  assert.strictEqual(params.model, "x");
+});
