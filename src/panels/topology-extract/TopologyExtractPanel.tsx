@@ -65,6 +65,13 @@ interface CategoryCounts {
   unknown: number;
 }
 
+/** Ids of kind:"hyperedge" nodes; links whose source is one are spokes. */
+function hyperedgeIds(doc: TopoDocument): Set<string> {
+  return new Set(doc.nodes.filter((n) => n.kind === "hyperedge").map((n) => n.id));
+}
+
+// Counts relations, not rows: each hyperedge once (its spokes inherit its
+// category and carry no attrs), plus each plain dyadic link.
 function countCategories(doc: TopoDocument): CategoryCounts {
   const counts: CategoryCounts = {
     containment: 0,
@@ -73,13 +80,19 @@ function countCategories(doc: TopoDocument): CategoryCounts {
     reference: 0,
     unknown: 0,
   };
-  for (const link of doc.links) {
-    const cat = link.attrs?.["i2t:edge_category"];
-    if (cat && cat in counts) {
+  const tally = (cat: unknown) => {
+    if (typeof cat === "string" && cat in counts) {
       counts[cat as EdgeCategory]++;
     } else {
       counts.unknown++;
     }
+  };
+  const spokeSources = hyperedgeIds(doc);
+  for (const node of doc.nodes) {
+    if (node.kind === "hyperedge") tally(node.attrs?.["i2t:edge_category"]);
+  }
+  for (const link of doc.links) {
+    if (!spokeSources.has(link.source)) tally(link.attrs?.["i2t:edge_category"]);
   }
   return counts;
 }
@@ -274,6 +287,12 @@ export default function TopologyExtractPanel(
   const categories = result ? countCategories(result.document) : null;
   const nodeCount = result?.document.nodes.filter((n) => n.kind === "node").length ?? 0;
   const hyperedgeCount = result?.document.nodes.filter((n) => n.kind === "hyperedge").length ?? 0;
+  const dyadicLinkCount = result
+    ? (() => {
+        const spokeSources = hyperedgeIds(result.document);
+        return result.document.links.filter((l) => !spokeSources.has(l.source)).length;
+      })()
+    : 0;
 
   return (
     <div className="topo-extract-container">
@@ -460,8 +479,8 @@ export default function TopologyExtractPanel(
               <span>
                 {nodeCount} node{nodeCount !== 1 ? "s" : ""}
                 {hyperedgeCount > 0 && `, ${hyperedgeCount} hyperedge${hyperedgeCount !== 1 ? "s" : ""}`}
-                , {result.document.links.length} edge
-                {result.document.links.length !== 1 ? "s" : ""}
+                , {dyadicLinkCount} edge
+                {dyadicLinkCount !== 1 ? "s" : ""}
               </span>
             </div>
 

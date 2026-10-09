@@ -4,6 +4,7 @@
 // completions API directly. The API key never leaves the client.
 
 import type { TopoDocument } from "../json-dyadic/types";
+import { isRelationDocument, projectRelations } from "./project";
 
 export interface OpenRouterOptions {
   apiKey: string;
@@ -16,7 +17,7 @@ export interface OpenRouterOptions {
 
 export interface ExtractionResult {
   document: TopoDocument;
-  /** Raw JSON string returned by the model (before parsing). */
+  /** The document as pretty-printed JSON (what "Copy JSON" copies). */
   rawJson: string;
   /** Usage stats from the API response, if available. */
   usage?: {
@@ -109,6 +110,17 @@ export async function extractTopology(
   }
 
   const data = await response.json();
+  // OpenRouter can return HTTP 200 with an upstream error on the choice
+  // (e.g. a provider-side 429). Surface it rather than a JSON parse error.
+  const choiceError = data?.choices?.[0]?.error;
+  if (choiceError) {
+    const status = typeof choiceError.code === "number" ? choiceError.code : undefined;
+    throw new ExtractionError(
+      `Upstream error${status ? ` ${status}` : ""}: ${choiceError.message ?? "unknown"}`,
+      status === 429 ? "rate_limit" : "api",
+      status,
+    );
+  }
   const content = data?.choices?.[0]?.message?.content;
   if (typeof content !== "string") {
     throw new ExtractionError(
@@ -144,12 +156,27 @@ export async function extractTopology(
       "parse",
     );
   }
-  if (!Array.isArray(doc.links)) {
+
+  // Default prompt: relation list, projected to {nodes, links} here.
+  // Custom prompts may still return {nodes, links} directly.
+  let document: TopoDocument;
+  if (isRelationDocument(doc)) {
+    document = projectRelations(doc, sourceText);
+  } else if (Array.isArray(doc.links)) {
+    document = parsed as TopoDocument;
+  } else {
     throw new ExtractionError(
-      "Response missing 'links' array",
+      "Response missing 'relations' (or 'links') array",
       "parse",
     );
   }
+
+  // The model has no clock; stamp provenance here.
+  document.metadata = {
+    ...(document.metadata ?? {}),
+    extracted_at: new Date().toISOString(),
+    model,
+  };
 
   const usage = data?.usage
     ? {
@@ -160,8 +187,8 @@ export async function extractTopology(
     : undefined;
 
   return {
-    document: parsed as TopoDocument,
-    rawJson,
+    document,
+    rawJson: JSON.stringify(document, null, 2),
     usage,
   };
 }
