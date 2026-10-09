@@ -3,6 +3,7 @@ import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { spawn, type IPty } from "tauri-pty";
 import { resolveShell } from "./terminal-shell";
+import { inTauri } from "../utils/file-io";
 import "./TerminalPanel.css";
 
 const SHELL = resolveShell(
@@ -38,6 +39,9 @@ export default function TerminalPanel() {
     let pty: IPty | null = null;
     try {
       fit.fit();
+      if (!inTauri()) {
+        throw new Error("the terminal needs the desktop app (this is a browser tab)");
+      }
       pty = spawn(SHELL, [], {
         cols: term.cols,
         rows: term.rows,
@@ -57,7 +61,9 @@ export default function TerminalPanel() {
       });
     } catch (err) {
       term.write(`\r\n\x1b[31mfailed to spawn pty: ${err}\x1b[0m\r\n`);
-      term.write("ensure tauri-plugin-pty is enabled in src-tauri/src/lib.rs\r\n");
+      if (inTauri()) {
+        term.write("ensure tauri-plugin-pty is enabled in src-tauri/src/lib.rs\r\n");
+      }
     }
 
     const ro = new ResizeObserver(() => {

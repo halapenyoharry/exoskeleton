@@ -49,8 +49,9 @@ import {
   updateActiveWorkspaceLayout,
   type AppStateV8,
 } from "./persistence/storage";
-import { tauriStorage } from "./persistence/tauri-storage";
+import { appStorage } from "./persistence/app-storage";
 import { createDebounce } from "./utils/debounce";
+import { errorText, inTauri, saveTextFile } from "./utils/file-io";
 import { DEFAULT_PRESET_ID } from "./persistence/presets";
 import {
   parseWorkspaceDocument,
@@ -115,10 +116,10 @@ const components = {
   "status-bar-panel": StatusBarPanel,
 };
 
-// Choose persistence backend by environment.
-// Today: Tauri only. Tomorrow: branch on window.__TAURI_INTERNALS__,
-// acquireVsCodeApi, etc. to pick web/vscode adapters.
-const storage = tauriStorage;
+// Persistence backend for this runtime: the Tauri store in the desktop app,
+// localStorage in a browser tab (where the Tauri store doesn't exist and
+// every reload used to fall back to the default layout).
+const storage = appStorage;
 
 // The Cmd+B-summoned settings panel lives in a Dockview 6 edge group on
 // the left side of the main grid. Same constant used by toggleSettings,
@@ -290,9 +291,10 @@ export default function App() {
   // sees those (events don't cross the iframe boundary, and cross-origin
   // pages block injection of our own listener).
   useEffect(() => {
+    if (!inTauri()) return; // no native menu in a browser tab
     const unlistenP = listen("shortcut:toggle-settings", () => toggleSettings());
     return () => {
-      void unlistenP.then((fn) => fn());
+      void unlistenP.then((fn) => fn()).catch(() => {});
     };
   }, []);
 
@@ -322,6 +324,24 @@ export default function App() {
       }
     } else {
       buildDefaultLayout(event.api);
+      // First run (nothing saved yet): start a state so the debounced save
+      // has something to write. Without this a first run never persisted,
+      // which is every run in a fresh browser tab.
+      const fresh: AppStateV8 = {
+        version: 8,
+        activeWorkspaceId: "default",
+        workspaces: {
+          default: {
+            id: "default",
+            name: "Default Workspace",
+            layout: event.api.toJSON(),
+            updatedAt: Date.now(),
+          },
+        },
+        preferences: {},
+      };
+      appStateRef.current = fresh;
+      setAppState(fresh);
     }
 
     // Rescue pathological saved layouts (panels absorbed into an edge
@@ -417,22 +437,20 @@ export default function App() {
     }
   }
 
-  function handleExportWorkspace() {
+  async function handleExportWorkspace() {
     if (!appState) return;
     save.flush();
+    setIsAddMenuOpen(false);
     const activeWs = getActiveWorkspace(appState);
     const jsonStr = serializeWorkspaceDocument(activeWs);
-    const blob = new Blob([jsonStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
     const safeName = activeWs.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    a.download = `${safeName || "workspace"}.exo.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    setIsAddMenuOpen(false);
+    try {
+      await saveTextFile(jsonStr, `${safeName || "workspace"}.exo.json`, [
+        { name: "Exoskeleton workspace", extensions: ["json"] },
+      ]);
+    } catch (err) {
+      alert(`Failed to export workspace: ${errorText(err)}`);
+    }
   }
 
   function handleImportWorkspace() {

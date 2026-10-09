@@ -446,3 +446,134 @@
 .topo-extract-prompt-reset:hover {
   color: #e040fb;
 }
+
+/* ── Depth row: parts and passes ────────────────────────────────── */
+
+.topo-extract-depth-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 4px 12px;
+  border-bottom: 1px solid rgba(224, 64, 251, 0.08);
+  flex-shrink: 0;
+}
+
+.topo-extract-depth-row label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #7e879b;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.topo-extract-depth-row input,
+.topo-extract-depth-row select {
+  background: #171a22;
+  color: #e8ecf4;
+  border: 1px solid #242935;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: inherit;
+  width: 64px;
+}
+
+.topo-extract-depth-plan {
+  font-size: 10px;
+  color: #4c556b;
+  margin-left: auto;
+}
+
+/* ── Live progress ──────────────────────────────────────────────── */
+
+.topo-extract-progress {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-top: 1px solid #242935;
+  font-size: 11px;
+  color: #b0b8c8;
+}
+
+.topo-extract-progress-now {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.topo-extract-progress-clock {
+  font-family: 'JetBrains Mono', monospace;
+  color: #e040fb;
+  min-width: 3.5em;
+}
+
+.topo-extract-progress-log {
+  margin-top: 4px;
+  max-height: 120px;
+  overflow-y: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #7e879b;
+}
+
+.topo-extract-progress-log summary {
+  cursor: pointer;
+  color: #7e879b;
+}
+
+.topo-extract-log-error {
+  color: #e06a6a;
+}
+
+/* ── Result extras ──────────────────────────────────────────────── */
+
+.topo-extract-quality {
+  font-size: 10px;
+  color: #ffb300;
+}
+
+.topo-extract-pushed {
+  font-size: 11px;
+  color: #6dffaa;
+}
+
+.topo-extract-pushed code {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.topo-extract-json summary {
+  cursor: pointer;
+  font-size: 11px;
+  color: #b0b8c8;
+}
+
+.topo-extract-json-text {
+  width: 100%;
+  height: 240px;
+  margin-top: 4px;
+  background: #0d0e12;
+  color: #e8ecf4;
+  border: 1px solid #242935;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.topo-extract-flash {
+  margin-top: 6px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.topo-extract-flash--ok,
+.topo-extract-flash--info {
+  color: #6dffaa;
+}
+
+.topo-extract-flash--error {
+  color: #e06a6a;
+}

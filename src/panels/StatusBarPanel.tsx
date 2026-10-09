@@ -54,6 +54,10 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
       setActiveDocId(id);
       updateStats(id);
     });
+    // The active id may have changed between the first render and this
+    // subscription (e.g. json-edit reopening its last document on launch).
+    const current = getActiveDocumentId();
+    if (current !== activeDocId) setActiveDocId(current);
 
     const unsubJson = onJsonChange(activeDocId, () => {
       updateStats(activeDocId);

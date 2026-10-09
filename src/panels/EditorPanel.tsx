@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
-import { open, save } from "@tauri-apps/plugin-dialog";
-import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import {
+  errorText,
+  fileNameFor,
+  inTauri,
+  openTextFiles,
+  readTextFileAt,
+  saveTextFile,
+} from "../utils/file-io";
+import { useFlash } from "../utils/useFlash";
 import "./EditorPanel.css";
 
 // TODO: replace this textarea with @marktext/muya for live-preview markdown.
@@ -19,20 +26,21 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
   const [path, setPath] = useState<string | null>(null);
   const [text, setText] = useState("# untitled\n\nstart writing.\n");
   const [dirty, setDirty] = useState(false);
+  const { flash, show, clear } = useFlash();
 
   // Reopen the persisted file on mount. If it's gone (moved/deleted),
   // fall back to the untitled buffer and drop the stale param.
   useEffect(() => {
     const initial = props.params?.filePath;
-    if (!initial) return;
-    readTextFile(initial)
+    if (!initial || !inTauri()) return;
+    readTextFileAt(initial)
       .then((content) => {
         setPath(initial);
         setText(content);
         setDirty(false);
       })
       .catch((e) => {
-        console.warn(`[exoskeleton] editor: couldn't reopen ${initial}:`, e);
+        show("error", `Couldn't reopen ${initial}: ${errorText(e)}`);
         props.api.updateParameters({ filePath: undefined });
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -44,30 +52,36 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
   }
 
   async function openFile() {
-    const picked = await open({
-      multiple: false,
-      directory: false,
-      filters: [{ name: "Markdown", extensions: ["md", "markdown", "txt"] }],
-    });
-    if (!picked || typeof picked !== "string") return;
-    const content = await readTextFile(picked);
-    rememberPath(picked);
-    setText(content);
-    setDirty(false);
+    try {
+      const [file] = await openTextFiles([
+        { name: "Markdown", extensions: ["md", "markdown", "txt"] },
+      ]);
+      if (!file) return;
+      if (file.path) rememberPath(file.path);
+      else setPath(file.name);
+      setText(file.text);
+      setDirty(false);
+      show("ok", `Opened ${file.name}`);
+    } catch (err) {
+      show("error", errorText(err));
+    }
   }
 
   async function saveFile() {
-    let target = path;
-    if (!target) {
-      const picked = await save({
-        filters: [{ name: "Markdown", extensions: ["md"] }],
-      });
-      if (!picked) return;
-      target = picked;
-      rememberPath(picked);
+    try {
+      const result = await saveTextFile(
+        text,
+        fileNameFor(path?.split(/[/\\]/).pop() ?? "untitled", "md"),
+        [{ name: "Markdown", extensions: ["md"] }],
+        inTauri() ? path : null,
+      );
+      if (!result) return;
+      if (result.method === "dialog") rememberPath(result.path);
+      setDirty(false);
+      show("ok", result.method === "dialog" ? `Saved to ${result.path}` : `Downloaded ${result.path}`);
+    } catch (err) {
+      show("error", errorText(err));
     }
-    await writeTextFile(target, text);
-    setDirty(false);
   }
 
   // Pure content — the host wraps this in PanelRoot via exoPanel().
@@ -82,6 +96,16 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
         <span style={{ flex: 1, color: "#4a6a78", fontStyle: dirty ? "italic" : "normal" }}>
           {path ?? "untitled"}{dirty ? " •" : ""}
         </span>
+        {flash && (
+          <span
+            onClick={clear}
+            title="Click to dismiss"
+            style={{ cursor: "pointer", color: flash.kind === "error" ? "#ff6b6b" : "#7ee2a8" }}
+          >
+            {flash.kind === "error" ? "⚠ " : "✓ "}
+            {flash.text}
+          </span>
+        )}
       </div>
       <textarea
         className="editor-textarea"

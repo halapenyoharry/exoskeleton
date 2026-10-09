@@ -1,60 +1,111 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
-import { setJson, type JsonValue } from "../../data/json-bus";
+import { setJson, uniqueJsonId, type JsonValue } from "../../data/json-bus";
+import { setActiveDocumentId } from "../../osc/channels";
+import {
+  copyText,
+  errorText,
+  fileNameFor,
+  inTauri,
+  openTextFiles,
+  readClipboardText,
+  saveTextFile,
+} from "../../utils/file-io";
+import { useFlash } from "../../utils/useFlash";
 import { DEFAULT_SYSTEM_PROMPT, estimateTokens } from "./prompts";
 import {
-  extractTopology,
-  ExtractionError,
-  type ExtractionResult,
-} from "./openrouter";
+  DEFAULT_OLLAMA_HOST,
+  ollamaChat,
+  ollamaListModels,
+  openRouterChat,
+  type ChatFn,
+} from "./transport";
+import {
+  chunkSource,
+  extractIteratively,
+  findDivisions,
+  type ExtractOutcome,
+  type PassRecord,
+} from "./extract";
+import { projectRelations } from "./project";
 import { runLocalInfo2TopoCli } from "./local-cli";
 import type { EdgeCategory, TopoDocument } from "../json-dyadic/types";
 import "./TopologyExtractPanel.css";
 
 // ── Provider vocabulary ──────────────────────────────────────────────
-type ProviderId = "openrouter" | "local-cli" | "direct-api";
+type ProviderId = "openrouter" | "ollama" | "local-cli";
 
-interface ProviderOption {
-  id: ProviderId;
-  label: string;
-  available: boolean;
-}
-
-const PROVIDERS: ProviderOption[] = [
-  { id: "openrouter", label: "OpenRouter", available: true },
-  { id: "local-cli", label: "Local CLI", available: true },
-  { id: "direct-api", label: "Direct API", available: false },
+const PROVIDERS: { id: ProviderId; label: string }[] = [
+  { id: "openrouter", label: "OpenRouter" },
+  { id: "ollama", label: "Ollama (local network)" },
+  { id: "local-cli", label: "Local CLI (desktop app)" },
 ];
 
 const DEFAULT_MODEL = "google/gemini-2.5-flash";
+const DEFAULT_OLLAMA_MODEL = "gemma4:latest";
+const CONTEXT_SIZES = [16384, 32768, 65536, 131072];
 
 // ── Persisted params ─────────────────────────────────────────────────
 export interface TopologyExtractParams {
-  /** json-bus document id to write into. Defaults to "default". */
-  documentId: string;
   /** Selected provider id. */
   provider: ProviderId;
   /** Model slug (for OpenRouter). */
   model: string;
   /** API key (stored in panel params — stripped on workspace export). */
   apiKey: string;
+  /** Ollama host, e.g. http://100.66.0.3:11434. */
+  ollamaHost: string;
+  /** Ollama model name. */
+  ollamaModel: string;
+  /** Ollama context window (num_ctx). Constant per run; changing it reloads the model. */
+  numCtx: number;
+  /** Follow-up passes per part after the first, per provider. */
+  openrouterFollowUps: number;
+  ollamaFollowUps: number;
+  /** Max characters per part, per provider (0 = whole source at once). */
+  openrouterChunkChars: number;
+  ollamaChunkChars: number;
   /** Custom system prompt override. Empty string = use default. */
   systemPrompt: string;
-  /** Auto-push result to json-bus on successful extraction. */
+  /** Push the result into the document library when extraction ends. */
   autoPush: boolean;
   /** CLI adapter to run for local-cli */
   adapter: string;
 }
 
 export const topologyExtractDefaults: TopologyExtractParams = {
-  documentId: "default",
   provider: "openrouter",
   model: DEFAULT_MODEL,
   apiKey: "",
+  ollamaHost: DEFAULT_OLLAMA_HOST,
+  ollamaModel: DEFAULT_OLLAMA_MODEL,
+  numCtx: 32768,
+  openrouterFollowUps: 0,
+  ollamaFollowUps: 6,
+  openrouterChunkChars: 16000,
+  ollamaChunkChars: 6000,
   systemPrompt: "",
-  autoPush: false,
+  autoPush: true,
   adapter: "extract",
 };
+
+// ── Result shape ─────────────────────────────────────────────────────
+interface RunResult {
+  document: TopoDocument;
+  json: string;
+  outcome?: ExtractOutcome;
+}
+
+interface Progress {
+  chunk: number;
+  chunkCount: number;
+  pass: number;
+  passCount: number;
+  passLabel: string;
+  tokens: number;
+  totalNodes: number;
+  totalRelations: number;
+}
 
 // ── Category stat helpers ────────────────────────────────────────────
 interface CategoryCounts {
@@ -97,192 +148,275 @@ function countCategories(doc: TopoDocument): CategoryCounts {
   return counts;
 }
 
+function clock(ms: number): string {
+  const s = Math.floor(ms / 1000);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+function kb(text: string): string {
+  return `${Math.max(1, Math.round(text.length / 1024)).toLocaleString()} KB`;
+}
+
+function passLine(p: PassRecord, chunkCount: number): string {
+  const part = chunkCount > 1 ? `part ${p.chunk + 1}/${chunkCount} · ` : "";
+  const kind = p.kind === "first" ? "first pass" : p.kind;
+  if (p.error) return `${part}${kind}: ✗ ${p.error}`;
+  return `${part}${kind}: +${p.newNodes} nodes, +${p.newRelations} relations (${(p.ms / 1000).toFixed(0)}s)`;
+}
+
 // ── Component ────────────────────────────────────────────────────────
 export default function TopologyExtractPanel(
   props: IDockviewPanelProps<TopologyExtractParams>,
 ) {
-  const rawParams = props.params ?? {};
   const params: TopologyExtractParams = {
     ...topologyExtractDefaults,
-    ...rawParams,
+    ...(props.params ?? {}),
   };
+  // Saved layouts may carry the retired "direct-api" placeholder.
+  if (!PROVIDERS.some((p) => p.id === params.provider)) params.provider = "openrouter";
 
-  // Local state
-  const [provider, setProvider] = useState<ProviderId>(params.provider);
-  const [model, setModel] = useState(params.model);
-  const [apiKey, setApiKey] = useState(params.apiKey);
+  const [p, setP] = useState<TopologyExtractParams>(params);
+  const set = <K extends keyof TopologyExtractParams>(key: K, value: TopologyExtractParams[K]) =>
+    setP((prev) => ({ ...prev, [key]: value }));
+
   const [showKey, setShowKey] = useState(false);
   const [sourceText, setSourceText] = useState("");
-  const [autoPush, setAutoPush] = useState(params.autoPush);
-  const [adapter, setAdapter] = useState(params.adapter || "extract");
-  const [systemPrompt, setSystemPrompt] = useState(
-    params.systemPrompt || DEFAULT_SYSTEM_PROMPT,
-  );
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [sourceFile, setSourceFile] = useState<string | null>(null);
-  const [progressLog, setProgressLog] = useState<string[]>([]);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
 
   // Extraction state
   const [extracting, setExtracting] = useState(false);
-  const [result, setResult] = useState<ExtractionResult | null>(null);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [now, setNow] = useState(Date.now());
+  const [progress, setProgress] = useState<Progress | null>(null);
+  const [log, setLog] = useState<string[]>([]);
+  const [result, setResult] = useState<RunResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pushed, setPushed] = useState(false);
+  const [pushedId, setPushedId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const { flash, show, clear } = useFlash(6000);
+
+  const systemPrompt = p.systemPrompt || DEFAULT_SYSTEM_PROMPT;
 
   // Persist params whenever they change
   useEffect(() => {
-    props.api.updateParameters({
-      ...params,
-      provider,
-      model,
-      apiKey,
-      autoPush,
-      adapter,
-      systemPrompt: systemPrompt === DEFAULT_SYSTEM_PROMPT ? "" : systemPrompt,
-    });
+    props.api.updateParameters(p);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [provider, model, apiKey, autoPush, adapter, systemPrompt, props.api]);
+  }, [p, props.api]);
 
-  const pushToJsonBus = useCallback(
-    (doc: TopoDocument) => {
-      setJson(params.documentId, doc as unknown as JsonValue);
-      setPushed(true);
+  // Tick the elapsed clock while a run is going.
+  useEffect(() => {
+    if (!extracting) return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [extracting]);
+
+  const refreshOllamaModels = useCallback(async () => {
+    try {
+      const models = await ollamaListModels(p.ollamaHost);
+      setOllamaModels(models);
+      show("ok", `${models.length} models on ${p.ollamaHost}`);
+    } catch (err) {
+      show("error", `Could not list models: ${errorText(err)}`);
+    }
+  }, [p.ollamaHost, show]);
+
+  useEffect(() => {
+    if (p.provider === "ollama" && ollamaModels.length === 0) void refreshOllamaModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [p.provider]);
+
+  const pushToLibrary = useCallback(
+    (doc: TopoDocument, existingId: string | null): string => {
+      const title =
+        (typeof doc.metadata?.title === "string" && doc.metadata.title) || "Extracted topology";
+      const model =
+        typeof doc.metadata?.model === "string" ? doc.metadata.model : "unknown model";
+      const id = existingId ?? uniqueJsonId(`extract-${title}`);
+      setJson(id, doc as unknown as JsonValue, { title, source: `topology-extract · ${model}` });
+      setActiveDocumentId(id);
+      setPushedId(id);
+      return id;
     },
-    [params.documentId],
+    [],
   );
+
+  const followUps = p.provider === "ollama" ? p.ollamaFollowUps : p.openrouterFollowUps;
+  const chunkChars = p.provider === "ollama" ? p.ollamaChunkChars : p.openrouterChunkChars;
+  const modelLabel = p.provider === "ollama" ? p.ollamaModel : p.provider === "openrouter" ? p.model : `i2t_cli ${p.adapter}`;
 
   async function handleExtract() {
     if (extracting) {
-      // Cancel in-flight
       abortRef.current?.abort();
       return;
     }
 
     setError(null);
     setResult(null);
-    setPushed(false);
+    setPushedId(null);
+    setLog([]);
+    setProgress(null);
+    clear();
     setExtracting(true);
+    const started = Date.now();
+    setStartedAt(started);
+    setNow(started);
 
     const controller = new AbortController();
     abortRef.current = controller;
 
     try {
-      let res: ExtractionResult;
-      
-      if (provider === "local-cli") {
-        setProgressLog([]);
-        const input = sourceFile 
-          ? { type: "file" as const, path: sourceFile } 
+      if (p.provider === "local-cli") {
+        if (!inTauri()) {
+          throw new Error("The Local CLI provider only works in the desktop app.");
+        }
+        const input = sourceFile
+          ? { type: "file" as const, path: sourceFile }
           : { type: "text" as const, data: sourceText };
-
-        const dyadicDoc = await runLocalInfo2TopoCli(
-          input, 
-          { apiKey, model, adapter },
-          (msg) => setProgressLog(prev => [...prev, msg].slice(-100))
-        );
-        res = {
-          document: dyadicDoc,
-          rawJson: JSON.stringify(dyadicDoc, null, 2),
-        };
-      } else {
-        res = await extractTopology({
-          apiKey,
-          model,
-          systemPrompt,
-          sourceText,
-          signal: controller.signal,
-        });
+        const doc = (await runLocalInfo2TopoCli(
+          input,
+          { apiKey: p.apiKey, model: p.model, adapter: p.adapter },
+          (msg) => setLog((prev) => [...prev, msg].slice(-100)),
+        )) as TopoDocument;
+        doc.metadata = { ...(doc.metadata ?? {}), extracted_at: new Date().toISOString(), model: modelLabel };
+        finish({ document: doc, json: JSON.stringify(doc, null, 2) });
+        return;
       }
-      
-      setResult(res);
 
-      if (autoPush) {
-        pushToJsonBus(res.document);
+      const chat: ChatFn =
+        p.provider === "ollama"
+          ? ollamaChat({ host: p.ollamaHost, model: p.ollamaModel, numCtx: p.numCtx })
+          : openRouterChat({ apiKey: p.apiKey, model: p.model });
+
+      const outcome = await extractIteratively({
+        chat,
+        systemPrompt,
+        sourceText,
+        chunkChars,
+        followUps,
+        signal: controller.signal,
+        onProgress: (pr) => {
+          setProgress({
+            chunk: pr.chunk,
+            chunkCount: pr.chunkCount,
+            pass: pr.pass,
+            passCount: pr.passCount,
+            passLabel: pr.passLabel,
+            tokens: pr.tokens ?? 0,
+            totalNodes: pr.totalNodes,
+            totalRelations: pr.totalRelations,
+          });
+          if (pr.finished) {
+            const line = passLine(pr.finished, pr.chunkCount);
+            setLog((prev) => [...prev, line].slice(-200));
+          }
+        },
+      });
+
+      const document = projectRelations(outcome.document, sourceText);
+      const totalCost = outcome.passes.reduce((sum, r) => sum + (r.usage?.cost ?? 0), 0);
+      document.metadata = {
+        ...(document.metadata ?? {}),
+        extracted_at: new Date().toISOString(),
+        model: modelLabel,
+        "i2t:passes": outcome.passes.length,
+        "i2t:parts": outcome.chunkCount,
+        ...(totalCost > 0 ? { "i2t:cost_usd": Number(totalCost.toFixed(4)) } : {}),
+        ...(outcome.complete ? {} : { "i2t:partial": `${outcome.chunksCompleted} of ${outcome.chunkCount} parts complete` }),
+      };
+      if (outcome.error) setError(outcome.error);
+      const hasContent = outcome.document.relations.length > 1 || outcome.document.nodes.length > 0;
+      if (outcome.complete || hasContent) {
+        finish({ document, json: JSON.stringify(document, null, 2), outcome });
       }
     } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") {
-        setError("Extraction cancelled.");
-      } else if (err instanceof ExtractionError) {
-        setError(err.message);
-      } else {
-        setError(
-          `Unexpected error: ${err instanceof Error ? err.message : String(err)}`,
-        );
-      }
+      setError(errorText(err));
     } finally {
       setExtracting(false);
       abortRef.current = null;
     }
   }
 
+  function finish(run: RunResult) {
+    setResult(run);
+    if (p.autoPush) {
+      const id = pushToLibrary(run.document, null);
+      show("ok", `In the library as "${id}" and now active`);
+    }
+  }
+
   async function handleLoadFile() {
     try {
-      const { open } = await import("@tauri-apps/plugin-dialog");
-      const { readTextFile } = await import("@tauri-apps/plugin-fs");
-      const picked = await open({
-        multiple: false,
-        directory: false,
-        filters: [
-          { name: "Text", extensions: ["txt", "md", "markdown", "json", "csv", "xml", "html"] },
-          { name: "All Files", extensions: ["*"] },
-        ],
-      });
-      if (!picked || typeof picked !== "string") return;
-      
-      if (provider === "local-cli") {
-        setSourceFile(picked);
-        setSourceText(`[File Mode] Selected for local extraction:\n${picked}`);
+      const [file] = await openTextFiles([
+        { name: "Text", extensions: ["txt", "md", "markdown", "json", "csv", "xml", "html"] },
+      ]);
+      if (!file) return;
+      if (p.provider === "local-cli" && file.path) {
+        setSourceFile(file.path);
+        setSourceText(`[File Mode] Selected for local extraction:\n${file.path}`);
       } else {
-        const content = await readTextFile(picked);
-        setSourceText(content);
+        setSourceText(file.text);
         setSourceFile(null);
       }
+      show("ok", `Loaded ${file.name} (${kb(file.text)})`);
     } catch (err) {
-      console.warn("[topology-extract] file open failed (off-Tauri?):", err);
+      show("error", errorText(err));
     }
   }
 
   async function handlePaste() {
     try {
-      const text = await navigator.clipboard.readText();
+      const text = await readClipboardText();
       setSourceText(text);
       setSourceFile(null);
+      show("ok", `Pasted ${kb(text)}`);
     } catch (err) {
-      console.warn("[topology-extract] clipboard read failed:", err);
+      show("error", errorText(err));
     }
   }
 
   async function handleCopyJson() {
     if (!result) return;
     try {
-      await navigator.clipboard.writeText(result.rawJson);
+      await copyText(result.json);
+      show("ok", `Copied ${kb(result.json)} to the clipboard`);
     } catch (err) {
-      console.warn("[topology-extract] clipboard write failed:", err);
+      show("error", errorText(err));
     }
   }
 
   async function handleSaveJson() {
     if (!result) return;
+    const title = typeof result.document.metadata?.title === "string" ? result.document.metadata.title : "topology";
     try {
-      const { save } = await import("@tauri-apps/plugin-dialog");
-      const { writeTextFile } = await import("@tauri-apps/plugin-fs");
-      const picked = await save({
-        filters: [{ name: "JSON", extensions: ["json"] }],
-      });
-      if (!picked) return;
-      await writeTextFile(picked, JSON.stringify(result.document, null, 2));
+      const saved = await saveTextFile(
+        result.json,
+        fileNameFor(`${title}.normalized-dyadic`, "json"),
+        [{ name: "JSON", extensions: ["json"] }],
+      );
+      if (!saved) return;
+      show("ok", saved.method === "dialog" ? `Saved to ${saved.path}` : `Downloaded ${saved.path} — check your Downloads folder`);
     } catch (err) {
-      console.warn("[topology-extract] save failed (off-Tauri?):", err);
+      show("error", errorText(err));
     }
   }
 
+  function handlePush() {
+    if (!result) return;
+    const id = pushToLibrary(result.document, pushedId);
+    show("ok", `In the library as "${id}" and now active`);
+  }
+
+  // ── Derived display values ─────────────────────────────────────────
   const tokenEstimate = estimateTokens(sourceText);
-  const providerAvailable = PROVIDERS.find((p) => p.id === provider)?.available ?? false;
+  const partCount =
+    p.provider === "local-cli" || sourceText.trim() === ""
+      ? 0
+      : chunkSource(sourceText, findDivisions(sourceText), chunkChars).length;
   const canExtract =
-    providerAvailable &&
-    apiKey.trim() !== "" &&
-    (sourceText.trim() !== "" || sourceFile !== null) &&
-    !extracting;
+    (p.provider !== "openrouter" || p.apiKey.trim() !== "") &&
+    (sourceText.trim() !== "" || sourceFile !== null);
 
   const categories = result ? countCategories(result.document) : null;
   const nodeCount = result?.document.nodes.filter((n) => n.kind === "node").length ?? 0;
@@ -293,6 +427,10 @@ export default function TopologyExtractPanel(
         return result.document.links.filter((l) => !spokeSources.has(l.source)).length;
       })()
     : 0;
+  const meta = result?.document.metadata ?? {};
+  const unverified = typeof meta["i2t:evidence_unverified"] === "number" ? (meta["i2t:evidence_unverified"] as number) : 0;
+  const warnings = Array.isArray(meta["i2t:extraction_warnings"]) ? (meta["i2t:extraction_warnings"] as string[]) : [];
+  const partial = typeof meta["i2t:partial"] === "string" ? (meta["i2t:partial"] as string) : null;
 
   return (
     <div className="topo-extract-container">
@@ -301,39 +439,81 @@ export default function TopologyExtractPanel(
         <label>
           Provider
           <select
-            value={provider}
-            onChange={(e) => setProvider(e.target.value as ProviderId)}
+            value={p.provider}
+            onChange={(e) => set("provider", e.target.value as ProviderId)}
+            disabled={extracting}
           >
-            {PROVIDERS.map((p) => (
-              <option key={p.id} value={p.id} disabled={!p.available}>
-                {p.label}
-                {!p.available ? " (coming soon)" : ""}
+            {PROVIDERS.map((pr) => (
+              <option key={pr.id} value={pr.id}>
+                {pr.label}
               </option>
             ))}
           </select>
         </label>
 
-        {provider === "openrouter" && (
+        {p.provider === "openrouter" && (
           <label>
             Model
             <input
               type="text"
               className="topo-extract-model-input"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
+              value={p.model}
+              onChange={(e) => set("model", e.target.value)}
               placeholder={DEFAULT_MODEL}
+              disabled={extracting}
             />
           </label>
         )}
 
-        {provider === "local-cli" && (
+        {p.provider === "ollama" && (
+          <>
+            <label>
+              Host
+              <input
+                type="text"
+                className="topo-extract-model-input"
+                value={p.ollamaHost}
+                onChange={(e) => set("ollamaHost", e.target.value)}
+                placeholder={DEFAULT_OLLAMA_HOST}
+                disabled={extracting}
+              />
+            </label>
+            <label>
+              Model
+              <input
+                type="text"
+                list="topo-extract-ollama-models"
+                className="topo-extract-model-input"
+                value={p.ollamaModel}
+                onChange={(e) => set("ollamaModel", e.target.value)}
+                placeholder={DEFAULT_OLLAMA_MODEL}
+                disabled={extracting}
+              />
+              <datalist id="topo-extract-ollama-models">
+                {ollamaModels.map((m) => (
+                  <option key={m} value={m} />
+                ))}
+              </datalist>
+            </label>
+            <button
+              className="topo-extract-source-btn"
+              onClick={() => void refreshOllamaModels()}
+              title="List the models installed on this host"
+              disabled={extracting}
+            >
+              ↻ models
+            </button>
+          </>
+        )}
+
+        {p.provider === "local-cli" && (
           <label>
             Adapter
             <select
-              value={adapter}
-              onChange={(e) => setAdapter(e.target.value)}
+              value={p.adapter}
+              onChange={(e) => set("adapter", e.target.value)}
               className="topo-extract-model-input"
-              style={{ width: '140px' }}
+              style={{ width: "140px" }}
             >
               <option value="extract">Generic Prose (extract)</option>
               <option value="manuscript">Manuscript Pipeline</option>
@@ -341,16 +521,10 @@ export default function TopologyExtractPanel(
             </select>
           </label>
         )}
-
-        {!providerAvailable && (
-          <span className="topo-extract-coming-soon">
-            This provider is not yet wired — OpenRouter is the active backend.
-          </span>
-        )}
       </div>
 
       {/* ── API key row ──────────────────────────────── */}
-      {provider === "openrouter" && (
+      {p.provider === "openrouter" && (
         <div className="topo-extract-key-row">
           <label style={{ fontSize: 11, color: "#7e879b", whiteSpace: "nowrap" }}>
             API Key
@@ -358,8 +532,8 @@ export default function TopologyExtractPanel(
           <input
             className="topo-extract-key-input"
             type={showKey ? "text" : "password"}
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
+            value={p.apiKey}
+            onChange={(e) => set("apiKey", e.target.value)}
             placeholder="sk-or-v1-..."
             spellCheck={false}
             autoComplete="off"
@@ -374,6 +548,66 @@ export default function TopologyExtractPanel(
         </div>
       )}
 
+      {/* ── Depth: parts and passes ───────────────────── */}
+      {p.provider !== "local-cli" && (
+        <div className="topo-extract-depth-row">
+          <label title="After the first pass, each part gets focused follow-up passes (modes, changes and causes, speech, identity), then 'anything missed' sweeps that repeat until one finds nothing new.">
+            Follow-up passes
+            <input
+              type="number"
+              min={0}
+              max={12}
+              value={followUps}
+              onChange={(e) =>
+                set(
+                  p.provider === "ollama" ? "ollamaFollowUps" : "openrouterFollowUps",
+                  Math.max(0, Math.min(12, Number(e.target.value) || 0)),
+                )
+              }
+              disabled={extracting}
+            />
+          </label>
+          <label title="Long sources are split at their own scene breaks and headings into parts of at most this many characters. 0 sends the whole source at once.">
+            Part size
+            <input
+              type="number"
+              min={0}
+              step={1000}
+              value={chunkChars}
+              onChange={(e) =>
+                set(
+                  p.provider === "ollama" ? "ollamaChunkChars" : "openrouterChunkChars",
+                  Math.max(0, Number(e.target.value) || 0),
+                )
+              }
+              disabled={extracting}
+            />
+          </label>
+          {p.provider === "ollama" && (
+            <label title="Context window (num_ctx). Larger fits longer parts but uses more GPU memory.">
+              Context
+              <select
+                value={p.numCtx}
+                onChange={(e) => set("numCtx", Number(e.target.value))}
+                disabled={extracting}
+              >
+                {CONTEXT_SIZES.map((n) => (
+                  <option key={n} value={n}>
+                    {n / 1024}k
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {partCount > 0 && (
+            <span className="topo-extract-depth-plan">
+              {partCount} part{partCount !== 1 ? "s" : ""} × {1 + followUps} pass
+              {1 + followUps !== 1 ? "es" : ""} max
+            </span>
+          )}
+        </div>
+      )}
+
       {/* ── Source input ─────────────────────────────── */}
       <div className="topo-extract-source">
         <textarea
@@ -383,14 +617,14 @@ export default function TopologyExtractPanel(
             setSourceText(e.target.value);
             setSourceFile(null); // Revert to text mode if typing
           }}
-          disabled={sourceFile !== null && provider === "local-cli"}
-          placeholder="Paste or type source text here…&#10;&#10;Drop a document, paste from clipboard, or load a file — then hit Extract Topology to run the AI extraction pipeline."
+          disabled={(sourceFile !== null && p.provider === "local-cli") || extracting}
+          placeholder="Paste source text here (⌘V), or load a file — then Extract Topology."
         />
         <div className="topo-extract-source-actions">
-          <button className="topo-extract-source-btn" onClick={handleLoadFile}>
+          <button className="topo-extract-source-btn" onClick={handleLoadFile} disabled={extracting}>
             📂 Load File
           </button>
-          <button className="topo-extract-source-btn" onClick={handlePaste}>
+          <button className="topo-extract-source-btn" onClick={handlePaste} disabled={extracting}>
             📋 From Clipboard
           </button>
           <span className="topo-extract-token-estimate">
@@ -413,12 +647,14 @@ export default function TopologyExtractPanel(
           <textarea
             className="topo-extract-prompt-textarea"
             value={systemPrompt}
-            onChange={(e) => setSystemPrompt(e.target.value)}
+            onChange={(e) =>
+              set("systemPrompt", e.target.value === DEFAULT_SYSTEM_PROMPT ? "" : e.target.value)
+            }
           />
-          {systemPrompt !== DEFAULT_SYSTEM_PROMPT && (
+          {p.systemPrompt !== "" && (
             <button
               className="topo-extract-prompt-reset"
-              onClick={() => setSystemPrompt(DEFAULT_SYSTEM_PROMPT)}
+              onClick={() => set("systemPrompt", "")}
             >
               ↺ Reset to default prompt
             </button>
@@ -446,19 +682,44 @@ export default function TopologyExtractPanel(
         <label className="topo-extract-auto-push">
           <input
             type="checkbox"
-            checked={autoPush}
-            onChange={(e) => setAutoPush(e.target.checked)}
+            checked={p.autoPush}
+            onChange={(e) => set("autoPush", e.target.checked)}
           />
-          Auto-push to viewers
+          Add to library when done
         </label>
       </div>
 
-      {/* ── Progress display ─────────────────────────── */}
-      {extracting && provider === "local-cli" && progressLog.length > 0 && (
-        <div className="topo-extract-progress-log" style={{ fontSize: '11px', fontFamily: 'monospace', background: '#1e1e1e', color: '#ccc', padding: '8px', margin: '8px 12px', borderRadius: '4px', maxHeight: '150px', overflowY: 'auto' }}>
-          {progressLog.map((line, i) => (
-            <div key={i}>{line}</div>
-          ))}
+      {/* ── Live progress ─────────────────────────────── */}
+      {(extracting || log.length > 0) && (
+        <div className="topo-extract-progress">
+          {extracting && (
+            <div className="topo-extract-progress-now">
+              <span className="topo-extract-progress-clock">
+                {startedAt !== null ? clock(now - startedAt) : "0:00"}
+              </span>
+              {progress ? (
+                <span>
+                  {progress.chunkCount > 1 ? `Part ${progress.chunk + 1} of ${progress.chunkCount} · ` : ""}
+                  pass {progress.pass + 1} of {progress.passCount} ({progress.passLabel})
+                  {progress.tokens > 0 ? ` · ${progress.tokens.toLocaleString()} tokens` : " · waiting for the model…"}
+                  {" · "}
+                  {progress.totalNodes} nodes, {progress.totalRelations} relations so far
+                </span>
+              ) : (
+                <span>{p.provider === "local-cli" ? "Running the CLI…" : "Starting…"}</span>
+              )}
+            </div>
+          )}
+          {log.length > 0 && (
+            <details className="topo-extract-progress-log" open={extracting}>
+              <summary>Pass log ({log.length})</summary>
+              {log.map((line, i) => (
+                <div key={i} className={line.includes("✗") ? "topo-extract-log-error" : ""}>
+                  {line}
+                </div>
+              ))}
+            </details>
+          )}
         </div>
       )}
 
@@ -467,7 +728,7 @@ export default function TopologyExtractPanel(
 
       {/* ── Result area ──────────────────────────────── */}
       <div className="topo-extract-result">
-        {!result && !error && (
+        {!result && !error && !extracting && (
           <div className="topo-extract-result-empty">
             No extraction yet. Paste source text and click Extract.
           </div>
@@ -475,12 +736,15 @@ export default function TopologyExtractPanel(
         {result && (
           <div className="topo-extract-result-summary">
             <div className="topo-extract-result-stats">
-              <span className="success-icon">✓</span>
+              <span className={partial ? "error-icon" : "success-icon"}>{partial ? "◐" : "✓"}</span>
               <span>
+                {partial ? `Partial (${partial}): ` : ""}
                 {nodeCount} node{nodeCount !== 1 ? "s" : ""}
                 {hyperedgeCount > 0 && `, ${hyperedgeCount} hyperedge${hyperedgeCount !== 1 ? "s" : ""}`}
                 , {dyadicLinkCount} edge
                 {dyadicLinkCount !== 1 ? "s" : ""}
+                {result.outcome && ` · ${result.outcome.passes.length} passes`}
+                {startedAt !== null && ` · ${clock(Date.now() - startedAt)}`}
               </span>
             </div>
 
@@ -514,34 +778,60 @@ export default function TopologyExtractPanel(
               </div>
             )}
 
+            {(unverified > 0 || warnings.length > 0) && (
+              <div className="topo-extract-quality">
+                {unverified > 0 && `${unverified} relation${unverified !== 1 ? "s" : ""} cite evidence not found verbatim in the source. `}
+                {warnings.length > 0 && `${warnings.length} projection warning${warnings.length !== 1 ? "s" : ""} (see metadata).`}
+              </div>
+            )}
+
             <div className="topo-extract-result-actions">
               <button
-                className={`topo-extract-result-btn topo-extract-result-btn--primary ${pushed ? "" : ""}`}
-                onClick={() => pushToJsonBus(result.document)}
-                title="Push extracted topology to json-bus for all viewers"
+                className="topo-extract-result-btn topo-extract-result-btn--primary"
+                onClick={handlePush}
+                title="Put this result in the document library and make it the active document"
               >
-                {pushed ? "✓ Pushed" : "Push to json-bus ▸"}
+                {pushedId ? "✓ In library — update" : "Add to library ▸"}
               </button>
-              <button
-                className="topo-extract-result-btn"
-                onClick={handleCopyJson}
-                title="Copy raw JSON to clipboard"
-              >
+              <button className="topo-extract-result-btn" onClick={handleCopyJson} title="Copy the JSON">
                 Copy JSON
               </button>
-              <button
-                className="topo-extract-result-btn"
-                onClick={handleSaveJson}
-                title="Save JSON to file"
-              >
-                Save…
+              <button className="topo-extract-result-btn" onClick={handleSaveJson} title="Save the JSON to a file">
+                {inTauri() ? "Save…" : "Download"}
               </button>
-              {result.usage && (
+              {result.outcome && result.outcome.passes.some((r) => r.usage?.cost) && (
                 <span className="topo-extract-usage">
-                  {result.usage.totalTokens.toLocaleString()} tokens used
+                  ${result.outcome.passes.reduce((s, r) => s + (r.usage?.cost ?? 0), 0).toFixed(3)}
                 </span>
               )}
             </div>
+
+            {pushedId && (
+              <div className="topo-extract-pushed">
+                In the library as <code>{pushedId}</code>. It is the active document: json-edit and the
+                viewers now show it. Switch documents from json-edit's picker.
+              </div>
+            )}
+
+            <details className="topo-extract-json">
+              <summary>JSON ({kb(result.json)})</summary>
+              <textarea
+                readOnly
+                className="topo-extract-json-text"
+                value={result.json}
+                onFocus={(e) => e.currentTarget.select()}
+              />
+            </details>
+          </div>
+        )}
+        {flash && (
+          <div
+            className={`topo-extract-flash topo-extract-flash--${flash.kind}`}
+            onClick={clear}
+            title="Click to dismiss"
+          >
+            {flash.kind === "error" ? "⚠ " : "✓ "}
+            {flash.text}
           </div>
         )}
       </div>
