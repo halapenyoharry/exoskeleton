@@ -42,18 +42,19 @@ A running Exoskeleton gives you:
 - **Dockable Workspace Grid**: Drag, dock, tab, split, resize, and pop out panels into separate OS windows.
 - **Workspaces (Schema v8)**: Create, rename, delete, switch between multiple named workspaces, export/import standalone `.exo.json` workspace documents, and open independent workspaces in separate OS windows.
 - **Layout Presets**: Instantly switch or reset to curated workspace layouts (**Minimal**, **JSON Lab**, **AV Lab**, **Everything**).
-- **Sixteen Built-in Panels**:
+- **Seventeen Built-in Panels**:
   - **Editor**: Markdown text editor with native file save/open.
   - **Terminal**: Real-shell terminal powered by xterm.js + `tauri-plugin-pty` with shell auto-resolution.
   - **Web Viewport**: In-app web browser viewport with URL bar for LAN services and docs.
   - **JSON Suite**: CodeMirror 6 JSON editor (featuring Midnight Alaska theme and file path persistence) feeding visualizers over an in-process `json-bus`:
     - **JSON Tree**: Interactive node inspector.
     - **JSON Circles**: SVG radial cluster visualization.
-    - **JSON Mass**: Physics particle gravity simulation.
+    - **JSON Mass**: Circle packing weighted by substrate mass (text lines, image weight).
     - **JSON Cytoscape**: Network graph layout.
     - **JSON Graph**: Force-directed 2D graph.
     - **JSON Graph 3D**: Three.js 3D force graph.
     - **JSON Dyadic**: Category & dyadic link topology graph parser.
+    - **JSON Attention**: Rapier 2D rigid-body field — mass earned from connection, a token of attention walking the edges and making the paths it takes heavier.
   - **AV Suite**:
     - **Tempo Clock**: Visual tempo & beat ticker.
     - **Piano**: Interactive web audio synthesizer keyboard.
@@ -189,7 +190,8 @@ exoskeleton/
 │   │   ├── json-cytoscape/          Cytoscape graph visualizer
 │   │   ├── json-graph/              2D force graph visualizer
 │   │   ├── json-graph3d/            3D Three.js graph visualizer
-│   │   └── json-dyadic/             Category/dyadic topology graph visualizer
+│   │   ├── json-dyadic/             Category/dyadic topology graph visualizer
+│   │   └── json-attention/          Rapier 2D field with an attention walker
 │   ├── persistence/                 Save/load, workspace storage v8 & presets
 │   │   ├── storage.ts               AppStateV8 & Workspace schema definition
 │   │   ├── workspace-file.ts        .exo.json document export/import validation

@@ -85,6 +85,7 @@ const JsonGraph3DPanel = lazy(() => import("./panels/json-graph3d/JsonGraph3DPan
 const JsonGraph3DInspectPanel = lazy(() => import("./panels/json-graph3d-inspect/JsonGraph3DInspectPanel"));
 const JsonDyadicPanel = lazy(() => import("./panels/json-dyadic/JsonDyadicPanel"));
 const JsonMassPanel = lazy(() => import("./panels/json-mass/JsonMassPanel"));
+const JsonAttentionPanel = lazy(() => import("./panels/json-attention/JsonAttentionPanel"));
 const ScopePanel = lazy(() => import("./panels/scope/ScopePanel"));
 const TopologyExtractPanel = lazy(() => import("./panels/topology-extract/TopologyExtractPanel"));
 const ProceduralControlPanel = lazy(() => import("./panels/procedural-visuals-suite/ControlPanel"));
@@ -133,6 +134,7 @@ const components = {
   "procedural-visuals-fountain":    lazyPanel(FountainPanel,             "var(--accent-procedural-fountain)"),
   "procedural-visuals-recursive":   lazyPanel(RecursiveSubdivisionPanel, "var(--accent-procedural-recursive)"),
   "procedural-visuals-manifold": lazyPanel(ManifoldPanel,  "var(--accent-procedural-manifold)"),
+  "json-attention":lazyPanel(JsonAttentionPanel,"var(--accent-json-attention)"),
   // Registered raw (no exoPanel wrapper) on purpose: the status bar owns
   // its full-width chrome and doesn't take the accent-stripe convention.
   "status-bar-panel": StatusBarPanel,
