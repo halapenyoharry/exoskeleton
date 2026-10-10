@@ -19,7 +19,18 @@ export function useElementSize(
 
   useEffect(() => {
     const el = ref.current;
-    if (el === observed.current) return; // same target: nothing to do
+    if (el === observed.current) {
+      // Same target. Dockview detaches hidden tabs' DOM and re-attaches it
+      // on show; Chromium does not always deliver a ResizeObserver entry
+      // for that re-attach, so re-measure on every render and, while we
+      // still read 0×0 on a connected element, poll until a size appears.
+      if (el && el.isConnected) {
+        const w = el.clientWidth;
+        const h = el.clientHeight;
+        setSize((s) => (s.width === w && s.height === h ? s : { width: w, height: h }));
+      }
+      return;
+    }
     cleanup.current();
     observed.current = el;
     if (!el) {
@@ -36,8 +47,17 @@ export function useElementSize(
       t = window.setTimeout(update, debounceMs);
     });
     ro.observe(el);
+    // Fallback poll while hidden/detached (0×0): stops as soon as a real
+    // size is read or the element changes.
+    const poll = window.setInterval(() => {
+      if (el.clientWidth > 0 && el.clientHeight > 0) {
+        update();
+        window.clearInterval(poll);
+      }
+    }, 250);
     cleanup.current = () => {
       if (t !== undefined) window.clearTimeout(t);
+      window.clearInterval(poll);
       ro.disconnect();
     };
   });
