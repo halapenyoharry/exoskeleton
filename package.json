@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "ship:web": "npm run build && wrangler pages deploy dist --project-name=exo-skeleton-org --commit-dirty=true",
     "tauri": "tauri",
     "test": "node --experimental-strip-types --test --test-reporter=spec \"src/**/*.test.ts\""
   },
