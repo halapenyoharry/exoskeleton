@@ -25,7 +25,14 @@ const accents: Record<string, string> = {
   "json-cytoscape": "var(--accent-json-cytoscape)",
   "json-graph": "var(--accent-json-graph)",
   "json-graph3d": "var(--accent-json-graph3d)",
+  "json-graph3d-inspect": "var(--accent-json-graph3d-inspect)",
   "json-dyadic": "var(--accent-json-dyadic)",
+  "topology-extract": "var(--accent-topology-extract)",
+  "procedural-visuals-control": "var(--accent-procedural-control)",
+  "procedural-visuals-balls": "var(--accent-procedural-balls)",
+  "procedural-visuals-fountain": "var(--accent-procedural-fountain)",
+  "procedural-visuals-recursive": "var(--accent-procedural-recursive)",
+  "procedural-visuals-manifold": "var(--accent-procedural-manifold)",
 };
 
 const glyphs: Record<string, string> = {
@@ -43,7 +50,14 @@ const glyphs: Record<string, string> = {
   "json-cytoscape": '"⬢"',
   "json-graph": '"✦"',
   "json-graph3d": '"⌬"',
+  "json-graph3d-inspect": '"⌖"',
   "json-dyadic": '"◬"',
+  "topology-extract": '"⚗"',
+  "procedural-visuals-control": '"▦"',
+  "procedural-visuals-balls": '"○"',
+  "procedural-visuals-fountain": '"≈"',
+  "procedural-visuals-recursive": '"▣"',
+  "procedural-visuals-manifold": '"◎"',
 };
 
 /** Resolve a panel id to the component key the accent/glyph maps use.

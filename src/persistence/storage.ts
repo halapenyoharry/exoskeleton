@@ -26,7 +26,13 @@ import type { SerializedDockview } from "dockview";
 //       migrateSavedLayout (default-layout.ts) before fromJSON runs.
 //   8 — multi-workspace support. Saved layout is encapsulated within named
 //       `workspaces` objects; `activeWorkspaceId` selects the active grid.
-export const CURRENT_VERSION = 8;
+//   9 — topology-extract panel: ingestion furnace for the info2topo
+//       pipeline. Pushes normalized-dyadic topology JSON to json-bus.
+//  10 — procedural-visuals suite: OSC-controlled generative canvases and
+//       3D topological manifolds.
+//  11 — json-graph3d-inspect: text-sprite 3D graph with category colors
+//       and containment hulls.
+export const CURRENT_VERSION = 11;
 
 export interface Preferences {
   // Empty for now; reserved for theme, tab-position, etc. when those land.

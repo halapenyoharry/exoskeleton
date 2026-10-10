@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { tauriStorage } from "../../persistence/tauri-storage";
+import { appStorage } from "../../persistence/app-storage";
 import "./SettingsPanel.css";
 
 /**
@@ -14,7 +14,7 @@ export default function SettingsPanel() {
   const [dirty, setDirty] = useState(false);
 
   async function loadFromDisk() {
-    const state = await tauriStorage.load();
+    const state = await appStorage.load();
     setText(JSON.stringify(state ?? {}, null, 2));
     setError(null);
     setDirty(false);
@@ -38,7 +38,7 @@ export default function SettingsPanel() {
   async function apply() {
     try {
       const parsed = JSON.parse(text);
-      await tauriStorage.save(parsed);
+      await appStorage.save(parsed);
       setDirty(false);
       setError(null);
       window.dispatchEvent(

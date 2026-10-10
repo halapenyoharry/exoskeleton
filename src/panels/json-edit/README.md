@@ -7,7 +7,8 @@ CodeMirror 6 JSON editor that publishes parsed documents onto the [`json-bus`](h
 A CodeMirror 6 editor configured with:
 - The bundled **Midnight Alaska** theme (cyan keys, white string values, gold numbers, green keywords). Hard-coded JSON-Crack-inspired palette.
 - JSON language mode, line wrapping, format-on-paste — sensible JSON defaults.
-- Open/save of a backing `.json` file; the path persists in panel params, so the document is restored on relaunch.
+- A document picker: every document on the `json-bus` is a named entry in an in-app library (persisted in IndexedDB by `src/data/json-bus-persist.ts`). The ☰ menu adds New document, Open file(s)… (each file becomes its own document), Save / Download, Copy JSON, Rename…, and Delete document. File and clipboard actions go through `src/utils/file-io.ts`, so they work in the desktop app (native dialogs) and in a plain browser tab (downloads, file picker, clipboard fallback), and every action reports success or failure in the header.
+- Follows the active document: picking a document here, in another editor, or pushing one from `topology-extract` switches this editor and the viewers to it. It also listens to the bus, so documents other panels publish appear without a remount.
 - Debounced (250ms) publishing to `json-bus`: each keystroke doesn't trigger a viewer re-render, but a brief pause does.
 - A parse-error indicator in the panel header if the buffer doesn't currently parse — the bus value sticks at the last valid parse so viewers don't flicker on invalid intermediate states.
 
@@ -15,10 +16,11 @@ A CodeMirror 6 editor configured with:
 
 | Param | Default | What it does |
 |---|---|---|
-| `documentId` | `"default"` | json-bus channel to publish into. Open two `json-edit` panels with different ids to drive different viewer groups. |
+| `documentId` | `"default"` | The document this panel last had open; reopened on launch. |
+| `followActive` | `true` | Edit whichever document is active. Set `false` and give two `json-edit` panels different `documentId`s to drive different viewer groups. |
 | `debounceMs` | `250` | Milliseconds to wait after the last keystroke before re-publishing. |
 | `theme` | `"midnight-alaska"` | Theme id. The bundled `midnight-alaska` CodeMirror extension is applied at mount. |
-| `filePath` | *(unset)* | Path of the backing file, set by open/save. Persisted, so the document reloads on next launch. |
+| `filePath` | *(legacy)* | Older layouts' backing-file path. Read once (desktop app) into an empty document, then dropped; the bus library now keeps documents across launches. |
 | `fontSize` | `13` | Editor font size in px. |
 | `lineWrapping` | `true` | Wrap long lines. (Superseded the Monaco-era `wordWrap` string param; old saved values are migrated.) |
 | `tabSize` | `2` | Indent width in spaces. |
@@ -29,7 +31,7 @@ All params persist via `props.api.updateParameters` — they survive exoskeleton
 
 ## Initial value
 
-On mount, `json-edit` checks `getJson(documentId)`. If a viewer or another editor previously published a document on that channel, the editor loads it (pretty-printed). Otherwise it starts with an empty buffer.
+On mount, `json-edit` reopens its last document (`documentId`) and makes it active, unless another panel already chose an active document, in which case it follows that one. Documents load from the persisted library shortly after launch and appear as they arrive.
 
 ## Theme customization
 

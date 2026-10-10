@@ -19,13 +19,25 @@ export const presets: LayoutPreset[] = [
     id: "json-lab",
     name: "JSON Lab",
     description: "JSON editor feeding the tree, graph, and 3D viewers.",
-    panelIds: ["json-edit", "json-tree", "json-graph3d"],
+    panelIds: ["json-edit", "json-tree", "json-graph3d", "json-graph3d-inspect", "topology-extract"],
   },
   {
     id: "av-lab",
     name: "AV Lab",
     description: "Tempo clock, piano, and oscilloscope over the OSC bus.",
     panelIds: ["tempo-clock", "piano", "scope"],
+  },
+  {
+    id: "procedural-lab",
+    name: "Procedural Lab",
+    description: "Generative visualizers and 3D topological manifolds driven by central OSC controls.",
+    panelIds: [
+      "procedural-visuals-control",
+      "procedural-visuals-manifold",
+      "procedural-visuals-balls",
+      "procedural-visuals-fountain",
+      "procedural-visuals-recursive",
+    ],
   },
   {
     id: "everything",

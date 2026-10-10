@@ -58,6 +58,13 @@ export const panelRegistry: RegistryEntry[] = [
     introducedAt: 1,
   },
   {
+    id: "text-viewer",
+    component: "text-viewer",
+    title: "text-viewer",
+    position: { referencePanel: "editor", direction: "within" },
+    introducedAt: 8,
+  },
+  {
     id: "tempo-clock",
     component: "tempo-clock",
     title: "tempo",
@@ -150,6 +157,68 @@ export const panelRegistry: RegistryEntry[] = [
     position: { referencePanel: "json-tree", direction: "within" },
     introducedAt: 6,
     companions: ["json-edit"],
+  },
+  // v11 — json-graph3d-inspect: reading-oriented sibling of json-graph3d.
+  // Text-sprite nodes, inline edge roles, category colors, containment hulls.
+  {
+    id: "json-graph3d-inspect",
+    component: "json-graph3d-inspect",
+    title: "3D-Inspect",
+    position: { referencePanel: "json-graph3d", direction: "within" },
+    introducedAt: 11,
+    companions: ["json-edit"],
+  },
+  // v9 — topology-extract: ingestion furnace for the info2topo pipeline.
+  // Takes source text, runs AI extraction, and pushes normalized-dyadic
+  // topology JSON to the json-bus where json-dyadic and other viewers
+  // consume it. Not in the minimal preset; appears in json-lab.
+  {
+    id: "topology-extract",
+    component: "topology-extract",
+    title: "topology-extract",
+    position: { referencePanel: "json-edit", direction: "within" },
+    introducedAt: 9,
+    companions: ["json-dyadic"],
+  },
+  // v10 — procedural-visuals: OSC-controlled generative canvases and 3D topological manifolds.
+  {
+    id: "procedural-visuals-control",
+    component: "procedural-visuals-control",
+    title: "proc-control",
+    position: { referencePanel: "editor", direction: "below" },
+    introducedAt: 10,
+  },
+  {
+    id: "procedural-visuals-manifold",
+    component: "procedural-visuals-manifold",
+    title: "manifold",
+    position: { referencePanel: "procedural-visuals-control", direction: "right" },
+    introducedAt: 10,
+    companions: ["procedural-visuals-control"],
+  },
+  {
+    id: "procedural-visuals-balls",
+    component: "procedural-visuals-balls",
+    title: "balls",
+    position: { referencePanel: "procedural-visuals-manifold", direction: "within" },
+    introducedAt: 10,
+    companions: ["procedural-visuals-control"],
+  },
+  {
+    id: "procedural-visuals-fountain",
+    component: "procedural-visuals-fountain",
+    title: "fountain",
+    position: { referencePanel: "procedural-visuals-manifold", direction: "within" },
+    introducedAt: 10,
+    companions: ["procedural-visuals-control"],
+  },
+  {
+    id: "procedural-visuals-recursive",
+    component: "procedural-visuals-recursive",
+    title: "recursive",
+    position: { referencePanel: "procedural-visuals-manifold", direction: "within" },
+    introducedAt: 10,
+    companions: ["procedural-visuals-control"],
   },
 ];
 

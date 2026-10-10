@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
+import { getJson, onJsonChange } from "../data/json-bus";
 import {
   areGraphsConnected,
   setGraphsConnected,
   onGraphsConnectionChange,
   getActiveDocumentId,
   onActiveDocumentIdChange,
-  getJson,
-  onJsonChange,
   getSelectedNode,
   onNodeSelectionBroadcast,
-} from "../data/json-bus";
+} from "../osc/channels";
 import { getDocStats } from "../data/json-utils/docStats";
 import "./StatusBarPanel.css";
 
@@ -55,6 +54,10 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
       setActiveDocId(id);
       updateStats(id);
     });
+    // The active id may have changed between the first render and this
+    // subscription (e.g. json-edit reopening its last document on launch).
+    const current = getActiveDocumentId();
+    if (current !== activeDocId) setActiveDocId(current);
 
     const unsubJson = onJsonChange(activeDocId, () => {
       updateStats(activeDocId);

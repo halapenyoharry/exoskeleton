@@ -1,7 +1,11 @@
 import { invoke } from "@tauri-apps/api/core";
-import { listen, UnlistenFn } from "@tauri-apps/api/event";
+import { listen } from "@tauri-apps/api/event";
+import type { UnlistenFn } from "@tauri-apps/api/event";
 import { LazyStore } from "@tauri-apps/plugin-store";
-import { OscArg, OscEvent } from "./types";
+import type { OscArg, OscEvent } from "./types.ts";
+import { retainIfRegistered } from "./retainer.ts";
+import { oscPatternToRegExp } from "./pattern.ts";
+import { beginBridgeDispatch, endBridgeDispatch } from "./local-sources.ts";
 
 // Exoskeleton's OSC is self-contained by default — see
 // docs/research/osc-self-contained-by-default.md.
@@ -39,6 +43,11 @@ let bridgeEnabled = false;
 })();
 
 function dispatchLocal(address: string, args: OscArg[]) {
+  // The retainer is privileged: it updates BEFORE the subscriber loop, not as
+  // an ordinary subscriber. If it registered via subscribeOsc, dispatch order
+  // would decide whether a handler re-reading getLast() sees the new value or
+  // the previous one. See docs/AGENTS-FAQ.md.
+  retainIfRegistered(address, args);
   // Iterate a snapshot — handlers may unsubscribe mid-dispatch.
   for (const sub of [...subscriptions]) {
     if (sub.pattern.test(address)) {
@@ -56,7 +65,15 @@ function dispatchLocal(address: string, args: OscArg[]) {
 // this listener is dormant — no cost.
 listen<OscEvent>("osc://message", (event) => {
   const { address, args } = event.payload;
-  dispatchLocal(address, args);
+  // Mark the dispatch as inbound so the coordination channels can drop our
+  // own messages coming home through a loopback bridge config. See
+  // src/osc/local-sources.ts.
+  beginBridgeDispatch();
+  try {
+    dispatchLocal(address, args);
+  } finally {
+    endBridgeDispatch();
+  }
 }).catch(() => {
   // Running outside Tauri (vitest, storybook, etc.). Skip silently.
 });
@@ -89,14 +106,19 @@ export async function sendOsc(address: string, args: OscArg[]): Promise<void> {
  *   *  matches any sequence of characters within a single path segment
  *   ?  matches any single character within a single path segment
  *
- * Returns a promise that resolves to an unlisten function. The function
- * signature matches Tauri's listen() return so existing code that does
- * `unlistenP.then(fn => fn())` continues to work.
+ * Returns the unsubscribe function directly, so it drops straight into a
+ * React effect:
+ *
+ *   useEffect(() => subscribeOsc("/json/*\/select", handler), []);
+ *
+ * Prefer this over onOsc(). Registration was always synchronous — onOsc's
+ * Promise wrapper only ever deferred the *unsubscribe* by a microtask, which
+ * let a handler fire once after unmount.
  */
-export async function onOsc(
+export function subscribeOsc(
   pattern: string,
   handler: (address: string, args: OscArg[]) => void,
-): Promise<UnlistenFn> {
+): () => void {
   const sub: Subscription = {
     pattern: oscPatternToRegExp(pattern),
     handler,
@@ -107,26 +129,19 @@ export async function onOsc(
   };
 }
 
-function escapeRegExp(s: string) {
-  return s.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+/**
+ * Back-compat wrapper around subscribeOsc.
+ *
+ * The async signature exists only to match Tauri's listen() return, so code
+ * written as `unlistenP.then(fn => fn())` keeps working. There is nothing to
+ * await — new code should call subscribeOsc directly.
+ */
+export async function onOsc(
+  pattern: string,
+  handler: (address: string, args: OscArg[]) => void,
+): Promise<UnlistenFn> {
+  return subscribeOsc(pattern, handler);
 }
 
-function oscPatternToRegExp(pattern: string): RegExp {
-  const segments = pattern.split("/");
-  const regexSegments = segments.map((segment) => {
-    if (!segment.includes("*") && !segment.includes("?")) {
-      return escapeRegExp(segment);
-    }
-    let regexStr = "";
-    for (let i = 0; i < segment.length; i++) {
-      const ch = segment[i];
-      if (ch === "?") regexStr += "[^/]";
-      else if (ch === "*") regexStr += "[^/]*";
-      else regexStr += escapeRegExp(ch);
-    }
-    return regexStr;
-  });
-  return new RegExp(`^${regexSegments.join("/")}$`);
-}
-
-export * from "./types";
+export * from "./types.ts";
+export { retain, getLast, getLastMatching, getMostRecent, clearRetained } from "./retainer.ts";

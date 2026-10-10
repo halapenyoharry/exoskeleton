@@ -12,7 +12,7 @@ import {
   onNodeSelectionBroadcast,
   broadcastNodeFocus,
   onNodeFocusBroadcast,
-} from "../../data/json-bus";
+} from "../../osc/channels";
 import { type DetectedGraph } from "../../data/json-utils/graphDetect";
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats, getDetectedGraph } from "../../data/json-utils/docStats";

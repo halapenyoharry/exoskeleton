@@ -4,7 +4,7 @@
   height: 100%;
   padding: 0 6px;
   font-size: 11px;
-  color: #4a6a78;
+  color: #ffffff;
 }
 
 .header-actions--prefix {
@@ -31,15 +31,15 @@
   color: inherit;
   cursor: pointer;
   padding: 2px 8px;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1;
-  opacity: 0.5;
+  opacity: 1;
   transition: opacity 0.12s, color 0.12s;
 }
 
 .header-btn:hover {
   opacity: 1;
-  color: #c5e8ee;
+  color: #ffffff;
 }
 
 .header-btn--danger:hover {
