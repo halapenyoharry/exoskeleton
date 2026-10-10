@@ -4,7 +4,15 @@ import { DockviewDefaultTab, type IDockviewPanelHeaderProps } from "dockview";
 import editorManifest from "./panels/editor.manifest";
 import webviewManifest from "./panels/webview.manifest";
 import dyadicManifest from "./panels/json-dyadic/manifest";
+import jsonEditManifest from "./panels/json-edit/manifest";
+import { emitPanelMenu, getPanelMenu, registerPanelMenu } from "./panel-menu";
+import type { PanelMenuItem } from "./panel-manifest";
 import "./ColoredTab.css";
+
+// Manifests whose declared `menu` shows in the pill's ☰ menu.
+for (const m of [editorManifest, webviewManifest, dyadicManifest, jsonEditManifest]) {
+  registerPanelMenu(m.id, m.menu);
+}
 
 // Panels that declare `toolbar: true` in their manifest get a toggle in the pill.
 // (Only core manifests with a toolbar are listed; extend as panels adopt the field.)
@@ -156,6 +164,7 @@ function PillTab(props: IDockviewPanelHeaderProps) {
     () => props.api.getParameters<{ toolbarVisible?: boolean }>().toolbarVisible !== false,
   );
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
+  const [moveOpen, setMoveOpen] = useState(false);
 
   useEffect(() => {
     const d = props.api.onDidTitleChange((e) => setTitle(e.title));
@@ -205,6 +214,7 @@ function PillTab(props: IDockviewPanelHeaderProps) {
 
   function openMenu() {
     const r = pillRef.current!.getBoundingClientRect();
+    setMoveOpen(false);
     setMenu(menu ? null : { x: r.left, y: r.bottom + 4 });
   }
   function toggleToolbar() {
@@ -216,6 +226,26 @@ function PillTab(props: IDockviewPanelHeaderProps) {
     setMenu(null);
     fn();
   };
+
+  const otherGroups = props.containerApi.groups.filter((g) => g.id !== group.id);
+  const renderItem = (item: PanelMenuItem, nested = false): React.ReactNode =>
+    item.children ? (
+      <div key={item.id} className="exo-pill-menu__group">
+        <div className="exo-pill-menu__heading">{item.label}</div>
+        {item.children.map((c) => renderItem(c, true))}
+      </div>
+    ) : (
+      <button
+        key={item.id}
+        role="menuitem"
+        className={nested ? "exo-pill-menu__sub" : undefined}
+        disabled={item.disabled}
+        onClick={act(() => emitPanelMenu(id, item.id))}
+      >
+        {item.label}
+        {item.shortcut && <span className="exo-pill-menu__kbd">{item.shortcut}</span>}
+      </button>
+    );
 
   return (
     <div
@@ -264,6 +294,8 @@ function PillTab(props: IDockviewPanelHeaderProps) {
             role="menu"
             style={{ left: menu.x, top: menu.y, color: accent }}
           >
+            {(getPanelMenu(id) ?? []).map((item) => renderItem(item))}
+            {getPanelMenu(id) && <hr className="exo-pill-menu__rule" />}
             <button
               role="menuitem"
               onClick={act(() =>
@@ -280,11 +312,45 @@ function PillTab(props: IDockviewPanelHeaderProps) {
             >
               Pop out
             </button>
+            <button
+              role="menuitem"
+              aria-expanded={moveOpen}
+              onClick={() => setMoveOpen(!moveOpen)}
+            >
+              Move to… {moveOpen ? "▾" : "▸"}
+            </button>
+            {moveOpen &&
+              (otherGroups.length === 0 ? (
+                <div className="exo-pill-menu__heading">No other panes</div>
+              ) : (
+                otherGroups.map((g) => (
+                  <div key={g.id} className="exo-pill-menu__group">
+                    <div className="exo-pill-menu__heading">
+                      {g.activePanel?.title ?? g.id}
+                    </div>
+                    {(
+                      [
+                        ["left", "Left of"],
+                        ["right", "Right of"],
+                        ["top", "Above"],
+                        ["bottom", "Below"],
+                        ["center", "Into"],
+                      ] as const
+                    ).map(([position, label]) => (
+                      <button
+                        key={position}
+                        role="menuitem"
+                        className="exo-pill-menu__sub"
+                        onClick={act(() => props.api.moveTo({ group: g, position }))}
+                      >
+                        {label} {g.activePanel?.title ?? "pane"}
+                      </button>
+                    ))}
+                  </div>
+                ))
+              ))}
             <button role="menuitem" onClick={act(() => props.api.close())}>
               Close
-            </button>
-            <button role="menuitem" disabled>
-              Panel menu…
             </button>
           </div>,
           (pillRef.current?.ownerDocument ?? document).body,

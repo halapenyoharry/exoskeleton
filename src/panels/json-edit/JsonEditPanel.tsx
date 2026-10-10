@@ -19,7 +19,7 @@ import {
   type JsonValue,
 } from "../../data/json-bus";
 import { openLibraryDocument } from "../../data/library";
-import { graphLibrary } from "../../fixtures/graphs";
+import { onPanelMenu } from "../../panel-menu";
 import {
   getActiveDocumentId,
   onActiveDocumentIdChange,
@@ -114,8 +114,6 @@ export default function JsonEditPanel(
   );
   const [parseError, setParseError] = useState<string | null>(null);
   const [docs, setDocs] = useState<DocEntry[]>(() => listJson());
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [libraryOpen, setLibraryOpen] = useState(false);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const { flash, show, clear } = useFlash();
@@ -133,20 +131,6 @@ export default function JsonEditPanel(
   const containerRef = useRef<HTMLDivElement | null>(null);
   const editorViewRef = useRef<EditorView | null>(null);
   const lastExternalValueRef = useRef<string>(value);
-
-  // Close menu on click outside
-  const menuRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (!menuOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-        setConfirmDelete(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [menuOpen]);
 
   // Publish the buffer now. Returns false if it doesn't parse.
   const publish = useCallback((): boolean => {
@@ -254,7 +238,6 @@ export default function JsonEditPanel(
   // ── File and clipboard actions ─────────────────────────────────────
 
   function newDocument() {
-    setMenuOpen(false);
     const id = uniqueJsonId("untitled");
     setJson(id, {}, { title: id, source: "json-edit" });
     selectDoc(id);
@@ -262,8 +245,6 @@ export default function JsonEditPanel(
   }
 
   async function openFromLibrary(entryId: string) {
-    setMenuOpen(false);
-    setLibraryOpen(false);
     try {
       const id = await openLibraryDocument(entryId);
       selectDoc(id);
@@ -274,7 +255,6 @@ export default function JsonEditPanel(
   }
 
   async function openFiles() {
-    setMenuOpen(false);
     try {
       const files = await openTextFiles(JSON_FILTERS, true);
       if (files.length === 0) return;
@@ -302,7 +282,6 @@ export default function JsonEditPanel(
   }
 
   async function saveToFile(saveAs: boolean) {
-    setMenuOpen(false);
     const id = docIdRef.current;
     const text = valueRef.current;
     const meta = getJsonMeta(id);
@@ -326,7 +305,6 @@ export default function JsonEditPanel(
   }
 
   async function copyJson() {
-    setMenuOpen(false);
     try {
       await copyText(valueRef.current);
       show("ok", `Copied ${kb(valueRef.current)} to the clipboard`);
@@ -347,9 +325,10 @@ export default function JsonEditPanel(
   function deleteDocument() {
     if (!confirmDelete) {
       setConfirmDelete(true);
+      show("error", "Click Delete document again to confirm");
+      window.setTimeout(() => setConfirmDelete(false), 4000);
       return;
     }
-    setMenuOpen(false);
     setConfirmDelete(false);
     const id = docIdRef.current;
     const title = getJsonMeta(id)?.title ?? id;
@@ -363,6 +342,22 @@ export default function JsonEditPanel(
   // Keyboard shortcuts while the editor has focus.
   const actionsRef = useRef({ open: openFiles, save: () => saveToFile(false), saveAs: () => saveToFile(true) });
   actionsRef.current = { open: openFiles, save: () => saveToFile(false), saveAs: () => saveToFile(true) };
+
+  // Pill ☰ menu dispatch (items declared in manifest.ts).
+  const menuRef = useRef<(itemId: string) => void>(() => {});
+  menuRef.current = (itemId) => {
+    if (itemId === "new") newDocument();
+    else if (itemId === "open") void openFiles();
+    else if (itemId === "save") void saveToFile(false);
+    else if (itemId === "copy") void copyJson();
+    else if (itemId === "rename") setRenaming(getJsonMeta(docIdRef.current)?.title ?? docIdRef.current);
+    else if (itemId === "delete") deleteDocument();
+    else if (itemId.startsWith("library:")) void openFromLibrary(itemId.slice("library:".length));
+  };
+  useEffect(
+    () => onPanelMenu(props.api.id, (itemId) => menuRef.current(itemId)),
+    [props.api.id],
+  );
 
   // Mount CodeMirror 6 EditorView. Recreated per document so undo history
   // never crosses documents.
@@ -585,73 +580,6 @@ export default function JsonEditPanel(
                 {flash.kind === "error" ? "⚠ " : "✓ "}
                 {flash.text}
               </span>
-            )}
-          </div>
-          <div className="json-edit-menu-wrapper" ref={menuRef}>
-            <button
-              className="json-edit-hamburger-btn"
-              onClick={() => {
-                setMenuOpen(!menuOpen);
-                setConfirmDelete(false);
-              }}
-              title="Documents and files"
-            >
-              ☰
-            </button>
-            {menuOpen && (
-              <div className="json-edit-dropdown">
-                <button className="json-edit-dropdown-item" onClick={newDocument}>
-                  New document
-                </button>
-                <button className="json-edit-dropdown-item" onClick={openFiles}>
-                  Open file(s)… <span>⌘O</span>
-                </button>
-                <button
-                  className="json-edit-dropdown-item"
-                  onClick={() => setLibraryOpen(!libraryOpen)}
-                >
-                  Library <span>{libraryOpen ? "▾" : "▸"}</span>
-                </button>
-                {libraryOpen &&
-                  graphLibrary.map((entry) => (
-                    <button
-                      key={entry.id}
-                      className="json-edit-dropdown-item json-edit-library-item"
-                      title={entry.description}
-                      onClick={() => openFromLibrary(entry.id)}
-                    >
-                      {entry.title} <span className="json-edit-library-tag">{entry.shape}</span>
-                    </button>
-                  ))}
-                <div className="json-edit-dropdown-sep" />
-                <button className="json-edit-dropdown-item" onClick={() => saveToFile(false)}>
-                  {inTauri() ? "Save" : "Download"} <span>⌘S</span>
-                </button>
-                {inTauri() && (
-                  <button className="json-edit-dropdown-item" onClick={() => saveToFile(true)}>
-                    Save As… <span>⌥⌘S</span>
-                  </button>
-                )}
-                <button className="json-edit-dropdown-item" onClick={copyJson}>
-                  Copy JSON
-                </button>
-                <div className="json-edit-dropdown-sep" />
-                <button
-                  className="json-edit-dropdown-item"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setRenaming(currentMeta?.title ?? docId);
-                  }}
-                >
-                  Rename…
-                </button>
-                <button
-                  className={`json-edit-dropdown-item ${confirmDelete ? "json-edit-dropdown-item--danger" : ""}`}
-                  onClick={deleteDocument}
-                >
-                  {confirmDelete ? "Click again to delete" : "Delete document"}
-                </button>
-              </div>
             )}
           </div>
         </div>

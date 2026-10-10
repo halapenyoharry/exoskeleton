@@ -1,0 +1,53 @@
+.menu-panel {
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 8px;
+  color: #c5e8ee;
+  font-size: 0.85rem;
+}
+.menu-section { margin-bottom: 12px; }
+.menu-heading {
+  margin: 0 0 4px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  font-weight: 600;
+}
+.menu-list, .menu-actions { display: flex; flex-direction: column; gap: 2px; }
+.menu-actions { flex-direction: row; flex-wrap: wrap; margin-top: 4px; }
+.menu-actions .menu-row { flex: 1; justify-content: center; }
+.menu-row-group { display: flex; gap: 2px; }
+.menu-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.menu-row:hover { background: rgba(0, 229, 255, 0.12); color: #fff; }
+.menu-row--grow { flex: 1; }
+.menu-row--active { border-left: 3px solid #00e5ff; }
+.menu-row--icon { justify-content: center; min-width: 32px; padding: 4px; }
+.menu-row--danger:hover { background: rgba(255, 82, 82, 0.15); color: #ff5252; }
+.menu-row-label { flex: 1; }
+.menu-row-mark { opacity: 0.7; font-size: 0.7rem; }
+.menu-link { color: #00e5ff; margin: 4px 0; }
+.menu-about-line { margin-bottom: 4px; }
+.menu-dim { opacity: 0.55; font-size: 0.78rem; }
+.menu-panel .panel-picker--list { display: flex; flex-direction: column; gap: 2px; }
+.menu-panel .panel-picker-btn { min-height: 32px; text-align: left; }
+
+@media (pointer: coarse) {
+  .menu-row, .menu-panel .panel-picker-btn { min-height: 44px; }
+  .menu-row--icon { min-width: 44px; }
+}

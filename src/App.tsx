@@ -26,6 +26,9 @@ import JsonGraphPanel from "./panels/json-graph/JsonGraphPanel";
 import StatusBarPanel from "./panels/StatusBarPanel";
 import TextViewerPanel from "./panels/text-viewer/TextViewerPanel";
 import BlankPanel from "./panels/BlankPanel";
+import MenuPanel from "./panels/MenuPanel";
+import { MenuContext, type MenuActions } from "./panels/menu-context";
+import { stripTransientPanels } from "./persistence/strip-transient";
 import { exoPanel } from "./PanelRoot";
 import {
   addOrFocusPanel,
@@ -34,10 +37,8 @@ import {
   buildPreset,
   migrateLayout,
   migrateSavedLayout,
-  panelRegistry,
   repairLayout,
 } from "./persistence/default-layout";
-import { panelAccent, panelGlyph } from "./ColoredTab";
 import {
   createWorkspace,
   deleteWorkspace,
@@ -90,6 +91,7 @@ function lazyPanel(Component: React.ComponentType<any>, accent: string) {
 // (not the panel) owns positioning and the accent stripe.
 const components = {
   blank:           exoPanel(BlankPanel,         "var(--accent-settings)"),
+  menu:            exoPanel(MenuPanel,          "var(--accent-settings)"),
   editor:          exoPanel(EditorPanel,        "var(--accent-editor)"),
   terminal:        exoPanel(TerminalPanel,      "var(--accent-terminal)"),
   webview:         exoPanel(LanWebview,         "var(--accent-webview)"),
@@ -146,7 +148,8 @@ export default function App() {
   // Floating ⊞ add-panel menu (bottom-right, next to the astromech
   // summoner). The roster is read fresh from the registry on each open,
   // so open/closed markers stay accurate without extra subscriptions.
-  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  // The ⊞ button toggles a Dockview floating group holding the `menu`
+  // panel (see toggleMenu). It is stripped from saved layouts.
 
   // Preferences state. Currently empty (see Preferences interface in
   // storage.ts); included in the save so future fields persist automatically.
@@ -155,7 +158,8 @@ export default function App() {
   // Single debounced save. Reads the live api ref + current AppStateV8 each tick.
   const save = useRef(
     createDebounce(() => {
-      const main = mainApiRef.current?.toJSON();
+      const raw = mainApiRef.current?.toJSON();
+      const main = raw && stripTransientPanels(raw);
       const current = appStateRef.current;
       if (!main || !current) return;
       const next = updateActiveWorkspaceLayout(current, main);
@@ -336,7 +340,7 @@ export default function App() {
           default: {
             id: "default",
             name: "Default Workspace",
-            layout: event.api.toJSON(),
+            layout: stripTransientPanels(event.api.toJSON()),
             updatedAt: Date.now(),
           },
         },
@@ -386,6 +390,35 @@ export default function App() {
     event.api.onDidActivePanelChange(save);
   }
 
+  function closeMenu() {
+    mainApiRef.current?.getPanel("menu")?.api.close();
+  }
+
+  function toggleMenu() {
+    const api = mainApiRef.current;
+    if (!api) return;
+    const existing = api.getPanel("menu");
+    if (existing) {
+      existing.api.close();
+      return;
+    }
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    const margin = 16;
+    const narrow = W < 480;
+    const width = narrow ? W - margin * 2 : 320;
+    const height = narrow ? H - margin * 2 : Math.min(480, H - 70);
+    // Desktop: sit just above the ⊞ button (bottom-right).
+    const x = narrow ? margin : Math.max(8, W - width - 12);
+    const y = narrow ? margin : Math.max(8, H - height - 58);
+    api.addPanel({
+      id: "menu",
+      component: "menu",
+      title: "menu",
+      floating: { width, height, x, y },
+    });
+  }
+
   function handleSwitchWorkspace(id: string) {
     if (!appState || id === appState.activeWorkspaceId) return;
     save.flush();
@@ -395,7 +428,7 @@ export default function App() {
     if (targetWs && mainApiRef.current) {
       applyWorkspaceState(mainApiRef.current, targetWs.layout, next.version);
     }
-    setIsAddMenuOpen(false);
+    closeMenu();
   }
 
   function handleCreateWorkspace() {
@@ -408,7 +441,7 @@ export default function App() {
     if (mainApiRef.current) {
       applyWorkspaceState(mainApiRef.current, newWs.layout, next.version);
     }
-    setIsAddMenuOpen(false);
+    closeMenu();
   }
 
   function handleRenameWorkspace() {
@@ -442,7 +475,7 @@ export default function App() {
   async function handleExportWorkspace() {
     if (!appState) return;
     save.flush();
-    setIsAddMenuOpen(false);
+    closeMenu();
     const activeWs = getActiveWorkspace(appState);
     const jsonStr = serializeWorkspaceDocument(activeWs);
     const safeName = activeWs.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
@@ -483,7 +516,7 @@ export default function App() {
       reader.readAsText(file);
     };
     input.click();
-    setIsAddMenuOpen(false);
+    closeMenu();
   }
 
   function handleOpenWorkspaceInNewWindow(workspaceId: string, e: React.MouseEvent) {
@@ -492,14 +525,45 @@ export default function App() {
     invoke("open_workspace_window", { workspaceId }).catch((err) => {
       console.error("[exoskeleton] failed to open workspace window:", err);
     });
-    setIsAddMenuOpen(false);
+    closeMenu();
   }
 
   if (appState === undefined) {
     return <div className="app-frame app-frame--loading" />;
   }
 
+  const menuActions: MenuActions = {
+    workspaces: appState ? listWorkspaces(appState) : [],
+    activeWorkspaceId: appState?.activeWorkspaceId ?? "",
+    isPanelOpen: (id) => !!mainApiRef.current?.getPanel(id),
+    addPanel: (id) => {
+      if (mainApiRef.current) addOrFocusPanel(mainApiRef.current, id);
+      closeMenu();
+    },
+    switchWorkspace: handleSwitchWorkspace,
+    createWorkspace: handleCreateWorkspace,
+    renameWorkspace: handleRenameWorkspace,
+    deleteWorkspace: handleDeleteWorkspace,
+    openWorkspaceInNewWindow: (id) => handleOpenWorkspaceInNewWindow(id, { stopPropagation() {} } as React.MouseEvent),
+    exportWorkspace: handleExportWorkspace,
+    importWorkspace: handleImportWorkspace,
+    resetLayout: () => {
+      const api = mainApiRef.current;
+      if (!api) return;
+      if (
+        window.confirm(
+          `Reset layout to default (${presets.find((p) => p.id === defaultPresetId())?.name ?? "Minimal"})? Any unsaved panel position changes will be cleared.`,
+        )
+      ) {
+        api.clear();
+        buildPreset(api, defaultPresetId());
+      }
+    },
+    closeMenu,
+  };
+
   return (
+    <MenuContext.Provider value={menuActions}>
     <div className="dockview-theme-abyss app-frame">
       <DockviewReact
         components={components}
@@ -510,6 +574,7 @@ export default function App() {
         prefixHeaderActionsComponent={PrefixHeaderActions}
         leftHeaderActionsComponent={LeftHeaderActions}
         rightHeaderActionsComponent={RightHeaderActions}
+        floatingGroupBounds="boundedWithinViewport"
         onReady={onMainReady}
       />
       {!isStatusBarVisible && mainApiRef.current && (
@@ -524,135 +589,13 @@ export default function App() {
       {mainApiRef.current && (
         <button
           className="add-panel-btn"
-          onClick={() => setIsAddMenuOpen((v) => !v)}
-          title="add a panel or manage workspaces"
+          onClick={toggleMenu}
+          title="menu: add panels, workspaces, about"
         >
           ⊞
         </button>
       )}
-      {isAddMenuOpen && mainApiRef.current && (
-        <>
-          <div
-            className="add-panel-backdrop"
-            onClick={() => setIsAddMenuOpen(false)}
-          />
-          <div className="add-panel-menu">
-            {appState && (
-              <div className="workspace-menu-section">
-                <div className="workspace-menu-header">
-                  <span className="workspace-menu-title">Workspaces</span>
-                  <div className="workspace-menu-actions">
-                    <button
-                      className="workspace-action-btn"
-                      onClick={handleCreateWorkspace}
-                      title="Create new workspace"
-                    >
-                      + New
-                    </button>
-                    <button
-                      className="workspace-action-btn"
-                      onClick={handleExportWorkspace}
-                      title="Export active workspace (.exo.json)"
-                    >
-                      Export
-                    </button>
-                    <button
-                      className="workspace-action-btn"
-                      onClick={handleImportWorkspace}
-                      title="Import workspace document (.exo.json)"
-                    >
-                      Import
-                    </button>
-                    <button
-                      className="workspace-action-btn"
-                      onClick={handleRenameWorkspace}
-                      title="Rename active workspace"
-                    >
-                      ✎
-                    </button>
-                    <button
-                      className="workspace-action-btn workspace-action-btn--danger"
-                      onClick={handleDeleteWorkspace}
-                      title="Delete active workspace"
-                    >
-                      🗑
-                    </button>
-                  </div>
-                </div>
-                <div className="workspace-list">
-                  {listWorkspaces(appState).map((ws) => {
-                    const isActive = ws.id === appState.activeWorkspaceId;
-                    return (
-                      <button
-                        key={ws.id}
-                        className={`workspace-item ${isActive ? "workspace-item--active" : ""}`}
-                        onClick={() => handleSwitchWorkspace(ws.id)}
-                      >
-                        <span className="workspace-name">{ws.name}</span>
-                        <div className="workspace-item-controls">
-                          <button
-                            className="workspace-popout-btn"
-                            onClick={(e) => handleOpenWorkspaceInNewWindow(ws.id, e)}
-                            title="Open workspace in new window"
-                          >
-                            ❐
-                          </button>
-                          {isActive && <span className="workspace-indicator">●</span>}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="add-panel-divider" />
-              </div>
-            )}
-            {panelRegistry.map((entry) => {
-              const open = !!mainApiRef.current?.getPanel(entry.id);
-              return (
-                <button
-                  key={entry.id}
-                  className="add-panel-item"
-                  onClick={() => {
-                    addOrFocusPanel(mainApiRef.current!, entry.id);
-                    setIsAddMenuOpen(false);
-                  }}
-                >
-                  <span
-                    className="add-panel-glyph"
-                    style={{ color: panelAccent(entry.id) }}
-                  >
-                    {panelGlyph(entry.id)}
-                  </span>
-                  <span className="add-panel-name">{entry.id}</span>
-                  <span className="add-panel-state">
-                    {open ? "●" : "+"}
-                  </span>
-                </button>
-              );
-            })}
-            <div className="add-panel-divider" />
-            <button
-              className="add-panel-item add-panel-reset"
-              onClick={() => {
-                if (
-                  window.confirm(
-                    `Reset layout to default (${presets.find((p) => p.id === defaultPresetId())?.name ?? "Minimal"})? Any unsaved panel position changes will be cleared.`,
-                  )
-                ) {
-                  mainApiRef.current?.clear();
-                  buildPreset(mainApiRef.current!, defaultPresetId());
-                  setIsAddMenuOpen(false);
-                }
-              }}
-            >
-              <span className="add-panel-glyph" style={{ color: "#ff5252" }}>
-                ↺
-              </span>
-              <span className="add-panel-name">Reset layout...</span>
-            </button>
-          </div>
-        </>
-      )}
     </div>
+    </MenuContext.Provider>
   );
 }

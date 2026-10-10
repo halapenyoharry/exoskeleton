@@ -121,6 +121,20 @@ export interface PanelTauriRequirements {
  * `paramsDefault`. Panels with no persisted state can omit it (defaults
  * to `unknown`).
  */
+/** One entry in a panel's ☰ menu. Items are *declared* here in the manifest;
+ *  the pane chrome (PillTab) renders them; a click calls
+ *  emitPanelMenu(panelId, item.id) (src/panel-menu.ts). The panel *handles*
+ *  items by subscribing: onPanelMenu(props.api.id, (itemId) => ...).
+ *  `children` render as an inline group headed by `label`. */
+export interface PanelMenuItem {
+  id: string;
+  label: string;
+  /** Display-only hint, e.g. "⌘S". The panel owns the actual keybinding. */
+  shortcut?: string;
+  disabled?: boolean;
+  children?: PanelMenuItem[];
+}
+
 export interface PanelManifest<P extends Record<string, any> = Record<string, any>> {
   // ─── identity ────────────────────────────────────────────────
 
@@ -136,6 +150,9 @@ export interface PanelManifest<P extends Record<string, any> = Record<string, an
    *  shows a toggle that writes `toolbarVisible` into panel params
    *  (default true); the panel reads it and hides its toolbar. */
   toolbar?: boolean;
+
+  /** Panel-specific items for the pill's ☰ menu. See PanelMenuItem. */
+  menu?: PanelMenuItem[];
 
   /** The React component itself. */
   component: ComponentType<IDockviewPanelProps<P>>;

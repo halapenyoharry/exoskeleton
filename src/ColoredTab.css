@@ -123,6 +123,12 @@
   cursor: pointer;
 }
 .exo-pill-menu button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
+.exo-pill-menu { max-height: calc(100vh - 80px); overflow-y: auto; }
+.exo-pill-menu__rule { width: 100%; border: 0; border-top: 1px solid rgba(255,255,255,0.15); margin: 4px 0; }
+.exo-pill-menu__heading { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; opacity: .6; padding: 6px 10px 2px; }
+.exo-pill-menu__group { display: flex; flex-direction: column; }
+.exo-pill-menu button.exo-pill-menu__sub { padding-left: 20px; }
+.exo-pill-menu__kbd { float: right; margin-left: 16px; opacity: .55; }
 .exo-pill-menu button:disabled { opacity: 0.4; cursor: default; }
 
 @media (pointer: coarse) {
