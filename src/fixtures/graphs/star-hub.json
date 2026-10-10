@@ -1,0 +1,174 @@
+{
+  "title": "Star hub",
+  "description": "One hub, 12 spokes; spokes s03 and s09 are sub-hubs with three leaves each.",
+  "nodes": [
+    {
+      "id": "hub",
+      "group": 0
+    },
+    {
+      "id": "s01",
+      "group": 1
+    },
+    {
+      "id": "s02",
+      "group": 1
+    },
+    {
+      "id": "s03",
+      "group": 1
+    },
+    {
+      "id": "s04",
+      "group": 1
+    },
+    {
+      "id": "s05",
+      "group": 1
+    },
+    {
+      "id": "s06",
+      "group": 1
+    },
+    {
+      "id": "s07",
+      "group": 1
+    },
+    {
+      "id": "s08",
+      "group": 1
+    },
+    {
+      "id": "s09",
+      "group": 1
+    },
+    {
+      "id": "s10",
+      "group": 1
+    },
+    {
+      "id": "s11",
+      "group": 1
+    },
+    {
+      "id": "s12",
+      "group": 1
+    },
+    {
+      "id": "s03-leaf1",
+      "group": 2
+    },
+    {
+      "id": "s03-leaf2",
+      "group": 2
+    },
+    {
+      "id": "s03-leaf3",
+      "group": 2
+    },
+    {
+      "id": "s09-leaf1",
+      "group": 2
+    },
+    {
+      "id": "s09-leaf2",
+      "group": 2
+    },
+    {
+      "id": "s09-leaf3",
+      "group": 2
+    }
+  ],
+  "links": [
+    {
+      "source": "hub",
+      "target": "s01",
+      "value": 2
+    },
+    {
+      "source": "hub",
+      "target": "s02",
+      "value": 2
+    },
+    {
+      "source": "hub",
+      "target": "s03",
+      "value": 2
+    },
+    {
+      "source": "hub",
+      "target": "s04",
+      "value": 2
+    },
+    {
+      "source": "hub",
+      "target": "s05",
+      "value": 2
+    },
+    {
+      "source": "hub",
+      "target": "s06",
+      "value": 2
+    },
+    {
+      "source": "hub",
+      "target": "s07",
+      "value": 2
+    },
+    {
+      "source": "hub",
+      "target": "s08",
+      "value": 2
+    },
+    {
+      "source": "hub",
+      "target": "s09",
+      "value": 2
+    },
+    {
+      "source": "hub",
+      "target": "s10",
+      "value": 2
+    },
+    {
+      "source": "hub",
+      "target": "s11",
+      "value": 2
+    },
+    {
+      "source": "hub",
+      "target": "s12",
+      "value": 2
+    },
+    {
+      "source": "s03",
+      "target": "s03-leaf1",
+      "value": 1
+    },
+    {
+      "source": "s03",
+      "target": "s03-leaf2",
+      "value": 1
+    },
+    {
+      "source": "s03",
+      "target": "s03-leaf3",
+      "value": 1
+    },
+    {
+      "source": "s09",
+      "target": "s09-leaf1",
+      "value": 1
+    },
+    {
+      "source": "s09",
+      "target": "s09-leaf2",
+      "value": 1
+    },
+    {
+      "source": "s09",
+      "target": "s09-leaf3",
+      "value": 1
+    }
+  ]
+}

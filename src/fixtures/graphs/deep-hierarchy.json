@@ -1,0 +1,236 @@
+{
+  "root": {
+    "bravo-1": {
+      "cedar-2": {
+        "delta-3": {
+          "ember-4": 56,
+          "gamma-6": {
+            "harbor-7": 9,
+            "iris-8": 31
+          }
+        },
+        "juniper-9": {
+          "kelp-10": "lumen-11",
+          "moss-12": {
+            "nectar-13": 81
+          }
+        }
+      },
+      "onyx-14": {
+        "prism-15": "quartz-16",
+        "ridge-17": {
+          "sable-18": true
+        }
+      }
+    },
+    "umber-20": {
+      "vale-21": {
+        "willow-22": {
+          "xenon-23": true
+        },
+        "zephyr-25": {
+          "alpha-26": {
+            "bravo-27": 64
+          },
+          "cedar-28": {
+            "delta-29": 55
+          }
+        },
+        "ember-30": {
+          "fjord-31": {
+            "gamma-32": 39,
+            "harbor-33": 32
+          },
+          "iris-34": {
+            "juniper-35": 24,
+            "kelp-36": 90
+          },
+          "lumen-37": {
+            "moss-38": 11
+          },
+          "nectar-39": {
+            "onyx-40": 68
+          }
+        },
+        "prism-41": true
+      },
+      "ridge-43": {
+        "sable-44": "tundra-45",
+        "umber-46": {
+          "vale-47": {
+            "willow-48": 54
+          }
+        },
+        "xenon-49": "yarrow-50"
+      }
+    },
+    "zephyr-51": {
+      "alpha-52": {
+        "bravo-53": {
+          "cedar-54": "delta-55",
+          "ember-56": 90
+        },
+        "gamma-58": {
+          "harbor-59": 60,
+          "juniper-61": 15,
+          "lumen-63": 99,
+          "nectar-65": 32,
+          "prism-67": "quartz-68"
+        },
+        "ridge-69": true,
+        "tundra-71": {
+          "umber-72": {
+            "vale-73": 71
+          },
+          "willow-74": 54
+        },
+        "yarrow-76": {
+          "zephyr-77": {
+            "alpha-78": 20
+          }
+        }
+      },
+      "bravo-79": "cedar-80",
+      "delta-81": {
+        "ember-82": {
+          "fjord-83": "gamma-84"
+        },
+        "harbor-85": {
+          "iris-86": {
+            "juniper-87": 66
+          },
+          "kelp-88": {
+            "lumen-89": 80,
+            "moss-90": 84
+          },
+          "nectar-91": {
+            "onyx-92": 87,
+            "prism-93": 95
+          },
+          "quartz-94": true,
+          "sable-96": 52
+        },
+        "umber-98": {
+          "vale-99": {
+            "willow-100": 82,
+            "xenon-101": 52
+          },
+          "yarrow-102": "zephyr-103"
+        }
+      },
+      "alpha-104": {
+        "bravo-105": "cedar-106",
+        "delta-107": {
+          "ember-108": {
+            "fjord-109": 10
+          }
+        },
+        "gamma-110": {
+          "harbor-111": 33
+        },
+        "juniper-113": {
+          "kelp-114": 63,
+          "moss-116": "nectar-117",
+          "onyx-118": 96
+        },
+        "quartz-120": {
+          "ridge-121": {
+            "sable-122": 21
+          },
+          "tundra-123": {
+            "umber-124": 27
+          }
+        }
+      }
+    },
+    "vale-125": {
+      "willow-126": {
+        "xenon-127": {
+          "yarrow-128": {
+            "zephyr-129": 67,
+            "alpha-130": 47
+          },
+          "bravo-131": {
+            "cedar-132": 46
+          }
+        },
+        "delta-133": {
+          "ember-134": {
+            "fjord-135": 79
+          },
+          "gamma-136": {
+            "harbor-137": 98
+          }
+        }
+      },
+      "iris-138": {
+        "juniper-139": {
+          "kelp-140": "lumen-141",
+          "moss-142": {
+            "nectar-143": 61
+          },
+          "onyx-144": {
+            "prism-145": 34,
+            "quartz-146": 25
+          }
+        },
+        "ridge-147": {
+          "sable-148": {
+            "tundra-149": 47
+          },
+          "umber-150": "vale-151",
+          "willow-152": "xenon-153"
+        },
+        "yarrow-154": {
+          "zephyr-155": {
+            "alpha-156": 11
+          },
+          "bravo-157": {
+            "cedar-158": 16
+          },
+          "delta-159": {
+            "ember-160": 92
+          },
+          "fjord-161": {
+            "gamma-162": 97,
+            "harbor-163": 26
+          },
+          "iris-164": 23
+        }
+      },
+      "kelp-166": {
+        "lumen-167": "moss-168",
+        "nectar-169": {
+          "onyx-170": {
+            "prism-171": 4
+          }
+        },
+        "quartz-172": true,
+        "sable-174": {
+          "tundra-175": {
+            "umber-176": 45
+          },
+          "vale-177": "willow-178"
+        }
+      },
+      "xenon-179": {
+        "yarrow-180": {
+          "zephyr-181": {
+            "alpha-182": 18
+          }
+        },
+        "bravo-183": {
+          "cedar-184": "delta-185",
+          "ember-186": {
+            "fjord-187": 42
+          },
+          "gamma-188": "harbor-189",
+          "iris-190": 95,
+          "kelp-192": {
+            "lumen-193": 85
+          }
+        }
+      }
+    }
+  }
+}

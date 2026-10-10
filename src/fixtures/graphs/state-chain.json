@@ -1,0 +1,360 @@
+{
+  "title": "State chain",
+  "description": "TopoThink topology: a chain of 8 state_change transformations across 9 states, with 3 containment enclosures. Load in json-dyadic.",
+  "nodes": [
+    {
+      "id": "engine:s0",
+      "kind": "node",
+      "attrs": {
+        "label": "S0",
+        "i2t:kind": "state"
+      }
+    },
+    {
+      "id": "engine:s1",
+      "kind": "node",
+      "attrs": {
+        "label": "S1",
+        "i2t:kind": "state"
+      }
+    },
+    {
+      "id": "engine:s2",
+      "kind": "node",
+      "attrs": {
+        "label": "S2",
+        "i2t:kind": "state"
+      }
+    },
+    {
+      "id": "engine:s3",
+      "kind": "node",
+      "attrs": {
+        "label": "S3",
+        "i2t:kind": "state"
+      }
+    },
+    {
+      "id": "engine:s4",
+      "kind": "node",
+      "attrs": {
+        "label": "S4",
+        "i2t:kind": "state"
+      }
+    },
+    {
+      "id": "engine:s5",
+      "kind": "node",
+      "attrs": {
+        "label": "S5",
+        "i2t:kind": "state"
+      }
+    },
+    {
+      "id": "engine:s6",
+      "kind": "node",
+      "attrs": {
+        "label": "S6",
+        "i2t:kind": "state"
+      }
+    },
+    {
+      "id": "engine:s7",
+      "kind": "node",
+      "attrs": {
+        "label": "S7",
+        "i2t:kind": "state"
+      }
+    },
+    {
+      "id": "engine:s8",
+      "kind": "node",
+      "attrs": {
+        "label": "S8",
+        "i2t:kind": "state"
+      }
+    },
+    {
+      "id": "engine:ring-a",
+      "kind": "node",
+      "attrs": {
+        "label": "Ring A",
+        "i2t:kind": "enclosure"
+      }
+    },
+    {
+      "id": "engine:ring-b",
+      "kind": "node",
+      "attrs": {
+        "label": "Ring B",
+        "i2t:kind": "enclosure"
+      }
+    },
+    {
+      "id": "engine:ring-c",
+      "kind": "node",
+      "attrs": {
+        "label": "Ring C",
+        "i2t:kind": "enclosure"
+      }
+    },
+    {
+      "id": "c:rel-transform-0",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "transforms",
+        "i2t:edge_category": "state_change"
+      }
+    },
+    {
+      "id": "c:rel-transform-1",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "transforms",
+        "i2t:edge_category": "state_change"
+      }
+    },
+    {
+      "id": "c:rel-transform-2",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "transforms",
+        "i2t:edge_category": "state_change"
+      }
+    },
+    {
+      "id": "c:rel-transform-3",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "transforms",
+        "i2t:edge_category": "state_change"
+      }
+    },
+    {
+      "id": "c:rel-transform-4",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "transforms",
+        "i2t:edge_category": "state_change"
+      }
+    },
+    {
+      "id": "c:rel-transform-5",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "transforms",
+        "i2t:edge_category": "state_change"
+      }
+    },
+    {
+      "id": "c:rel-transform-6",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "transforms",
+        "i2t:edge_category": "state_change"
+      }
+    },
+    {
+      "id": "c:rel-transform-7",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "transforms",
+        "i2t:edge_category": "state_change"
+      }
+    },
+    {
+      "id": "c:rel-enclose-0",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:edge_category": "containment"
+      }
+    },
+    {
+      "id": "c:rel-enclose-1",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:edge_category": "containment"
+      }
+    },
+    {
+      "id": "c:rel-enclose-2",
+      "kind": "hyperedge",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:edge_category": "containment"
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "c:rel-transform-0",
+      "target": "engine:s0",
+      "layer": "state_layer",
+      "role": "input"
+    },
+    {
+      "source": "c:rel-transform-0",
+      "target": "engine:s1",
+      "layer": "state_layer",
+      "role": "output"
+    },
+    {
+      "source": "c:rel-transform-1",
+      "target": "engine:s1",
+      "layer": "state_layer",
+      "role": "input"
+    },
+    {
+      "source": "c:rel-transform-1",
+      "target": "engine:s2",
+      "layer": "state_layer",
+      "role": "output"
+    },
+    {
+      "source": "c:rel-transform-2",
+      "target": "engine:s2",
+      "layer": "state_layer",
+      "role": "input"
+    },
+    {
+      "source": "c:rel-transform-2",
+      "target": "engine:s3",
+      "layer": "state_layer",
+      "role": "output"
+    },
+    {
+      "source": "c:rel-transform-3",
+      "target": "engine:s3",
+      "layer": "state_layer",
+      "role": "input"
+    },
+    {
+      "source": "c:rel-transform-3",
+      "target": "engine:s4",
+      "layer": "state_layer",
+      "role": "output"
+    },
+    {
+      "source": "c:rel-transform-4",
+      "target": "engine:s4",
+      "layer": "state_layer",
+      "role": "input"
+    },
+    {
+      "source": "c:rel-transform-4",
+      "target": "engine:s5",
+      "layer": "state_layer",
+      "role": "output"
+    },
+    {
+      "source": "c:rel-transform-5",
+      "target": "engine:s5",
+      "layer": "state_layer",
+      "role": "input"
+    },
+    {
+      "source": "c:rel-transform-5",
+      "target": "engine:s6",
+      "layer": "state_layer",
+      "role": "output"
+    },
+    {
+      "source": "c:rel-transform-6",
+      "target": "engine:s6",
+      "layer": "state_layer",
+      "role": "input"
+    },
+    {
+      "source": "c:rel-transform-6",
+      "target": "engine:s7",
+      "layer": "state_layer",
+      "role": "output"
+    },
+    {
+      "source": "c:rel-transform-7",
+      "target": "engine:s7",
+      "layer": "state_layer",
+      "role": "input"
+    },
+    {
+      "source": "c:rel-transform-7",
+      "target": "engine:s8",
+      "layer": "state_layer",
+      "role": "output"
+    },
+    {
+      "source": "c:rel-enclose-0",
+      "target": "engine:ring-a",
+      "layer": "containment_layer",
+      "role": "container"
+    },
+    {
+      "source": "c:rel-enclose-0",
+      "target": "engine:s0",
+      "layer": "containment_layer",
+      "role": "contained"
+    },
+    {
+      "source": "c:rel-enclose-0",
+      "target": "engine:s1",
+      "layer": "containment_layer",
+      "role": "contained"
+    },
+    {
+      "source": "c:rel-enclose-0",
+      "target": "engine:s2",
+      "layer": "containment_layer",
+      "role": "contained"
+    },
+    {
+      "source": "c:rel-enclose-1",
+      "target": "engine:ring-b",
+      "layer": "containment_layer",
+      "role": "container"
+    },
+    {
+      "source": "c:rel-enclose-1",
+      "target": "engine:s3",
+      "layer": "containment_layer",
+      "role": "contained"
+    },
+    {
+      "source": "c:rel-enclose-1",
+      "target": "engine:s4",
+      "layer": "containment_layer",
+      "role": "contained"
+    },
+    {
+      "source": "c:rel-enclose-1",
+      "target": "engine:s5",
+      "layer": "containment_layer",
+      "role": "contained"
+    },
+    {
+      "source": "c:rel-enclose-2",
+      "target": "engine:ring-c",
+      "layer": "containment_layer",
+      "role": "container"
+    },
+    {
+      "source": "c:rel-enclose-2",
+      "target": "engine:s6",
+      "layer": "containment_layer",
+      "role": "contained"
+    },
+    {
+      "source": "c:rel-enclose-2",
+      "target": "engine:s7",
+      "layer": "containment_layer",
+      "role": "contained"
+    },
+    {
+      "source": "c:rel-enclose-2",
+      "target": "engine:s8",
+      "layer": "containment_layer",
+      "role": "contained"
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "title": "Messy (tolerance test)",
+  "description": "Deliberately irregular JSON: mixed arrays and objects, nulls, numbers stored as strings, a 200-character string, unicode keys, empty containers. For parser tolerance, not for reading.",
+  "mixed_array": [
+    1,
+    "two",
+    null,
+    {
+      "three": 3
+    },
+    [
+      4,
+      [
+        5,
+        [
+          "six"
+        ]
+      ]
+    ],
+    true,
+    false,
+    {
+      "nested": {
+        "deeper": {
+          "deepest": null
+        }
+      }
+    }
+  ],
+  "numbers_as_strings": {
+    "count": "42",
+    "ratio": "0.618",
+    "negative": "-7",
+    "scientific": "6.02e23",
+    "not_a_number": "NaN",
+    "real_number": 3.14159
+  },
+  "nulls_everywhere": {
+    "a": null,
+    "b": [
+      null,
+      null,
+      null
+    ],
+    "c": {
+      "d": null,
+      "e": []
+    },
+    "f": null
+  },
+  "long_string": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut .",
+  "unicode_keys": {
+    "日本語": "kanji key",
+    "Ελληνικά": "greek key",
+    "emoji-🧭": "compass",
+    "نص": "arabic key",
+    "naïve café": "accents",
+    "": "empty key name"
+  },
+  "empty_object": {},
+  "empty_array": [],
+  "array_of_mixed_objects": [
+    {
+      "id": 1,
+      "label": "first"
+    },
+    {
+      "id": "2",
+      "name": "second",
+      "extra": []
+    },
+    {
+      "label": "no id here"
+    },
+    42,
+    "bare string",
+    null,
+    {
+      "id": null,
+      "source": "x"
+    },
+    {
+      "source": "a",
+      "target": "b"
+    }
+  ],
+  "duplicate_looking_ids": [
+    {
+      "id": "dup"
+    },
+    {
+      "id": "dup"
+    },
+    {
+      "id": 7
+    },
+    {
+      "id": "7"
+    }
+  ],
+  "deep_nulls_arrays": [
+    [
+      [
+        [
+          [
+            []
+          ]
+        ]
+      ]
+    ],
+    [
+      [
+        null
+      ]
+    ],
+    {
+      "": {
+        "": {}
+      }
+    }
+  ]
+}

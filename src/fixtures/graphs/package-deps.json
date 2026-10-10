@@ -1,0 +1,446 @@
+{
+  "title": "Package dependencies",
+  "description": "exoskeleton package.json as a graph: project node linked to 26 dependencies and 10 devDependencies (kind field distinguishes them).",
+  "nodes": [
+    {
+      "id": "exoskeleton",
+      "kind": "project",
+      "label": "exoskeleton",
+      "version": "0.1.0"
+    },
+    {
+      "id": "@codemirror/lang-json",
+      "kind": "dependency",
+      "label": "@codemirror/lang-json",
+      "version": "^6.0.1"
+    },
+    {
+      "id": "@codemirror/language",
+      "kind": "dependency",
+      "label": "@codemirror/language",
+      "version": "^6.10.8"
+    },
+    {
+      "id": "@codemirror/state",
+      "kind": "dependency",
+      "label": "@codemirror/state",
+      "version": "^6.5.2"
+    },
+    {
+      "id": "@codemirror/view",
+      "kind": "dependency",
+      "label": "@codemirror/view",
+      "version": "^6.36.3"
+    },
+    {
+      "id": "@lezer/highlight",
+      "kind": "dependency",
+      "label": "@lezer/highlight",
+      "version": "^1.2.1"
+    },
+    {
+      "id": "@tauri-apps/api",
+      "kind": "dependency",
+      "label": "@tauri-apps/api",
+      "version": "^2.11.0"
+    },
+    {
+      "id": "@tauri-apps/plugin-dialog",
+      "kind": "dependency",
+      "label": "@tauri-apps/plugin-dialog",
+      "version": "^2.7.1"
+    },
+    {
+      "id": "@tauri-apps/plugin-fs",
+      "kind": "dependency",
+      "label": "@tauri-apps/plugin-fs",
+      "version": "^2.5.1"
+    },
+    {
+      "id": "@tauri-apps/plugin-log",
+      "kind": "dependency",
+      "label": "@tauri-apps/plugin-log",
+      "version": "^2.8.0"
+    },
+    {
+      "id": "@tauri-apps/plugin-opener",
+      "kind": "dependency",
+      "label": "@tauri-apps/plugin-opener",
+      "version": "^2"
+    },
+    {
+      "id": "@tauri-apps/plugin-shell",
+      "kind": "dependency",
+      "label": "@tauri-apps/plugin-shell",
+      "version": "^2.3.6"
+    },
+    {
+      "id": "@tauri-apps/plugin-store",
+      "kind": "dependency",
+      "label": "@tauri-apps/plugin-store",
+      "version": "^2.4.3"
+    },
+    {
+      "id": "@xterm/addon-fit",
+      "kind": "dependency",
+      "label": "@xterm/addon-fit",
+      "version": "^0.11.0"
+    },
+    {
+      "id": "@xterm/xterm",
+      "kind": "dependency",
+      "label": "@xterm/xterm",
+      "version": "^6.0.0"
+    },
+    {
+      "id": "codemirror",
+      "kind": "dependency",
+      "label": "codemirror",
+      "version": "^6.0.1"
+    },
+    {
+      "id": "cytoscape",
+      "kind": "dependency",
+      "label": "cytoscape",
+      "version": "^3.33.0"
+    },
+    {
+      "id": "cytoscape-fcose",
+      "kind": "dependency",
+      "label": "cytoscape-fcose",
+      "version": "^2.2.0"
+    },
+    {
+      "id": "d3",
+      "kind": "dependency",
+      "label": "d3",
+      "version": "^7.9.0"
+    },
+    {
+      "id": "dockview",
+      "kind": "dependency",
+      "label": "dockview",
+      "version": "^6.0.5"
+    },
+    {
+      "id": "react",
+      "kind": "dependency",
+      "label": "react",
+      "version": "^19.1.0"
+    },
+    {
+      "id": "react-dom",
+      "kind": "dependency",
+      "label": "react-dom",
+      "version": "^19.1.0"
+    },
+    {
+      "id": "react-force-graph-3d",
+      "kind": "dependency",
+      "label": "react-force-graph-3d",
+      "version": "^1.27.0"
+    },
+    {
+      "id": "react-markdown",
+      "kind": "dependency",
+      "label": "react-markdown",
+      "version": "^10.1.0"
+    },
+    {
+      "id": "tauri-pty",
+      "kind": "dependency",
+      "label": "tauri-pty",
+      "version": "^0.2.1"
+    },
+    {
+      "id": "three",
+      "kind": "dependency",
+      "label": "three",
+      "version": "^0.184.0"
+    },
+    {
+      "id": "three-spritetext",
+      "kind": "dependency",
+      "label": "three-spritetext",
+      "version": "^1.10.0"
+    },
+    {
+      "id": "@tauri-apps/cli",
+      "kind": "devDependency",
+      "label": "@tauri-apps/cli",
+      "version": "^2"
+    },
+    {
+      "id": "@types/cytoscape",
+      "kind": "devDependency",
+      "label": "@types/cytoscape",
+      "version": "^3.21.0"
+    },
+    {
+      "id": "@types/d3",
+      "kind": "devDependency",
+      "label": "@types/d3",
+      "version": "^7.4.3"
+    },
+    {
+      "id": "@types/node",
+      "kind": "devDependency",
+      "label": "@types/node",
+      "version": "^25.7.0"
+    },
+    {
+      "id": "@types/react",
+      "kind": "devDependency",
+      "label": "@types/react",
+      "version": "^19.1.8"
+    },
+    {
+      "id": "@types/react-dom",
+      "kind": "devDependency",
+      "label": "@types/react-dom",
+      "version": "^19.1.6"
+    },
+    {
+      "id": "@types/three",
+      "kind": "devDependency",
+      "label": "@types/three",
+      "version": "^0.184.0"
+    },
+    {
+      "id": "@vitejs/plugin-react",
+      "kind": "devDependency",
+      "label": "@vitejs/plugin-react",
+      "version": "^4.6.0"
+    },
+    {
+      "id": "typescript",
+      "kind": "devDependency",
+      "label": "typescript",
+      "version": "~5.8.3"
+    },
+    {
+      "id": "vite",
+      "kind": "devDependency",
+      "label": "vite",
+      "version": "^7.0.4"
+    }
+  ],
+  "links": [
+    {
+      "source": "exoskeleton",
+      "target": "@codemirror/lang-json",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@codemirror/language",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@codemirror/state",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@codemirror/view",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@lezer/highlight",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@tauri-apps/api",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@tauri-apps/plugin-dialog",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@tauri-apps/plugin-fs",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@tauri-apps/plugin-log",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@tauri-apps/plugin-opener",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@tauri-apps/plugin-shell",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@tauri-apps/plugin-store",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@xterm/addon-fit",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@xterm/xterm",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "codemirror",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "cytoscape",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "cytoscape-fcose",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "d3",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "dockview",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "react",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "react-dom",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "react-force-graph-3d",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "react-markdown",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "tauri-pty",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "three",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "three-spritetext",
+      "kind": "dependency",
+      "label": "depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@tauri-apps/cli",
+      "kind": "devDependency",
+      "label": "dev-depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@types/cytoscape",
+      "kind": "devDependency",
+      "label": "dev-depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@types/d3",
+      "kind": "devDependency",
+      "label": "dev-depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@types/node",
+      "kind": "devDependency",
+      "label": "dev-depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@types/react",
+      "kind": "devDependency",
+      "label": "dev-depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@types/react-dom",
+      "kind": "devDependency",
+      "label": "dev-depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@types/three",
+      "kind": "devDependency",
+      "label": "dev-depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "@vitejs/plugin-react",
+      "kind": "devDependency",
+      "label": "dev-depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "typescript",
+      "kind": "devDependency",
+      "label": "dev-depends on"
+    },
+    {
+      "source": "exoskeleton",
+      "target": "vite",
+      "kind": "devDependency",
+      "label": "dev-depends on"
+    }
+  ]
+}
