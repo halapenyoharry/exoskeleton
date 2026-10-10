@@ -151,6 +151,19 @@ export const panelRegistry: RegistryEntry[] = [
     introducedAt: 6,
     companions: ["json-edit"],
   },
+  // v8 — json-attention: a Rapier 2D rigid-body field where mass is earned
+  // from connection and a token of attention walks the edges. The only
+  // viewer that shows the document changing under attention rather than
+  // the document as given. Not auto-added: reach it via the ⊞ menu or
+  // the Everything preset.
+  {
+    id: "json-attention",
+    component: "json-attention",
+    title: "attention",
+    position: { referencePanel: "json-tree", direction: "within" },
+    introducedAt: 8,
+    companions: ["json-edit"],
+  },
 ];
 
 /**
