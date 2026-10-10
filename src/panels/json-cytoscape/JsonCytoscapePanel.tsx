@@ -490,7 +490,6 @@ export default function JsonCytoscapePanel(
   return (
     <>
       <div className="panel-header json-cytoscape-header">
-        <span>json-cytoscape</span>
         <div className="json-cytoscape-controls">
           <select
             value={params.layout}

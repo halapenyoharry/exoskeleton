@@ -9,6 +9,7 @@ import {
   onJsonChange,
   onJsonListChange,
   onJsonStore,
+  publishRestoredText,
   setJson,
   uniqueJsonId,
   updateJsonMeta,
@@ -81,4 +82,14 @@ test("store listeners see sets and deletes; hydrate does not echo or overwrite",
   assert.strictEqual(events.length, 0, "hydration is not written back");
   off();
   offE();
+});
+
+test("publishRestoredText publishes only when the bus lacks an equal value", () => {
+  assert.strictEqual(publishRestoredText("restore-a", '{"a":1}'), true);
+  assert.deepStrictEqual(getJson("restore-a"), { a: 1 });
+  assert.strictEqual(publishRestoredText("restore-a", '{ "a": 1 }'), false);
+  assert.strictEqual(publishRestoredText("restore-a", '{"a":2}'), true);
+  assert.strictEqual(publishRestoredText("restore-a", "not json"), false);
+  assert.strictEqual(publishRestoredText("restore-b", "  "), false);
+  assert.strictEqual(getJson("restore-b"), undefined);
 });

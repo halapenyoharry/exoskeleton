@@ -125,15 +125,19 @@ export function PanelRoot({
   className,
   children,
   style,
+  toolbarVisible,
 }: {
   accent?: string;
   className?: string;
   children: ReactNode;
   style?: CSSProperties;
+  /** false hides the panel's toolbar row (.panel-header / .panel-toolbar). */
+  toolbarVisible?: boolean;
 }) {
   return (
     <div
       className={className ? `panel-pad ${className}` : "panel-pad"}
+      data-toolbar-visible={toolbarVisible === false ? "false" : undefined}
       style={{ "--panel-accent": accent ?? "transparent", ...style } as CSSProperties}
     >
       {children}
@@ -160,7 +164,12 @@ export function exoPanel<P extends Record<string, any>>(
         accent={accent}
         onClose={() => props.api.close()}
       >
-        <PanelRoot accent={accent}>
+        <PanelRoot
+          accent={accent}
+          toolbarVisible={
+            (props.params as { toolbarVisible?: boolean } | undefined)?.toolbarVisible
+          }
+        >
           <Component {...props} />
         </PanelRoot>
       </PanelErrorBoundary>

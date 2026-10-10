@@ -87,8 +87,6 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
   // Pure content — the host wraps this in PanelRoot via exoPanel().
   return (
     <>
-      <div className="panel-header">editor</div>
-      {(props.params as { toolbarVisible?: boolean } | undefined)?.toolbarVisible !== false && (
       <div className="panel-toolbar">
         <button onClick={openFile}>open</button>
         <button onClick={saveFile} disabled={!dirty && !!path}>
@@ -108,7 +106,6 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
           </span>
         )}
       </div>
-      )}
       <textarea
         className="editor-textarea"
         value={text}

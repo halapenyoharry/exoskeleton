@@ -6,6 +6,7 @@ import JsonCytoscapePanel, {
 
 const manifest: PanelManifest<JsonCytoscapeParams> = {
   id: "json-cytoscape",
+  toolbar: true,
   title: "cyto",
   component: JsonCytoscapePanel,
   description:

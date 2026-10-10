@@ -425,7 +425,6 @@ export default function JsonCirclesPanel(
   return (
     <>
       <div className="panel-header json-circles-header">
-        <span>json-circles</span>
         <div className="json-circles-controls">
           <label title="Toggle [N] prefix on array items">
             <input

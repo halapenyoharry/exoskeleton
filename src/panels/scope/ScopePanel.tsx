@@ -282,7 +282,6 @@ export default function ScopePanel(props: IDockviewPanelProps<ScopeParams>) {
 
   return (
     <>
-      <div className="panel-header">scope</div>
       <div className="scope-body">
         <div className="scope-toolbar">
           <button

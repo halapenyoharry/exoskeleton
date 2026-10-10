@@ -204,6 +204,28 @@ export function hydrateJson(
   if (added) emitList();
 }
 
+/**
+ * Publish editor text that was restored from some other source (panel state,
+ * a late storage hydrate) when the bus has no equal value for `id`, so
+ * viewers following the document can read it. Returns true if it published.
+ * Empty or unparseable text is left alone.
+ */
+export function publishRestoredText(id: string, text: string): boolean {
+  if (text.trim() === "") return false;
+  let parsed: JsonValue;
+  try {
+    parsed = JSON.parse(text) as JsonValue;
+  } catch {
+    return false;
+  }
+  const current = values.get(id);
+  if (current !== undefined && JSON.stringify(current) === JSON.stringify(parsed)) {
+    return false;
+  }
+  setJson(id, parsed);
+  return true;
+}
+
 function dispatch(id: string, value: JsonValue): void {
   // Snapshot — handlers may unsubscribe mid-dispatch.
   for (const sub of [...subscriptions]) {

@@ -325,7 +325,6 @@ export default function JsonTreePanel(
   return (
     <>
       <div className="panel-header json-tree-header">
-        <span>json-tree</span>
         <div className="json-tree-controls">
           <select
             value={params.layout}

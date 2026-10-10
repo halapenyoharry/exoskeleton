@@ -7,6 +7,7 @@ import JsonTreePanel, {
 const manifest: PanelManifest<JsonTreeParams> = {
   // identity
   id: "json-tree",
+  toolbar: true,
   title: "tree",
   component: JsonTreePanel,
   description:

@@ -6,6 +6,7 @@ import JsonCirclesPanel, {
 
 const manifest: PanelManifest<JsonCirclesParams> = {
   id: "json-circles",
+  toolbar: true,
   title: "circles",
   component: JsonCirclesPanel,
   description:

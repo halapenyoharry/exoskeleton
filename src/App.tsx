@@ -9,8 +9,6 @@ import { listen } from "@tauri-apps/api/event";
 import ColoredTab from "./ColoredTab";
 import Watermark from "./Watermark";
 import {
-  PrefixHeaderActions,
-  LeftHeaderActions,
   RightHeaderActions,
 } from "./HeaderActions";
 import EditorPanel from "./panels/EditorPanel";
@@ -571,8 +569,6 @@ export default function App() {
         singleTabMode="fullwidth"
         defaultTabComponent={ColoredTab}
         watermarkComponent={Watermark}
-        prefixHeaderActionsComponent={PrefixHeaderActions}
-        leftHeaderActionsComponent={LeftHeaderActions}
         rightHeaderActionsComponent={RightHeaderActions}
         floatingGroupBounds="boundedWithinViewport"
         onReady={onMainReady}

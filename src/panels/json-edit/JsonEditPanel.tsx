@@ -13,6 +13,7 @@ import {
   onJsonChange,
   onJsonListChange,
   setJson,
+  publishRestoredText,
   uniqueJsonId,
   updateJsonMeta,
   type DocEntry,
@@ -198,8 +199,26 @@ export default function JsonEditPanel(
     const active = getActiveDocumentId();
     if (active !== "default" && active !== docIdRef.current) switchTo(active);
     else setActiveDocumentId(docIdRef.current);
+    // Text restored into the editor must also be on the bus for the viewers.
+    if (publishRestoredText(docIdRef.current, valueRef.current)) {
+      fromBusTextRef.current = valueRef.current;
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // A late storage hydrate lands after mount: the bus change handler below
+  // updates the text; here we make sure the viewers follow this document.
+  useEffect(
+    () =>
+      onJsonListChange(() => {
+        if (!params.followActive) return;
+        const id = docIdRef.current;
+        if (getJson(id) !== undefined && getActiveDocumentId() === "default" && id !== "default") {
+          setActiveDocumentId(id);
+        }
+      }),
+    [params.followActive],
+  );
 
   // Focusing this editor makes its document the active one.
   useEffect(() => {
@@ -538,7 +557,6 @@ export default function JsonEditPanel(
       <div className="panel-header">
         <div className="json-edit-header-container">
           <div className="json-edit-header-left">
-            <span>json-edit</span>
             {renaming !== null ? (
               <input
                 className="json-edit-rename"

@@ -377,34 +377,60 @@
   color: #00e5ff;
 }
 
-/* Panel header labels stay on one line in narrow panes. */
-.panel-header {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
-
-.panel-header > :first-child {
-  flex: 0 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.panel-header > :not(:first-child) {
+/* ---- Toolbar row contract ---------------------------------------------
+   .panel-header / .panel-toolbar = the panel's toolbar row: controls only,
+   never a text label (the pill carries the name). Normal-flow row at the
+   top of the panel. In single-tab groups the header strip floats over the
+   content, so the row pads itself past the pill (left) and corner controls
+   (right). Controls wrap rather than overflow. Hidden by the host when the
+   panel root has data-toolbar-visible="false". */
+.panel-pad .panel-header,
+.panel-pad .panel-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px 8px;
+  height: auto;
+  min-height: 24px;
+  padding: 4px 10px;
+  box-sizing: border-box;
+  white-space: normal;
+  overflow: visible;
+  letter-spacing: normal;
+  text-transform: none;
   flex-shrink: 0;
 }
-
-.panel-header > .dp-header-doc {
+.dv-groupview.exo-single-tab .panel-pad .panel-header,
+.dv-groupview.exo-single-tab .panel-pad .panel-toolbar {
+  padding-left: calc(var(--exo-pill-w, 160px) + 12px);
+  padding-right: var(--exo-corner-w, 96px);
+}
+.panel-pad[data-toolbar-visible="false"] .panel-header,
+.panel-pad[data-toolbar-visible="false"] .panel-toolbar {
+  display: none;
+}
+.panel-pad .panel-header > .dp-header-doc,
+.panel-pad .panel-toolbar > .dp-header-doc {
   flex: 0 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-@media (max-width: 600px) {
-  .panel-header {
-    letter-spacing: 0.08em;
+@media (pointer: coarse) {
+  .panel-pad .panel-header button,
+  .panel-pad .panel-header select,
+  .panel-pad .panel-header label,
+  .panel-pad .panel-header input,
+  .panel-pad .panel-toolbar button,
+  .panel-pad .panel-toolbar select,
+  .panel-pad .panel-toolbar label,
+  .panel-pad .panel-toolbar input {
+    min-height: 36px;
   }
+}
+
+.panel-pad .panel-header [class$="-controls"] {
+  flex-wrap: wrap;
+  row-gap: 6px;
 }

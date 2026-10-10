@@ -36,6 +36,7 @@ import {
   type EdgeColorBy,
 } from "./inspect-model";
 import { makeTextPlane, orientAlong, type TextPlane } from "./text-plane";
+import { Segmented, Toggle, Toolbar, ToolbarGroup } from "../../components/toolbar/Toolbar";
 import "./JsonGraph3DInspectPanel.css";
 
 export type InspectLabelMode = "always" | "hover" | "never";
@@ -713,104 +714,136 @@ export default function JsonGraph3DInspectPanel(
   return (
     <>
       <div className="panel-header json-graph3d-inspect-header">
-        <span>3D-Inspect</span>
-        <div className="json-graph3d-inspect-controls">
-          <select
-            value={params.dimensions}
-            onChange={(e) => updateParam("dimensions", Number(e.target.value) as 2 | 3)}
-            title="2D or 3D layout"
-          >
-            <option value={2}>2D</option>
-            <option value={3}>3D</option>
-          </select>
-          <select
-            value={params.edgeLabels}
-            onChange={(e) => updateParam("edgeLabels", e.target.value as InspectLabelMode)}
-            title="Edge label visibility"
-          >
-            <option value="always">edges: always</option>
-            <option value="hover">edges: hover</option>
-            <option value="never">edges: never</option>
-          </select>
-          <select
-            value={params.nodeSizeBy}
-            onChange={(e) => updateParam("nodeSizeBy", e.target.value as NodeSizeBy)}
-            title="What drives node text size"
-          >
-            <option value="degree">size: degree</option>
-            <option value="uniform">size: uniform</option>
-          </select>
-          <select
-            value={params.edgeColorBy}
-            onChange={(e) => updateParam("edgeColorBy", e.target.value as EdgeColorBy)}
-            title="What drives edge color"
-          >
-            <option value="category">color: category</option>
-            <option value="layer">color: layer</option>
-            <option value="predicate">color: predicate</option>
-          </select>
-          <label title="Draw transparent hulls around containment groups">
-            <input
-              type="checkbox"
+        <Toolbar className="json-graph3d-inspect-controls" label="3D-Inspect view controls">
+          <ToolbarGroup label="view" title="Lay the graph out flat or in depth">
+            <Segmented<2 | 3>
+              label="Layout dimensions"
+              value={params.dimensions}
+              onChange={(v) => updateParam("dimensions", v)}
+              options={[
+                { value: 2, label: "2D", title: "Lay the graph out flat on one plane" },
+                { value: 3, label: "3D", title: "Lay the graph out in depth; drag to orbit" },
+              ]}
+            />
+          </ToolbarGroup>
+
+          <ToolbarGroup label="edge labels" title="When the text on a connection is shown">
+            <Segmented<InspectLabelMode>
+              label="Edge label visibility"
+              value={params.edgeLabels}
+              onChange={(v) => updateParam("edgeLabels", v)}
+              options={[
+                { value: "always", label: "always", title: "Show the text on every connection" },
+                { value: "hover", label: "hover", title: "Show a connection's text only while the pointer is over it" },
+                { value: "never", label: "never", title: "Hide all text on connections" },
+              ]}
+            />
+            <Segmented<EdgeLabelOrientation>
+              label="Edge label orientation"
+              value={params.edgeLabelOrientation}
+              onChange={(v) => updateParam("edgeLabelOrientation", v)}
+              options={[
+                { value: "along", label: "along", icon: "⟶", title: "Lay the text along the line of the connection" },
+                { value: "billboard", label: "face", icon: "◱", title: "Turn the text to always face you" },
+              ]}
+            />
+          </ToolbarGroup>
+
+          <ToolbarGroup label="node size" title="What decides how big a node's name is drawn">
+            <Segmented<NodeSizeBy>
+              label="Node size"
+              value={params.nodeSizeBy}
+              onChange={(v) => updateParam("nodeSizeBy", v)}
+              options={[
+                { value: "uniform", label: "same", icon: "●", title: "Every node is drawn the same size" },
+                { value: "degree", label: "by links", icon: "⬤", title: "Bigger nodes have more connections" },
+              ]}
+            />
+          </ToolbarGroup>
+
+          <ToolbarGroup label="edge color" title="What decides the color of a connection">
+            <Segmented<EdgeColorBy>
+              label="Edge color"
+              value={params.edgeColorBy}
+              onChange={(v) => updateParam("edgeColorBy", v)}
+              options={[
+                {
+                  value: "category",
+                  label: "category",
+                  icon: (
+                    <span className="json-graph3d-inspect-cat-dots">
+                      {CATEGORY_ORDER.map((c) => (
+                        <span
+                          key={c}
+                          style={{ background: params.colorOverrides[`category:${c}`] ?? CATEGORY_TOKENS[c].color }}
+                        />
+                      ))}
+                    </span>
+                  ),
+                  title: "Color each connection by its kind: containment, state change, interactivity, reference",
+                },
+                { value: "layer", label: "layer", title: "Color each connection by the layer it belongs to" },
+                { value: "predicate", label: "verb", title: "Color each connection by its predicate (the verb that links the two nodes)" },
+              ]}
+            />
+          </ToolbarGroup>
+
+          <ToolbarGroup label="containment" title="How groups of contained nodes are drawn">
+            <Toggle
+              label="hulls"
               checked={params.hulls}
-              onChange={(e) => updateParam("hulls", e.target.checked)}
+              onChange={(v) => updateParam("hulls", v)}
+              title="Draw a see-through shell around each group of nodes that belong together"
             />
-            hulls
-          </label>
-          <select
-            value={params.hullMode}
-            onChange={(e) => updateParam("hullMode", e.target.value as HullMode)}
-            title="Hull shape"
-            disabled={!params.hulls}
-          >
-            <option value="ellipsoid">blob</option>
-            <option value="convex">convex</option>
-          </select>
-          <label title="Also draw containment spoke lines (the whitepaper says hull only)">
-            <input
-              type="checkbox"
+            <Segmented<HullMode>
+              label="Hull shape"
+              value={params.hullMode}
+              onChange={(v) => updateParam("hullMode", v)}
+              disabled={!params.hulls}
+              options={[
+                { value: "ellipsoid", label: "blob", icon: "◯", title: "Round, soft shell around the group" },
+                { value: "convex", label: "convex", icon: "⬡", title: "Tight shell that hugs the outermost nodes" },
+              ]}
+            />
+            <Toggle
+              label="lines"
               checked={params.showContainmentLinks}
-              onChange={(e) => updateParam("showContainmentLinks", e.target.checked)}
+              onChange={(v) => updateParam("showContainmentLinks", v)}
+              title="Also draw the lines from a container to each thing inside it (off by default: the shell already shows this)"
             />
-            contain-lines
-          </label>
-          <select
-            value={params.hyperedgeLabel}
-            onChange={(e) => updateParam("hyperedgeLabel", e.target.value as HyperedgeLabel)}
-            title="How reified relations (hyperedge nodes) are drawn"
-          >
-            <option value="predicate">relations: predicate</option>
-            <option value="dot">relations: dot</option>
-            <option value="id">relations: id</option>
-          </select>
-          <select
-            value={params.edgeLabelOrientation}
-            onChange={(e) => updateParam("edgeLabelOrientation", e.target.value as EdgeLabelOrientation)}
-            title="Edge label orientation"
-          >
-            <option value="along">labels: along edge</option>
-            <option value="billboard">labels: face viewer</option>
-          </select>
-          <label title="Freeze the physics simulation">
-            <input
-              type="checkbox"
+          </ToolbarGroup>
+
+          <ToolbarGroup label="relations" title="How a relation that joins several nodes is drawn">
+            <Segmented<HyperedgeLabel>
+              label="Relation node style"
+              value={params.hyperedgeLabel}
+              onChange={(v) => updateParam("hyperedgeLabel", v)}
+              options={[
+                { value: "predicate", label: "verb", title: "Show the relation's verb as text" },
+                { value: "dot", label: "dot", icon: "•", title: "Show the relation as a small junction dot" },
+                { value: "id", label: "id", title: "Show the relation's raw id" },
+              ]}
+            />
+          </ToolbarGroup>
+
+          <ToolbarGroup label="layout" title="Physics and overlays">
+            <Toggle
+              label="freeze"
               checked={params.freezeLayout}
-              onChange={(e) => updateParam("freezeLayout", e.target.checked)}
+              onChange={(v) => updateParam("freezeLayout", v)}
+              title="Stop the nodes from moving; turn off to let them settle again"
             />
-            freeze
-          </label>
-          <label title="Show the category legend">
-            <input
-              type="checkbox"
+            <Toggle
+              label="legend"
               checked={params.showLegend}
-              onChange={(e) => updateParam("showLegend", e.target.checked)}
+              onChange={(v) => updateParam("showLegend", v)}
+              title="Show the color key for connection kinds in the corner"
             />
-            legend
-          </label>
-          <button onClick={resetView} title="Fit graph to view" className="json-graph3d-inspect-reset-btn">
-            ⤢
-          </button>
-        </div>
+            <button onClick={resetView} title="Zoom and center so the whole graph fits in view" className="json-graph3d-inspect-reset-btn">
+              ⤢
+            </button>
+          </ToolbarGroup>
+        </Toolbar>
       </div>
       <div className="panel-body json-graph3d-inspect-body" ref={containerRef}>
         {!isGraph && (

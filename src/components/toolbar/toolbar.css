@@ -1,0 +1,208 @@
+/* Toolbar primitives — see Toolbar.tsx for the brief.
+   Tokens are scoped so a panel can retint them via --xo-toolbar-accent. */
+
+.xo-toolbar {
+  --xo-accent: var(--xo-toolbar-accent, var(--panel-accent, #7ddff5));
+  --xo-fg: #dce5e7;
+  --xo-fg-dim: #8b95b0;
+  --xo-line: #1a237e80;
+  --xo-bg: #0d1230;
+  --xo-min-h: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 6px 10px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: visible;
+  font-size: 12px;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: normal;
+}
+
+@media (pointer: coarse) {
+  .xo-toolbar {
+    --xo-min-h: 36px;
+    gap: 8px 12px;
+  }
+}
+
+/* --- Group: caption above controls ------------------------------------ */
+
+.xo-toolbar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.xo-toolbar-caption {
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--xo-fg-dim);
+  white-space: nowrap;
+  cursor: default;
+}
+
+.xo-toolbar-group-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* --- Segmented ---------------------------------------------------------- */
+
+.xo-segmented {
+  display: inline-flex;
+  align-items: stretch;
+  min-height: var(--xo-min-h);
+  border: 1px solid var(--xo-line);
+  border-radius: 6px;
+  background: var(--xo-bg);
+  overflow: hidden;
+}
+
+.xo-segmented-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: var(--xo-min-h);
+  padding: 0 10px;
+  margin: 0;
+  border: 0;
+  border-right: 1px solid var(--xo-line);
+  background: transparent;
+  color: var(--xo-fg);
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.xo-segmented-btn:last-child {
+  border-right: 0;
+}
+
+.xo-segmented-btn:hover {
+  background: color-mix(in srgb, var(--xo-accent) 14%, transparent);
+}
+
+.xo-segmented-btn[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--xo-accent) 28%, transparent);
+  color: #ffffff;
+  box-shadow: inset 0 -2px 0 var(--xo-accent);
+}
+
+.xo-segmented-btn:focus-visible,
+.xo-toggle:focus-visible,
+.xo-swatch:focus-visible {
+  outline: 2px solid var(--xo-accent);
+  outline-offset: -2px;
+}
+
+.xo-segmented-icon {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+/* --- Toggle (pill) ------------------------------------------------------ */
+
+.xo-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--xo-min-h);
+  padding: 0 10px 0 8px;
+  margin: 0;
+  border: 1px solid var(--xo-line);
+  border-radius: 999px;
+  background: var(--xo-bg);
+  color: var(--xo-fg);
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.xo-toggle:hover {
+  background: color-mix(in srgb, var(--xo-accent) 14%, transparent);
+}
+
+.xo-toggle-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid var(--xo-fg-dim);
+  background: transparent;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.xo-toggle[aria-pressed="true"] {
+  border-color: var(--xo-accent);
+  color: #ffffff;
+}
+
+.xo-toggle[aria-pressed="true"] .xo-toggle-dot {
+  background: var(--xo-accent);
+  border-color: var(--xo-accent);
+}
+
+/* --- Swatch picker ------------------------------------------------------ */
+
+.xo-swatches {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: var(--xo-min-h);
+}
+
+.xo-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--xo-min-h);
+  height: var(--xo-min-h);
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.xo-swatch-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.xo-swatch:hover .xo-swatch-dot {
+  transform: scale(1.15);
+}
+
+.xo-swatch[aria-pressed="true"] .xo-swatch-dot {
+  box-shadow: 0 0 0 2px var(--xo-bg), 0 0 0 4px #ffffff;
+}
+
+/* --- Disabled ----------------------------------------------------------- */
+
+.xo-segmented[data-disabled],
+.xo-swatches[data-disabled],
+.xo-toggle:disabled,
+.xo-segmented-btn:disabled,
+.xo-swatch:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

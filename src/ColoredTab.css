@@ -15,19 +15,26 @@
    ColoredTab.tsx, so currentColor cascades through tab content + close X. */
 
 /* ---- Pill chrome: single-panel groups ---------------------------------
-   The group's header overlays the content; the pill floats upper-left. */
+   Content runs full height; the header strip floats over it: the pill at
+   top-left, the group controls (+ ⤴ ×) at top-right. The panel's toolbar
+   row (App.css) pads itself past both via --exo-pill-w / --exo-corner-w. */
 .dv-groupview.exo-single-tab {
   position: relative;
   container: exo-pane / inline-size;
 }
-/* The pill strip stacks above the content (same height the tab bar used),
-   so nothing underneath is ever covered. To float it over the content
-   instead, make this container position:absolute and the content inset:0. */
 .dv-groupview.exo-single-tab > .dv-tabs-and-actions-container {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 5;
+  height: auto;
   background: transparent;
   pointer-events: none;
+}
+.dv-groupview.exo-single-tab > .dv-content-container {
+  position: absolute;
+  inset: 0;
 }
 .dv-groupview.exo-single-tab > .dv-tabs-and-actions-container > * {
   pointer-events: none;
@@ -97,7 +104,14 @@
 
 @container exo-pane (max-width: 240px) {
   .exo-pill__title { display: none; }
+  /* Narrow pane: the corner cluster collapses to just × so it never
+     overlaps the glyph-only pill; the pill always wins the z-order. */
+  .dv-groupview.exo-single-tab .dv-right-actions-container .header-btn:not(.header-btn--danger) {
+    display: none;
+  }
 }
+.dv-groupview.exo-single-tab .dv-tabs-container .dv-tab { z-index: 2; position: relative; }
+.dv-groupview.exo-single-tab .dv-right-actions-container { z-index: 1; }
 
 .exo-pill-menu {
   position: fixed;
@@ -135,13 +149,6 @@
   .exo-pill { height: 44px; border-radius: 22px; }
   .exo-pill__btn { min-width: 44px; height: 44px; font-size: 16px; }
   .exo-pill-menu button { min-height: 44px; }
-  /* Let the strip grow to fit the taller pill instead of clipping it. */
-  .dv-groupview.exo-single-tab > .dv-tabs-and-actions-container,
-  .dv-groupview.exo-single-tab > .dv-tabs-and-actions-container .dv-tabs-container,
-  .dv-groupview.exo-single-tab > .dv-tabs-and-actions-container .dv-tab {
-    height: auto;
-    min-height: 48px;
-  }
 }
 
 /* Single-tab groups: drop the redundant group dot; keep the group's right
@@ -152,7 +159,29 @@
 }
 .dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-right-actions-container {
   flex-shrink: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 28px;
+  margin: 4px 6px 0 0;
+  border-radius: 14px;
+  background: rgba(14, 16, 20, 0.72);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+.dv-groupview.exo-single-tab .header-actions--right {
+  padding: 0 4px;
 }
 .dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-void-container {
   min-width: 0;
+}
+
+@media (pointer: coarse) {
+  .dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-right-actions-container {
+    height: 44px;
+    border-radius: 22px;
+  }
+  .header-btn { min-width: 40px; min-height: 40px; }
 }

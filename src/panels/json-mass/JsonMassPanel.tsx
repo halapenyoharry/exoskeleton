@@ -444,7 +444,6 @@ export default function JsonMassPanel(
   return (
     <>
       <div className="panel-header json-mass-header">
-        <span>json-mass</span>
         <button
           onClick={() => resetRef.current()}
           title="Reset view"

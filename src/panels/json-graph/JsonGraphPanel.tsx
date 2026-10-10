@@ -452,7 +452,6 @@ export default function JsonGraphPanel(
   return (
     <>
       <div className="panel-header json-graph-header">
-        <span>json-graph</span>
         <div className="json-graph-controls">
           <label title="Freeze the physics simulation">
             <input

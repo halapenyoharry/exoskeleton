@@ -81,9 +81,6 @@ export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerPar
 
   return (
     <div className="text-viewer-container">
-      <div className="text-viewer-header">
-        <span>node-text-flow</span>
-      </div>
       <div className="text-viewer-body">
         {nodeBlocks.length === 0 ? (
           <div className="text-viewer-empty">No nodes found in graph.</div>

@@ -3,46 +3,60 @@
 }
 
 .json-graph3d-inspect-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 4px 8px;
+  /* The global .panel-header is a 24px single-line strip. This header is
+     controls-only and wraps, so it grows with its content. */
+  --xo-toolbar-accent: var(--accent-json-graph3d-inspect);
+  height: auto;
+  min-height: 24px;
+  align-items: flex-start;
+  padding: 6px 8px;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  letter-spacing: normal;
+  text-transform: none;
   font-size: 12px;
 }
 
-.json-graph3d-inspect-controls {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+/* Beat the global `.panel-header > :first-child { flex: 0 1 auto; overflow: hidden }` —
+   the toolbar is the only child and must take the full width and wrap. */
+.json-graph3d-inspect-header > .json-graph3d-inspect-controls {
+  flex: 1 1 100%;
+  min-width: 0;
+  overflow: visible;
 }
 
-.json-graph3d-inspect-controls select,
-.json-graph3d-inspect-controls label {
-  font-size: 11px;
-  background: transparent;
-  border: 1px solid #1a237e60;
-  color: #DCE5E7;
-  border-radius: 3px;
-  padding: 2px 4px;
+/* Four tiny category dots as the icon of the "category" edge-color choice. */
+.json-graph3d-inspect-cat-dots {
+  display: inline-grid;
+  grid-template-columns: repeat(2, 6px);
+  gap: 2px;
 }
 
-.json-graph3d-inspect-controls label {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
+.json-graph3d-inspect-cat-dots > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
 }
 
 .json-graph3d-inspect-reset-btn {
+  min-height: 32px;
+  min-width: 32px;
   background: transparent;
   border: 1px solid var(--accent-json-graph3d-inspect);
   color: var(--accent-json-graph3d-inspect);
-  border-radius: 3px;
-  padding: 2px 8px;
-  font-size: 14px;
+  border-radius: 6px;
+  padding: 0 8px;
+  font-size: 16px;
+  line-height: 1;
   cursor: pointer;
+}
+
+@media (pointer: coarse) {
+  .json-graph3d-inspect-reset-btn {
+    min-height: 36px;
+    min-width: 36px;
+  }
 }
 
 .json-graph3d-inspect-reset-btn:hover {

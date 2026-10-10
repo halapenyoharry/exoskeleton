@@ -14,13 +14,12 @@ for (const m of [editorManifest, webviewManifest, dyadicManifest, jsonEditManife
   registerPanelMenu(m.id, m.menu);
 }
 
-// Panels that declare `toolbar: true` in their manifest get a toggle in the pill.
-// (Only core manifests with a toolbar are listed; extend as panels adopt the field.)
-const toolbarPanels = new Set(
-  [editorManifest, webviewManifest, dyadicManifest]
-    .filter((m) => m.toolbar)
-    .map((m) => m.id),
-);
+// Panels with a toolbar row (manifest `toolbar: true`) get a toggle in the pill.
+// Listed by id here to avoid importing every manifest into the chrome.
+const toolbarPanels = new Set([
+  "editor", "webview", "json-dyadic", "json-tree", "json-graph",
+  "json-cytoscape", "json-mass", "json-circles", "json-graph3d",
+]);
 
 // Customize Dockview's default tab without replacing it. The default tab
 // carries the drag-and-drop plumbing (pointer event handlers, drag start /
@@ -182,8 +181,28 @@ function PillTab(props: IDockviewPanelHeaderProps) {
       root.style.setProperty("--exo-pill-w", `${Math.ceil(pill.getBoundingClientRect().width)}px`);
     });
     ro.observe(pill);
+    // Publish the corner controls' width the same way (the container may
+    // mount after the pill, so watch for it).
+    let corner: HTMLElement | null = null;
+    const ro2 = new ResizeObserver(() => {
+      if (corner) root.style.setProperty("--exo-corner-w", `${Math.ceil(corner.getBoundingClientRect().width)}px`);
+    });
+    const attach = () => {
+      const c = root.querySelector(".dv-right-actions-container") as HTMLElement | null;
+      if (c && c !== corner) {
+        if (corner) ro2.unobserve(corner);
+        corner = c;
+        ro2.observe(c);
+      }
+    };
+    attach();
+    const mo = new MutationObserver(attach);
+    mo.observe(root, { childList: true, subtree: true });
     return () => {
       ro.disconnect();
+      ro2.disconnect();
+      mo.disconnect();
+      root.style.removeProperty("--exo-corner-w");
       root.classList.remove("exo-single-tab");
       root.style.removeProperty("--exo-pill-w");
     };

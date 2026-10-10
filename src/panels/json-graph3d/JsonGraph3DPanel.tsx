@@ -379,7 +379,6 @@ export default function JsonGraph3DPanel(
   return (
     <>
       <div className="panel-header json-graph3d-header">
-        <span>json-graph3d</span>
         <div className="json-graph3d-controls">
           <select
             value={params.dimensions}

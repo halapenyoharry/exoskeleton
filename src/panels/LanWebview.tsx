@@ -26,8 +26,6 @@ export default function LanWebview(props: IDockviewPanelProps<LanWebviewParams>)
   // Pure content — the host wraps this in PanelRoot via exoPanel().
   return (
     <>
-      <div className="panel-header">webview</div>
-      {(props.params as { toolbarVisible?: boolean } | undefined)?.toolbarVisible !== false && (
       <div className="panel-toolbar">
         <input
           value={url}
@@ -41,7 +39,6 @@ export default function LanWebview(props: IDockviewPanelProps<LanWebviewParams>)
         <button onClick={go}>go</button>
         <button onClick={() => setReloadKey((k) => k + 1)}>reload</button>
       </div>
-      )}
       <div className="panel-body">
         <iframe
           key={reloadKey}

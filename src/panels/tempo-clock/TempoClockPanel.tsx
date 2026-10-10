@@ -66,7 +66,6 @@ export default function TempoClockPanel(
 
   return (
     <>
-      <div className="panel-header">tempo</div>
       <div className="tempo-clock-body">
         <div className="tempo-clock-controls">
           <button onClick={toggle} className="tempo-clock-play">
