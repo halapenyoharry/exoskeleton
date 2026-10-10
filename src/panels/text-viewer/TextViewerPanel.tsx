@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import type { IDockviewPanelProps } from "dockview";
 import { useJsonDoc } from "../../data/useJsonDoc";
-import { getDetectedGraph } from "../../data/json-utils/docStats";
+import { buildNodeBlocks } from "./nodeBlocks";
 import ReactMarkdown from "react-markdown";
 import {
   broadcastNodeSelection,
@@ -10,6 +10,8 @@ import {
   onNodeFocusBroadcast,
   getActiveDocumentId,
   areGraphsConnected,
+  onActiveDocumentIdChange,
+  onGraphsConnectionChange,
 } from "../../osc/channels";
 import "./TextViewerPanel.css";
 
@@ -18,16 +20,25 @@ export interface TextViewerParams {
 }
 
 export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerParams>) {
-  const documentId = props.params?.documentId ?? "default";
+  const paramDocId = props.params?.documentId ?? "default";
+  const [documentId, setDocumentId] = useState(paramDocId);
+  const [connected, setConnected] = useState(areGraphsConnected());
+
+  useEffect(() => onGraphsConnectionChange(setConnected), []);
+
+  useEffect(() => {
+    if (!connected) {
+      setDocumentId(paramDocId);
+      return;
+    }
+    setDocumentId(getActiveDocumentId());
+    return onActiveDocumentIdChange((id) => setDocumentId(id));
+  }, [connected, paramDocId]);
+
   const jsonDoc = useJsonDoc(props.api, documentId);
-  
+
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-
-  const graph = useMemo(() => {
-    if (!jsonDoc) return null;
-    return getDetectedGraph(jsonDoc);
-  }, [jsonDoc]);
 
   // Listen to cross-panel sync events
   useEffect(() => {
@@ -66,23 +77,7 @@ export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerPar
   };
 
   // Prepare all nodes text blocks in sequence
-  const nodeBlocks = useMemo(() => {
-    if (!graph) return [];
-    
-    // The natural array order acts as the sequence
-    return graph.nodes.map(node => {
-      const attrs = node.attrs || {};
-      const text = attrs.text || attrs.description || attrs.content || attrs.detail || attrs.theme || attrs.narrative_arc;
-      
-      return {
-        id: node.id,
-        title: node.label || attrs.label || attrs.name || node.id,
-        content: text ? (typeof text === "string" ? text : JSON.stringify(text)) : null,
-        allAttrs: attrs,
-        color: attrs['instagraph:color'] || attrs.color || null,
-      };
-    });
-  }, [graph]);
+  const nodeBlocks = useMemo(() => buildNodeBlocks(jsonDoc), [jsonDoc]);
 
   return (
     <div className="text-viewer-container">
@@ -125,9 +120,8 @@ export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerPar
                     <span className="text-viewer-pill">id: {block.id}</span>
                     {Object.entries(block.allAttrs).map(([k, v]) => {
                       if (['text', 'description', 'content', 'detail', 'theme', 'narrative_arc'].includes(k) && block.content) return null;
-                      if (k === 'label' || k === 'name') return null; // already the title
                       return (
-                        <span key={k} className="text-viewer-pill">{k}: {String(v)}</span>
+                        <span key={k} className="text-viewer-pill">{k}: {typeof v === "object" ? JSON.stringify(v) : String(v)}</span>
                       );
                     })}
                   </div>

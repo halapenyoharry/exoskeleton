@@ -275,6 +275,7 @@ export default function JsonGraph3DPanel(
   const containerRef = useRef<HTMLDivElement | null>(null);
   const size = useElementSize(containerRef);
 
+  const prevFreezeRef = useRef(false);
   const fgRef = useRef<ForceGraphMethods<FGNode, FGLink> | undefined>(
     undefined,
   );
@@ -326,8 +327,12 @@ export default function JsonGraph3DPanel(
         n.fy = undefined;
         n.fz = undefined;
       }
-      fgRef.current?.d3ReheatSimulation();
+      // Reheat only when freeze is released. Reheating on every data swap
+      // flips the library's engineRunning on before its (deferred) update has
+      // built `layout`, so layoutTick reads `undefined.tick`.
+      if (prevFreezeRef.current) fgRef.current?.d3ReheatSimulation();
     }
+    prevFreezeRef.current = params.freezeLayout;
   }, [params.freezeLayout, data, perfBlocked]);
 
   const resetView = () => {
@@ -446,6 +451,7 @@ export default function JsonGraph3DPanel(
         )}
         {isGraph && !perfBlocked && size.width > 0 && size.height > 0 && (
           <ForceGraph3D<FGNode, FGLink>
+            key={activeDocId}
             ref={fgRef}
             graphData={data}
             width={size.width}

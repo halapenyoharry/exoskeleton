@@ -17,7 +17,7 @@ Browser build (Vite dev, Chromium pane, desktop width unless noted). Document un
 | topology-extract | ⏳ | | |
 | selection round-trip (graph → status bar, cyto, json-edit) | Star hub | ✅ | Clicking a force-graph node updates the status bar, highlights it in cytoscape, and scrolls json-edit to the node's line. |
 | decouple / reconnect | ⏳ | | |
-| mobile width (375px) | ⏳ | | |
+| mobile width (375px) | Star hub, 5-group JSON Lab | ❌ | (1) Five groups at phone width are unusable (~175px panes); multi-tab groups push their tabs into Dockview's "∨ 2" overflow chevron, so the tab controls disappear — the exact failure the pill was meant to prevent. Needs a mobile layout mode (plan item 6c). (2) Status bar wraps to three lines (~90px). (3) Uppercase letter-spaced panel-header labels wrap to two lines. Single-tab pills themselves are fine (glyph-only, 44px). |
 | pop-out (desktop only) | ⏳ | | |
 | floating ⊞ menu | — | ✅ | Opens as a floating Dockview group with the pill; About → GitHub; not persisted. |
 | blank-pane "+" | — | ✅ | Adds a picker tab; chosen component replaces it in place. |

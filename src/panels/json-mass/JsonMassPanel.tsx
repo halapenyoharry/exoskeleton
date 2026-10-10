@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
 import * as d3 from "d3";
+import {
+  getActiveDocumentId,
+  onActiveDocumentIdChange,
+  areGraphsConnected,
+  onGraphsConnectionChange,
+} from "../../osc/channels";
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats } from "../../data/json-utils/docStats";
 import { useElementSize } from "../../useElementSize";
@@ -155,7 +161,20 @@ export default function JsonMassPanel(
 
 
   // Visibility-aware doc subscription; debounced resize (see the hooks).
-  const doc = useJsonDoc(props.api, params.documentId);
+  const [activeDocId, setActiveDocId] = useState(params.documentId);
+  const [connected, setConnected] = useState(areGraphsConnected());
+  useEffect(() => onGraphsConnectionChange(setConnected), []);
+  useEffect(() => {
+    if (!connected) {
+      setActiveDocId(params.documentId);
+      return;
+    }
+    setActiveDocId(getActiveDocumentId());
+    return onActiveDocumentIdChange((id) => {
+      setActiveDocId(id);
+    });
+  }, [connected, params.documentId]);
+  const doc = useJsonDoc(props.api, activeDocId);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const size = useElementSize(containerRef);

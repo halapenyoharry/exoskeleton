@@ -487,12 +487,15 @@ export default function JsonDyadicPanel(
 
   const layerOrder = topology.layerOrder;
   const hasLayers = layerOrder.length > 0;
-  const selected =
+  // Default to the first available layer when none is selected or the
+  // selection is absent from this document (derived; not persisted).
+  const effectiveLayer =
     params.selectedLayer && topology.layers.has(params.selectedLayer)
-      ? topology.layers.get(params.selectedLayer)!
-      : null;
+      ? params.selectedLayer
+      : (layerOrder[0] ?? null);
+  const selected = effectiveLayer ? topology.layers.get(effectiveLayer)! : null;
   const overlays = params.overlayLayers
-    .filter((l) => l !== params.selectedLayer)
+    .filter((l) => l !== effectiveLayer)
     .map((l) => topology.layers.get(l))
     .filter((l): l is LayerData => Boolean(l));
 
@@ -508,7 +511,7 @@ export default function JsonDyadicPanel(
         <label className="dp-picker">
           layer
           <select
-            value={params.selectedLayer ?? ""}
+            value={effectiveLayer ?? ""}
             onChange={(e) =>
               updateParam("selectedLayer", e.target.value || null)
             }
