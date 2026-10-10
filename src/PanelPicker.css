@@ -1,0 +1,22 @@
+.panel-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.panel-picker--chips {
+  justify-content: center;
+  margin-top: 8px;
+}
+.panel-picker--list {
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+.panel-picker--list .panel-picker-btn {
+  text-align: left;
+  padding: 8px 12px;
+}
+@media (pointer: coarse) {
+  .panel-picker-btn {
+    min-height: 44px;
+  }
+}

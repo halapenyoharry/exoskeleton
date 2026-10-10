@@ -18,6 +18,8 @@ import {
   type DocEntry,
   type JsonValue,
 } from "../../data/json-bus";
+import { openLibraryDocument } from "../../data/library";
+import { graphLibrary } from "../../fixtures/graphs";
 import {
   getActiveDocumentId,
   onActiveDocumentIdChange,
@@ -113,6 +115,7 @@ export default function JsonEditPanel(
   const [parseError, setParseError] = useState<string | null>(null);
   const [docs, setDocs] = useState<DocEntry[]>(() => listJson());
   const [menuOpen, setMenuOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const { flash, show, clear } = useFlash();
@@ -256,6 +259,18 @@ export default function JsonEditPanel(
     setJson(id, {}, { title: id, source: "json-edit" });
     selectDoc(id);
     show("ok", `New document "${id}"`);
+  }
+
+  async function openFromLibrary(entryId: string) {
+    setMenuOpen(false);
+    setLibraryOpen(false);
+    try {
+      const id = await openLibraryDocument(entryId);
+      selectDoc(id);
+      show("ok", `Opened "${getJsonMeta(id)?.title ?? id}"`);
+    } catch (err) {
+      show("error", `Could not open library entry: ${errorText(err)}`);
+    }
   }
 
   async function openFiles() {
@@ -591,6 +606,23 @@ export default function JsonEditPanel(
                 <button className="json-edit-dropdown-item" onClick={openFiles}>
                   Open file(s)… <span>⌘O</span>
                 </button>
+                <button
+                  className="json-edit-dropdown-item"
+                  onClick={() => setLibraryOpen(!libraryOpen)}
+                >
+                  Library <span>{libraryOpen ? "▾" : "▸"}</span>
+                </button>
+                {libraryOpen &&
+                  graphLibrary.map((entry) => (
+                    <button
+                      key={entry.id}
+                      className="json-edit-dropdown-item json-edit-library-item"
+                      title={entry.description}
+                      onClick={() => openFromLibrary(entry.id)}
+                    >
+                      {entry.title} <span className="json-edit-library-tag">{entry.shape}</span>
+                    </button>
+                  ))}
                 <div className="json-edit-dropdown-sep" />
                 <button className="json-edit-dropdown-item" onClick={() => saveToFile(false)}>
                   {inTauri() ? "Save" : "Download"} <span>⌘S</span>

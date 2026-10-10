@@ -1,0 +1,15 @@
+.blank-panel {
+  height: 100%;
+  overflow: auto;
+  padding: 12px;
+  box-sizing: border-box;
+  background: #0d1326;
+  color: #6a8a98;
+}
+.blank-panel-hint {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #4a6a78;
+  margin-bottom: 10px;
+}

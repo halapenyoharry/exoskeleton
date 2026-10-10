@@ -28,7 +28,18 @@ export function PrefixHeaderActions(props: IDockviewHeaderActionsProps) {
  * Shows: per-group action, access to activePanel and containerApi, programmatic addPanel.
  */
 export function LeftHeaderActions(props: IDockviewHeaderActionsProps) {
-  function addTab() {
+  // Default "+": a blank pane with a component picker, as a new active tab.
+  function addBlank() {
+    const id = `blank-${Math.random().toString(36).slice(2, 6)}`;
+    props.containerApi.addPanel({
+      id,
+      component: "blank",
+      title: "new",
+      position: { referenceGroup: props.group },
+    });
+  }
+  // Alt/option-click: the old behavior, clone the active panel's component.
+  function cloneTab() {
     const active = props.activePanel;
     if (!active) return;
     // The panel's real component name — NOT a substring of its id.
@@ -48,7 +59,11 @@ export function LeftHeaderActions(props: IDockviewHeaderActionsProps) {
   }
   return (
     <div className="header-actions header-actions--left">
-      <button className="header-btn" title="add another tab of this type" onClick={addTab}>
+      <button
+        className="header-btn"
+        title="new blank tab (pick a component) — alt-click: duplicate this tab's type"
+        onClick={(e) => (e.altKey ? cloneTab() : addBlank())}
+      >
         +
       </button>
     </div>

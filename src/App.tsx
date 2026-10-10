@@ -25,6 +25,7 @@ import JsonCirclesPanel from "./panels/json-circles/JsonCirclesPanel";
 import JsonGraphPanel from "./panels/json-graph/JsonGraphPanel";
 import StatusBarPanel from "./panels/StatusBarPanel";
 import TextViewerPanel from "./panels/text-viewer/TextViewerPanel";
+import BlankPanel from "./panels/BlankPanel";
 import { exoPanel } from "./PanelRoot";
 import {
   addOrFocusPanel,
@@ -88,6 +89,7 @@ function lazyPanel(Component: React.ComponentType<any>, accent: string) {
 // Each entry is wrapped with `exoPanel(Component, accent)` or `lazyPanel` so the host
 // (not the panel) owns positioning and the accent stripe.
 const components = {
+  blank:           exoPanel(BlankPanel,         "var(--accent-settings)"),
   editor:          exoPanel(EditorPanel,        "var(--accent-editor)"),
   terminal:        exoPanel(TerminalPanel,      "var(--accent-terminal)"),
   webview:         exoPanel(LanWebview,         "var(--accent-webview)"),

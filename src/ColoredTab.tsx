@@ -24,6 +24,7 @@ const toolbarPanels = new Set(
 // pseudo-element. Result: drag works because we touched nothing important.
 
 const accents: Record<string, string> = {
+  blank: "var(--accent-settings)",
   editor: "var(--accent-editor)",
   terminal: "var(--accent-terminal)",
   webview: "var(--accent-webview)",
@@ -49,6 +50,7 @@ const accents: Record<string, string> = {
 };
 
 const glyphs: Record<string, string> = {
+  blank: '"+"',
   editor: '"◆"',
   terminal: '"▸"',
   webview: '"◯"',

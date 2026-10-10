@@ -2,10 +2,9 @@ import type { IWatermarkPanelProps } from "dockview";
 import {
   addOrFocusPanel,
   buildPreset,
-  panelRegistry,
 } from "./persistence/default-layout";
 import { presets } from "./persistence/presets";
-import { panelAccent, panelGlyph } from "./ColoredTab";
+import PanelPicker from "./PanelPicker";
 import "./Watermark.css";
 
 export default function Watermark(props: IWatermarkPanelProps) {
@@ -38,18 +37,7 @@ export default function Watermark(props: IWatermarkPanelProps) {
         </div>
 
         <p className="watermark-hint">or summon one panel at a time:</p>
-        <div className="watermark-buttons">
-          {panelRegistry.map((entry) => (
-            <button
-              key={entry.id}
-              className="watermark-btn"
-              style={{ color: panelAccent(entry.id) }}
-              onClick={() => addOrFocusPanel(api, entry.id)}
-            >
-              {panelGlyph(entry.id)} {entry.id}
-            </button>
-          ))}
-        </div>
+        <PanelPicker onPick={(id) => addOrFocusPanel(api, id)} />
       </div>
     </div>
   );
