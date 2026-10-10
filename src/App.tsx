@@ -62,6 +62,7 @@ const JsonCytoscapePanel = lazy(() => import("./panels/json-cytoscape/JsonCytosc
 const JsonGraph3DPanel = lazy(() => import("./panels/json-graph3d/JsonGraph3DPanel"));
 const JsonDyadicPanel = lazy(() => import("./panels/json-dyadic/JsonDyadicPanel"));
 const JsonMassPanel = lazy(() => import("./panels/json-mass/JsonMassPanel"));
+const JsonAttentionPanel = lazy(() => import("./panels/json-attention/JsonAttentionPanel"));
 const ScopePanel = lazy(() => import("./panels/scope/ScopePanel"));
 
 function lazyPanel(Component: React.ComponentType<any>, accent: string) {
@@ -94,6 +95,7 @@ const components = {
   "json-graph":    exoPanel(JsonGraphPanel,     "var(--accent-json-graph)"),
   "json-graph3d":  lazyPanel(JsonGraph3DPanel,  "var(--accent-json-graph3d)"),
   "json-dyadic":   lazyPanel(JsonDyadicPanel,   "var(--accent-json-dyadic)"),
+  "json-attention":lazyPanel(JsonAttentionPanel,"var(--accent-json-attention)"),
   // Registered raw (no exoPanel wrapper) on purpose: the status bar owns
   // its full-width chrome and doesn't take the accent-stripe convention.
   "status-bar-panel": StatusBarPanel,
