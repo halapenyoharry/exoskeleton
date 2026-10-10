@@ -8,7 +8,32 @@ export interface LayoutPreset {
 
 export const DEFAULT_PRESET_ID = "minimal";
 
+/** Preset for first-run web visitors: an empty grid (the Watermark picker
+ *  shows). Desktop keeps DEFAULT_PRESET_ID. */
+export const WEB_DEFAULT_PRESET_ID = "blank";
+
+/** True when running in a plain browser tab rather than the Tauri shell.
+ *  Runtime check so one dist/ serves both. Kept dependency-free so node
+ *  tests can import this module. */
+export function isWebRuntime(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    !("__TAURI_INTERNALS__" in window) &&
+    !("__TAURI__" in window)
+  );
+}
+
+export function defaultPresetId(): string {
+  return isWebRuntime() ? WEB_DEFAULT_PRESET_ID : DEFAULT_PRESET_ID;
+}
+
 export const presets: LayoutPreset[] = [
+  {
+    id: "blank",
+    name: "Blank Canvas",
+    description: "A clean, empty grid. Start fresh or summon panels on demand.",
+    panelIds: [],
+  },
   {
     id: "minimal",
     name: "Minimal",
@@ -56,6 +81,7 @@ export function resolvePresetPanelIds(
   presetId: string,
   availablePanelIds: string[],
 ): string[] {
+  if (presetId === "blank") return [];
   const target = presets.find((p) => p.id === presetId) ?? presets.find((p) => p.id === DEFAULT_PRESET_ID);
   if (!target) return availablePanelIds;
   if (target.panelIds.length === 0) return availablePanelIds;

@@ -12,7 +12,7 @@ import type {
 // This is the SCHEMA's idea of "what panels exist and how they're arranged."
 // State (the JSON saved between sessions) is a delta on top of this.
 
-import { DEFAULT_PRESET_ID, resolvePresetPanelIds } from "./presets.ts";
+import { defaultPresetId, isWebRuntime, resolvePresetPanelIds } from "./presets.ts";
 import { CURRENT_VERSION } from "./storage.ts";
 
 export const DEFAULT_WEBVIEW_URL = "https://dockview.dev";
@@ -280,6 +280,7 @@ export function addRegistryPanel(
   api: DockviewApi,
   entry: RegistryEntry,
   extraParams?: Record<string, unknown>,
+  customPosition?: AddPanelPositionOptions,
 ): IDockviewPanel | undefined {
   const existing = api.getPanel(entry.id);
   if (existing) return existing;
@@ -298,7 +299,7 @@ export function addRegistryPanel(
     floating?: unknown;
   };
 
-  let position = registryPosition;
+  let position = customPosition ?? registryPosition;
   const referenceMissing =
     position &&
     "referencePanel" in position &&
@@ -350,6 +351,9 @@ export function addOrFocusPanel(api: DockviewApi, id: string) {
  *  Iterates panelRegistry in registry order and calls addRegistryPanel for entries
  *  whose ID is in the resolved preset panel IDs. */
 export function buildPreset(api: DockviewApi, presetId: string) {
+  // Browser-only arrangements (ported from exo-skeleton.org). Desktop keeps
+  // the registry positions below.
+  if (isWebRuntime() && buildWebPreset(api, presetId)) return;
   const targetIds = new Set(
     resolvePresetPanelIds(
       presetId,
@@ -363,10 +367,44 @@ export function buildPreset(api: DockviewApi, presetId: string) {
   }
 }
 
-/** Build the default layout (called when no saved state exists). Delegates
- *  to buildPreset with DEFAULT_PRESET_ID ("minimal"). */
+type Step = [id: string, position: AddPanelPositionOptions];
+
+function buildSteps(api: DockviewApi, steps: Step[]) {
+  for (const [id, position] of steps) {
+    const entry = getRegistryEntry(id);
+    if (entry) addRegistryPanel(api, entry, undefined, position);
+  }
+}
+
+/** Web-only preset arrangements. Returns true when it handled the preset. */
+function buildWebPreset(api: DockviewApi, presetId: string): boolean {
+  if (presetId === "av-lab") {
+    // piano | scope | tempo-clock
+    buildSteps(api, [
+      ["piano", { direction: "right" }],
+      ["scope", { referencePanel: "piano", direction: "right" }],
+      ["tempo-clock", { referencePanel: "scope", direction: "right" }],
+    ]);
+    return true;
+  }
+  if (presetId === "json-lab") {
+    // json-edit left; 2x2 right: tree | graph over graph3d | cytoscape
+    buildSteps(api, [
+      ["json-edit", { direction: "right" }],
+      ["json-tree", { referencePanel: "json-edit", direction: "right" }],
+      ["json-graph", { referencePanel: "json-tree", direction: "right" }],
+      ["json-graph3d", { referencePanel: "json-tree", direction: "below" }],
+      ["json-cytoscape", { referencePanel: "json-graph", direction: "below" }],
+    ]);
+    return true;
+  }
+  return false;
+}
+
+/** Build the default layout (called when no saved state exists). Desktop:
+ *  "minimal". Browser: "blank" (empty grid + preset picker). */
 export function buildDefaultLayout(api: DockviewApi) {
-  buildPreset(api, DEFAULT_PRESET_ID);
+  buildPreset(api, defaultPresetId());
 }
 
 /**

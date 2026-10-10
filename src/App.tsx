@@ -52,7 +52,7 @@ import {
 import { appStorage } from "./persistence/app-storage";
 import { createDebounce } from "./utils/debounce";
 import { errorText, inTauri, saveTextFile } from "./utils/file-io";
-import { DEFAULT_PRESET_ID } from "./persistence/presets";
+import { defaultPresetId, presets } from "./persistence/presets";
 import {
   parseWorkspaceDocument,
   serializeWorkspaceDocument,
@@ -634,11 +634,11 @@ export default function App() {
               onClick={() => {
                 if (
                   window.confirm(
-                    "Reset layout to default (Minimal)? Any unsaved panel position changes will be cleared.",
+                    `Reset layout to default (${presets.find((p) => p.id === defaultPresetId())?.name ?? "Minimal"})? Any unsaved panel position changes will be cleared.`,
                   )
                 ) {
                   mainApiRef.current?.clear();
-                  buildPreset(mainApiRef.current!, DEFAULT_PRESET_ID);
+                  buildPreset(mainApiRef.current!, defaultPresetId());
                   setIsAddMenuOpen(false);
                 }
               }}

@@ -6,12 +6,17 @@ import { isCompatible, migrateToV8 } from "./storage";
 // localStorage is per origin and per browser, so each machine keeps its own
 // layout. Same contract as tauri-storage.ts.
 
-const KEY = "exoskeleton.state";
+// Key kept identical to exo-skeleton.org's so existing visitors keep their
+// saved layouts. "exoskeleton.state" was this repo's earlier key; it is read
+// as a fallback and never written.
+const KEY = "exoskeleton_web_state_v8_1";
+const LEGACY_KEY = "exoskeleton.state";
 
 export const webStorage: Storage = {
   async load(): Promise<AppStateV8 | null> {
     try {
-      const text = window.localStorage.getItem(KEY);
+      const text =
+        window.localStorage.getItem(KEY) ?? window.localStorage.getItem(LEGACY_KEY);
       if (text === null) return null;
       const raw = JSON.parse(text);
       if (!isCompatible(raw)) {
@@ -34,6 +39,7 @@ export const webStorage: Storage = {
   async clear() {
     try {
       window.localStorage.removeItem(KEY);
+      window.localStorage.removeItem(LEGACY_KEY);
     } catch (e) {
       console.warn("[exoskeleton] failed to clear state:", e);
     }
