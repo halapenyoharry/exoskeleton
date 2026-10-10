@@ -502,6 +502,7 @@ export default function App() {
       <DockviewReact
         components={components}
         // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —
+        singleTabMode="fullwidth"
         defaultTabComponent={ColoredTab}
         watermarkComponent={Watermark}
         prefixHeaderActionsComponent={PrefixHeaderActions}

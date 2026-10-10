@@ -132,6 +132,11 @@ export interface PanelManifest<P extends Record<string, any> = Record<string, an
   /** Title shown in the tab. Defaults to `id` if omitted. */
   title?: string;
 
+  /** True if the panel renders a hideable toolbar. The pill chrome then
+   *  shows a toggle that writes `toolbarVisible` into panel params
+   *  (default true); the panel reads it and hides its toolbar. */
+  toolbar?: boolean;
+
   /** The React component itself. */
   component: ComponentType<IDockviewPanelProps<P>>;
 

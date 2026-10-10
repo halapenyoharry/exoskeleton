@@ -8,6 +8,7 @@ import EditorPanel from "./EditorPanel";
 const manifest: PanelManifest = {
   id: "editor",
   title: "editor",
+  toolbar: true,
   component: EditorPanel,
   description:
     "Markdown/text editor with native open/save. Anchors the default layout — the first panel into an empty grid.",

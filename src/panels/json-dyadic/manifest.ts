@@ -7,6 +7,7 @@ import JsonDyadicPanel, {
 const manifest: PanelManifest<JsonDyadicParams> = {
   id: "json-dyadic",
   title: "dyadic",
+  toolbar: true,
   component: JsonDyadicPanel,
   description:
     "Categorical viewer for TopoThink dyadic JSON. Renders each edge per its i2t:edge_category — containment as enclosures, state_change as gradient flows, interactivity as shared color fields, reference as low-weight tags. Never draws connector lines. Layer is the loadable unit.",

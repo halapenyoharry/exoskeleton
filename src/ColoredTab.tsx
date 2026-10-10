@@ -1,5 +1,18 @@
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { DockviewDefaultTab, type IDockviewPanelHeaderProps } from "dockview";
+import editorManifest from "./panels/editor.manifest";
+import webviewManifest from "./panels/webview.manifest";
+import dyadicManifest from "./panels/json-dyadic/manifest";
 import "./ColoredTab.css";
+
+// Panels that declare `toolbar: true` in their manifest get a toggle in the pill.
+// (Only core manifests with a toolbar are listed; extend as panels adopt the field.)
+const toolbarPanels = new Set(
+  [editorManifest, webviewManifest, dyadicManifest]
+    .filter((m) => m.toolbar)
+    .map((m) => m.id),
+);
 
 // Customize Dockview's default tab without replacing it. The default tab
 // carries the drag-and-drop plumbing (pointer event handlers, drag start /
@@ -88,6 +101,26 @@ export function panelGlyph(id: string): string {
 }
 
 export default function ColoredTab(props: IDockviewPanelHeaderProps) {
+  const [single, setSingle] = useState(
+    () => props.api.group.panels.length === 1,
+  );
+
+  useEffect(() => {
+    const update = () => setSingle(props.api.group.panels.length === 1);
+    update();
+    const subs = [
+      props.containerApi.onDidAddPanel(update),
+      props.containerApi.onDidRemovePanel(update),
+      props.containerApi.onDidLayoutChange(update),
+    ];
+    return () => subs.forEach((d) => d.dispose());
+  }, [props.api, props.containerApi]);
+
+  if (single) return <PillTab {...props} />;
+  return <PlainTab {...props} />;
+}
+
+function PlainTab(props: IDockviewPanelHeaderProps) {
   const id = props.api.id;
   const key = resolveComponentKey(id) ?? id;
   const accent = accents[key] ?? "inherit";
@@ -103,5 +136,157 @@ export default function ColoredTab(props: IDockviewPanelHeaderProps) {
         } as React.CSSProperties
       }
     />
+  );
+}
+
+const stop = (e: React.SyntheticEvent) => e.stopPropagation();
+
+function PillTab(props: IDockviewPanelHeaderProps) {
+  const id = props.api.id;
+  const key = resolveComponentKey(id) ?? id;
+  const accent = accents[key] ?? "inherit";
+  const glyph = panelGlyph(id);
+  const hasToolbar = toolbarPanels.has(key);
+
+  const pillRef = useRef<HTMLDivElement>(null);
+  const [title, setTitle] = useState(props.api.title ?? id);
+  const [toolbarVisible, setToolbarVisible] = useState(
+    () => props.api.getParameters<{ toolbarVisible?: boolean }>().toolbarVisible !== false,
+  );
+  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const d = props.api.onDidTitleChange((e) => setTitle(e.title));
+    return () => d.dispose();
+  }, [props.api]);
+
+  // Mark the group root so CSS can overlay the header on the content.
+  useEffect(() => {
+    const pill = pillRef.current;
+    const root = pill?.closest(".dv-groupview") as HTMLElement | null;
+    if (!pill || !root) return;
+    root.classList.add("exo-single-tab");
+    // Publish the pill's width so panel headers underneath can pad past it.
+    const ro = new ResizeObserver(() => {
+      root.style.setProperty("--exo-pill-w", `${Math.ceil(pill.getBoundingClientRect().width)}px`);
+    });
+    ro.observe(pill);
+    return () => {
+      ro.disconnect();
+      root.classList.remove("exo-single-tab");
+      root.style.removeProperty("--exo-pill-w");
+    };
+  }, []);
+
+  // Escape / outside-click close the menu.
+  useEffect(() => {
+    if (!menu) return;
+    const doc = pillRef.current?.ownerDocument ?? document;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenu(null);
+    const onDown = (e: Event) => {
+      if (!(e.target as Element).closest?.(".exo-pill-menu")) setMenu(null);
+    };
+    doc.addEventListener("keydown", onKey);
+    doc.addEventListener("pointerdown", onDown, true);
+    return () => {
+      doc.removeEventListener("keydown", onKey);
+      doc.removeEventListener("pointerdown", onDown, true);
+    };
+  }, [menu]);
+
+  const group = props.api.group;
+  const guard = {
+    draggable: false,
+    onPointerDown: stop,
+    onMouseDown: stop,
+  } as const;
+
+  function openMenu() {
+    const r = pillRef.current!.getBoundingClientRect();
+    setMenu(menu ? null : { x: r.left, y: r.bottom + 4 });
+  }
+  function toggleToolbar() {
+    const next = !toolbarVisible;
+    setToolbarVisible(next);
+    props.api.updateParameters({ toolbarVisible: next });
+  }
+  const act = (fn: () => void) => () => {
+    setMenu(null);
+    fn();
+  };
+
+  return (
+    <div
+      ref={pillRef}
+      className="exo-pill"
+      style={{ color: accent }}
+      title={title}
+    >
+      <button
+        className="exo-pill__btn"
+        aria-label="Pane menu"
+        aria-expanded={!!menu}
+        {...guard}
+        onClick={openMenu}
+      >
+        ☰
+      </button>
+      <span className="exo-pill__label">
+        <span className="exo-pill__glyph">{glyph}</span>
+        <span className="exo-pill__title">{title}</span>
+      </span>
+      {hasToolbar && (
+        <button
+          className={`exo-pill__btn exo-pill__toolbar${toolbarVisible ? " is-on" : ""}`}
+          aria-label="Toggle toolbar"
+          aria-pressed={toolbarVisible}
+          title="Toggle toolbar"
+          {...guard}
+          onClick={toggleToolbar}
+        >
+          ▭
+        </button>
+      )}
+      <button
+        className="exo-pill__btn"
+        aria-label="Close panel"
+        {...guard}
+        onClick={() => props.api.close()}
+      >
+        ×
+      </button>
+      {menu &&
+        createPortal(
+          <div
+            className="exo-pill-menu"
+            role="menu"
+            style={{ left: menu.x, top: menu.y, color: accent }}
+          >
+            <button
+              role="menuitem"
+              onClick={act(() =>
+                group.api.isMaximized()
+                  ? group.api.exitMaximized()
+                  : group.api.maximize(),
+              )}
+            >
+              {group.api.isMaximized() ? "Restore" : "Maximize"}
+            </button>
+            <button
+              role="menuitem"
+              onClick={act(() => void props.containerApi.addPopoutGroup(group))}
+            >
+              Pop out
+            </button>
+            <button role="menuitem" onClick={act(() => props.api.close())}>
+              Close
+            </button>
+            <button role="menuitem" disabled>
+              Panel menu…
+            </button>
+          </div>,
+          (pillRef.current?.ownerDocument ?? document).body,
+        )}
+    </div>
   );
 }

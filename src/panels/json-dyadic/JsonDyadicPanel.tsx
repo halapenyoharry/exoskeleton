@@ -503,6 +503,7 @@ export default function JsonDyadicPanel(
         <span className="dp-header-doc">{activeDocId}</span>
       </div>
 
+      {(props.params as { toolbarVisible?: boolean } | undefined)?.toolbarVisible !== false && (
       <div className="panel-toolbar dp-toolbar">
         <label className="dp-picker">
           layer
@@ -547,6 +548,7 @@ export default function JsonDyadicPanel(
 
         {params.showCategoryLegend && <CategoryLegend />}
       </div>
+      )}
 
       <div className="panel-body dp-body">
         {topology.warnings.length > 0 && doc === undefined && (

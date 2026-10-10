@@ -13,3 +13,140 @@
 
 /* The accent color is carried on the root tab style attribute set by
    ColoredTab.tsx, so currentColor cascades through tab content + close X. */
+
+/* ---- Pill chrome: single-panel groups ---------------------------------
+   The group's header overlays the content; the pill floats upper-left. */
+.dv-groupview.exo-single-tab {
+  position: relative;
+  container: exo-pane / inline-size;
+}
+/* The pill strip stacks above the content (same height the tab bar used),
+   so nothing underneath is ever covered. To float it over the content
+   instead, make this container position:absolute and the content inset:0. */
+.dv-groupview.exo-single-tab > .dv-tabs-and-actions-container {
+  position: relative;
+  z-index: 5;
+  background: transparent;
+  pointer-events: none;
+}
+.dv-groupview.exo-single-tab > .dv-tabs-and-actions-container > * {
+  pointer-events: none;
+}
+.dv-groupview.exo-single-tab .dv-tabs-and-actions-container.dv-single-tab.dv-full-width-single-tab .dv-scrollable,
+.dv-groupview.exo-single-tab .dv-tabs-and-actions-container.dv-single-tab.dv-full-width-single-tab .dv-tabs-container,
+.dv-groupview.exo-single-tab .dv-tabs-and-actions-container.dv-single-tab.dv-full-width-single-tab .dv-tabs-container .dv-tab {
+  flex-grow: 0;
+  background: transparent;
+  border: none;
+  height: auto;
+  overflow: visible;
+}
+.dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-void-container {
+  flex-grow: 1;
+}
+.dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-tab,
+.dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-right-actions-container,
+.dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-left-actions-container {
+  pointer-events: auto;
+}
+.dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-tab::before,
+.dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-tab::after {
+  display: none;
+}
+
+.exo-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 28px;
+  margin: 4px 0 0 6px;
+  padding: 0 4px;
+  border-radius: 14px;
+  background: rgba(14, 16, 20, 0.72);
+  backdrop-filter: blur(6px);
+  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  font-size: 12px;
+  white-space: nowrap;
+  max-width: calc(100cqw - 16px);
+  box-sizing: border-box;
+}
+.exo-pill__btn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  min-width: 22px;
+  height: 24px;
+  padding: 0 4px;
+  border-radius: 12px;
+  font: inherit;
+  cursor: pointer;
+  opacity: 0.85;
+}
+.exo-pill__btn:hover { background: rgba(255, 255, 255, 0.12); opacity: 1; }
+.exo-pill__toolbar:not(.is-on) { opacity: 0.45; }
+.exo-pill__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+  min-width: 0;
+  cursor: grab;
+}
+.exo-pill__glyph { font-size: 11px; }
+.exo-pill__title { overflow: hidden; text-overflow: ellipsis; }
+
+@container exo-pane (max-width: 240px) {
+  .exo-pill__title { display: none; }
+}
+
+.exo-pill-menu {
+  position: fixed;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  padding: 4px;
+  border-radius: 8px;
+  background: rgba(20, 22, 28, 0.96);
+  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+.exo-pill-menu button {
+  background: transparent;
+  border: none;
+  color: #e6e6e6;
+  text-align: left;
+  font: inherit;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.exo-pill-menu button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
+.exo-pill-menu button:disabled { opacity: 0.4; cursor: default; }
+
+@media (pointer: coarse) {
+  .exo-pill { height: 44px; border-radius: 22px; }
+  .exo-pill__btn { min-width: 44px; height: 44px; font-size: 16px; }
+  .exo-pill-menu button { min-height: 44px; }
+  /* Let the strip grow to fit the taller pill instead of clipping it. */
+  .dv-groupview.exo-single-tab > .dv-tabs-and-actions-container,
+  .dv-groupview.exo-single-tab > .dv-tabs-and-actions-container .dv-tabs-container,
+  .dv-groupview.exo-single-tab > .dv-tabs-and-actions-container .dv-tab {
+    height: auto;
+    min-height: 48px;
+  }
+}
+
+/* Single-tab groups: drop the redundant group dot; keep the group's right
+   actions from being clipped. (--exo-pill-w is published by PillTab for
+   anyone who wants to lay out around the pill.) */
+.dv-groupview.exo-single-tab .header-dot {
+  display: none;
+}
+.dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-right-actions-container {
+  flex-shrink: 0;
+}
+.dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-void-container {
+  min-width: 0;
+}
