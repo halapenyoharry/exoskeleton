@@ -23,8 +23,18 @@ export function isWebRuntime(): boolean {
   );
 }
 
+/** Build-time override for the web default preset. Set
+ *  VITE_WEB_DEFAULT_PRESET=<preset id> when building (the outer-rim deploy
+ *  script passes it from its config), so what exo-skeleton.org opens with is
+ *  a deploy option, not a code change. Unknown ids fall back to "blank". */
+function webDefaultPresetId(): string {
+  const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
+  const id = env?.VITE_WEB_DEFAULT_PRESET?.trim();
+  return id && presets.some((p) => p.id === id) ? id : WEB_DEFAULT_PRESET_ID;
+}
+
 export function defaultPresetId(): string {
-  return isWebRuntime() ? WEB_DEFAULT_PRESET_ID : DEFAULT_PRESET_ID;
+  return isWebRuntime() ? webDefaultPresetId() : DEFAULT_PRESET_ID;
 }
 
 export const presets: LayoutPreset[] = [
