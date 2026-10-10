@@ -88,10 +88,12 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
           title={connected ? "Click to decouple views" : "Click to coordinate views"}
         >
           <span className="status-indicator-dot" />
-          {connected ? "COORDINATED LINK ACTIVE" : "LINK DECOUPLED"}
+          <span className="status-link-long">{connected ? "COORDINATED LINK ACTIVE" : "LINK DECOUPLED"}</span>
+          <span className="status-link-short">{connected ? "linked" : "decoupled"}</span>
         </button>
         <span className="status-doc-badge" title="Active Editor Target">
-          DOC: {activeDocId}
+          <span className="status-doc-label">DOC: </span>
+          <span className="status-doc-value">{activeDocId}</span>
         </span>
       </div>
 
@@ -106,10 +108,10 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
 
       <div className="status-bar-right">
         <div className="status-stats">
-          <span>Nodes:</span>
+          <span className="status-stats-label">Nodes:</span>
           <span className="status-stats-val">{stats.nodes}</span>
           <span className="status-stats-divider">|</span>
-          <span>Edges:</span>
+          <span className="status-stats-label">Edges:</span>
           <span className="status-stats-val">{stats.edges}</span>
         </div>
         <button

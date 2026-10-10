@@ -376,3 +376,35 @@
   background: rgba(0, 229, 255, 0.2);
   color: #00e5ff;
 }
+
+/* Panel header labels stay on one line in narrow panes. */
+.panel-header {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.panel-header > :first-child {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-header > :not(:first-child) {
+  flex-shrink: 0;
+}
+
+.panel-header > .dp-header-doc {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 600px) {
+  .panel-header {
+    letter-spacing: 0.08em;
+  }
+}
