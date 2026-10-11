@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
+import { onPanelMenu } from "../../panel-menu";
 import cytoscape from "cytoscape";
 import type { Core, ElementDefinition, LayoutOptions } from "cytoscape";
 import fcose from "cytoscape-fcose";
@@ -486,6 +487,13 @@ export default function JsonCytoscapePanel(
   const resetView = () => {
     cyRef.current?.fit(undefined, params.fitPadding);
   };
+
+  // Drawer-strip "fit" button dispatches to the hidden toolbar's action.
+  const menuRef = useRef<(id: string) => void>(() => {});
+  menuRef.current = (id) => {
+    if (id === "fit") resetView();
+  };
+  useEffect(() => onPanelMenu(props.api.id, (id) => menuRef.current(id)), [props.api.id]);
 
   return (
     <>

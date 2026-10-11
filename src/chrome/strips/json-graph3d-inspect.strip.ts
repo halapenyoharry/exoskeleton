@@ -43,6 +43,7 @@ export const json3dInspectStrip: PaneStripItem[] = [
       ],
     },
   },
+  { id: "fit", kind: "button", icon: "⤢", label: "fit", tooltip: "Fit graph to view" },
 ];
 
 registerStrip("json-graph3d-inspect", json3dInspectStrip);

@@ -4,3 +4,6 @@ import "./json-graph3d.strip.ts";
 import "./json-graph.strip.ts";
 import "./json-cytoscape.strip.ts";
 import "./json-tree.strip.ts";
+import "./json-circles.strip.ts";
+import "./json-mass.strip.ts";
+import "./editor.strip.ts";

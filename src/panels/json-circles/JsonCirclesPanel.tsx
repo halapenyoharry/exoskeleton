@@ -9,6 +9,7 @@ import {
 } from "../../osc/channels";
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats } from "../../data/json-utils/docStats";
+import { onPanelMenu } from "../../panel-menu";
 import { useElementSize } from "../../useElementSize";
 import {
   jsonToHierarchy,
@@ -421,6 +422,14 @@ export default function JsonCirclesPanel(
     params.panZoomMin,
     params.panZoomMax,
   ]);
+
+  useEffect(
+    () =>
+      onPanelMenu(props.api.id, (id) => {
+        if (id === "reset") resetRef.current();
+      }),
+    [props.api.id],
+  );
 
   return (
     <>

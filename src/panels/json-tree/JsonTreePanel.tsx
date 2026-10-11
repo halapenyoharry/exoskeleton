@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
+import { onPanelMenu } from "../../panel-menu";
 import * as d3 from "d3";
 import {
   getActiveDocumentId,
@@ -120,6 +121,13 @@ export default function JsonTreePanel(
   // D3 rendering.
   const svgRef = useRef<SVGSVGElement | null>(null);
   const resetRef = useRef<() => void>(() => {});
+
+  // Drawer-strip "reset" button dispatches to the hidden toolbar's action.
+  const menuRef = useRef<(id: string) => void>(() => {});
+  menuRef.current = (id) => {
+    if (id === "reset") resetRef.current();
+  };
+  useEffect(() => onPanelMenu(props.api.id, (id) => menuRef.current(id)), [props.api.id]);
 
   useEffect(() => {
     if (!containerRef.current) return;

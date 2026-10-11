@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
+import { onPanelMenu } from "../../panel-menu";
 import ForceGraph3D from "react-force-graph-3d";
 import type { ForceGraphMethods } from "react-force-graph-3d";
 import SpriteText from "three-spritetext";
@@ -704,6 +705,13 @@ export default function JsonGraph3DInspectPanel(
   }, [activeDocId, nodesById, props.api.id]);
 
   const resetView = () => fgRef.current?.zoomToFit(params.fitDuration, params.fitPadding);
+
+  // Drawer-strip "fit" button dispatches to the hidden toolbar's action.
+  const menuRef = useRef<(id: string) => void>(() => {});
+  menuRef.current = (id) => {
+    if (id === "fit") resetView();
+  };
+  useEffect(() => onPanelMenu(props.api.id, (id) => menuRef.current(id)), [props.api.id]);
 
   const linkVisible = (l: FGLink) => {
     if (l.layer && params.layerVisibility[l.layer] === false) return false;

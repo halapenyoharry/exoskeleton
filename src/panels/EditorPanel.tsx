@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
 import {
   errorText,
@@ -8,6 +8,7 @@ import {
   readTextFileAt,
   saveTextFile,
 } from "../utils/file-io";
+import { onPanelMenu } from "../panel-menu";
 import { useFlash } from "../utils/useFlash";
 import "./EditorPanel.css";
 
@@ -84,6 +85,19 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
     }
   }
 
+  // Drawer strip buttons. Latest handlers via ref so state is never stale.
+  const actions = { openFile, saveFile: () => { if (!dirty && path) return; return saveFile(); } };
+  const actionsRef = useRef(actions);
+  actionsRef.current = actions;
+  useEffect(
+    () =>
+      onPanelMenu(props.api.id, (id) => {
+        if (id === "open") void actionsRef.current.openFile();
+        else if (id === "save") void actionsRef.current.saveFile();
+      }),
+    [props.api.id],
+  );
+
   // Pure content — the host wraps this in PanelRoot via exoPanel().
   return (
     <>
@@ -92,6 +106,10 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
         <button onClick={saveFile} disabled={!dirty && !!path}>
           save
         </button>
+      </div>
+      {/* Status line lives in the content, not the toolbar, so it stays
+          visible when the toolbar is replaced by the pane drawer. */}
+      <div className="editor-status">
         <span style={{ flex: 1, color: "#4a6a78", fontStyle: dirty ? "italic" : "normal" }}>
           {path ?? "untitled"}{dirty ? " •" : ""}
         </span>

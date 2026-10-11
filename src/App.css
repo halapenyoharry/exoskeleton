@@ -438,3 +438,17 @@
 /* Panels with a registered drawer strip: their inline toolbar lives in the drawer. */
 .panel-pad[data-has-strip="true"] .panel-header,
 .panel-pad[data-has-strip="true"] .panel-toolbar { display: none; }
+
+/* Editor status line (path · dirty · flash): content-level, below the pill. */
+.editor-status {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 4px 10px 2px 10px;
+  font-size: 11px;
+  font-family: Menlo, monospace;
+  min-height: 20px;
+}
+.dv-groupview.exo-single-tab .panel-pad .editor-status {
+  padding-left: calc(var(--exo-pill-w, 160px) + 12px);
+}
