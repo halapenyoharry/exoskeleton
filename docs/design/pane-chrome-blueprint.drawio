@@ -43,13 +43,12 @@
 <mxCell id="d4" value="△ ⌖ 3D-Inspect  ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#ffd166;strokeWidth=1;fontColor=#ffd166;fontFamily=Menlo;fontSize=11;opacity=70" vertex="1" parent="1">
         <mxGeometry x="180" y="480" width="150" height="30" as="geometry"/>
       </mxCell>
-<mxCell id="d5" value="+" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#8896a0;strokeWidth=1;fontColor=#8896a0;fontFamily=Menlo;fontSize=12" vertex="1" parent="1">
-        <mxGeometry x="338" y="480" width="30" height="30" as="geometry"/>
+<mxCell id="d5" value="+   ⤴   ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#8896a0;strokeWidth=1;fontColor=#8896a0;fontFamily=Menlo;fontSize=12" vertex="1" parent="1"><mxGeometry x="488" y="480" width="100" height="30" as="geometry"/></mxCell>
+<mxCell id="d5n" value="GROUP CONTROLS, upper right of the group: + new tab here · ⤴ pop out · × close group. Not in the pills." style="text;html=1;align=right;verticalAlign=top;fontColor=#8896a0;fontSize=9;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="300" y="514" width="288" height="30" as="geometry"/></mxCell>
+<mxCell id="d6" value="pills = △ title ×  (no +). Active pane solid, others outline. Click to switch, drag to move. Narrow group: pills collapse to glyphs." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
+        <mxGeometry x="52" y="548" width="536" height="30" as="geometry"/>
       </mxCell>
-<mxCell id="d6" value="active pane = solid pill; others = outline. Click a pill to switch; drag a pill to move the pane. Narrow group: pills collapse to glyphs." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
-        <mxGeometry x="52" y="530" width="536" height="30" as="geometry"/>
-      </mxCell>
-<mxCell id="d7" value="DECIDE: is this right, or keep Dockview's plain tab strip for 2+ panes (what you have today, and said was fine)?" style="text;html=1;align=left;fontColor=#ff4d8d;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="d7" value="DECIDE: a lone pane is also a group — does its pill keep the + (as drawn in A), or does + always sit in the group controls top-right, even for one pane? Proposal: always top-right, so the rule has no exceptions." style="text;html=1;align=left;fontColor=#ff4d8d;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="40" y="695" width="560" height="20" as="geometry"/>
       </mxCell>
 <mxCell id="e0" value="E · PANE SETTINGS zone (contents)" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
