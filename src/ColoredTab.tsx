@@ -153,6 +153,19 @@ function PillTab(props: IDockviewPanelHeaderProps) {
       root.style.setProperty("--exo-pill-w", `${Math.ceil(row.getBoundingClientRect().width)}px`);
     });
     ro.observe(row);
+    // Compact mode: if the pill row can't fit, inactive pills go glyph-only
+    // (measured by removing the flag, checking overflow, and re-applying).
+    const checkCompact = () => {
+      root.removeAttribute("data-compact");
+      if (row.scrollWidth > row.clientWidth + 1) root.setAttribute("data-compact", "true");
+    };
+    const scroller = (row.parentElement as HTMLElement | null) ?? row;
+    const ro3 = new ResizeObserver(checkCompact);
+    ro3.observe(scroller);
+    ro3.observe(root);
+    const mo2 = new MutationObserver(checkCompact);
+    mo2.observe(row, { childList: true, subtree: true, characterData: true });
+    checkCompact();
     // Publish the corner controls' width the same way (the container may
     // mount after the pill, so watch for it).
     let corner: HTMLElement | null = null;
@@ -173,6 +186,8 @@ function PillTab(props: IDockviewPanelHeaderProps) {
     return () => {
       ro.disconnect();
       ro2.disconnect();
+      ro3.disconnect();
+      mo2.disconnect();
       mo.disconnect();
       // Other pills of the same group may remain; only the last one cleans up.
       queueMicrotask(() => {
@@ -180,6 +195,7 @@ function PillTab(props: IDockviewPanelHeaderProps) {
         root.style.removeProperty("--exo-corner-w");
         root.classList.remove("exo-single-tab");
         root.style.removeProperty("--exo-pill-w");
+        root.removeAttribute("data-compact");
       });
     };
   }, []);

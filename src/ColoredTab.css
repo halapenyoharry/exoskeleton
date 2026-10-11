@@ -240,3 +240,22 @@
   -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
   mask-image: linear-gradient(to bottom, #000 55%, transparent);
 }
+
+/* ---- Never overflow: pills shrink to glyph-only first ------------------ */
+.dockview-theme-abyss .dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-tabs-container {
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+.dockview-theme-abyss .dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-tab,
+.dockview-theme-abyss .dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-tab.dv-active-tab,
+.dockview-theme-abyss .dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-tab.dv-inactive-tab {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.exo-pill { min-width: 0; }
+.dv-groupview.exo-single-tab .dv-right-actions-container { flex-shrink: 0; }
+.dv-groupview[data-compact="true"] .exo-pill:not(.is-active) .exo-pill__title { display: none; }
+.dv-groupview[data-compact="true"] .exo-pill:not(.is-active) .exo-pill__btn:not(.exo-pill__tri) { display: none; }
+/* Hide dockview's overflow chevron outright as a backstop. */
+.dv-groupview.exo-single-tab .dv-tabs-overflow-dropdown-root,
+.dv-groupview.exo-single-tab .dv-tabs-overflow-container { display: none !important; }

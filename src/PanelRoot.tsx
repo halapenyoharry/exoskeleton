@@ -4,7 +4,8 @@ import { resolveComponentKey } from "./ColoredTab";
 import { initPaneChrome, setPaneOpen, setPanePinned, usePaneChrome } from "./pane-chrome-state";
 
 import { PaneDrawer } from "./chrome/PaneDrawer";
-import "./chrome/strips/json-graph3d-inspect.strip";
+import "./chrome/strips";
+import { getStrip } from "./chrome/strip-registry";
 
 function PaneDrawerHost(props: IDockviewPanelProps<any>) {
   const id = props.api.id;
@@ -149,6 +150,7 @@ export function PanelRoot({
   children,
   style,
   toolbarVisible,
+  hasStrip,
 }: {
   accent?: string;
   className?: string;
@@ -156,11 +158,14 @@ export function PanelRoot({
   style?: CSSProperties;
   /** false hides the panel's toolbar row (.panel-header / .panel-toolbar). */
   toolbarVisible?: boolean;
+  /** true when the panel has a registered drawer strip (inline toolbar hidden by CSS). */
+  hasStrip?: boolean;
 }) {
   return (
     <div
       className={className ? `panel-pad ${className}` : "panel-pad"}
       data-toolbar-visible={toolbarVisible === false ? "false" : undefined}
+      data-has-strip={hasStrip ? "true" : undefined}
       style={{ "--panel-accent": accent ?? "transparent", ...style } as CSSProperties}
     >
       {children}
@@ -181,6 +186,8 @@ export function exoPanel<P extends Record<string, any>>(
 ) {
   return function Wrapped(props: IDockviewPanelProps<P>) {
     const title = props.api.title ?? props.api.id;
+    const componentKey = resolveComponentKey(props.api.id) ?? props.api.id;
+    const hasStrip = !!getStrip(componentKey);
     return (
       <PanelErrorBoundary
         panelTitle={title}
@@ -189,6 +196,7 @@ export function exoPanel<P extends Record<string, any>>(
       >
         <PanelRoot
           accent={accent}
+          hasStrip={hasStrip}
           toolbarVisible={
             (props.params as { toolbarVisible?: boolean } | undefined)?.toolbarVisible
           }

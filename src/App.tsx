@@ -567,6 +567,7 @@ export default function App() {
         components={components}
         // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —
         singleTabMode="fullwidth"
+        disableTabsOverflowList
         defaultTabComponent={ColoredTab}
         watermarkComponent={Watermark}
         rightHeaderActionsComponent={RightHeaderActions}

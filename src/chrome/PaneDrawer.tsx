@@ -9,7 +9,7 @@ import { Segmented, SwatchPicker, Toggle } from "../components/toolbar/Toolbar";
 import { emitPanelMenu } from "../panel-menu";
 import type { PaneCell, PaneStripItem } from "../panel-manifest";
 import { getStrip } from "./strip-registry";
-import { gridColumns, spanToPlacement } from "./grid-math";
+import { drawerColumns, spanToPlacement } from "./grid-math";
 import pkg from "../../package.json";
 import "./PaneDrawer.css";
 
@@ -29,7 +29,9 @@ export interface PaneDrawerProps {
 }
 
 const SETTINGS_ID = "__settings";
-const DEFAULT_SIZE = { horizontal: 150, vertical: 168 };
+const MIN_VERTICAL = 260;
+const DEFAULT_VERTICAL = 300;
+const MIN_HORIZONTAL_BODY = 72;
 const ACCENTS = ["#7ddff5", "#ffb454", "#7dffb0", "#ff7da8", "#b69cff"];
 
 type Params = Record<string, unknown>;
@@ -171,10 +173,13 @@ export function PaneDrawer(props: PaneDrawerProps) {
   const strip = useMemo<PaneStripItem[]>(() => getStrip(componentKey) ?? getStrip(panelId) ?? [], [componentKey, panelId]);
   const [active, setActive] = useState<string>(() => strip.find((s) => s.kind === "tab")?.id ?? SETTINGS_ID);
   const rootRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(600);
 
   const orientation: DrawerOrientation = params.drawerOrientation === "vertical" ? "vertical" : "horizontal";
-  const size = typeof params.drawerSize === "number" ? params.drawerSize : DEFAULT_SIZE[orientation];
+  const rawSize = typeof params.drawerSize === "number" ? params.drawerSize : undefined;
+  // horizontal: max body height (undefined = fit content); vertical: drawer width.
+  const size = orientation === "vertical" ? Math.max(MIN_VERTICAL, rawSize ?? DEFAULT_VERTICAL) : rawSize;
 
   // Restore pinned state from params once.
   useEffect(() => {
@@ -212,10 +217,13 @@ export function PaneDrawer(props: PaneDrawerProps) {
     const el = e.currentTarget as HTMLElement;
     el.setPointerCapture(e.pointerId);
     const start = orientation === "horizontal" ? e.clientY : e.clientX;
-    const base = size;
+    const base = orientation === "vertical"
+      ? size ?? DEFAULT_VERTICAL
+      : rawSize ?? bodyRef.current?.offsetHeight ?? 150;
     const move = (ev: PointerEvent) => {
       const d = (orientation === "horizontal" ? ev.clientY : ev.clientX) - start;
-      write({ drawerSize: Math.round(Math.min(600, Math.max(72, base + d))) });
+      const lo = orientation === "vertical" ? MIN_VERTICAL : MIN_HORIZONTAL_BODY;
+      write({ drawerSize: Math.round(Math.min(900, Math.max(lo, base + d))) });
     };
     const up = () => { el.removeEventListener("pointermove", move); el.removeEventListener("pointerup", up); el.removeEventListener("pointercancel", up); };
     el.addEventListener("pointermove", move);
@@ -228,7 +236,7 @@ export function PaneDrawer(props: PaneDrawerProps) {
   const tabs = strip.filter((s) => s.kind === "tab");
   const current = active === SETTINGS_ID ? undefined : tabs.find((t) => t.id === active) ?? tabs[0];
   const showSettings = active === SETTINGS_ID || !current;
-  const columns = gridColumns(orientation, width - 24);
+  const columns = drawerColumns(orientation, width - 24);
 
   const pickItem = (item: PaneStripItem) => {
     if (item.kind === "tab") setActive(item.id);
@@ -239,12 +247,12 @@ export function PaneDrawer(props: PaneDrawerProps) {
     <div
       ref={rootRef}
       className={`pane-drawer pane-drawer--${orientation}`}
-      style={{ ["--pd-size" as string]: `${size}px` }}
+      style={size === undefined ? undefined : { ["--pd-size" as string]: `${size}px` }}
       data-pane-drawer
       role="region"
       aria-label="Pane controls"
     >
-      <div className="pd-strip" role="tablist" aria-orientation={orientation}>
+      <div className="pd-strip" role="tablist">
         {strip.map((item) => (
           <button key={item.id} type="button" className="pd-pos" role={item.kind === "tab" ? "tab" : undefined}
             aria-selected={item.kind === "tab" ? item.id === current?.id && !showSettings : undefined}
@@ -253,10 +261,12 @@ export function PaneDrawer(props: PaneDrawerProps) {
             <span className="pd-pos-label">{item.label}</span>
           </button>
         ))}
+        {strip.length > 0 && <span className="pd-sep" role="separator" aria-hidden="true" />}
         <button type="button" className="pd-pos" role="tab" aria-selected={showSettings} title="Pane settings" onClick={() => setActive(SETTINGS_ID)}>
           <span className="pd-pos-icon" aria-hidden="true">⚙</span>
           <span className="pd-pos-label">pane</span>
         </button>
+        <span className="pd-spacer" />
         <button type="button" className="pd-pos pd-pos--host" title={orientation === "horizontal" ? "Dock drawer to the left" : "Span drawer across the top"}
           onClick={() => write({ drawerOrientation: orientation === "horizontal" ? "vertical" : "horizontal", drawerSize: undefined })}>
           <span className="pd-pos-icon" aria-hidden="true">⇅</span>
@@ -266,12 +276,12 @@ export function PaneDrawer(props: PaneDrawerProps) {
           📌
         </button>
       </div>
-      <div className="pd-body">
+      <div className="pd-body" ref={bodyRef}>
         {showSettings ? (
           <SettingsBody p={{ ...props, params, write }} />
         ) : current?.body ? (
           <div className={current.body.layout === "grid" ? "pd-grid" : "pd-stack"}
-            style={current.body.layout === "grid" ? { gridTemplateColumns: `repeat(${columns}, 52px)` } : undefined}>
+            style={current.body.layout === "grid" ? { gridTemplateColumns: `repeat(${columns}, minmax(52px, auto))` } : undefined}>
             {current.body.cells.map((c) => (
               <Cell key={c.param} cell={c} params={params} write={write} columns={columns} stack={current.body!.layout === "stack"} />
             ))}

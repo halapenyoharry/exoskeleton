@@ -30,3 +30,13 @@ export function gridColumns(orientation: "horizontal" | "vertical", widthPx: num
   if (orientation === "vertical") return 2;
   return Math.max(3, Math.floor((widthPx + CELL_GAP) / (CELL_UNIT + CELL_GAP)));
 }
+
+/** Vertical drawer columns by width: 2-up when narrow, 3-up from ~400px. */
+export function verticalColumns(widthPx: number): number {
+  return widthPx >= 400 ? 3 : 2;
+}
+
+/** Columns for the drawer in either orientation. */
+export function drawerColumns(orientation: "horizontal" | "vertical", widthPx: number): number {
+  return orientation === "vertical" ? verticalColumns(widthPx) : gridColumns(orientation, widthPx);
+}
