@@ -1,197 +1,199 @@
-<mxfile host="app.diagrams.net" modified="2026-10-11T00:00:00.000Z" agent="exoskeleton" version="24.0.0" type="device">
-  <diagram id="pane-chrome" name="Pane chrome blueprint">
-    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" background="#0a0e27" math="0" shadow="0">
-      <mxCell id="0"/>
-      <mxCell id="1" parent="0"/>
-      <mxCell id="t0" value="EXOSKELETON — PANE CHROME BLUEPRINT (draft for Harold, 2026-10-11). Dark boxes = pane content. Pills and drawers float over content; content never reflows. Edit anything; red notes are open decisions." style="text;html=1;align=left;verticalAlign=middle;fontColor=#8896a0;fontSize=12;fontFamily=Menlo" vertex="1" parent="1">
+<mxfile host="app.diagrams.net" type="device">
+<diagram id="pane-chrome" name="Pane chrome blueprint">
+<mxGraphModel grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" background="#0a0e27">
+<root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+<mxCell id="t0" value="EXOSKELETON — PANE CHROME BLUEPRINT (draft for Harold, 2026-10-11). Dark boxes = pane content. Pills and drawers float over content; content never reflows. Edit anything; red notes are open decisions." style="text;html=1;align=left;verticalAlign=middle;fontColor=#8896a0;fontSize=12;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="40" y="20" width="1400" height="30" as="geometry"/>
       </mxCell>
-      <mxCell id="a0" value="A · COLLAPSED (default)" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="a0" value="A · COLLAPSED (default)" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="40" y="60" width="300" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="a1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1">
+<mxCell id="a1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1">
         <mxGeometry x="40" y="90" width="420" height="300" as="geometry"/>
       </mxCell>
-      <mxCell id="a2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=none;opacity=35;" vertex="1" parent="1">
+<mxCell id="a2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=none;opacity=35;" vertex="1" parent="1">
         <mxGeometry x="40" y="90" width="420" height="60" as="geometry"/>
       </mxCell>
-      <mxCell id="a2n" value="scrim: slight darkening + slight blur under the title area&#10;(two GLOBAL settings, not per pane; no lines)" style="text;html=1;align=left;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
+<mxCell id="a2n" value="scrim: slight darkening + slight blur under the title area&#10;(two GLOBAL settings, not per pane; no lines)" style="text;html=1;align=left;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
         <mxGeometry x="200" y="100" width="260" height="40" as="geometry"/>
       </mxCell>
-      <mxCell id="a3" value="△  ◆ editor            +  ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;fontColor=#18ffff;fontFamily=Menlo;fontSize=12;align=left;spacingLeft=12;" vertex="1" parent="1">
+<mxCell id="a3" value="△  ◆ editor            +  ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;fontColor=#18ffff;fontFamily=Menlo;fontSize=12;align=left;spacingLeft=12;" vertex="1" parent="1">
         <mxGeometry x="52" y="100" width="150" height="32" as="geometry"/>
       </mxCell>
-      <mxCell id="a4" value="pane content (full height, top to bottom)" style="text;html=1;align=center;fontColor=#3a4a6a;fontSize=11;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="a4" value="pane content (full height, top to bottom)" style="text;html=1;align=center;fontColor=#3a4a6a;fontSize=11;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="40" y="230" width="420" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="a5" value="△ opens the drawer (B/C)&#10;◆ glyph + accent = identity&#10;title = drag handle&#10;+ = add a sibling pane here&#10;× = close this pane" style="text;html=1;align=left;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
+<mxCell id="a5" value="△ opens the drawer (B/C)&#10;◆ glyph + accent = identity&#10;title = drag handle&#10;+ = add a sibling pane here&#10;× = close this pane" style="text;html=1;align=left;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
         <mxGeometry x="52" y="300" width="300" height="80" as="geometry"/>
       </mxCell>
-      <mxCell id="a6" value="DECIDE: corner — left (drawn) or right (said)? Proposal: left, global setting." style="text;html=1;align=left;fontColor=#ff4d8d;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="a6" value="DECIDE: corner — left (drawn) or right (said)? Proposal: left, global setting." style="text;html=1;align=left;fontColor=#ff4d8d;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="40" y="395" width="420" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="b0" value="B · EXPANDED — drawer, HORIZONTAL orientation" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="b0" value="B · EXPANDED — drawer, HORIZONTAL orientation" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="520" y="60" width="400" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="b1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1">
+<mxCell id="b1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1">
         <mxGeometry x="520" y="90" width="560" height="300" as="geometry"/>
       </mxCell>
-      <mxCell id="b2" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;opacity=95;" vertex="1" parent="1">
+<mxCell id="b2" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;opacity=95;" vertex="1" parent="1">
         <mxGeometry x="532" y="100" width="536" height="186" as="geometry"/>
       </mxCell>
-      <mxCell id="b3" value="▽  ◆ editor      ≡            +  ×" style="text;html=1;align=left;fontColor=#18ffff;fontFamily=Menlo;fontSize=12;spacingLeft=10;verticalAlign=middle" vertex="1" parent="1">
+<mxCell id="b3" value="▽  ◆ editor      ≡            +  ×" style="text;html=1;align=left;fontColor=#18ffff;fontFamily=Menlo;fontSize=12;spacingLeft=10;verticalAlign=middle" vertex="1" parent="1">
         <mxGeometry x="532" y="104" width="300" height="28" as="geometry"/>
       </mxCell>
-      <mxCell id="b3n" value="≡ = component menu (New, Open, Library…)&#10;from manifest.menu" style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
+<mxCell id="b3n" value="≡ = component menu (New, Open, Library…)&#10;from manifest.menu" style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
         <mxGeometry x="840" y="104" width="220" height="28" as="geometry"/>
       </mxCell>
-      <mxCell id="b4" value="CONTROLS" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=#18ffff;strokeColor=none;fontColor=#0a0e27;fontFamily=Menlo;fontSize=10;fontStyle=1" vertex="1" parent="1">
+<mxCell id="b4" value="CONTROLS" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=#18ffff;strokeColor=none;fontColor=#0a0e27;fontFamily=Menlo;fontSize=10;fontStyle=1" vertex="1" parent="1">
         <mxGeometry x="544" y="136" width="90" height="22" as="geometry"/>
       </mxCell>
-      <mxCell id="b5" value="PANE SETTINGS" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;fontColor=#18ffff;fontFamily=Menlo;fontSize=10" vertex="1" parent="1">
+<mxCell id="b5" value="PANE SETTINGS" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;fontColor=#18ffff;fontFamily=Menlo;fontSize=10" vertex="1" parent="1">
         <mxGeometry x="640" y="136" width="110" height="22" as="geometry"/>
       </mxCell>
-      <mxCell id="b6" value="⇅" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#8896a0;fontColor=#8896a0;fontFamily=Menlo;fontSize=12" vertex="1" parent="1">
+<mxCell id="b6" value="⇅" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#8896a0;fontColor=#8896a0;fontFamily=Menlo;fontSize=12" vertex="1" parent="1">
         <mxGeometry x="1030" y="136" width="28" height="22" as="geometry"/>
       </mxCell>
-      <mxCell id="b6n" value="orientation button (not a tab): flips B ⇄ C" style="text;html=1;align=right;fontColor=#8896a0;fontSize=9;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="b6n" value="orientation button (not a tab): flips B ⇄ C" style="text;html=1;align=right;fontColor=#8896a0;fontSize=9;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="770" y="138" width="255" height="18" as="geometry"/>
       </mxCell>
-      <mxCell id="b7a" value="2D|3D" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontFamily=Menlo;fontSize=9;dashed=0" vertex="1" parent="1">
+<mxCell id="b7a" value="2D|3D" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontFamily=Menlo;fontSize=9;dashed=0" vertex="1" parent="1">
         <mxGeometry x="544" y="166" width="44" height="44" as="geometry"/>
       </mxCell>
-      <mxCell id="b7b" value="●●●●" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#ffd166;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
+<mxCell id="b7b" value="●●●●" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#ffd166;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
         <mxGeometry x="596" y="166" width="44" height="44" as="geometry"/>
       </mxCell>
-      <mxCell id="b7c" value="◯|⬡" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
+<mxCell id="b7c" value="◯|⬡" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
         <mxGeometry x="648" y="166" width="44" height="44" as="geometry"/>
       </mxCell>
-      <mxCell id="b7d" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1" vertex="1" parent="1">
+<mxCell id="b7d" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1" vertex="1" parent="1">
         <mxGeometry x="700" y="166" width="44" height="44" as="geometry"/>
       </mxCell>
-      <mxCell id="b7e" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1" vertex="1" parent="1">
+<mxCell id="b7e" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1" vertex="1" parent="1">
         <mxGeometry x="752" y="166" width="44" height="44" as="geometry"/>
       </mxCell>
-      <mxCell id="b7n" value="5 SLOTS, fixed 44×44 each (touch minimum).&#10;Slot types: segmented · toggle · swatch · dial · stepper.&#10;Our user picks what goes here for their users.&#10;Empty slots drawn dashed. Visual, not text." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
+<mxCell id="b7n" value="5 SLOTS, fixed 44×44 each (touch minimum).&#10;Slot types: segmented · toggle · swatch · dial · stepper.&#10;Our user picks what goes here for their users.&#10;Empty slots drawn dashed. Visual, not text." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
         <mxGeometry x="810" y="162" width="256" height="52" as="geometry"/>
       </mxCell>
-      <mxCell id="b8" value="pane component controls (optional) — overflow beyond 5 slots, same primitives, wraps" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1;fontColor=#8896a0;fontFamily=Menlo;fontSize=9;align=left;spacingLeft=8" vertex="1" parent="1">
+<mxCell id="b8" value="pane component controls (optional) — overflow beyond 5 slots, same primitives, wraps" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1;fontColor=#8896a0;fontFamily=Menlo;fontSize=9;align=left;spacingLeft=8" vertex="1" parent="1">
         <mxGeometry x="544" y="218" width="514" height="28" as="geometry"/>
       </mxCell>
-      <mxCell id="b9" value="〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰" style="text;html=1;align=left;fontColor=#3a4a6a;fontSize=8;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="b9" value="〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰" style="text;html=1;align=left;fontColor=#3a4a6a;fontSize=8;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="544" y="248" width="514" height="12" as="geometry"/>
       </mxCell>
-      <mxCell id="b10" value="about — manifest.description · docs link · version" style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="b10" value="about — manifest.description · docs link · version" style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="544" y="262" width="514" height="18" as="geometry"/>
       </mxCell>
-      <mxCell id="b11" value="pane content continues underneath (drawer overlays; resize handle on drawer's bottom edge)" style="text;html=1;align=center;fontColor=#3a4a6a;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="b11" value="pane content continues underneath (drawer overlays; resize handle on drawer's bottom edge)" style="text;html=1;align=center;fontColor=#3a4a6a;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="520" y="320" width="560" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="b12" value="DECIDE: always 5 squares (empties shown) or up to 5? · overlay vs push content? (proposal: overlay)" style="text;html=1;align=left;fontColor=#ff4d8d;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="b12" value="DECIDE: always 5 squares (empties shown) or up to 5? · overlay vs push content? (proposal: overlay)" style="text;html=1;align=left;fontColor=#ff4d8d;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="520" y="395" width="560" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="c0" value="C · EXPANDED — drawer, VERTICAL orientation" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="c0" value="C · EXPANDED — drawer, VERTICAL orientation" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="1140" y="60" width="400" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="c1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1">
+<mxCell id="c1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1">
         <mxGeometry x="1140" y="90" width="420" height="300" as="geometry"/>
       </mxCell>
-      <mxCell id="c2" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;opacity=95;" vertex="1" parent="1">
+<mxCell id="c2" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;opacity=95;" vertex="1" parent="1">
         <mxGeometry x="1152" y="100" width="120" height="280" as="geometry"/>
       </mxCell>
-      <mxCell id="c3" value="▽ ◆ editor&#10;≡        + ×" style="text;html=1;align=left;fontColor=#18ffff;fontFamily=Menlo;fontSize=11;spacingLeft=8;verticalAlign=top" vertex="1" parent="1">
+<mxCell id="c3" value="▽ ◆ editor&#10;≡        + ×" style="text;html=1;align=left;fontColor=#18ffff;fontFamily=Menlo;fontSize=11;spacingLeft=8;verticalAlign=top" vertex="1" parent="1">
         <mxGeometry x="1152" y="104" width="120" height="34" as="geometry"/>
       </mxCell>
-      <mxCell id="c4" value="CTRL" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=#18ffff;strokeColor=none;fontColor=#0a0e27;fontFamily=Menlo;fontSize=9;fontStyle=1" vertex="1" parent="1">
+<mxCell id="c4" value="CTRL" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=#18ffff;strokeColor=none;fontColor=#0a0e27;fontFamily=Menlo;fontSize=9;fontStyle=1" vertex="1" parent="1">
         <mxGeometry x="1160" y="142" width="42" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="c5" value="SET" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;fontColor=#18ffff;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
+<mxCell id="c5" value="SET" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;fontColor=#18ffff;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
         <mxGeometry x="1206" y="142" width="34" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="c6" value="⇆" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#8896a0;fontColor=#8896a0;fontFamily=Menlo;fontSize=11" vertex="1" parent="1">
+<mxCell id="c6" value="⇆" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#8896a0;fontColor=#8896a0;fontFamily=Menlo;fontSize=11" vertex="1" parent="1">
         <mxGeometry x="1244" y="142" width="22" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="c7a" value="2D|3D" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
+<mxCell id="c7a" value="2D|3D" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
         <mxGeometry x="1160" y="170" width="44" height="44" as="geometry"/>
       </mxCell>
-      <mxCell id="c7b" value="●●●●" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#ffd166;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
+<mxCell id="c7b" value="●●●●" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#ffd166;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
         <mxGeometry x="1212" y="170" width="44" height="44" as="geometry"/>
       </mxCell>
-      <mxCell id="c7c" value="◯|⬡" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
+<mxCell id="c7c" value="◯|⬡" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
         <mxGeometry x="1160" y="222" width="44" height="44" as="geometry"/>
       </mxCell>
-      <mxCell id="c7d" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1" vertex="1" parent="1">
+<mxCell id="c7d" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1" vertex="1" parent="1">
         <mxGeometry x="1212" y="222" width="44" height="44" as="geometry"/>
       </mxCell>
-      <mxCell id="c7e" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1" vertex="1" parent="1">
+<mxCell id="c7e" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1" vertex="1" parent="1">
         <mxGeometry x="1160" y="274" width="44" height="44" as="geometry"/>
       </mxCell>
-      <mxCell id="c8" value="〰〰〰〰〰〰&#10;about" style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top;spacingLeft=6" vertex="1" parent="1">
+<mxCell id="c8" value="〰〰〰〰〰〰&#10;about" style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top;spacingLeft=6" vertex="1" parent="1">
         <mxGeometry x="1152" y="334" width="120" height="40" as="geometry"/>
       </mxCell>
-      <mxCell id="c9" value="same drawer, 2-up slot grid.&#10;Resize handle on the right edge.&#10;Content continues underneath." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
+<mxCell id="c9" value="same drawer, 2-up slot grid.&#10;Resize handle on the right edge.&#10;Content continues underneath." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
         <mxGeometry x="1290" y="104" width="260" height="60" as="geometry"/>
       </mxCell>
-      <mxCell id="c10" value="pane content" style="text;html=1;align=center;fontColor=#3a4a6a;fontSize=11;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="c10" value="pane content" style="text;html=1;align=center;fontColor=#3a4a6a;fontSize=11;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="1290" y="230" width="250" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="d0" value="D · GROUP WITH 2+ PANES (proposal: a row of title pills, no tab strip)" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="d0" value="D · GROUP WITH 2+ PANES (proposal: a row of title pills, no tab strip)" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="40" y="440" width="600" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="d1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1">
+<mxCell id="d1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1">
         <mxGeometry x="40" y="470" width="560" height="220" as="geometry"/>
       </mxCell>
-      <mxCell id="d2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=none;opacity=35;" vertex="1" parent="1">
+<mxCell id="d2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=none;opacity=35;" vertex="1" parent="1">
         <mxGeometry x="40" y="470" width="560" height="52" as="geometry"/>
       </mxCell>
-      <mxCell id="d3" value="△ ◆ editor  ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;fontColor=#18ffff;fontFamily=Menlo;fontSize=11;" vertex="1" parent="1">
+<mxCell id="d3" value="△ ◆ editor  ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;fontColor=#18ffff;fontFamily=Menlo;fontSize=11;" vertex="1" parent="1">
         <mxGeometry x="52" y="480" width="120" height="30" as="geometry"/>
       </mxCell>
-      <mxCell id="d4" value="△ ⌖ 3D-Inspect  ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#ffd166;strokeWidth=1;fontColor=#ffd166;fontFamily=Menlo;fontSize=11;opacity=70" vertex="1" parent="1">
+<mxCell id="d4" value="△ ⌖ 3D-Inspect  ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#ffd166;strokeWidth=1;fontColor=#ffd166;fontFamily=Menlo;fontSize=11;opacity=70" vertex="1" parent="1">
         <mxGeometry x="180" y="480" width="150" height="30" as="geometry"/>
       </mxCell>
-      <mxCell id="d5" value="+" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#8896a0;strokeWidth=1;fontColor=#8896a0;fontFamily=Menlo;fontSize=12" vertex="1" parent="1">
+<mxCell id="d5" value="+" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#8896a0;strokeWidth=1;fontColor=#8896a0;fontFamily=Menlo;fontSize=12" vertex="1" parent="1">
         <mxGeometry x="338" y="480" width="30" height="30" as="geometry"/>
       </mxCell>
-      <mxCell id="d6" value="active pane = solid pill; others = outline. Click a pill to switch; drag a pill to move the pane. Narrow group: pills collapse to glyphs." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
+<mxCell id="d6" value="active pane = solid pill; others = outline. Click a pill to switch; drag a pill to move the pane. Narrow group: pills collapse to glyphs." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
         <mxGeometry x="52" y="530" width="536" height="30" as="geometry"/>
       </mxCell>
-      <mxCell id="d7" value="DECIDE: is this right, or keep Dockview's plain tab strip for 2+ panes (what you have today, and said was fine)?" style="text;html=1;align=left;fontColor=#ff4d8d;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="d7" value="DECIDE: is this right, or keep Dockview's plain tab strip for 2+ panes (what you have today, and said was fine)?" style="text;html=1;align=left;fontColor=#ff4d8d;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="40" y="695" width="560" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="e0" value="E · PANE SETTINGS zone (contents)" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="e0" value="E · PANE SETTINGS zone (contents)" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="660" y="440" width="400" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="e1" value="⤢ maximize / restore&#10;⤴ pop out (desktop only)&#10;⇄ move to… (touch has no drag)&#10;🔗 follow active document / pin to a document&#10;◆ accent color&#10;▭ show compact controls" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1;fontColor=#8896a0;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=6" vertex="1" parent="1">
+<mxCell id="e1" value="⤢ maximize / restore&#10;⤴ pop out (desktop only)&#10;⇄ move to… (touch has no drag)&#10;🔗 follow active document / pin to a document&#10;◆ accent color&#10;▭ show compact controls" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1;fontColor=#8896a0;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=6" vertex="1" parent="1">
         <mxGeometry x="660" y="470" width="300" height="120" as="geometry"/>
       </mxCell>
-      <mxCell id="e2" value="= what the pill ☰ shows below the rule today.&#10;Pane-scoped, not component-scoped." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
+<mxCell id="e2" value="= what the pill ☰ shows below the rule today.&#10;Pane-scoped, not component-scoped." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
         <mxGeometry x="970" y="470" width="200" height="40" as="geometry"/>
       </mxCell>
-      <mxCell id="f0" value="F · SAME SHAPE, THREE SCALES" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="f0" value="F · SAME SHAPE, THREE SCALES" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="1140" y="440" width="400" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="f1" value="APP  ⊞ → floating menu pane&#10;sections · about" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#8896a0;fontColor=#8896a0;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+<mxCell id="f1" value="APP  ⊞ → floating menu pane&#10;sections · about" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#8896a0;fontColor=#8896a0;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
         <mxGeometry x="1140" y="470" width="400" height="44" as="geometry"/>
       </mxCell>
-      <mxCell id="f2" value="PANE  △ → drawer&#10;zones · 5 slots · compact controls · about" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;fontColor=#18ffff;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+<mxCell id="f2" value="PANE  △ → drawer&#10;zones · 5 slots · compact controls · about" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;fontColor=#18ffff;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
         <mxGeometry x="1160" y="524" width="360" height="44" as="geometry"/>
       </mxCell>
-      <mxCell id="f3" value="SLOT  one 44×44 square → one visual control" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#ffd166;fontColor=#ffd166;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+<mxCell id="f3" value="SLOT  one 44×44 square → one visual control" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#ffd166;fontColor=#ffd166;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
         <mxGeometry x="1180" y="578" width="320" height="34" as="geometry"/>
       </mxCell>
-      <mxCell id="f4" value="one contract (title · sections · about), three sizes. The manifest declares menu, slots, settings, about; the host draws them." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
+<mxCell id="f4" value="one contract (title · sections · about), three sizes. The manifest declares menu, slots, settings, about; the host draws them." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
         <mxGeometry x="1140" y="622" width="400" height="40" as="geometry"/>
       </mxCell>
-      <mxCell id="g0" value="G · WHAT A PANEL DECLARES (manifest), WHAT THE HOST DRAWS" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
+<mxCell id="g0" value="G · WHAT A PANEL DECLARES (manifest), WHAT THE HOST DRAWS" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="40" y="740" width="700" height="20" as="geometry"/>
       </mxCell>
-      <mxCell id="g1" value="manifest {&#10;  id, title, glyph, accent&#10;  menu:     [ …items… ]            → ≡&#10;  slots:    [ up to 5 × {type, param, icon, tooltip} ] → the squares&#10;  controls: [ …more of the same… ]  → compact controls (optional)&#10;  settings: { followActive, pinned, … } → PANE SETTINGS zone&#10;  about:    { description, docs }   → about&#10;}" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#3a4a6a;fontColor=#8896a0;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=6" vertex="1" parent="1">
+<mxCell id="g1" value="manifest {&#10;  id, title, glyph, accent&#10;  menu:     [ …items… ]            → ≡&#10;  slots:    [ up to 5 × {type, param, icon, tooltip} ] → the squares&#10;  controls: [ …more of the same… ]  → compact controls (optional)&#10;  settings: { followActive, pinned, … } → PANE SETTINGS zone&#10;  about:    { description, docs }   → about&#10;}" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#3a4a6a;fontColor=#8896a0;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=6" vertex="1" parent="1">
         <mxGeometry x="40" y="770" width="560" height="150" as="geometry"/>
       </mxCell>
-      <mxCell id="g2" value="host rules (fixed, not per panel):&#10;· slot = 44×44, gap 8 → 5 slots ≈ 252px; below 240px pane width the pill is glyph-only and slots go 2-up&#10;· drawer overlays content; resizable; orientation per pane, remembered&#10;· scrim darkening + blur are global settings&#10;· slot types are the only vocabulary: segmented · toggle · swatch · dial · stepper (no free text)&#10;· every control has a tooltip in plain words" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#3a4a6a;fontColor=#8896a0;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=6" vertex="1" parent="1">
+<mxCell id="g2" value="host rules (fixed, not per panel):&#10;· slot = 44×44, gap 8 → 5 slots ≈ 252px; below 240px pane width the pill is glyph-only and slots go 2-up&#10;· drawer overlays content; resizable; orientation per pane, remembered&#10;· scrim darkening + blur are global settings&#10;· slot types are the only vocabulary: segmented · toggle · swatch · dial · stepper (no free text)&#10;· every control has a tooltip in plain words" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#3a4a6a;fontColor=#8896a0;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=6" vertex="1" parent="1">
         <mxGeometry x="620" y="770" width="560" height="150" as="geometry"/>
       </mxCell>
-    </mxGraphModel>
-  </diagram>
+</root>
+</mxGraphModel>
+</diagram>
 </mxfile>
