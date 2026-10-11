@@ -4,9 +4,6 @@
 <root>
 <mxCell id="0"/>
 <mxCell id="1" parent="0"/>
-<mxCell id="t0" value="EXOSKELETON — PANE CHROME BLUEPRINT (draft for Harold, 2026-10-11). Dark boxes = pane content. Pills and drawers float over content; content never reflows. Edit anything; red notes are open decisions." style="text;html=1;align=left;verticalAlign=middle;fontColor=#8896a0;fontSize=12;fontFamily=Menlo" vertex="1" parent="1">
-        <mxGeometry x="40" y="20" width="1400" height="30" as="geometry"/>
-      </mxCell>
 <mxCell id="a0" value="A · COLLAPSED (default)" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="40" y="60" width="300" height="20" as="geometry"/>
       </mxCell>
@@ -30,111 +27,6 @@
       </mxCell>
 <mxCell id="a6" value="DECIDE: corner — left (drawn) or right (said)? Proposal: left, global setting." style="text;html=1;align=left;fontColor=#ff4d8d;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="40" y="395" width="420" height="20" as="geometry"/>
-      </mxCell>
-<mxCell id="b0" value="B · EXPANDED — drawer, HORIZONTAL orientation" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
-        <mxGeometry x="520" y="60" width="400" height="20" as="geometry"/>
-      </mxCell>
-<mxCell id="b1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1">
-        <mxGeometry x="520" y="90" width="560" height="300" as="geometry"/>
-      </mxCell>
-<mxCell id="b2" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;opacity=95;" vertex="1" parent="1">
-        <mxGeometry x="532" y="100" width="536" height="186" as="geometry"/>
-      </mxCell>
-<mxCell id="b3" value="▽  ◆ editor      ≡            +  ×" style="text;html=1;align=left;fontColor=#18ffff;fontFamily=Menlo;fontSize=12;spacingLeft=10;verticalAlign=middle" vertex="1" parent="1">
-        <mxGeometry x="532" y="104" width="300" height="28" as="geometry"/>
-      </mxCell>
-<mxCell id="b3n" value="≡ = component menu (New, Open, Library…)&#10;from manifest.menu" style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
-        <mxGeometry x="840" y="104" width="220" height="28" as="geometry"/>
-      </mxCell>
-<mxCell id="b4" value="CONTROLS" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=#18ffff;strokeColor=none;fontColor=#0a0e27;fontFamily=Menlo;fontSize=10;fontStyle=1" vertex="1" parent="1">
-        <mxGeometry x="544" y="136" width="90" height="22" as="geometry"/>
-      </mxCell>
-<mxCell id="b5" value="PANE SETTINGS" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;fontColor=#18ffff;fontFamily=Menlo;fontSize=10" vertex="1" parent="1">
-        <mxGeometry x="640" y="136" width="110" height="22" as="geometry"/>
-      </mxCell>
-<mxCell id="b6" value="⇅" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#8896a0;fontColor=#8896a0;fontFamily=Menlo;fontSize=12" vertex="1" parent="1">
-        <mxGeometry x="1030" y="136" width="28" height="22" as="geometry"/>
-      </mxCell>
-<mxCell id="b6n" value="orientation button (not a tab): flips B ⇄ C" style="text;html=1;align=right;fontColor=#8896a0;fontSize=9;fontFamily=Menlo" vertex="1" parent="1">
-        <mxGeometry x="770" y="138" width="255" height="18" as="geometry"/>
-      </mxCell>
-<mxCell id="b7a" value="2D|3D" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontFamily=Menlo;fontSize=9;dashed=0" vertex="1" parent="1">
-        <mxGeometry x="544" y="166" width="44" height="44" as="geometry"/>
-      </mxCell>
-<mxCell id="b7b" value="●●●●" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#ffd166;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
-        <mxGeometry x="596" y="166" width="44" height="44" as="geometry"/>
-      </mxCell>
-<mxCell id="b7c" value="◯|⬡" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
-        <mxGeometry x="648" y="166" width="44" height="44" as="geometry"/>
-      </mxCell>
-<mxCell id="b7d" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1" vertex="1" parent="1">
-        <mxGeometry x="700" y="166" width="44" height="44" as="geometry"/>
-      </mxCell>
-<mxCell id="b7e" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1" vertex="1" parent="1">
-        <mxGeometry x="752" y="166" width="44" height="44" as="geometry"/>
-      </mxCell>
-<mxCell id="b7n" value="5 SLOTS, fixed 44×44 each (touch minimum).&#10;Slot types: segmented · toggle · swatch · dial · stepper.&#10;Our user picks what goes here for their users.&#10;Empty slots drawn dashed. Visual, not text." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
-        <mxGeometry x="810" y="162" width="256" height="52" as="geometry"/>
-      </mxCell>
-<mxCell id="b8" value="pane component controls (optional) — overflow beyond 5 slots, same primitives, wraps" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1;fontColor=#8896a0;fontFamily=Menlo;fontSize=9;align=left;spacingLeft=8" vertex="1" parent="1">
-        <mxGeometry x="544" y="218" width="514" height="28" as="geometry"/>
-      </mxCell>
-<mxCell id="b9" value="〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰〰" style="text;html=1;align=left;fontColor=#3a4a6a;fontSize=8;fontFamily=Menlo" vertex="1" parent="1">
-        <mxGeometry x="544" y="248" width="514" height="12" as="geometry"/>
-      </mxCell>
-<mxCell id="b10" value="about — manifest.description · docs link · version" style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo" vertex="1" parent="1">
-        <mxGeometry x="544" y="262" width="514" height="18" as="geometry"/>
-      </mxCell>
-<mxCell id="b11" value="pane content continues underneath (drawer overlays; resize handle on drawer's bottom edge)" style="text;html=1;align=center;fontColor=#3a4a6a;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
-        <mxGeometry x="520" y="320" width="560" height="20" as="geometry"/>
-      </mxCell>
-<mxCell id="b12" value="DECIDE: always 5 squares (empties shown) or up to 5? · overlay vs push content? (proposal: overlay)" style="text;html=1;align=left;fontColor=#ff4d8d;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
-        <mxGeometry x="520" y="395" width="560" height="20" as="geometry"/>
-      </mxCell>
-<mxCell id="c0" value="C · EXPANDED — drawer, VERTICAL orientation" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
-        <mxGeometry x="1140" y="60" width="400" height="20" as="geometry"/>
-      </mxCell>
-<mxCell id="c1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1">
-        <mxGeometry x="1140" y="90" width="420" height="300" as="geometry"/>
-      </mxCell>
-<mxCell id="c2" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;opacity=95;" vertex="1" parent="1">
-        <mxGeometry x="1152" y="100" width="120" height="280" as="geometry"/>
-      </mxCell>
-<mxCell id="c3" value="▽ ◆ editor&#10;≡        + ×" style="text;html=1;align=left;fontColor=#18ffff;fontFamily=Menlo;fontSize=11;spacingLeft=8;verticalAlign=top" vertex="1" parent="1">
-        <mxGeometry x="1152" y="104" width="120" height="34" as="geometry"/>
-      </mxCell>
-<mxCell id="c4" value="CTRL" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=#18ffff;strokeColor=none;fontColor=#0a0e27;fontFamily=Menlo;fontSize=9;fontStyle=1" vertex="1" parent="1">
-        <mxGeometry x="1160" y="142" width="42" height="20" as="geometry"/>
-      </mxCell>
-<mxCell id="c5" value="SET" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;fontColor=#18ffff;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
-        <mxGeometry x="1206" y="142" width="34" height="20" as="geometry"/>
-      </mxCell>
-<mxCell id="c6" value="⇆" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#8896a0;fontColor=#8896a0;fontFamily=Menlo;fontSize=11" vertex="1" parent="1">
-        <mxGeometry x="1244" y="142" width="22" height="20" as="geometry"/>
-      </mxCell>
-<mxCell id="c7a" value="2D|3D" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
-        <mxGeometry x="1160" y="170" width="44" height="44" as="geometry"/>
-      </mxCell>
-<mxCell id="c7b" value="●●●●" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#ffd166;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
-        <mxGeometry x="1212" y="170" width="44" height="44" as="geometry"/>
-      </mxCell>
-<mxCell id="c7c" value="◯|⬡" style="whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontFamily=Menlo;fontSize=9" vertex="1" parent="1">
-        <mxGeometry x="1160" y="222" width="44" height="44" as="geometry"/>
-      </mxCell>
-<mxCell id="c7d" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1" vertex="1" parent="1">
-        <mxGeometry x="1212" y="222" width="44" height="44" as="geometry"/>
-      </mxCell>
-<mxCell id="c7e" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;dashed=1" vertex="1" parent="1">
-        <mxGeometry x="1160" y="274" width="44" height="44" as="geometry"/>
-      </mxCell>
-<mxCell id="c8" value="〰〰〰〰〰〰&#10;about" style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top;spacingLeft=6" vertex="1" parent="1">
-        <mxGeometry x="1152" y="334" width="120" height="40" as="geometry"/>
-      </mxCell>
-<mxCell id="c9" value="same drawer, 2-up slot grid.&#10;Resize handle on the right edge.&#10;Content continues underneath." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
-        <mxGeometry x="1290" y="104" width="260" height="60" as="geometry"/>
-      </mxCell>
-<mxCell id="c10" value="pane content" style="text;html=1;align=center;fontColor=#3a4a6a;fontSize=11;fontFamily=Menlo" vertex="1" parent="1">
-        <mxGeometry x="1290" y="230" width="250" height="20" as="geometry"/>
       </mxCell>
 <mxCell id="d0" value="D · GROUP WITH 2+ PANES (proposal: a row of title pills, no tab strip)" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="40" y="440" width="600" height="20" as="geometry"/>
@@ -187,12 +79,46 @@
 <mxCell id="g0" value="G · WHAT A PANEL DECLARES (manifest), WHAT THE HOST DRAWS" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
         <mxGeometry x="40" y="740" width="700" height="20" as="geometry"/>
       </mxCell>
-<mxCell id="g1" value="manifest {&#10;  id, title, glyph, accent&#10;  menu:     [ …items… ]            → ≡&#10;  slots:    [ up to 5 × {type, param, icon, tooltip} ] → the squares&#10;  controls: [ …more of the same… ]  → compact controls (optional)&#10;  settings: { followActive, pinned, … } → PANE SETTINGS zone&#10;  about:    { description, docs }   → about&#10;}" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#3a4a6a;fontColor=#8896a0;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=6" vertex="1" parent="1">
-        <mxGeometry x="40" y="770" width="560" height="150" as="geometry"/>
-      </mxCell>
 <mxCell id="g2" value="host rules (fixed, not per panel):&#10;· slot = 44×44, gap 8 → 5 slots ≈ 252px; below 240px pane width the pill is glyph-only and slots go 2-up&#10;· drawer overlays content; resizable; orientation per pane, remembered&#10;· scrim darkening + blur are global settings&#10;· slot types are the only vocabulary: segmented · toggle · swatch · dial · stepper (no free text)&#10;· every control has a tooltip in plain words" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#3a4a6a;fontColor=#8896a0;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=6" vertex="1" parent="1">
         <mxGeometry x="620" y="770" width="560" height="150" as="geometry"/>
       </mxCell>
+<mxCell id="b0" value="B · EXPANDED — drawer (header strip of 4 positions; body = active tab)" style="text;html=1;align=left;verticalAlign=top;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="520" y="60" width="560" height="20" as="geometry"/></mxCell>
+<mxCell id="b1" value="" style="rounded=1;arcSize=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;fontColor=#3a4a6a;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="520" y="90" width="560" height="300" as="geometry"/></mxCell>
+<mxCell id="b2" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="532" y="100" width="300" height="282" as="geometry"/></mxCell>
+<mxCell id="b3" value="▽  ◆ editor         📌  +  ×" style="text;html=1;align=left;verticalAlign=top;fontColor=#18ffff;fontSize=12;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="536" y="104" width="290" height="24" as="geometry"/></mxCell>
+<mxCell id="b3n" value="📌 = pin? (keep drawer open) — or pop-out? YOU TELL ME. Only shown while open." style="text;html=1;align=left;verticalAlign=top;fontColor=#ff4d8d;fontSize=9;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="840" y="104" width="230" height="40" as="geometry"/></mxCell>
+<mxCell id="b4" value="1" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=#18ffff;strokeColor=#18ffff;strokeWidth=1;fontColor=#0a0e27;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="544" y="134" width="56" height="26" as="geometry"/></mxCell>
+<mxCell id="b5" value="2" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="606" y="134" width="56" height="26" as="geometry"/></mxCell>
+<mxCell id="b6" value="⚙" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="668" y="134" width="56" height="26" as="geometry"/></mxCell>
+<mxCell id="b7" value="⇅" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#8896a0;strokeWidth=1;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="730" y="134" width="56" height="26" as="geometry"/></mxCell>
+<mxCell id="b4n" value="1 2 3 4 = fixed positions. Each is a TAB (opens a body) or a BUTTON (acts). Here: 1,2 = tabs; 3 = ⚙ pane settings tab; 4 = orientation BUTTON. Active tab is solid and joins its body." style="text;html=1;align=left;verticalAlign=top;fontColor=#8896a0;fontSize=9;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="840" y="134" width="230" height="80" as="geometry"/></mxCell>
+<mxCell id="b8" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;strokeWidth=1;" vertex="1" parent="1"><mxGeometry x="544" y="166" width="242" height="200" as="geometry"/></mxCell>
+<mxCell id="b9" value="2×2" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="552" y="174" width="112" height="112" as="geometry"/></mxCell>
+<mxCell id="b10" value="1×1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="672" y="174" width="52" height="52" as="geometry"/></mxCell>
+<mxCell id="b11" value="1×1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="732" y="174" width="46" height="52" as="geometry"/></mxCell>
+<mxCell id="b12" value="2×1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="672" y="234" width="106" height="52" as="geometry"/></mxCell>
+<mxCell id="b13" value="" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;fontColor=#3a4a6a;fontSize=10;fontFamily=Menlo;dashed=1;" vertex="1" parent="1"><mxGeometry x="552" y="294" width="52" height="52" as="geometry"/></mxCell>
+<mxCell id="b14" value="" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;fontColor=#3a4a6a;fontSize=10;fontFamily=Menlo;dashed=1;" vertex="1" parent="1"><mxGeometry x="612" y="294" width="52" height="52" as="geometry"/></mxCell>
+<mxCell id="b15" value="3×1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="672" y="294" width="106" height="52" as="geometry"/></mxCell>
+<mxCell id="b8n" value="BODY, variant 1: CARD GRID. Fixed grid unit (proposal 52px); a control takes 1×1, 2×1, 2×2 or 3×1 cells. Empty cells dashed. Visual controls only: segmented · toggle · swatch · dial · stepper." style="text;html=1;align=left;verticalAlign=top;fontColor=#8896a0;fontSize=9;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="840" y="220" width="230" height="90" as="geometry"/></mxCell>
+<mxCell id="b16" value="pane content continues underneath (drawer overlays; resizable)" style="text;html=1;align=center;verticalAlign=top;fontColor=#3a4a6a;fontSize=9;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="520" y="392" width="560" height="16" as="geometry"/></mxCell>
+<mxCell id="b17" value="DECIDE: grid vs stack — per tab by the panel author, or a user toggle? · 4 positions fixed or max 4?" style="text;html=1;align=left;verticalAlign=top;fontColor=#ff4d8d;fontSize=10;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="520" y="410" width="560" height="16" as="geometry"/></mxCell>
+<mxCell id="c0" value="C · SAME DRAWER, body variant 2: STACK OF ROWS" style="text;html=1;align=left;verticalAlign=top;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="1140" y="60" width="420" height="20" as="geometry"/></mxCell>
+<mxCell id="c1" value="" style="rounded=1;arcSize=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;fontColor=#3a4a6a;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1140" y="90" width="420" height="300" as="geometry"/></mxCell>
+<mxCell id="c2" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1152" y="100" width="250" height="282" as="geometry"/></mxCell>
+<mxCell id="c3" value="▽  ◆ editor      📌  +  ×" style="text;html=1;align=left;verticalAlign=top;fontColor=#18ffff;fontSize=12;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="1156" y="104" width="240" height="24" as="geometry"/></mxCell>
+<mxCell id="c4" value="1" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1164" y="134" width="48" height="26" as="geometry"/></mxCell>
+<mxCell id="c5" value="2" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=#18ffff;strokeColor=#18ffff;strokeWidth=1;fontColor=#0a0e27;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1218" y="134" width="48" height="26" as="geometry"/></mxCell>
+<mxCell id="c6" value="⚙" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1272" y="134" width="48" height="26" as="geometry"/></mxCell>
+<mxCell id="c7" value="⇅" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#8896a0;strokeWidth=1;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1326" y="134" width="48" height="26" as="geometry"/></mxCell>
+<mxCell id="c8" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1164" y="166" width="210" height="200" as="geometry"/></mxCell>
+<mxCell id="c90" value="row — one control or one setting, full width" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1172" y="174" width="194" height="40" as="geometry"/></mxCell>
+<mxCell id="c91" value="row — one control or one setting, full width" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1172" y="222" width="194" height="40" as="geometry"/></mxCell>
+<mxCell id="c92" value="row — one control or one setting, full width" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1172" y="270" width="194" height="40" as="geometry"/></mxCell>
+<mxCell id="c93" value="row — one control or one setting, full width" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1172" y="318" width="194" height="40" as="geometry"/></mxCell>
+<mxCell id="c8n" value="rows: full-width, fixed height, scroll if many. Good for settings (⚙ tab) and for lists. Same primitives as the grid." style="text;html=1;align=left;verticalAlign=top;fontColor=#8896a0;fontSize=9;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="1410" y="170" width="145" height="120" as="geometry"/></mxCell>
+<mxCell id="c10" value="pane content underneath" style="text;html=1;align=center;verticalAlign=top;fontColor=#3a4a6a;fontSize=9;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="1140" y="392" width="420" height="16" as="geometry"/></mxCell>
+<mxCell id="g1" value="manifest {&#10;  id, title, glyph, accent&#10;  menu:  [ …items… ]  → ≡ (or a button position)&#10;  strip: [ up to 4 × { kind: tab | button, icon, tooltip,&#10;                       body?: { layout: grid | stack, cells: [ {type, param, span} ] } } ]&#10;  settings: { followActive, pinned, … } → the ⚙ tab (host-provided)&#10;  about: { description, docs } → inside ⚙, bottom&#10;}" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#3a4a6a;strokeWidth=1;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;align=left;spacingLeft=10;verticalAlign=top;spacingTop=6;" vertex="1" parent="1"><mxGeometry x="40" y="770" width="560" height="150" as="geometry"/></mxCell>
 </root>
 </mxGraphModel>
 </diagram>
