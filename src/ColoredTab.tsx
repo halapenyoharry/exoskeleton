@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import "./chrome-settings";
+import { initPaneChrome, setPaneOpen, setPanePinned, usePaneChrome } from "./pane-chrome-state";
 import { createPortal } from "react-dom";
-import { DockviewDefaultTab, type IDockviewPanelHeaderProps } from "dockview";
+import type { IDockviewPanelHeaderProps } from "dockview";
 import editorManifest from "./panels/editor.manifest";
 import webviewManifest from "./panels/webview.manifest";
 import dyadicManifest from "./panels/json-dyadic/manifest";
@@ -13,13 +15,6 @@ import "./ColoredTab.css";
 for (const m of [editorManifest, webviewManifest, dyadicManifest, jsonEditManifest]) {
   registerPanelMenu(m.id, m.menu);
 }
-
-// Panels with a toolbar row (manifest `toolbar: true`) get a toggle in the pill.
-// Listed by id here to avoid importing every manifest into the chrome.
-const toolbarPanels = new Set([
-  "editor", "webview", "json-dyadic", "json-tree", "json-graph",
-  "json-cytoscape", "json-mass", "json-circles", "json-graph3d",
-]);
 
 // Customize Dockview's default tab without replacing it. The default tab
 // carries the drag-and-drop plumbing (pointer event handlers, drag start /
@@ -110,42 +105,8 @@ export function panelGlyph(id: string): string {
 }
 
 export default function ColoredTab(props: IDockviewPanelHeaderProps) {
-  const [single, setSingle] = useState(
-    () => props.api.group.panels.length === 1,
-  );
-
-  useEffect(() => {
-    const update = () => setSingle(props.api.group.panels.length === 1);
-    update();
-    const subs = [
-      props.containerApi.onDidAddPanel(update),
-      props.containerApi.onDidRemovePanel(update),
-      props.containerApi.onDidLayoutChange(update),
-    ];
-    return () => subs.forEach((d) => d.dispose());
-  }, [props.api, props.containerApi]);
-
-  if (single) return <PillTab {...props} />;
-  return <PlainTab {...props} />;
-}
-
-function PlainTab(props: IDockviewPanelHeaderProps) {
-  const id = props.api.id;
-  const key = resolveComponentKey(id) ?? id;
-  const accent = accents[key] ?? "inherit";
-  const glyph = glyphs[key] ?? '"·"';
-
-  return (
-    <DockviewDefaultTab
-      {...props}
-      style={
-        {
-          color: accent,
-          "--tab-glyph": glyph,
-        } as React.CSSProperties
-      }
-    />
-  );
+  // Every tab is a pill; a lone pane is a row of one.
+  return <PillTab {...props} />;
 }
 
 const stop = (e: React.SyntheticEvent) => e.stopPropagation();
@@ -155,19 +116,28 @@ function PillTab(props: IDockviewPanelHeaderProps) {
   const key = resolveComponentKey(id) ?? id;
   const accent = accents[key] ?? "inherit";
   const glyph = panelGlyph(id);
-  const hasToolbar = toolbarPanels.has(key);
+  const pinnedParam = props.api.getParameters<{ drawerPinned?: boolean }>().drawerPinned === true;
+  initPaneChrome(id, pinnedParam);
+  const { open, pinned } = usePaneChrome(id);
+  const [active, setActive] = useState(() => props.api.group.activePanel?.id === props.api.id);
+  const holdRef = useRef<number | undefined>(undefined);
 
   const pillRef = useRef<HTMLDivElement>(null);
   const [title, setTitle] = useState(props.api.title ?? id);
-  const [toolbarVisible, setToolbarVisible] = useState(
-    () => props.api.getParameters<{ toolbarVisible?: boolean }>().toolbarVisible !== false,
-  );
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
   const [moveOpen, setMoveOpen] = useState(false);
 
   useEffect(() => {
     const d = props.api.onDidTitleChange((e) => setTitle(e.title));
-    return () => d.dispose();
+    const sync = () => setActive(props.api.group.activePanel?.id === props.api.id);
+    sync();
+    const d2 = props.api.group.api.onDidActivePanelChange(sync);
+    const d3 = props.api.onDidGroupChange(sync);
+    return () => {
+      d.dispose();
+      d2.dispose();
+      d3.dispose();
+    };
   }, [props.api]);
 
   // Mark the group root so CSS can overlay the header on the content.
@@ -177,10 +147,12 @@ function PillTab(props: IDockviewPanelHeaderProps) {
     if (!pill || !root) return;
     root.classList.add("exo-single-tab");
     // Publish the pill's width so panel headers underneath can pad past it.
+    // The whole row (tabs container) is what toolbars must clear.
+    const row = (pill.closest(".dv-tabs-container") as HTMLElement | null) ?? pill;
     const ro = new ResizeObserver(() => {
-      root.style.setProperty("--exo-pill-w", `${Math.ceil(pill.getBoundingClientRect().width)}px`);
+      root.style.setProperty("--exo-pill-w", `${Math.ceil(row.getBoundingClientRect().width)}px`);
     });
-    ro.observe(pill);
+    ro.observe(row);
     // Publish the corner controls' width the same way (the container may
     // mount after the pill, so watch for it).
     let corner: HTMLElement | null = null;
@@ -202,9 +174,13 @@ function PillTab(props: IDockviewPanelHeaderProps) {
       ro.disconnect();
       ro2.disconnect();
       mo.disconnect();
-      root.style.removeProperty("--exo-corner-w");
-      root.classList.remove("exo-single-tab");
-      root.style.removeProperty("--exo-pill-w");
+      // Other pills of the same group may remain; only the last one cleans up.
+      queueMicrotask(() => {
+        if (root.querySelector(".exo-pill")) return;
+        root.style.removeProperty("--exo-corner-w");
+        root.classList.remove("exo-single-tab");
+        root.style.removeProperty("--exo-pill-w");
+      });
     };
   }, []);
 
@@ -231,16 +207,33 @@ function PillTab(props: IDockviewPanelHeaderProps) {
     onMouseDown: stop,
   } as const;
 
-  function openMenu() {
-    const r = pillRef.current!.getBoundingClientRect();
+  function toggleDrawer() {
+    if (!active) {
+      props.api.setActive();
+      return;
+    }
+    setPaneOpen(id, !open);
+  }
+  // Temporary bridge: the component menu opens on right-click / long-press of the title.
+  function openMenuAt(x: number, y: number) {
     setMoveOpen(false);
-    setMenu(menu ? null : { x: r.left, y: r.bottom + 4 });
+    setMenu({ x, y });
   }
-  function toggleToolbar() {
-    const next = !toolbarVisible;
-    setToolbarVisible(next);
-    props.api.updateParameters({ toolbarVisible: next });
-  }
+  const labelHandlers = {
+    onContextMenu: (e: React.MouseEvent) => {
+      e.preventDefault();
+      openMenuAt(e.clientX, e.clientY);
+    },
+    onPointerDown: (e: React.PointerEvent) => {
+      if (e.pointerType !== "touch") return;
+      const { clientX: x, clientY: y } = e;
+      window.clearTimeout(holdRef.current);
+      holdRef.current = window.setTimeout(() => openMenuAt(x, y), 550);
+    },
+    onPointerUp: () => window.clearTimeout(holdRef.current),
+    onPointerCancel: () => window.clearTimeout(holdRef.current),
+    onPointerMove: () => window.clearTimeout(holdRef.current),
+  };
   const act = (fn: () => void) => () => {
     setMenu(null);
     fn();
@@ -269,33 +262,34 @@ function PillTab(props: IDockviewPanelHeaderProps) {
   return (
     <div
       ref={pillRef}
-      className="exo-pill"
-      style={{ color: accent }}
+      data-pane-chrome
+      className={`exo-pill${active ? " is-active" : ""}${open ? " is-open" : ""}`}
+      style={{ color: accent, "--pill-accent": accent } as React.CSSProperties}
       title={title}
     >
       <button
-        className="exo-pill__btn"
-        aria-label="Pane menu"
-        aria-expanded={!!menu}
+        className="exo-pill__btn exo-pill__tri"
+        aria-label={open ? "Close drawer" : "Open drawer"}
+        aria-expanded={open}
         {...guard}
-        onClick={openMenu}
+        onClick={toggleDrawer}
       >
-        ☰
+        △
       </button>
-      <span className="exo-pill__label">
+      <span className="exo-pill__label" {...labelHandlers}>
         <span className="exo-pill__glyph">{glyph}</span>
         <span className="exo-pill__title">{title}</span>
       </span>
-      {hasToolbar && (
+      {open && (
         <button
-          className={`exo-pill__btn exo-pill__toolbar${toolbarVisible ? " is-on" : ""}`}
-          aria-label="Toggle toolbar"
-          aria-pressed={toolbarVisible}
-          title="Toggle toolbar"
+          className={`exo-pill__btn exo-pill__pin${pinned ? " is-on" : ""}`}
+          aria-label="Pin drawer open"
+          aria-pressed={pinned}
+          title="Keep the drawer open"
           {...guard}
-          onClick={toggleToolbar}
+          onClick={() => setPanePinned(id, !pinned, props.api)}
         >
-          ▭
+          📌
         </button>
       )}
       <button

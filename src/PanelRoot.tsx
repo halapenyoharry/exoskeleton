@@ -1,5 +1,28 @@
 import { Component, type ComponentType, type CSSProperties, type ErrorInfo, type ReactNode } from "react";
 import type { IDockviewPanelProps } from "dockview";
+import { resolveComponentKey } from "./ColoredTab";
+import { initPaneChrome, setPaneOpen, setPanePinned, usePaneChrome } from "./pane-chrome-state";
+
+import { PaneDrawer } from "./chrome/PaneDrawer";
+import "./chrome/strips/json-graph3d-inspect.strip";
+
+function PaneDrawerHost(props: IDockviewPanelProps<any>) {
+  const id = props.api.id;
+  initPaneChrome(id, (props.params as { drawerPinned?: boolean } | undefined)?.drawerPinned === true);
+  const { open, pinned } = usePaneChrome(id);
+  return (
+    <PaneDrawer
+      panelId={id}
+      componentKey={resolveComponentKey(id) ?? id}
+      api={props.api}
+      containerApi={props.containerApi}
+      open={open}
+      onOpenChange={(o) => setPaneOpen(id, o)}
+      pinned={pinned}
+      onPinnedChange={(v) => setPanePinned(id, v, props.api)}
+    />
+  );
+}
 
 interface PanelErrorBoundaryProps {
   panelTitle: string;
@@ -171,6 +194,7 @@ export function exoPanel<P extends Record<string, any>>(
           }
         >
           <Component {...props} />
+          <PaneDrawerHost {...props} />
         </PanelRoot>
       </PanelErrorBoundary>
     );

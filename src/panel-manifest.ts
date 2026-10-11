@@ -135,6 +135,40 @@ export interface PanelMenuItem {
   children?: PanelMenuItem[];
 }
 
+/**
+ * Pane chrome v2 drawer vocabulary. A panel *declares* its drawer strip
+ * (docs/design/pane-chrome-blueprint.drawio, sections B, C, E, G); the host
+ * (src/chrome/PaneDrawer.tsx) renders it. Each cell binds to a panel param
+ * of the same name. Max 4 author positions; the host appends a settings tab
+ * and an orientation button.
+ */
+export interface PaneCell {
+  type: "segmented" | "toggle" | "swatch" | "stepper" | "dial";
+  /** Panel param this cell reads and writes. */
+  param: string;
+  label: string;
+  tooltip?: string;
+  /** [columns, rows] on the 52px grid unit: 1x1, 2x1, 2x2, 3x1. Default [1,1]. */
+  span?: [number, number];
+  /** segmented / swatch choices. Option values are strings; numeric params
+   *  are matched by String(value) and written back as numbers when the
+   *  option value is numeric-looking and the current value is a number. */
+  options?: { value: string; label?: string; icon?: string; color?: string }[];
+  min?: number;
+  max?: number;
+  step?: number;
+}
+
+export interface PaneStripItem {
+  id: string;
+  kind: "tab" | "button";
+  icon: string;
+  label: string;
+  tooltip?: string;
+  /** Tabs only. */
+  body?: { layout: "grid" | "stack"; cells: PaneCell[] };
+}
+
 export interface PanelManifest<P extends Record<string, any> = Record<string, any>> {
   // ─── identity ────────────────────────────────────────────────
 
@@ -150,6 +184,9 @@ export interface PanelManifest<P extends Record<string, any> = Record<string, an
    *  shows a toggle that writes `toolbarVisible` into panel params
    *  (default true); the panel reads it and hides its toolbar. */
   toolbar?: boolean;
+
+  /** Drawer strip (pane chrome v2). See PaneStripItem. Up to 4 positions. */
+  strip?: PaneStripItem[];
 
   /** Panel-specific items for the pill's ☰ menu. See PanelMenuItem. */
   menu?: PanelMenuItem[];

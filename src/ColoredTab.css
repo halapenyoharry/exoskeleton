@@ -69,9 +69,9 @@
   margin: 4px 0 0 6px;
   padding: 0 4px;
   border-radius: 14px;
-  background: rgba(14, 16, 20, 0.72);
-  backdrop-filter: blur(6px);
-  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, currentColor 55%, transparent);
+  opacity: 0.7;
   font-size: 12px;
   white-space: nowrap;
   max-width: calc(100cqw - 16px);
@@ -90,7 +90,16 @@
   opacity: 0.85;
 }
 .exo-pill__btn:hover { background: rgba(255, 255, 255, 0.12); opacity: 1; }
-.exo-pill__toolbar:not(.is-on) { opacity: 0.45; }
+.exo-pill.is-active {
+  background: var(--pill-accent, currentColor);
+  color: #0d1326 !important;
+  border-color: var(--pill-accent, currentColor);
+  opacity: 1;
+}
+.exo-pill__tri { transition: transform 0.12s; }
+.exo-pill.is-open .exo-pill__tri { transform: rotate(180deg); }
+.exo-pill__pin:not(.is-on) { opacity: 0.5; }
+.exo-pill.is-active .exo-pill__btn:hover { background: rgba(0, 0, 0, 0.18); }
 .exo-pill__label {
   display: inline-flex;
   align-items: center;
@@ -103,7 +112,7 @@
 .exo-pill__title { overflow: hidden; text-overflow: ellipsis; }
 
 @container exo-pane (max-width: 240px) {
-  .exo-pill__title { display: none; }
+  .exo-pill:not(.is-active) .exo-pill__title { display: none; }
   /* Narrow pane: the corner cluster collapses to just × so it never
      overlaps the glyph-only pill; the pill always wins the z-order. */
   .dv-groupview.exo-single-tab .dv-right-actions-container .header-btn:not(.header-btn--danger) {
@@ -165,8 +174,7 @@
   height: 28px;
   margin: 4px 6px 0 0;
   border-radius: 14px;
-  background: rgba(14, 16, 20, 0.72);
-  backdrop-filter: blur(6px);
+  background: rgba(14, 16, 20, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-sizing: border-box;
   pointer-events: auto;
@@ -184,4 +192,51 @@
     border-radius: 22px;
   }
   .header-btn { min-width: 40px; min-height: 40px; }
+}
+
+/* ---- Pill row: every group (1+ tabs) --------------------------------
+   Dockview's tab strip stays the container (drag/drop intact); its chrome
+   is stripped and the tabs become gapped pills. */
+.dockview-theme-abyss .dv-groupview.exo-single-tab > .dv-tabs-and-actions-container {
+  --dv-tabs-and-actions-container-height: auto;
+}
+.dockview-theme-abyss .dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-scrollable {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: calc(100% - var(--exo-corner-w, 96px) - 8px);
+  background: transparent;
+}
+.dockview-theme-abyss .dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-tabs-container {
+  gap: 4px;
+  background: transparent;
+  height: auto;
+}
+.dockview-theme-abyss .dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-tab,
+.dockview-theme-abyss .dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-tab.dv-active-tab,
+.dockview-theme-abyss .dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-tab.dv-inactive-tab {
+  background: transparent;
+  border: none;
+  padding: 0;
+  height: auto;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+/* Scrim: darkening gradient + blur band under the pill row. Strength comes
+   from the global chrome settings (--exo-scrim-darken / --exo-scrim-blur). */
+.dv-groupview.exo-single-tab > .dv-tabs-and-actions-container::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 -14px 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 8, 18, var(--exo-scrim-darken, 0.35)),
+    transparent
+  );
+  backdrop-filter: blur(var(--exo-scrim-blur, 6px));
+  -webkit-backdrop-filter: blur(var(--exo-scrim-blur, 6px));
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
 }

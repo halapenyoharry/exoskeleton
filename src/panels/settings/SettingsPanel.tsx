@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 import { appStorage } from "../../persistence/app-storage";
+import {
+  loadChromeSettings,
+  saveChromeSettings,
+  type ChromeSettings,
+} from "../../chrome-settings";
 import "./SettingsPanel.css";
 
 /**
@@ -12,6 +17,13 @@ export default function SettingsPanel() {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
+
+  const [chrome, setChrome] = useState<ChromeSettings>(loadChromeSettings);
+  function updateChrome(patch: Partial<ChromeSettings>) {
+    const next = { ...chrome, ...patch };
+    setChrome(next);
+    saveChromeSettings(next);
+  }
 
   async function loadFromDisk() {
     const state = await appStorage.load();
@@ -71,6 +83,24 @@ export default function SettingsPanel() {
             <span className="settings-panel__clean">in sync</span>
           )}
         </span>
+      </div>
+      <div className="settings-panel__chrome">
+        <label>
+          scrim darken {chrome.scrimDarken.toFixed(2)}
+          <input
+            type="range" min={0} max={1} step={0.05}
+            value={chrome.scrimDarken}
+            onChange={(e) => updateChrome({ scrimDarken: Number(e.target.value) })}
+          />
+        </label>
+        <label>
+          scrim blur {chrome.scrimBlur}px
+          <input
+            type="range" min={0} max={24} step={1}
+            value={chrome.scrimBlur}
+            onChange={(e) => updateChrome({ scrimBlur: Number(e.target.value) })}
+          />
+        </label>
       </div>
       <textarea
         className="settings-panel__textarea"
