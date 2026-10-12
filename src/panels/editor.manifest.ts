@@ -1,5 +1,6 @@
 import type { PanelManifest } from "../panel-manifest";
 import EditorPanel from "./EditorPanel";
+import { editorToolbar } from "../chrome/toolbars/editor.toolbar";
 
 // Manifest for a core (in-repo) panel. Core panels never get "installed",
 // but declaring them in the same contract as library panels means every
@@ -8,7 +9,14 @@ import EditorPanel from "./EditorPanel";
 const manifest: PanelManifest = {
   id: "editor",
   title: "editor",
-  toolbar: true,
+  toolbar: editorToolbar,
+  menu: [
+    { id: "new", label: "New", shortcut: "⌘N" },
+    { id: "open", label: "Open…", shortcut: "⌘O" },
+    { id: "save", label: "Save", shortcut: "⌘S" },
+    { id: "saveAs", label: "Save As…" },
+    { id: "download", label: "Download" },
+  ],
   component: EditorPanel,
   description:
     "Markdown/text editor with native open/save. Anchors the default layout — the first panel into an empty grid.",

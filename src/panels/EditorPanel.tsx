@@ -68,13 +68,13 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
     }
   }
 
-  async function saveFile() {
+  async function saveFile(asNew = false) {
     try {
       const result = await saveTextFile(
         text,
         fileNameFor(path?.split(/[/\\]/).pop() ?? "untitled", "md"),
         [{ name: "Markdown", extensions: ["md"] }],
-        inTauri() ? path : null,
+        inTauri() && !asNew ? path : null,
       );
       if (!result) return;
       if (result.method === "dialog") rememberPath(result.path);
@@ -85,8 +85,19 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
     }
   }
 
-  // Drawer strip buttons. Latest handlers via ref so state is never stale.
-  const actions = { openFile, saveFile: () => { if (!dirty && path) return; return saveFile(); } };
+  // Menu + toolbar items. Latest handlers via ref so state is never stale.
+  const newFile = () => {
+    setPath(null);
+    setText("");
+    setDirty(false);
+    props.api.updateParameters({ filePath: undefined });
+  };
+  const actions = {
+    openFile,
+    newFile,
+    saveFile: () => { if (!dirty && path) return; return saveFile(); },
+    saveAs: () => saveFile(true),
+  };
   const actionsRef = useRef(actions);
   actionsRef.current = actions;
   useEffect(
@@ -94,6 +105,8 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
       onPanelMenu(props.api.id, (id) => {
         if (id === "open") void actionsRef.current.openFile();
         else if (id === "save") void actionsRef.current.saveFile();
+        else if (id === "saveAs" || id === "download") void actionsRef.current.saveAs();
+        else if (id === "new") actionsRef.current.newFile();
       }),
     [props.api.id],
   );
@@ -101,9 +114,10 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
   // Pure content — the host wraps this in PanelRoot via exoPanel().
   return (
     <>
+      {/* Inline buttons; hidden by CSS when the host renders the slim toolbar. */}
       <div className="panel-toolbar">
         <button onClick={openFile}>open</button>
-        <button onClick={saveFile} disabled={!dirty && !!path}>
+        <button onClick={() => void saveFile()} disabled={!dirty && !!path}>
           save
         </button>
       </div>

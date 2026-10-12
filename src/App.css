@@ -401,8 +401,8 @@
   text-transform: none;
   flex-shrink: 0;
 }
-.dv-groupview.exo-single-tab .panel-pad .panel-header,
-.dv-groupview.exo-single-tab .panel-pad .panel-toolbar {
+.dv-groupview.exo-single-tab .panel-pad:not([data-has-toolbar="true"]) .panel-header,
+.dv-groupview.exo-single-tab .panel-pad:not([data-has-toolbar="true"]) .panel-toolbar {
   padding-left: calc(var(--exo-pill-w, 160px) + 12px);
   padding-right: var(--exo-corner-w, 96px);
 }
@@ -438,6 +438,9 @@
 /* Panels with a registered drawer strip: their inline toolbar lives in the drawer. */
 .panel-pad[data-has-strip="true"] .panel-header,
 .panel-pad[data-has-strip="true"] .panel-toolbar { display: none; }
+/* Panels with a slim toolbar: inline .panel-toolbar buttons are replaced.
+   (.panel-header stays: it is content such as a document selector.) */
+.panel-pad[data-has-toolbar="true"] .panel-toolbar { display: none; }
 
 /* Editor status line (path · dirty · flash): content-level, below the pill. */
 .editor-status {
@@ -449,6 +452,4 @@
   font-family: Menlo, monospace;
   min-height: 20px;
 }
-.dv-groupview.exo-single-tab .panel-pad .editor-status {
-  padding-left: calc(var(--exo-pill-w, 160px) + 12px);
-}
+/* (editor-status sits below the slim toolbar row; no pill padding needed) */

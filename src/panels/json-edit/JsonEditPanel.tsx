@@ -332,6 +332,16 @@ export default function JsonEditPanel(
     }
   }
 
+  function formatJson() {
+    try {
+      const text = JSON.stringify(JSON.parse(valueRef.current), null, params.tabSize);
+      if (text !== valueRef.current) setValue(text);
+      show("ok", "Formatted");
+    } catch {
+      show("error", "Can't format: JSON doesn't parse");
+    }
+  }
+
   function commitRename() {
     if (renaming === null) return;
     const title = renaming.trim();
@@ -368,6 +378,8 @@ export default function JsonEditPanel(
     if (itemId === "new") newDocument();
     else if (itemId === "open") void openFiles();
     else if (itemId === "save") void saveToFile(false);
+    else if (itemId === "saveAs") void saveToFile(true);
+    else if (itemId === "format") formatJson();
     else if (itemId === "copy") void copyJson();
     else if (itemId === "rename") setRenaming(getJsonMeta(docIdRef.current)?.title ?? docIdRef.current);
     else if (itemId === "delete") deleteDocument();

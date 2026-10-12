@@ -6,6 +6,10 @@ import { initPaneChrome, setPaneOpen, setPanePinned, usePaneChrome } from "./pan
 import { PaneDrawer } from "./chrome/PaneDrawer";
 import "./chrome/strips";
 import { getStrip } from "./chrome/strip-registry";
+import "./chrome/toolbars";
+import { getToolbar } from "./chrome/toolbar-registry";
+import { SlimToolbar } from "./chrome/SlimToolbar";
+import type { ToolbarItem } from "./panel-manifest";
 
 function PaneDrawerHost(props: IDockviewPanelProps<any>) {
   const id = props.api.id;
@@ -151,6 +155,8 @@ export function PanelRoot({
   style,
   toolbarVisible,
   hasStrip,
+  toolbar,
+  panelId,
 }: {
   accent?: string;
   className?: string;
@@ -160,14 +166,19 @@ export function PanelRoot({
   toolbarVisible?: boolean;
   /** true when the panel has a registered drawer strip (inline toolbar hidden by CSS). */
   hasStrip?: boolean;
+  /** Declared slim toolbar items; rendered as a dedicated row above the content. */
+  toolbar?: ToolbarItem[];
+  panelId?: string;
 }) {
   return (
     <div
       className={className ? `panel-pad ${className}` : "panel-pad"}
       data-toolbar-visible={toolbarVisible === false ? "false" : undefined}
       data-has-strip={hasStrip ? "true" : undefined}
+      data-has-toolbar={toolbar ? "true" : undefined}
       style={{ "--panel-accent": accent ?? "transparent", ...style } as CSSProperties}
     >
+      {toolbar && panelId && <SlimToolbar panelId={panelId} items={toolbar} />}
       {children}
     </div>
   );
@@ -188,6 +199,7 @@ export function exoPanel<P extends Record<string, any>>(
     const title = props.api.title ?? props.api.id;
     const componentKey = resolveComponentKey(props.api.id) ?? props.api.id;
     const hasStrip = !!getStrip(componentKey);
+    const toolbar = getToolbar(componentKey);
     return (
       <PanelErrorBoundary
         panelTitle={title}
@@ -197,6 +209,8 @@ export function exoPanel<P extends Record<string, any>>(
         <PanelRoot
           accent={accent}
           hasStrip={hasStrip}
+          toolbar={toolbar}
+          panelId={props.api.id}
           toolbarVisible={
             (props.params as { toolbarVisible?: boolean } | undefined)?.toolbarVisible
           }

@@ -8,6 +8,10 @@ import webviewManifest from "./panels/webview.manifest";
 import dyadicManifest from "./panels/json-dyadic/manifest";
 import jsonEditManifest from "./panels/json-edit/manifest";
 import { emitPanelMenu, getPanelMenu, registerPanelMenu } from "./panel-menu";
+import { getStrip } from "./chrome/strip-registry";
+import { getToolbar } from "./chrome/toolbar-registry";
+import "./chrome/toolbars";
+import "./chrome/strips";
 import type { PanelMenuItem } from "./panel-manifest";
 import "./ColoredTab.css";
 
@@ -120,11 +124,16 @@ function PillTab(props: IDockviewPanelHeaderProps) {
   initPaneChrome(id, pinnedParam);
   const { open, pinned } = usePaneChrome(id);
   const [active, setActive] = useState(() => props.api.group.activePanel?.id === props.api.id);
-  const holdRef = useRef<number | undefined>(undefined);
 
+  const hasMenu = !!getPanelMenu(key);
+  const hasStrip = !!getStrip(key);
+  const hasToolbar = !!getToolbar(key);
   const pillRef = useRef<HTMLDivElement>(null);
   const [title, setTitle] = useState(props.api.title ?? id);
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
+  const [toolbarOn, setToolbarOn] = useState(
+    () => props.api.getParameters<{ toolbarVisible?: boolean }>().toolbarVisible !== false,
+  );
   const [moveOpen, setMoveOpen] = useState(false);
 
   useEffect(() => {
@@ -206,7 +215,7 @@ function PillTab(props: IDockviewPanelHeaderProps) {
     const doc = pillRef.current?.ownerDocument ?? document;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenu(null);
     const onDown = (e: Event) => {
-      if (!(e.target as Element).closest?.(".exo-pill-menu")) setMenu(null);
+      if (!(e.target as Element).closest?.(".exo-pill-menu, .exo-pill__menu")) setMenu(null);
     };
     doc.addEventListener("keydown", onKey);
     doc.addEventListener("pointerdown", onDown, true);
@@ -230,26 +239,17 @@ function PillTab(props: IDockviewPanelHeaderProps) {
     }
     setPaneOpen(id, !open);
   }
-  // Temporary bridge: the component menu opens on right-click / long-press of the title.
-  function openMenuAt(x: number, y: number) {
+  function toggleMenu(e: React.MouseEvent<HTMLElement>) {
+    if (menu) return setMenu(null);
+    const r = e.currentTarget.getBoundingClientRect();
     setMoveOpen(false);
-    setMenu({ x, y });
+    setMenu({ x: r.left, y: r.bottom + 4 });
   }
-  const labelHandlers = {
-    onContextMenu: (e: React.MouseEvent) => {
-      e.preventDefault();
-      openMenuAt(e.clientX, e.clientY);
-    },
-    onPointerDown: (e: React.PointerEvent) => {
-      if (e.pointerType !== "touch") return;
-      const { clientX: x, clientY: y } = e;
-      window.clearTimeout(holdRef.current);
-      holdRef.current = window.setTimeout(() => openMenuAt(x, y), 550);
-    },
-    onPointerUp: () => window.clearTimeout(holdRef.current),
-    onPointerCancel: () => window.clearTimeout(holdRef.current),
-    onPointerMove: () => window.clearTimeout(holdRef.current),
-  };
+  function toggleToolbar() {
+    const next = !toolbarOn;
+    setToolbarOn(next);
+    props.api.updateParameters({ toolbarVisible: next });
+  }
   const act = (fn: () => void) => () => {
     setMenu(null);
     fn();
@@ -283,20 +283,34 @@ function PillTab(props: IDockviewPanelHeaderProps) {
       style={{ color: accent, "--pill-accent": accent } as React.CSSProperties}
       title={title}
     >
-      <button
-        className="exo-pill__btn exo-pill__tri"
-        aria-label={open ? "Close drawer" : "Open drawer"}
-        aria-expanded={open}
-        {...guard}
-        onClick={toggleDrawer}
-      >
-        △
-      </button>
-      <span className="exo-pill__label" {...labelHandlers}>
+      {hasMenu && (
+        <button
+          className="exo-pill__btn exo-pill__menu"
+          aria-label="Menu"
+          aria-haspopup="menu"
+          aria-expanded={!!menu}
+          {...guard}
+          onClick={toggleMenu}
+        >
+          ≡
+        </button>
+      )}
+      {hasStrip && (
+        <button
+          className="exo-pill__btn exo-pill__tri"
+          aria-label={open ? "Close drawer" : "Open drawer"}
+          aria-expanded={open}
+          {...guard}
+          onClick={toggleDrawer}
+        >
+          △
+        </button>
+      )}
+      <span className="exo-pill__label">
         <span className="exo-pill__glyph">{glyph}</span>
         <span className="exo-pill__title">{title}</span>
       </span>
-      {open && (
+      {hasStrip && open && (
         <button
           className={`exo-pill__btn exo-pill__pin${pinned ? " is-on" : ""}`}
           aria-label="Pin drawer open"
@@ -323,8 +337,9 @@ function PillTab(props: IDockviewPanelHeaderProps) {
             role="menu"
             style={{ left: menu.x, top: menu.y, color: accent }}
           >
-            {(getPanelMenu(id) ?? []).map((item) => renderItem(item))}
-            {getPanelMenu(id) && <hr className="exo-pill-menu__rule" />}
+            {(getPanelMenu(key) ?? []).map((item) => renderItem(item))}
+            {!hasStrip && (
+              <>
             <button
               role="menuitem"
               onClick={act(() =>
@@ -378,9 +393,16 @@ function PillTab(props: IDockviewPanelHeaderProps) {
                   </div>
                 ))
               ))}
+            {hasToolbar && (
+              <button role="menuitem" onClick={act(toggleToolbar)}>
+                {toolbarOn ? "✓ " : ""}Show toolbar
+              </button>
+            )}
             <button role="menuitem" onClick={act(() => props.api.close())}>
               Close
             </button>
+              </>
+            )}
           </div>,
           (pillRef.current?.ownerDocument ?? document).body,
         )}

@@ -159,6 +159,16 @@ export interface PaneCell {
   step?: number;
 }
 
+/** One icon button in a panel's slim toolbar (pane chrome v2.1). A click calls
+ *  emitPanelMenu(panelId, id), the same bus as menu items and strip buttons. */
+export interface ToolbarItem {
+  id: string;
+  icon: string;
+  label: string;
+  tooltip?: string;
+  disabled?: boolean;
+}
+
 export interface PaneStripItem {
   id: string;
   kind: "tab" | "button";
@@ -180,10 +190,11 @@ export interface PanelManifest<P extends Record<string, any> = Record<string, an
   /** Title shown in the tab. Defaults to `id` if omitted. */
   title?: string;
 
-  /** True if the panel renders a hideable toolbar. The pill chrome then
-   *  shows a toggle that writes `toolbarVisible` into panel params
-   *  (default true); the panel reads it and hides its toolbar. */
-  toolbar?: boolean;
+  /** `true`: the panel renders its own hideable inline toolbar (legacy flag).
+   *  `ToolbarItem[]`: the host renders a slim icon toolbar row; the pill's
+   *  menu gets a "show toolbar" toggle that writes `toolbarVisible` into
+   *  panel params (default true). Clicks arrive via onPanelMenu. */
+  toolbar?: boolean | ToolbarItem[];
 
   /** Drawer strip (pane chrome v2). See PaneStripItem. Up to 4 positions. */
   strip?: PaneStripItem[];
