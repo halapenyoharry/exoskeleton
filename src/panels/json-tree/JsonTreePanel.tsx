@@ -43,6 +43,12 @@ export interface JsonTreeParams {
   explodePrimitives: boolean;
   /** Node-count above which the perf warning fires. */
   nodeThreshold: number;
+  /** Fit the laid-out tree to the viewport on draw / doc change / reset. */
+  fitOnLoad: boolean;
+  /** Padding (px) around the fitted bounds. */
+  fitPadding: number;
+  /** Maximum zoom scale applied by fit. */
+  fitMaxScale: number;
 }
 
 export const jsonTreeDefaults: JsonTreeParams = {
@@ -57,6 +63,9 @@ export const jsonTreeDefaults: JsonTreeParams = {
   showArrayIndices: true,
   explodePrimitives: false,
   nodeThreshold: 10000,
+  fitOnLoad: true,
+  fitPadding: 40,
+  fitMaxScale: 1.5,
 };
 
 const EMPTY_TREE: HierarchyNode = { name: "Waiting for JSON…" };
@@ -181,7 +190,7 @@ export default function JsonTreePanel(
 
     const zoom = d3
       .zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.1, 4])
+      .scaleExtent([0.01, 4])
       .on("zoom", (event) => {
         g.attr("transform", event.transform);
       });
@@ -299,13 +308,35 @@ export default function JsonTreePanel(
           : height / 2 - (x0 + x1) / 2,
       )
       .scale(1);
-    svg.call(zoom.transform as never, defaultTransform);
 
+    const fitTransform = () => {
+      const bounds = g.node()?.getBBox();
+      if (!bounds || bounds.width === 0 || bounds.height === 0) return null;
+      const cx = bounds.x + bounds.width / 2;
+      const cy = bounds.y + bounds.height / 2;
+      const scale = Math.max(
+        0.01,
+        Math.min(
+          width / (bounds.width + params.fitPadding),
+          height / (bounds.height + params.fitPadding),
+          params.fitMaxScale,
+        ),
+      );
+      return d3.zoomIdentity
+        .translate(width / 2, height / 2)
+        .scale(scale)
+        .translate(-cx, -cy);
+    };
+
+    const initial = params.fitOnLoad ? (fitTransform() ?? defaultTransform) : defaultTransform;
+    svg.call(zoom.transform as never, initial);
+
+    // reset = fit.
     resetRef.current = () => {
       svg
         .transition()
         .duration(500)
-        .call(zoom.transform as never, defaultTransform);
+        .call(zoom.transform as never, fitTransform() ?? defaultTransform);
     };
 
     return () => {

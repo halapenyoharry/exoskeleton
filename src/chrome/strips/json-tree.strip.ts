@@ -1,6 +1,4 @@
 // Drawer strip for json-tree. Params from JsonTreePanel.tsx (JsonTreeParams).
-// TODO: the "reset" button emits emitPanelMenu(panelId, "reset"); JsonTreePanel
-// does not yet subscribe with onPanelMenu (its toolbar called resetRef).
 
 import type { PaneStripItem } from "../../panel-manifest.ts";
 import { registerStrip } from "../strip-registry.ts";
@@ -15,6 +13,7 @@ export const jsonTreeStrip: PaneStripItem[] = [
           options: [{ value: "cluster", label: "cluster" }, { value: "tidy", label: "tidy" }] },
         { type: "segmented", param: "direction", label: "orientation", tooltip: "Reading direction", span: [3, 1],
           options: [{ value: "LR", label: "L→R" }, { value: "RL", label: "R→L" }, { value: "TB", label: "T↓B" }, { value: "BT", label: "B↑T" }] },
+        { type: "toggle", param: "fitOnLoad", label: "fit on load", tooltip: "Fit the tree to the pane when drawn or the document changes" },
       ],
     },
   },

@@ -141,3 +141,4 @@
   .watermark-card { padding: 20px 16px; max-width: 100%; width: 100%; box-sizing: border-box; }
   .watermark-presets { grid-template-columns: 1fr; }
   .watermark-preset-btn, .watermark-btn { min-height: 44px; }
+}
