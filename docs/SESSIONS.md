@@ -432,3 +432,9 @@ Next: Harold's next review. Open as before.
 State: pushed; tsc/build/test (161) green.
 Last: new `select` cell kind (`optionsFrom` + `src/chrome/runtime-options.ts`) so a panel can publish choices at runtime; dyadic now has a drawer (layers / show) and no inline toolbar. Every viewer with controls now uses a drawer; editor and json-edit use menu + slim toolbar; webview keeps its URL bar; terminal/piano/scope/text-viewer have no chrome kinds.
 Next: mobile layout mode (plan 6c) — waiting on Harold's go. Then `.panel-pad` stacking context; tree fit-to-view; entry flow; title renames; outline panel; Tauri pass.
+
+## 2026-10-12 (mobile deck mode)
+
+State: pushed; tsc/build/test (167) green. Bookmark tag before this work: `bookmark-2026-10-12-chrome-v2.1`.
+Last: web runtime at ≤600px switches to a **deck**: one pane full-screen, every pane as a 44px pill in a horizontally scrollable row, `+ ⤴ ×` pinned right, status bar hidden (⊞ menu → Deck → Status bar / Settings). Each workspace keeps two layouts (`layout` = desktop grid, `mobileLayout` = deck); crossing the width reconciles panels between them (`src/persistence/deck.ts`, tested) so the grid is never flattened. Back gesture: a sentinel history entry is absorbed — closes ⊞ / ≡ / unpinned drawers first, then previous pane. Verified in the browser at 375px and back to desktop (status bar header re-hidden on grid restore).
+Next: Harold tries it on a phone (deploy with `~/Projects/outer-rim/droids/deploy-exo-skeleton.sh --ref hhvc/exoskeleton-subagents-05f606` for a preview URL). Swipe-to-switch panes is deliberately not built yet. Then: `.panel-pad` stacking context; tree fit-to-view; entry flow; title renames; outline panel; Tauri pass.
