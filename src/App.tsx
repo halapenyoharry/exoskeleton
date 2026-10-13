@@ -280,7 +280,20 @@ export default function App() {
       hideStatusBarInDeck(api);
     } else {
       applyWorkspaceState(api, ws.layout, version);
+      ensureStatusBarChrome(api);
     }
+  }
+
+  /** The status bar is restored by fromJSON with a visible header; (re)hide it,
+   *  or mount it if the saved grid lacked one. */
+  function ensureStatusBarChrome(api: DockviewApi) {
+    const sb = api.getPanel("status-bar");
+    if (!sb) {
+      mountStatusBar(api);
+      return;
+    }
+    sb.group.header.hidden = true;
+    setIsStatusBarVisible(true);
   }
 
   /** Width crossed the threshold: swap grid <-> deck, never flattening the grid. */
@@ -305,7 +318,7 @@ export default function App() {
       setAppState(next);
       setDeckMode(false);
       applyWorkspaceState(api, grid, next.version);
-      if (!api.getPanel("status-bar")) mountStatusBar(api);
+      ensureStatusBarChrome(api);
     }
   }
 
