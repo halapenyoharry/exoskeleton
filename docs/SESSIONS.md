@@ -420,3 +420,9 @@ State: clean tree on `hhvc/exoskeleton-subagents-05f606` (pushed). tsc/build/tes
 Last: Harold: app-like panes need a menu and a slim toolbar, not a control panel. Each pane now declares any of three chrome kinds (spec in plan "v2.1"; blueprint section H): `manifest.menu` → `≡` dropdown on the pill (manifest items, then pane section: maximize/pop out/move to/show toolbar/close when no drawer); `manifest.toolbar` → dedicated 28px row of circular outlined icon buttons under the pill row (`src/chrome/SlimToolbar.tsx`, `toolbar-registry.ts`, `toolbars/`), toggled via "show toolbar", hides the panel's inline `.panel-toolbar`; `manifest.strip` → `△` drawer. Editor = menu + toolbar (open/save/save as); json-edit = menu + toolbar (open/download/copy/format); its editor strip was removed. The right-click title bridge is gone.
 Next: Harold reviews. Then dyadic needs a runtime-options cell kind; `.panel-pad` as a stacking context; mobile layout mode.
 Open: a pane with no menu and no strip has no pane section (maximize/pop out live in the group controls) — fine for terminal/piano/scope, say if not.
+
+## 2026-10-12 (drawer polish after review)
+
+State: pushed; tsc/build/test (160) green.
+Last: Harold: "right direction." Fixed: strip tabs are tab-shaped (rounded top, flat bottom, joined to body), action buttons are pills, cells size to content (flex-wrap; no clipping); 3D-Inspect strip regrouped look/structure/motion (names are a proposal); json-edit document picker shows the title (or "untitled"), id only in tooltip, plain text when one document.
+Next: Harold's next review. Open as before.
