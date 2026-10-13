@@ -49,6 +49,10 @@
      paint over the tab bars. position:relative provides a positioning
      context for absolutely-positioned children (e.g. .webview-frame). */
   position: relative;
+  /* Every panel is its own stacking context: a panel's internal z-index
+     (e.g. the procedural suite's z-index:10 title bar) can never rise above
+     the pill row / group controls (siblings at z-index 5) or hide the ×. */
+  isolation: isolate;
   width: 100%;
   height: 100%;
   display: flex;
