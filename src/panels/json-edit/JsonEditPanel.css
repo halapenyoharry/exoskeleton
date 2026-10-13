@@ -162,3 +162,9 @@
   border-radius: 8px;
   padding: 1px 6px;
 }
+
+.json-edit-doc-label {
+  background: transparent;
+  border: none;
+  cursor: default;
+}

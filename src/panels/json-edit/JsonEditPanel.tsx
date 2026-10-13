@@ -559,10 +559,11 @@ export default function JsonEditPanel(
     };
   }, [value, docId, params.debounceMs, publish]);
 
+  const docLabel = (t?: string) => (t && t.trim() ? t : "untitled");
   const currentMeta = docs.find((d) => d.id === docId)?.meta;
   const pickerEntries: DocEntry[] = currentMeta
     ? docs
-    : [{ id: docId, meta: { title: `${docId} (empty)`, createdAt: "", updatedAt: "" } }, ...docs];
+    : [{ id: docId, meta: { title: "", createdAt: "", updatedAt: "" } }, ...docs];
 
   return (
     <>
@@ -582,19 +583,27 @@ export default function JsonEditPanel(
                 }}
               />
             ) : (
-              <select
-                className="json-edit-doc-picker"
-                value={docId}
-                onChange={(e) => selectDoc(e.target.value)}
-                title={currentMeta?.source ? `${docId} · from ${currentMeta.source}` : docId}
-              >
-                {pickerEntries.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.meta.title}
-                    {d.meta.title !== d.id ? `  ·  ${d.id}` : ""}
-                  </option>
-                ))}
-              </select>
+              pickerEntries.length < 2 ? (
+                <span
+                  className="json-edit-doc-picker json-edit-doc-label"
+                  title={pickerEntries[0]?.id ?? docId}
+                >
+                  {docLabel(pickerEntries[0]?.meta.title)}
+                </span>
+              ) : (
+                <select
+                  className="json-edit-doc-picker"
+                  value={docId}
+                  onChange={(e) => selectDoc(e.target.value)}
+                  title={currentMeta?.source ? `${docId} · from ${currentMeta.source}` : docId}
+                >
+                  {pickerEntries.map((d) => (
+                    <option key={d.id} value={d.id} title={d.id}>
+                      {docLabel(d.meta.title)}
+                    </option>
+                  ))}
+                </select>
+              )
             )}
             {parseError && (
               <span className="json-edit-parse-error" title={parseError}>

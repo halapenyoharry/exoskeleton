@@ -21,7 +21,7 @@ test("registry: exact, prefix (longest wins), miss, cap at 4", () => {
 
 test("json-graph3d-inspect strip registers and is valid", () => {
   assert.equal(getStrip("json-graph3d-inspect-1a2b")?.length, 4);
-  assert.deepEqual(json3dInspectStrip.map((t) => t.id), ["view", "style", "layout", "fit"]);
+  assert.deepEqual(json3dInspectStrip.map((t) => t.id), ["look", "structure", "motion", "fit"]);
 });
 
 test("grid span -> css placement", () => {
