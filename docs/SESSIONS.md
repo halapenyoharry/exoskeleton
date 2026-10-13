@@ -426,3 +426,9 @@ Open: a pane with no menu and no strip has no pane section (maximize/pop out liv
 State: pushed; tsc/build/test (160) green.
 Last: Harold: "right direction." Fixed: strip tabs are tab-shaped (rounded top, flat bottom, joined to body), action buttons are pills, cells size to content (flex-wrap; no clipping); 3D-Inspect strip regrouped look/structure/motion (names are a proposal); json-edit document picker shows the title (or "untitled"), id only in tooltip, plain text when one document.
 Next: Harold's next review. Open as before.
+
+## 2026-10-12 (dyadic into the drawer)
+
+State: pushed; tsc/build/test (161) green.
+Last: new `select` cell kind (`optionsFrom` + `src/chrome/runtime-options.ts`) so a panel can publish choices at runtime; dyadic now has a drawer (layers / show) and no inline toolbar. Every viewer with controls now uses a drawer; editor and json-edit use menu + slim toolbar; webview keeps its URL bar; terminal/piano/scope/text-viewer have no chrome kinds.
+Next: mobile layout mode (plan 6c) — waiting on Harold's go. Then `.panel-pad` stacking context; tree fit-to-view; entry flow; title renames; outline panel; Tauri pass.
