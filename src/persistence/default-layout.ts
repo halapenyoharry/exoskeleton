@@ -353,7 +353,10 @@ export function addOrFocusPanel(api: DockviewApi, id: string) {
 export function buildPreset(api: DockviewApi, presetId: string) {
   // Browser-only arrangements (ported from exo-skeleton.org). Desktop keeps
   // the registry positions below.
-  if (isWebRuntime() && buildWebPreset(api, presetId)) return;
+  if (isWebRuntime() && buildWebPreset(api, presetId, webPresetNarrow())) {
+    seedPresetDocument(presetId);
+    return;
+  }
   const targetIds = new Set(
     resolvePresetPanelIds(
       presetId,
@@ -365,6 +368,39 @@ export function buildPreset(api: DockviewApi, presetId: string) {
       addRegistryPanel(api, entry);
     }
   }
+  seedPresetDocument(presetId);
+}
+
+/** Phones (under 600px) get the stacked web arrangements. Read at apply time. */
+function webPresetNarrow(): boolean {
+  return typeof window !== "undefined" && window.innerWidth < 600;
+}
+
+/** True when a bus value is worth drawing (not absent, null, "", {} or []). */
+function hasContent(v: unknown): boolean {
+  if (v === undefined || v === null || v === "") return false;
+  if (Array.isArray(v)) return v.length > 0;
+  if (typeof v === "object") return Object.keys(v as object).length > 0;
+  return true;
+}
+
+/** The JSON Lab opens drawing something: if the active document is empty,
+ *  load the bundled system map. Never overwrites an existing document. */
+function seedPresetDocument(presetId: string) {
+  if (presetId !== "json-lab" || typeof window === "undefined") return;
+  void (async () => {
+    try {
+      const [{ getJson }, { getActiveDocumentId }, { openLibraryDocument }] = await Promise.all([
+        import("../data/json-bus.ts"),
+        import("../osc/channels/index.ts"),
+        import("../data/library.ts"),
+      ]);
+      if (hasContent(getJson(getActiveDocumentId()))) return;
+      await openLibraryDocument("exoskeleton-system");
+    } catch (e) {
+      console.warn("[exoskeleton] could not seed the JSON Lab document:", e);
+    }
+  })();
 }
 
 type Step = [id: string, position: AddPanelPositionOptions];
@@ -377,7 +413,7 @@ function buildSteps(api: DockviewApi, steps: Step[]) {
 }
 
 /** Web-only preset arrangements. Returns true when it handled the preset. */
-function buildWebPreset(api: DockviewApi, presetId: string): boolean {
+export function buildWebPreset(api: DockviewApi, presetId: string, narrow = false): boolean {
   if (presetId === "av-lab") {
     // piano | scope | tempo-clock
     buildSteps(api, [
@@ -385,6 +421,24 @@ function buildWebPreset(api: DockviewApi, presetId: string): boolean {
       ["scope", { referencePanel: "piano", direction: "right" }],
       ["tempo-clock", { referencePanel: "scope", direction: "right" }],
     ]);
+    return true;
+  }
+  if (presetId === "json-lab" && narrow) {
+    // Phone: json-edit full width on top (short), viewers 2 per row below:
+    // tree | graph over graph3d | cytoscape.
+    buildSteps(api, [
+      ["json-edit", { direction: "right" }],
+      ["json-tree", { referencePanel: "json-edit", direction: "below" }],
+      ["json-graph", { referencePanel: "json-tree", direction: "right" }],
+      ["json-graph3d", { referencePanel: "json-tree", direction: "below" }],
+      ["json-cytoscape", { referencePanel: "json-graph", direction: "below" }],
+    ]);
+    try {
+      const h = Math.max(120, Math.round(window.innerHeight * 0.2));
+      api.getPanel("json-edit")?.group.api.setSize({ height: h });
+    } catch {
+      /* sizing is cosmetic */
+    }
     return true;
   }
   if (presetId === "json-lab") {

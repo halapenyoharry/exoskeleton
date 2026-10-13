@@ -27,6 +27,7 @@ import BlankPanel from "./panels/BlankPanel";
 import MenuPanel from "./panels/MenuPanel";
 import { MenuContext, type MenuActions } from "./panels/menu-context";
 import { stripTransientPanels } from "./persistence/strip-transient";
+import { loadDeckOptIn, saveDeckOptIn } from "./chrome-settings";
 import { DECK_QUERY, buildDeckLayout, reconcileLayouts } from "./persistence/deck";
 import { closeBackClosers, closeOpenDrawers } from "./pane-chrome-state";
 import { exoPanel } from "./PanelRoot";
@@ -132,9 +133,14 @@ const storage = appStorage;
 const SIDE_EDGE = "left" as const;
 const SIDE_GROUP_ID = "side-grid";
 
-/** Phone "deck" mode: web runtime and a viewport at or below DECK_QUERY. */
-function wantsDeck(): boolean {
+/** Phone: web runtime and a viewport at or below DECK_QUERY. */
+function isPhoneWidth(): boolean {
   return isWebRuntime() && typeof window.matchMedia === "function" && window.matchMedia(DECK_QUERY).matches;
+}
+
+/** Deck is opt-in: a phone shows the grid unless "One pane at a time" is on. */
+function wantsDeck(): boolean {
+  return isPhoneWidth() && loadDeckOptIn();
 }
 
 /** The layout to show for a workspace in deck mode: its saved deck
@@ -161,6 +167,10 @@ export default function App() {
   // Deck (phone) mode: single group of pills. Ref for handlers, state for render.
   const deckModeRef = useRef(false);
   const [deckMode, setDeckModeState] = useState(false);
+  // Phone width (grid or deck) and the persisted deck opt-in.
+  const [phone, setPhone] = useState(isPhoneWidth);
+  const [deckOptIn, setDeckOptInState] = useState(loadDeckOptIn);
+  const deckOptInRef = useRef(deckOptIn);
   // In deck mode the status bar is hidden until opened from the ⊞ menu.
   const deckStatusWantedRef = useRef(false);
   const collapsingRef = useRef(false);
@@ -351,7 +361,10 @@ export default function App() {
   useEffect(() => {
     if (!isWebRuntime() || typeof window.matchMedia !== "function") return;
     const mq = window.matchMedia(DECK_QUERY);
-    const onChange = () => swapMode(mq.matches);
+    const onChange = () => {
+      setPhone(mq.matches);
+      swapMode(mq.matches && deckOptInRef.current);
+    };
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, []);
@@ -360,7 +373,7 @@ export default function App() {
   // transient UI, then steps back through recently used panes. It never
   // leaves the page: the sentinel entry is re-pushed after every pop.
   useEffect(() => {
-    if (!deckMode || !isWebRuntime()) return;
+    if (!phone || !isWebRuntime()) return;
     const sentinel = { exo: "deck" };
     if ((history.state as { exo?: string } | null)?.exo !== "deck") {
       history.pushState(sentinel, "");
@@ -374,6 +387,8 @@ export default function App() {
           /* ≡ menu dismissed */
         } else if (closeOpenDrawers()) {
           /* drawer dismissed */
+        } else if (api.hasMaximizedGroup()) {
+          api.exitMaximizedGroup();
         } else {
           const mru = mruRef.current;
           mru.pop(); // current pane
@@ -391,7 +406,15 @@ export default function App() {
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, [deckMode]);
+  }, [phone]);
+
+  function toggleDeckOptIn() {
+    const on = !deckOptInRef.current;
+    deckOptInRef.current = on;
+    setDeckOptInState(on);
+    saveDeckOptIn(on);
+    swapMode(on && isPhoneWidth());
+  }
 
   function mountStatusBar(api: DockviewApi) {
     let bottom = api.getEdgeGroup("bottom");
@@ -568,7 +591,7 @@ export default function App() {
       save();
     });
     event.api.onDidActivePanelChange((p) => {
-      if (deckModeRef.current && p && p.id !== "menu" && p.id !== "status-bar" && p.id !== "settings") {
+      if (isPhoneWidth() && p && p.id !== "menu" && p.id !== "status-bar" && p.id !== "settings") {
         const mru = mruRef.current;
         if (mru[mru.length - 1] !== p.id) {
           const i = mru.indexOf(p.id);
@@ -772,6 +795,12 @@ export default function App() {
     },
     closeMenu,
     deckMode,
+    phone,
+    deckOptIn,
+    toggleDeck: () => {
+      toggleDeckOptIn();
+      closeMenu();
+    },
     statusBarVisible: isStatusBarVisible,
     toggleStatusBar: () => {
       const api = mainApiRef.current;
@@ -793,7 +822,7 @@ export default function App() {
 
   return (
     <MenuContext.Provider value={menuActions}>
-    <div className={`dockview-theme-abyss app-frame${deckMode ? " exo-deck" : ""}`}>
+    <div className={`dockview-theme-abyss app-frame${deckMode ? " exo-deck" : ""}${phone ? " exo-phone" : ""}`}>
       <DockviewReact
         components={components}
         // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —

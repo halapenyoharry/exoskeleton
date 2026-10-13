@@ -35,3 +35,29 @@ export function onOptions(panelId: string, key: string, cb: Listener): () => voi
     if (set!.size === 0) listeners.delete(id);
   };
 }
+
+// Runtime text for toolbar chips (ToolbarItem.textFrom). Same shape as options.
+type TextListener = (text: string) => void;
+const texts = new Map<string, string>();
+const textListeners = new Map<string, Set<TextListener>>();
+
+export function publishToolbarText(panelId: string, key: string, text: string): void {
+  const id = k(panelId, key);
+  texts.set(id, text);
+  for (const cb of [...(textListeners.get(id) ?? [])]) cb(text);
+}
+
+export function getToolbarText(panelId: string, key: string): string {
+  return texts.get(k(panelId, key)) ?? "";
+}
+
+export function onToolbarText(panelId: string, key: string, cb: TextListener): () => void {
+  const id = k(panelId, key);
+  let set = textListeners.get(id);
+  if (!set) textListeners.set(id, (set = new Set()));
+  set.add(cb);
+  return () => {
+    set!.delete(cb);
+    if (set!.size === 0) textListeners.delete(id);
+  };
+}

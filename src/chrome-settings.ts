@@ -34,11 +34,31 @@ export function applyChromeSettings(s: ChromeSettings = loadChromeSettings()): v
 
 export function saveChromeSettings(s: ChromeSettings): void {
   try {
-    localStorage.setItem(KEY, JSON.stringify(s));
+    // Merge, so fields owned elsewhere (deckOptIn) survive a scrim save.
+    const prev = JSON.parse(localStorage.getItem(KEY) ?? "{}") as Record<string, unknown>;
+    localStorage.setItem(KEY, JSON.stringify({ ...prev, ...s }));
   } catch {
     /* storage unavailable: still apply for this session */
   }
   applyChromeSettings(s);
+}
+
+/** Phone "one pane at a time" deck: opt-in, default off (phones show the grid). */
+export function loadDeckOptIn(): boolean {
+  try {
+    return (JSON.parse(localStorage.getItem(KEY) ?? "{}") as { deckOptIn?: unknown }).deckOptIn === true;
+  } catch {
+    return false;
+  }
+}
+
+export function saveDeckOptIn(on: boolean): void {
+  try {
+    const prev = JSON.parse(localStorage.getItem(KEY) ?? "{}") as Record<string, unknown>;
+    localStorage.setItem(KEY, JSON.stringify({ ...prev, deckOptIn: on }));
+  } catch {
+    /* storage unavailable: applies for this session only */
+  }
 }
 
 applyChromeSettings();

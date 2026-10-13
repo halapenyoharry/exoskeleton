@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { IDockviewHeaderActionsProps } from "dockview";
 import { ensureCompanions } from "./persistence/default-layout";
 import "./HeaderActions.css";
@@ -12,6 +13,15 @@ import "./HeaderActions.css";
  *   - ⨯ close-group: closes every panel in this group at once.
  */
 export function RightHeaderActions(props: IDockviewHeaderActionsProps) {
+  // While this group is maximized (phone tap-to-focus) a visible "⤡ all"
+  // button restores the grid.
+  const [maximized, setMaximized] = useState(() => props.group.api.isMaximized());
+  useEffect(() => {
+    const sync = () => setMaximized(props.group.api.isMaximized());
+    sync();
+    const d = props.containerApi.onDidMaximizedGroupChange(sync);
+    return () => d.dispose();
+  }, [props.containerApi, props.group]);
   // Default "+": a blank pane with a component picker, as a new active tab.
   function addBlank() {
     const id = `blank-${Math.random().toString(36).slice(2, 6)}`;
@@ -49,6 +59,15 @@ export function RightHeaderActions(props: IDockviewHeaderActionsProps) {
   }
   return (
     <div className="header-actions header-actions--right">
+      {maximized && (
+        <button
+          className="header-btn header-btn--all"
+          title="show all panes again"
+          onClick={() => props.group.api.exitMaximized()}
+        >
+          ⤡ all
+        </button>
+      )}
       <button
         className="header-btn"
         title="new blank tab (pick a component) — alt-click: duplicate this tab's type"
@@ -57,7 +76,7 @@ export function RightHeaderActions(props: IDockviewHeaderActionsProps) {
         +
       </button>
       <button
-        className="header-btn"
+        className="header-btn header-btn--popout"
         title="pop out this group into its own window"
         onClick={popoutGroup}
       >

@@ -45,3 +45,17 @@
 .header-btn--danger:hover {
   color: #ff6666;
 }
+
+.header-btn--all {
+  font-size: 13px;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 12px;
+  padding: 2px 8px;
+  margin-right: 4px;
+}
+
+/* Phones: pop-out is desktop-only; the cluster collapses to + and x. */
+.exo-phone .header-btn--popout {
+  display: none;
+}

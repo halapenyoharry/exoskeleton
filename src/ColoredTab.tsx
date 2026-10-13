@@ -135,6 +135,9 @@ function PillTab(props: IDockviewPanelHeaderProps) {
     () => props.api.getParameters<{ toolbarVisible?: boolean }>().toolbarVisible !== false,
   );
   const [moveOpen, setMoveOpen] = useState(false);
+  // Phone tap-to-focus: was this pill already active when the press began?
+  // (Dockview activates on press, so by click time `active` is always true.)
+  const wasActiveRef = useRef(false);
 
   useEffect(() => {
     const d = props.api.onDidTitleChange((e) => setTitle(e.title));
@@ -166,7 +169,11 @@ function PillTab(props: IDockviewPanelHeaderProps) {
     // (measured by removing the flag, checking overflow, and re-applying).
     const checkCompact = () => {
       root.removeAttribute("data-compact");
-      if (row.scrollWidth > row.clientWidth + 1) root.setAttribute("data-compact", "true");
+      const over = () => row.scrollWidth > row.clientWidth + 1;
+      if (!over()) return;
+      root.setAttribute("data-compact", "true");
+      // Still too wide with glyph-only inactive pills: tighten the active one too.
+      if (over()) root.setAttribute("data-compact", "tight");
     };
     const scroller = (row.parentElement as HTMLElement | null) ?? row;
     const ro3 = new ResizeObserver(checkCompact);
@@ -179,7 +186,10 @@ function PillTab(props: IDockviewPanelHeaderProps) {
     // mount after the pill, so watch for it).
     let corner: HTMLElement | null = null;
     const ro2 = new ResizeObserver(() => {
-      if (corner) root.style.setProperty("--exo-corner-w", `${Math.ceil(corner.getBoundingClientRect().width)}px`);
+      if (corner) {
+        root.style.setProperty("--exo-corner-w", `${Math.ceil(corner.getBoundingClientRect().width)}px`);
+        checkCompact(); // the row's room depends on the cluster's width
+      }
     });
     const attach = () => {
       const c = root.querySelector(".dv-right-actions-container") as HTMLElement | null;
@@ -241,6 +251,15 @@ function PillTab(props: IDockviewPanelHeaderProps) {
     onPointerDown: stop,
     onMouseDown: stop,
   } as const;
+
+  function onLabelClick() {
+    const el = pillRef.current;
+    if (!wasActiveRef.current || !el) return;
+    // Phone grid only: the deck is one group, so there is nothing to focus.
+    if (!el.closest(".exo-phone") || el.closest(".exo-deck")) return;
+    if (group.api.isMaximized()) group.api.exitMaximized();
+    else group.api.maximize();
+  }
 
   function toggleDrawer() {
     if (!active) {
@@ -316,7 +335,13 @@ function PillTab(props: IDockviewPanelHeaderProps) {
           △
         </button>
       )}
-      <span className="exo-pill__label">
+      <span
+        className="exo-pill__label"
+        onPointerDownCapture={() => {
+          wasActiveRef.current = props.api.group.activePanel?.id === props.api.id;
+        }}
+        onClick={onLabelClick}
+      >
         <span className="exo-pill__glyph">{glyph}</span>
         <span className="exo-pill__title">{title}</span>
       </span>

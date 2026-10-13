@@ -59,13 +59,19 @@ export default function MenuPanel(_props: IDockviewPanelProps) {
         <PanelPicker variant="list" onPick={m.addPanel} />
       </section>
 
-      {m.deckMode && (
+      {m.phone && (
         <section className="menu-section">
           <h3 className="menu-heading">Deck</h3>
-          <button className="menu-row" onClick={m.toggleStatusBar}>
-            <span className="menu-row-label">Status bar</span>
-            <span className="menu-row-mark">{m.statusBarVisible ? "●" : "○"}</span>
+          <button className="menu-row" onClick={m.toggleDeck} aria-pressed={m.deckOptIn}>
+            <span className="menu-row-label">One pane at a time</span>
+            <span className="menu-row-mark">{m.deckOptIn ? "●" : "○"}</span>
           </button>
+          {m.deckMode && (
+            <button className="menu-row" onClick={m.toggleStatusBar}>
+              <span className="menu-row-label">Status bar</span>
+              <span className="menu-row-mark">{m.statusBarVisible ? "●" : "○"}</span>
+            </button>
+          )}
           <button className="menu-row" onClick={m.toggleSettings}>
             <span className="menu-row-label">Settings</span>
           </button>

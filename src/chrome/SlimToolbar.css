@@ -38,3 +38,23 @@
   /* 36px hit area without growing the 22px visual circle */
   .slim-toolbar__btn::after { content: ""; position: absolute; inset: -7px; }
 }
+.slim-toolbar__chip {
+  height: 22px;
+  max-width: 180px;
+  padding: 0 8px;
+  box-sizing: border-box;
+  border-radius: 11px;
+  border: 1px solid color-mix(in srgb, var(--panel-accent) 60%, transparent);
+  background: color-mix(in srgb, var(--panel-accent) 8%, transparent);
+  color: var(--panel-accent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  flex-shrink: 1;
+  min-width: 0;
+}
+.slim-toolbar__chip:hover:not(:disabled) { background: color-mix(in srgb, var(--panel-accent) 18%, transparent); }

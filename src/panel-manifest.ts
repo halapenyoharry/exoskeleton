@@ -170,6 +170,10 @@ export interface ToolbarItem {
   label: string;
   tooltip?: string;
   disabled?: boolean;
+  /** 'button' (default) is a round icon; 'chip' is a small text label. */
+  kind?: 'button' | 'chip';
+  /** chip only: runtime-text key the panel publishes via publishToolbarText. */
+  textFrom?: string;
 }
 
 export interface PaneStripItem {

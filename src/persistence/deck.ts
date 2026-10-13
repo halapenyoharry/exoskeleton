@@ -69,7 +69,15 @@ function singleGroup(base: SerializedDockview, views: string[], active: string |
   };
   delete out.floatingGroups;
   delete out.popoutGroups;
-  return out;
+  return stripMaximized(out);
+}
+
+/** A maximized group's location is meaningless once the arrangement changes. */
+function stripMaximized(l: SerializedDockview): SerializedDockview {
+  const g = l.grid as unknown as { maximizedNode?: unknown };
+  if (!g || g.maximizedNode === undefined) return l;
+  const { maximizedNode: _m, ...rest } = g;
+  return { ...l, grid: rest as unknown as SerializedDockview["grid"] };
 }
 
 /** Grid -> deck: every panel into one group; params/ids preserved; active kept. */
@@ -147,7 +155,7 @@ export function reconcileLayouts(
     delete out.activeGroup;
     delete out.floatingGroups;
     delete out.popoutGroups;
-    return out;
+    return stripMaximized(out);
   }
   if (!tRoot || leaves(tRoot).length === 0 || leaves(tRoot).every((l) => l.views.every((v) => removed.has(v)) )) {
     // Nothing to keep in target: arrange all of source's panels in one group.
@@ -181,7 +189,7 @@ export function reconcileLayouts(
       .filter((g) => g.data.views.length > 0);
     out.floatingGroups = fg;
   }
-  return out;
+  return stripMaximized(out);
 }
 
 /** True when `layout` has exactly one grid group (a deck). */

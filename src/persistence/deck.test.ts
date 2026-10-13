@@ -117,3 +117,12 @@ test("reconcile into an empty grid builds a single group", () => {
   const next = reconcileLayouts(empty, buildDeckLayout(grid));
   assert.deepStrictEqual(layoutPanelOrder(next), ["editor", "webview", "terminal"]);
 });
+
+test("deck/reconcile outputs never carry a maximizedNode", () => {
+  const g = JSON.parse(JSON.stringify(grid)) as SerializedDockview;
+  (g.grid as unknown as { maximizedNode?: unknown }).maximizedNode = { location: [0] };
+  const deck = buildDeckLayout(g);
+  assert.equal((deck.grid as unknown as { maximizedNode?: unknown }).maximizedNode, undefined);
+  const back = reconcileLayouts(g, deck);
+  assert.equal((back.grid as unknown as { maximizedNode?: unknown }).maximizedNode, undefined);
+});

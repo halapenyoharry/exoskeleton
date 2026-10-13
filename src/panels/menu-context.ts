@@ -22,6 +22,10 @@ export interface MenuActions {
   closeMenu: () => void;
   /** Phone deck mode: the menu also carries the status-bar toggle and Settings. */
   deckMode: boolean;
+  /** Phone width (grid or deck): the menu carries the "One pane at a time" toggle. */
+  phone: boolean;
+  deckOptIn: boolean;
+  toggleDeck: () => void;
   statusBarVisible: boolean;
   toggleStatusBar: () => void;
   toggleSettings: () => void;

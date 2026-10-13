@@ -21,6 +21,7 @@ import {
 } from "../../data/json-bus";
 import { openLibraryDocument } from "../../data/library";
 import { onPanelMenu } from "../../panel-menu";
+import { publishToolbarText } from "../../chrome/runtime-options";
 import {
   getActiveDocumentId,
   onActiveDocumentIdChange,
@@ -118,6 +119,8 @@ export default function JsonEditPanel(
   const [renaming, setRenaming] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const { flash, show, clear } = useFlash();
+  const [docMenu, setDocMenu] = useState<{ left: number } | null>(null);
+  const docsRef = useRef<DocEntry[]>([]);
 
   // Refs read by callbacks that outlive a render (debounce timer, keymap).
   const docIdRef = useRef(docId);
@@ -380,7 +383,13 @@ export default function JsonEditPanel(
     else if (itemId === "save") void saveToFile(false);
     else if (itemId === "saveAs") void saveToFile(true);
     else if (itemId === "format") formatJson();
-    else if (itemId === "copy") void copyJson();
+    else if (itemId === "doc") {
+      if (docsRef.current.length < 2) return;
+      const chip = containerRef.current?.parentElement?.querySelector<HTMLElement>('[data-toolbar-item="doc"]');
+      const body = containerRef.current;
+      const left = chip && body ? Math.max(0, chip.getBoundingClientRect().left - body.getBoundingClientRect().left) : 8;
+      setDocMenu((m) => (m ? null : { left }));
+    } else if (itemId === "copy") void copyJson();
     else if (itemId === "rename") setRenaming(getJsonMeta(docIdRef.current)?.title ?? docIdRef.current);
     else if (itemId === "delete") deleteDocument();
     else if (itemId.startsWith("library:")) void openFromLibrary(itemId.slice("library:".length));
@@ -565,65 +574,76 @@ export default function JsonEditPanel(
     ? docs
     : [{ id: docId, meta: { title: "", createdAt: "", updatedAt: "" } }, ...docs];
 
+  docsRef.current = pickerEntries;
+  const docTitle = docLabel(currentMeta?.title);
+  useEffect(() => {
+    publishToolbarText(props.api.id, "doc", docTitle);
+  }, [props.api.id, docTitle]);
+  useEffect(() => {
+    if (!docMenu) return;
+    const close = () => setDocMenu(null);
+    const t = window.setTimeout(() => window.addEventListener("pointerdown", close, { once: true }), 0);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("pointerdown", close);
+    };
+  }, [docMenu]);
+
   return (
     <>
-      <div className="panel-header">
-        <div className="json-edit-header-container">
-          <div className="json-edit-header-left">
-            {renaming !== null ? (
-              <input
-                className="json-edit-rename"
-                autoFocus
-                value={renaming}
-                onChange={(e) => setRenaming(e.target.value)}
-                onBlur={commitRename}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") commitRename();
-                  if (e.key === "Escape") setRenaming(null);
-                }}
-              />
-            ) : (
-              pickerEntries.length < 2 ? (
-                <span
-                  className="json-edit-doc-picker json-edit-doc-label"
-                  title={pickerEntries[0]?.id ?? docId}
-                >
-                  {docLabel(pickerEntries[0]?.meta.title)}
-                </span>
-              ) : (
-                <select
-                  className="json-edit-doc-picker"
-                  value={docId}
-                  onChange={(e) => selectDoc(e.target.value)}
-                  title={currentMeta?.source ? `${docId} · from ${currentMeta.source}` : docId}
-                >
-                  {pickerEntries.map((d) => (
-                    <option key={d.id} value={d.id} title={d.id}>
-                      {docLabel(d.meta.title)}
-                    </option>
-                  ))}
-                </select>
-              )
-            )}
-            {parseError && (
-              <span className="json-edit-parse-error" title={parseError}>
-                ⚠ JSON parse error
-              </span>
-            )}
-            {flash && (
-              <span
-                className={`json-edit-flash json-edit-flash--${flash.kind}`}
-                title="Click to dismiss"
-                onClick={clear}
-              >
-                {flash.kind === "error" ? "⚠ " : "✓ "}
-                {flash.text}
-              </span>
-            )}
-          </div>
+      {(renaming !== null || parseError || flash) && (
+        <div className="json-edit-status">
+          {renaming !== null && (
+            <input
+              className="json-edit-rename"
+              autoFocus
+              value={renaming}
+              onChange={(e) => setRenaming(e.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitRename();
+                if (e.key === "Escape") setRenaming(null);
+              }}
+            />
+          )}
+          {parseError && (
+            <span className="json-edit-parse-error" title={parseError}>
+              ⚠ JSON parse error
+            </span>
+          )}
+          {flash && (
+            <span
+              className={`json-edit-flash json-edit-flash--${flash.kind}`}
+              title="Click to dismiss"
+              onClick={clear}
+            >
+              {flash.kind === "error" ? "⚠ " : "✓ "}
+              {flash.text}
+            </span>
+          )}
         </div>
+      )}
+      <div className="panel-body json-edit-body" ref={containerRef}>
+        {docMenu && (
+          <ul className="json-edit-doc-menu" style={{ left: docMenu.left }} onPointerDown={(e) => e.stopPropagation()}>
+            {pickerEntries.map((d) => (
+              <li key={d.id}>
+                <button
+                  type="button"
+                  className={d.id === docId ? "is-current" : undefined}
+                  title={d.id}
+                  onClick={() => {
+                    setDocMenu(null);
+                    selectDoc(d.id);
+                  }}
+                >
+                  {docLabel(d.meta.title)}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-      <div className="panel-body json-edit-body" ref={containerRef} />
     </>
   );
 }
