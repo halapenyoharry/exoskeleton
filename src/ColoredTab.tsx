@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./chrome-settings";
-import { initPaneChrome, setPaneOpen, setPanePinned, usePaneChrome } from "./pane-chrome-state";
+import { initPaneChrome, registerBackCloser, setPaneOpen, setPanePinned, usePaneChrome } from "./pane-chrome-state";
 import { createPortal } from "react-dom";
 import type { IDockviewPanelHeaderProps } from "dockview";
 import editorManifest from "./panels/editor.manifest";
@@ -209,9 +209,18 @@ function PillTab(props: IDockviewPanelHeaderProps) {
     };
   }, []);
 
-  // Escape / outside-click close the menu.
+  // Deck: keep the active pill in view as the row scrolls horizontally.
+  useEffect(() => {
+    const el = pillRef.current;
+    if (active && el?.closest(".exo-deck")) {
+      el.scrollIntoView?.({ inline: "nearest", block: "nearest" });
+    }
+  }, [active]);
+
+  // Escape / outside-click close the menu; back (deck) closes it too.
   useEffect(() => {
     if (!menu) return;
+    const unregister = registerBackCloser(() => setMenu(null));
     const doc = pillRef.current?.ownerDocument ?? document;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenu(null);
     const onDown = (e: Event) => {
@@ -222,6 +231,7 @@ function PillTab(props: IDockviewPanelHeaderProps) {
     return () => {
       doc.removeEventListener("keydown", onKey);
       doc.removeEventListener("pointerdown", onDown, true);
+      unregister();
     };
   }, [menu]);
 

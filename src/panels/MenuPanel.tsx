@@ -59,6 +59,19 @@ export default function MenuPanel(_props: IDockviewPanelProps) {
         <PanelPicker variant="list" onPick={m.addPanel} />
       </section>
 
+      {m.deckMode && (
+        <section className="menu-section">
+          <h3 className="menu-heading">Deck</h3>
+          <button className="menu-row" onClick={m.toggleStatusBar}>
+            <span className="menu-row-label">Status bar</span>
+            <span className="menu-row-mark">{m.statusBarVisible ? "●" : "○"}</span>
+          </button>
+          <button className="menu-row" onClick={m.toggleSettings}>
+            <span className="menu-row-label">Settings</span>
+          </button>
+        </section>
+      )}
+
       <section className="menu-section">
         <button className="menu-row menu-row--danger" onClick={m.resetLayout}>
           ↺ Reset layout...

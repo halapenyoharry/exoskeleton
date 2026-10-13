@@ -42,6 +42,10 @@ export interface Workspace {
   id: string;
   name: string;
   layout: SerializedDockview;
+  /** Phone "deck" arrangement (one group, every panel a tab). Optional:
+   *  built from `layout` the first time the workspace opens on a phone.
+   *  `layout` always stays the desktop grid. */
+  mobileLayout?: SerializedDockview;
   updatedAt: number; // Date.now()
 }
 
@@ -137,6 +141,7 @@ export function getActiveWorkspace(state: AppStateV8): Workspace {
 export function updateActiveWorkspaceLayout(
   state: AppStateV8,
   layout: SerializedDockview,
+  slot: "layout" | "mobileLayout" = "layout",
 ): AppStateV8 {
   const activeId = state.activeWorkspaceId;
   const active = state.workspaces[activeId];
@@ -148,7 +153,7 @@ export function updateActiveWorkspaceLayout(
       ...state.workspaces,
       [activeId]: {
         ...active,
-        layout,
+        [slot]: layout,
         updatedAt: Date.now(),
       },
     },
@@ -167,6 +172,7 @@ export function createWorkspace(
   state: AppStateV8,
   name: string,
   initialLayout?: SerializedDockview,
+  initialMobileLayout?: SerializedDockview,
 ): { state: AppStateV8; workspace: Workspace } {
   const id = `ws_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
   const activeLayout = getActiveWorkspace(state)?.layout || {
@@ -179,6 +185,7 @@ export function createWorkspace(
     layout: initialLayout || activeLayout,
     updatedAt: Date.now(),
   };
+  if (initialMobileLayout) workspace.mobileLayout = initialMobileLayout;
 
   const nextState: AppStateV8 = {
     ...state,

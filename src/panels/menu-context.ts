@@ -20,6 +20,11 @@ export interface MenuActions {
   importWorkspace: () => void;
   resetLayout: () => void;
   closeMenu: () => void;
+  /** Phone deck mode: the menu also carries the status-bar toggle and Settings. */
+  deckMode: boolean;
+  statusBarVisible: boolean;
+  toggleStatusBar: () => void;
+  toggleSettings: () => void;
 }
 
 export const MenuContext = createContext<MenuActions | null>(null);

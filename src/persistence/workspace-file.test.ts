@@ -138,3 +138,21 @@ test("parseWorkspaceDocument drops apiKey from a hand-crafted document", () => {
   assert.strictEqual("apiKey" in params, false);
   assert.strictEqual(params.model, "x");
 });
+
+test("workspace documents round-trip an optional mobileLayout and strip secrets inside it", () => {
+  const withDeck = {
+    ...mockWorkspace,
+    mobileLayout: {
+      grid: { root: { type: "branch", data: [] }, height: 1, width: 1, orientation: "HORIZONTAL" },
+      panels: { t: { id: "t", contentComponent: "topology-extract", params: { apiKey: "sk-secret", keep: 1 } } },
+    },
+  } as any as Workspace;
+  const parsed = parseWorkspaceDocument(serializeWorkspaceDocument(withDeck));
+  assert.deepStrictEqual((parsed.mobileLayout as any).panels.t.params, { keep: 1 });
+  assert.throws(
+    () => parseWorkspaceDocument(JSON.stringify({ type: "exoskeleton-workspace", version: 8, workspace: { ...mockWorkspace, mobileLayout: 5 } })),
+    /mobileLayout/,
+  );
+  // absent stays absent
+  assert.ok(!("mobileLayout" in parseWorkspaceDocument(serializeWorkspaceDocument(mockWorkspace))));
+});

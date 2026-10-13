@@ -259,3 +259,39 @@
 /* Hide dockview's overflow chevron outright as a backstop. */
 .dv-groupview.exo-single-tab .dv-tabs-overflow-dropdown-root,
 .dv-groupview.exo-single-tab .dv-tabs-overflow-container { display: none !important; }
+
+/* ---- Deck (phone): one pane full-screen, every pane a pill in one
+   horizontally scrollable row; group controls (+ ⤴ ×) stay pinned at the
+   right end (they are absolutely positioned; the scroller stops short of
+   them via --exo-corner-w). Dockview's tabs-container is the native scroller
+   (its Scrollbar helper drives scrollLeft on it). Row sits at the top, so no
+   horizontal gesture begins at a screen edge. */
+.exo-deck .dv-groupview.exo-single-tab > .dv-tabs-and-actions-container .dv-scrollable {
+  overflow: hidden;
+}
+.exo-deck .dv-groupview.exo-single-tab > .dv-tabs-and-actions-container .dv-scrollable .dv-tabs-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  touch-action: pan-x;
+}
+.exo-deck .dv-tabs-container::-webkit-scrollbar { display: none; }
+.exo-deck .dv-scrollable .dv-scrollbar { display: none; }
+.exo-deck .dv-groupview.exo-single-tab > .dv-tabs-and-actions-container .dv-tab,
+.exo-deck .dv-groupview.exo-single-tab > .dv-tabs-and-actions-container .dv-tab.dv-active-tab,
+.exo-deck .dv-groupview.exo-single-tab > .dv-tabs-and-actions-container .dv-tab.dv-inactive-tab {
+  flex: 0 0 auto;
+}
+.exo-deck .exo-pill { height: 44px; border-radius: 22px; flex: none; }
+.exo-deck .exo-pill__btn { min-width: 44px; height: 44px; font-size: 16px; }
+/* Never glyph-only in the deck: the row scrolls instead. */
+.exo-deck .dv-groupview[data-compact="true"] .exo-pill:not(.is-active) .exo-pill__title { display: inline; }
+.exo-deck .dv-groupview[data-compact="true"] .exo-pill:not(.is-active) .exo-pill__btn:not(.exo-pill__tri) { display: inline-block; }
+.exo-deck .dv-groupview.exo-single-tab .dv-tabs-and-actions-container .dv-right-actions-container {
+  height: 44px;
+  border-radius: 22px;
+}
+.exo-deck .header-btn { min-width: 40px; min-height: 40px; }

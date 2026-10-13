@@ -61,6 +61,13 @@ export function parseWorkspaceDocument(raw: string): Workspace {
     throw new Error("Invalid workspace structure: missing string id or name");
   }
 
+  if (ws.mobileLayout !== undefined) {
+    const ml = ws.mobileLayout as { grid?: unknown; panels?: unknown } | null;
+    if (!ml || typeof ml !== "object" || typeof ml.panels !== "object" || !ml.grid) {
+      throw new Error("Invalid workspace structure: mobileLayout is malformed");
+    }
+  }
+
   // Secrets are dropped on import too: a document carrying someone else's
   // key would otherwise silently route this user's text through their
   // account (where the key owner can read request logs).
@@ -84,8 +91,16 @@ export function parseWorkspaceDocument(raw: string): Workspace {
  * the user re-opens the file themselves if they want it.
  */
 function stripPanelParams(workspace: Workspace, keys: readonly string[]): Workspace {
-  const panels = workspace.layout?.panels;
-  if (!panels || typeof panels !== "object") return workspace;
+  const out = { ...workspace, layout: stripLayoutParams(workspace.layout, keys) };
+  if (workspace.mobileLayout) {
+    out.mobileLayout = stripLayoutParams(workspace.mobileLayout, keys);
+  }
+  return out;
+}
+
+function stripLayoutParams(layout: Workspace["layout"], keys: readonly string[]): Workspace["layout"] {
+  const panels = layout?.panels;
+  if (!panels || typeof panels !== "object") return layout;
 
   const sanitizedPanels: typeof panels = {};
   for (const [id, panel] of Object.entries(panels)) {
@@ -103,5 +118,5 @@ function stripPanelParams(workspace: Workspace, keys: readonly string[]): Worksp
     }
   }
 
-  return { ...workspace, layout: { ...workspace.layout, panels: sanitizedPanels } };
+  return { ...layout, panels: sanitizedPanels };
 }

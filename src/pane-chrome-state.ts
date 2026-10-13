@@ -64,3 +64,33 @@ export function usePaneChrome(id: string): PaneChromeState {
     () => DEFAULT,
   );
 }
+
+/** Close every open, unpinned drawer. Returns true if any was open.
+ *  (Used by the deck's back-button absorption.) */
+export function closeOpenDrawers(): boolean {
+  let any = false;
+  for (const [id, st] of states) {
+    if (st.open && !st.pinned) {
+      states.set(id, { ...st, open: false });
+      any = true;
+    }
+  }
+  if (any) emit();
+  return any;
+}
+
+/** Transient popovers (the ≡ pill menu) register a closer while open so the
+ *  deck's back gesture can dismiss them. Returns an unregister function. */
+const backClosers = new Set<() => void>();
+export function registerBackCloser(fn: () => void): () => void {
+  backClosers.add(fn);
+  return () => backClosers.delete(fn);
+}
+/** Run and clear all registered closers. Returns true if any existed. */
+export function closeBackClosers(): boolean {
+  if (backClosers.size === 0) return false;
+  const fns = [...backClosers];
+  backClosers.clear();
+  fns.forEach((f) => f());
+  return true;
+}

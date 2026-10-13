@@ -27,6 +27,8 @@ import BlankPanel from "./panels/BlankPanel";
 import MenuPanel from "./panels/MenuPanel";
 import { MenuContext, type MenuActions } from "./panels/menu-context";
 import { stripTransientPanels } from "./persistence/strip-transient";
+import { DECK_QUERY, buildDeckLayout, reconcileLayouts } from "./persistence/deck";
+import { closeBackClosers, closeOpenDrawers } from "./pane-chrome-state";
 import { exoPanel } from "./PanelRoot";
 import {
   addOrFocusPanel,
@@ -48,11 +50,12 @@ import {
   switchWorkspace,
   updateActiveWorkspaceLayout,
   type AppStateV8,
+  type Workspace,
 } from "./persistence/storage";
 import { appStorage } from "./persistence/app-storage";
 import { createDebounce } from "./utils/debounce";
 import { errorText, inTauri, saveTextFile } from "./utils/file-io";
-import { defaultPresetId, presets } from "./persistence/presets";
+import { defaultPresetId, isWebRuntime, presets } from "./persistence/presets";
 import {
   parseWorkspaceDocument,
   serializeWorkspaceDocument,
@@ -129,6 +132,18 @@ const storage = appStorage;
 const SIDE_EDGE = "left" as const;
 const SIDE_GROUP_ID = "side-grid";
 
+/** Phone "deck" mode: web runtime and a viewport at or below DECK_QUERY. */
+function wantsDeck(): boolean {
+  return isWebRuntime() && typeof window.matchMedia === "function" && window.matchMedia(DECK_QUERY).matches;
+}
+
+/** The layout to show for a workspace in deck mode: its saved deck
+ *  reconciled with the grid (panels added/removed on desktop follow), or a
+ *  fresh deck built from the grid. */
+function deckLayoutFor(ws: Workspace) {
+  return ws.mobileLayout ? reconcileLayouts(ws.mobileLayout, ws.layout) : buildDeckLayout(ws.layout);
+}
+
 export default function App() {
   // Initial-load gate. `undefined` = loading; null = no saved state; an
   // AppStateV8 = restored from disk or initialized with default workspace.
@@ -143,6 +158,13 @@ export default function App() {
 
   const mainApiRef = useRef<DockviewApi | null>(null);
   const [isStatusBarVisible, setIsStatusBarVisible] = useState(false);
+  // Deck (phone) mode: single group of pills. Ref for handlers, state for render.
+  const deckModeRef = useRef(false);
+  const [deckMode, setDeckModeState] = useState(false);
+  // In deck mode the status bar is hidden until opened from the ⊞ menu.
+  const deckStatusWantedRef = useRef(false);
+  const collapsingRef = useRef(false);
+  const mruRef = useRef<string[]>([]);
   // Floating ⊞ add-panel menu (bottom-right, next to the astromech
   // summoner). The roster is read fresh from the registry on each open,
   // so open/closed markers stay accurate without extra subscriptions.
@@ -160,7 +182,11 @@ export default function App() {
       const main = raw && stripTransientPanels(raw);
       const current = appStateRef.current;
       if (!main || !current) return;
-      const next = updateActiveWorkspaceLayout(current, main);
+      const next = updateActiveWorkspaceLayout(
+        current,
+        main,
+        deckModeRef.current ? "mobileLayout" : "layout",
+      );
       appStateRef.current = next;
       storage.save(next);
     }, 400),
@@ -224,7 +250,7 @@ export default function App() {
         setAppState(v8);
         const activeWs = getActiveWorkspace(v8);
         if (mainApiRef.current && activeWs) {
-          applyWorkspaceState(mainApiRef.current, activeWs.layout, v8.version);
+          applyWs(mainApiRef.current, activeWs, v8.version);
         }
       }
     };
@@ -233,6 +259,126 @@ export default function App() {
       window.removeEventListener("exoskeleton:state-applied", handleStateApplied);
     };
   }, []);
+
+  function setDeckMode(on: boolean) {
+    deckModeRef.current = on;
+    setDeckModeState(on);
+  }
+
+  function hideStatusBarInDeck(api: DockviewApi) {
+    if (deckStatusWantedRef.current) return;
+    const sb = api.getPanel("status-bar");
+    if (sb) api.removePanel(sb);
+    if (api.getEdgeGroup("bottom") && !api.getPanel("status-bar")) api.removeEdgeGroup("bottom");
+    setIsStatusBarVisible(!!api.getPanel("status-bar"));
+  }
+
+  /** Apply a workspace to the dock in whichever mode we are in. */
+  function applyWs(api: DockviewApi, ws: Workspace, version: number) {
+    if (deckModeRef.current) {
+      applyWorkspaceState(api, deckLayoutFor(ws), version);
+      hideStatusBarInDeck(api);
+    } else {
+      applyWorkspaceState(api, ws.layout, version);
+    }
+  }
+
+  /** Width crossed the threshold: swap grid <-> deck, never flattening the grid. */
+  function swapMode(toDeck: boolean) {
+    const api = mainApiRef.current;
+    if (!api || deckModeRef.current === toDeck) return;
+    save.flush(); // writes the outgoing mode's slot
+    const cur = appStateRef.current;
+    if (!cur) return;
+    const ws = getActiveWorkspace(cur);
+    if (toDeck) {
+      setDeckMode(true);
+      const deck = deckLayoutFor(ws);
+      applyWorkspaceState(api, deck, cur.version);
+      hideStatusBarInDeck(api);
+    } else {
+      const deck = stripTransientPanels(api.toJSON());
+      const withDeck = updateActiveWorkspaceLayout(cur, deck, "mobileLayout");
+      const grid = reconcileLayouts(ws.layout, deck);
+      const next = updateActiveWorkspaceLayout(withDeck, grid, "layout");
+      appStateRef.current = next;
+      setAppState(next);
+      setDeckMode(false);
+      applyWorkspaceState(api, grid, next.version);
+      if (!api.getPanel("status-bar")) mountStatusBar(api);
+    }
+  }
+
+  /** Deck keeps exactly one main group: anything that opened a second group
+   *  (registry positions, drops) is folded back into it. */
+  function collapseDeck(api: DockviewApi) {
+    if (collapsingRef.current) return;
+    const mains = api.groups.filter((g) => g.api.location.type === "grid");
+    if (mains.length <= 1) return;
+    collapsingRef.current = true;
+    queueMicrotask(() => {
+      try {
+        const active = api.activePanel;
+        const live = api.groups.filter((g) => g.api.location.type === "grid");
+        const target = live.find((g) => g.panels.length > 0 && g === active?.group) ?? live[0];
+        for (const g of live) {
+          if (g === target) continue;
+          for (const p of [...g.panels]) p.api.moveTo({ group: target, position: "center" });
+        }
+        active?.api.setActive();
+      } catch (e) {
+        console.warn("[exoskeleton] collapseDeck failed:", e);
+      } finally {
+        collapsingRef.current = false;
+      }
+    });
+  }
+
+  // Width threshold: swap between grid and deck as the viewport crosses it.
+  useEffect(() => {
+    if (!isWebRuntime() || typeof window.matchMedia !== "function") return;
+    const mq = window.matchMedia(DECK_QUERY);
+    const onChange = () => swapMode(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  // Back absorption (deck, web only): the phone's back gesture dismisses
+  // transient UI, then steps back through recently used panes. It never
+  // leaves the page: the sentinel entry is re-pushed after every pop.
+  useEffect(() => {
+    if (!deckMode || !isWebRuntime()) return;
+    const sentinel = { exo: "deck" };
+    if ((history.state as { exo?: string } | null)?.exo !== "deck") {
+      history.pushState(sentinel, "");
+    }
+    const onPop = () => {
+      const api = mainApiRef.current;
+      if (api) {
+        if (api.getPanel("menu")) {
+          api.getPanel("menu")?.api.close();
+        } else if (closeBackClosers()) {
+          /* ≡ menu dismissed */
+        } else if (closeOpenDrawers()) {
+          /* drawer dismissed */
+        } else {
+          const mru = mruRef.current;
+          mru.pop(); // current pane
+          while (mru.length) {
+            const prev = api.getPanel(mru[mru.length - 1]);
+            if (prev) {
+              prev.api.setActive();
+              break;
+            }
+            mru.pop();
+          }
+        }
+      }
+      history.pushState(sentinel, "");
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [deckMode]);
 
   function mountStatusBar(api: DockviewApi) {
     let bottom = api.getEdgeGroup("bottom");
@@ -304,13 +450,20 @@ export default function App() {
 
   function onMainReady(event: DockviewReadyEvent) {
     mainApiRef.current = event.api;
+    const startInDeck = wantsDeck();
+    setDeckMode(startInDeck);
+    let loadedDeck = false;
     if (appState) {
       const activeWs = getActiveWorkspace(appState);
       // Restore preferences so the first auto-save round-trips them.
       if (appState.preferences) prefsRef.current = appState.preferences;
       try {
-        const layout = migrateSavedLayout(activeWs.layout, appState.version);
+        const layout = migrateSavedLayout(
+          startInDeck ? deckLayoutFor(activeWs) : activeWs.layout,
+          appState.version,
+        );
         event.api.fromJSON(layout);
+        loadedDeck = startInDeck;
         // Add any panels the user's saved state predates. No-op when the
         // saved version is already current. Without this, panels installed
         // after the user's last save would never appear unless they
@@ -348,6 +501,19 @@ export default function App() {
       setAppState(fresh);
     }
 
+    // Phone with only a grid on hand (first run, or the fallback above):
+    // fold it into the deck; the grid stays in `layout` as the workspace's
+    // desktop arrangement.
+    if (startInDeck && !loadedDeck) {
+      const grid = stripTransientPanels(event.api.toJSON());
+      const cur = appStateRef.current;
+      if (cur && !appState) {
+        appStateRef.current = updateActiveWorkspaceLayout(cur, grid, "layout");
+      }
+      event.api.clear();
+      event.api.fromJSON(buildDeckLayout(grid));
+    }
+
     // Rescue pathological saved layouts (panels absorbed into an edge
     // group, empty main grid). No-op when the layout is healthy; the
     // repaired arrangement is persisted by the next debounced save.
@@ -355,7 +521,9 @@ export default function App() {
 
     // Check if status bar is in the restored panel list; if not, mount it.
     const statusBarPanel = event.api.getPanel("status-bar");
-    if (!statusBarPanel) {
+    if (startInDeck) {
+      hideStatusBarInDeck(event.api);
+    } else if (!statusBarPanel) {
       mountStatusBar(event.api);
     } else {
       statusBarPanel.group.header.hidden = true;
@@ -383,9 +551,21 @@ export default function App() {
       }
       setIsStatusBarVisible(!!event.api.getPanel("status-bar"));
 
+      if (deckModeRef.current) collapseDeck(event.api);
       save();
     });
-    event.api.onDidActivePanelChange(save);
+    event.api.onDidActivePanelChange((p) => {
+      if (deckModeRef.current && p && p.id !== "menu" && p.id !== "status-bar" && p.id !== "settings") {
+        const mru = mruRef.current;
+        if (mru[mru.length - 1] !== p.id) {
+          const i = mru.indexOf(p.id);
+          if (i >= 0) mru.splice(i, 1);
+          mru.push(p.id);
+          if (mru.length > 20) mru.shift();
+        }
+      }
+      save();
+    });
   }
 
   function closeMenu() {
@@ -403,7 +583,7 @@ export default function App() {
     const W = window.innerWidth;
     const H = window.innerHeight;
     const margin = 16;
-    const narrow = W < 480;
+    const narrow = W <= 600;
     const width = narrow ? W - margin * 2 : 320;
     const height = narrow ? H - margin * 2 : Math.min(480, H - 70);
     // Desktop: sit just above the ⊞ button (bottom-right).
@@ -424,7 +604,7 @@ export default function App() {
     setAppState(next);
     const targetWs = next.workspaces[id];
     if (targetWs && mainApiRef.current) {
-      applyWorkspaceState(mainApiRef.current, targetWs.layout, next.version);
+      applyWs(mainApiRef.current, targetWs, next.version);
     }
     closeMenu();
   }
@@ -437,7 +617,7 @@ export default function App() {
     const { state: next, workspace: newWs } = createWorkspace(appState, name);
     setAppState(next);
     if (mainApiRef.current) {
-      applyWorkspaceState(mainApiRef.current, newWs.layout, next.version);
+      applyWs(mainApiRef.current, newWs, next.version);
     }
     closeMenu();
   }
@@ -465,7 +645,7 @@ export default function App() {
       setAppState(next);
       const nextActiveWs = getActiveWorkspace(next);
       if (nextActiveWs && mainApiRef.current) {
-        applyWorkspaceState(mainApiRef.current, nextActiveWs.layout, next.version);
+        applyWs(mainApiRef.current, nextActiveWs, next.version);
       }
     }
   }
@@ -502,10 +682,15 @@ export default function App() {
           save.flush();
           const newId = `ws_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
           const workspaceToInsert = { ...importedWs, id: newId, updatedAt: Date.now() };
-          const { state: next } = createWorkspace(appState, workspaceToInsert.name, workspaceToInsert.layout);
+          const { state: next, workspace: created } = createWorkspace(
+            appState,
+            workspaceToInsert.name,
+            workspaceToInsert.layout,
+            workspaceToInsert.mobileLayout,
+          );
           setAppState(next);
           if (mainApiRef.current) {
-            applyWorkspaceState(mainApiRef.current, workspaceToInsert.layout, next.version);
+            applyWs(mainApiRef.current, created, next.version);
           }
         } catch (err) {
           alert(`Failed to import workspace: ${(err as Error).message}`);
@@ -555,14 +740,47 @@ export default function App() {
       ) {
         api.clear();
         buildPreset(api, defaultPresetId());
+        if (deckModeRef.current && appStateRef.current) {
+          // The preset is a grid: it becomes the desktop layout, and the
+          // deck is rebuilt from it.
+          const grid = stripTransientPanels(api.toJSON());
+          const reset = updateActiveWorkspaceLayout(appStateRef.current, grid, "layout");
+          const ws = getActiveWorkspace(reset);
+          const clean: AppStateV8 = {
+            ...reset,
+            workspaces: { ...reset.workspaces, [ws.id]: { ...ws } },
+          };
+          delete clean.workspaces[ws.id].mobileLayout;
+          appStateRef.current = clean;
+          setAppState(clean);
+          applyWs(api, clean.workspaces[ws.id], clean.version);
+        }
       }
     },
     closeMenu,
+    deckMode,
+    statusBarVisible: isStatusBarVisible,
+    toggleStatusBar: () => {
+      const api = mainApiRef.current;
+      if (!api) return;
+      if (api.getPanel("status-bar")) {
+        deckStatusWantedRef.current = false;
+        hideStatusBarInDeck(api);
+      } else {
+        deckStatusWantedRef.current = true;
+        mountStatusBar(api);
+      }
+      closeMenu();
+    },
+    toggleSettings: () => {
+      toggleSettings();
+      closeMenu();
+    },
   };
 
   return (
     <MenuContext.Provider value={menuActions}>
-    <div className="dockview-theme-abyss app-frame">
+    <div className={`dockview-theme-abyss app-frame${deckMode ? " exo-deck" : ""}`}>
       <DockviewReact
         components={components}
         // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —
@@ -574,7 +792,7 @@ export default function App() {
         floatingGroupBounds="boundedWithinViewport"
         onReady={onMainReady}
       />
-      {!isStatusBarVisible && mainApiRef.current && (
+      {!isStatusBarVisible && !deckMode && mainApiRef.current && (
         <button
           className="status-bar-summoner-btn"
           onClick={() => mountStatusBar(mainApiRef.current!)}
