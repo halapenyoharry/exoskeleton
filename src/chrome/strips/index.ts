@@ -6,3 +6,4 @@ import "./json-cytoscape.strip.ts";
 import "./json-tree.strip.ts";
 import "./json-circles.strip.ts";
 import "./json-mass.strip.ts";
+import "./json-dyadic.strip.ts";

@@ -143,7 +143,7 @@ export interface PanelMenuItem {
  * and an orientation button.
  */
 export interface PaneCell {
-  type: "segmented" | "toggle" | "swatch" | "stepper" | "dial";
+  type: "segmented" | "toggle" | "swatch" | "stepper" | "dial" | "select";
   /** Panel param this cell reads and writes. */
   param: string;
   label: string;
@@ -154,6 +154,9 @@ export interface PaneCell {
    *  are matched by String(value) and written back as numbers when the
    *  option value is numeric-looking and the current value is a number. */
   options?: { value: string; label?: string; icon?: string; color?: string }[];
+  /** select: key of options published at runtime via publishOptions(panelId,
+   *  key, ...) (src/chrome/runtime-options.ts). Static `options` still work. */
+  optionsFrom?: string;
   min?: number;
   max?: number;
   step?: number;

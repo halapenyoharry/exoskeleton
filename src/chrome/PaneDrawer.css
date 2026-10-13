@@ -105,3 +105,6 @@
   .pane-drawer--horizontal .pd-resize { height: 44px; }
   .pane-drawer--vertical .pd-resize { width: 44px; }
 }
+
+.pd-select { min-height: 32px; max-width: 100%; font: inherit; color: var(--xo-fg); background: var(--xo-bg); border: 1px solid var(--xo-line); border-radius: 8px; padding: 4px 8px; outline: none; }
+@media (pointer: coarse) { .pd-select { min-height: 36px; } }

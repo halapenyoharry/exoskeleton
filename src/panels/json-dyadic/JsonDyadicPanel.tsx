@@ -1,3 +1,4 @@
+import { publishOptions } from "../../chrome/runtime-options";
 import { useEffect, useMemo, useState } from "react";
 import type { IDockviewPanelProps } from "dockview";
 import {
@@ -439,13 +440,6 @@ export default function JsonDyadicPanel(
     ...(props.params ?? {}),
   };
 
-  const updateParam = <K extends keyof JsonDyadicParams>(
-    key: K,
-    value: JsonDyadicParams[K],
-  ) => {
-    props.api.updateParameters({ ...params, [key]: value });
-  };
-
   // active-document coordination — mirrors json-circles
   const [activeDocId, setActiveDocId] = useState(params.documentId);
   const [connected, setConnected] = useState(areGraphsConnected());
@@ -499,53 +493,33 @@ export default function JsonDyadicPanel(
     .map((l) => topology.layers.get(l))
     .filter((l): l is LayerData => Boolean(l));
 
+  // Publish layer choices for the drawer's select cell.
+  useEffect(() => {
+    publishOptions(
+      props.api.id,
+      "layers",
+      layerOrder.map((id) => {
+        const l = topology.layers.get(id)!;
+        return {
+          value: id,
+          label: `${CATEGORY_TOKENS[l.primaryCategory].label.charAt(0).toUpperCase()}\u00b7${l.layer} (${l.linkCount})`,
+        };
+      }),
+    );
+  }, [props.api.id, topology, layerOrder, activeDocId]);
+
+  // Reflect the derived default in the drawer (select binds to the param).
+  useEffect(() => {
+    if (effectiveLayer && params.selectedLayer !== effectiveLayer) {
+      props.api.updateParameters({ selectedLayer: effectiveLayer });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveLayer]);
+
   return (
     <>
-      <div className="panel-toolbar dp-toolbar">
-        <span className="dp-header-doc">{activeDocId}</span>
-        <label className="dp-picker">
-          layer
-          <select
-            value={effectiveLayer ?? ""}
-            onChange={(e) =>
-              updateParam("selectedLayer", e.target.value || null)
-            }
-          >
-            <option value="">— pick a layer —</option>
-            {layerOrder.map((id) => {
-              const l = topology.layers.get(id)!;
-              return (
-                <option key={id} value={id}>
-                  {CATEGORY_TOKENS[l.primaryCategory].label.charAt(0).toUpperCase()}
-                  ·{l.layer} ({l.linkCount})
-                </option>
-              );
-            })}
-          </select>
-        </label>
-
-        <label className="dp-toggle">
-          <input
-            type="checkbox"
-            checked={params.showCategoryLegend}
-            onChange={(e) =>
-              updateParam("showCategoryLegend", e.target.checked)
-            }
-          />
-          legend
-        </label>
-
-        <label className="dp-toggle">
-          <input
-            type="checkbox"
-            checked={params.showMetadata}
-            onChange={(e) => updateParam("showMetadata", e.target.checked)}
-          />
-          metadata
-        </label>
-
-        {params.showCategoryLegend && <CategoryLegend />}
-      </div>
+      <div className="dp-doc">{activeDocId}</div>
+      {params.showCategoryLegend && <CategoryLegend />}
 
       <div className="panel-body dp-body">
         {topology.warnings.length > 0 && doc === undefined && (

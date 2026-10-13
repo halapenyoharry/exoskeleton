@@ -7,6 +7,8 @@ import type { ReactNode } from "react";
 import type { DockviewApi, DockviewPanelApi } from "dockview";
 import { Segmented, SwatchPicker, Toggle } from "../components/toolbar/Toolbar";
 import { emitPanelMenu } from "../panel-menu";
+import { getOptions, onOptions } from "./runtime-options";
+import type { RuntimeOption } from "./runtime-options";
 import type { PaneCell, PaneStripItem } from "../panel-manifest";
 import { getStrip } from "./strip-registry";
 import { normalizeSpan, spanToPixels } from "./grid-math";
@@ -53,7 +55,43 @@ function useParams(api: DockviewPanelApi): [Params, (patch: Params) => void] {
   return [params, write];
 }
 
-function CellView({ cell, value, onChange }: { cell: PaneCell; value: unknown; onChange: (v: unknown) => void }) {
+function useCellOptions(panelId: string, cell: PaneCell): RuntimeOption[] {
+  const key = cell.optionsFrom;
+  const [rt, setRt] = useState<RuntimeOption[]>(() => (key ? getOptions(panelId, key) : []));
+  useEffect(() => {
+    if (!key) return;
+    setRt(getOptions(panelId, key));
+    return onOptions(panelId, key, setRt);
+  }, [panelId, key]);
+  if (key) return rt;
+  return (cell.options ?? []).map((o) => ({ value: o.value, label: o.label ?? o.value }));
+}
+
+function SelectCell({ panelId, cell, value, onChange }: { panelId: string; cell: PaneCell; value: unknown; onChange: (v: unknown) => void }) {
+  const opts = useCellOptions(panelId, cell);
+  const tip = cell.tooltip ?? cell.label;
+  if (opts.length === 0) return <span className="pd-dim" title={tip}>no {cell.label}s</span>;
+  const cur = value == null ? "" : String(value);
+  if (opts.length <= 4) {
+    return (
+      <Segmented<string>
+        label={cell.label}
+        title={tip}
+        value={cur}
+        onChange={(v) => onChange(v)}
+        options={opts.map((o) => ({ value: o.value, label: o.label, title: o.title ?? o.label }))}
+      />
+    );
+  }
+  return (
+    <select className="pd-select" aria-label={cell.label} title={tip} value={cur} onChange={(e) => onChange(e.target.value || null)}>
+      {!opts.some((o) => o.value === cur) && <option value="">{"\u2014 pick \u2014"}</option>}
+      {opts.map((o) => <option key={o.value} value={o.value} title={o.title}>{o.label}</option>)}
+    </select>
+  );
+}
+
+function CellView({ panelId, cell, value, onChange }: { panelId: string; cell: PaneCell; value: unknown; onChange: (v: unknown) => void }) {
   const tip = cell.tooltip ?? cell.label;
   const numeric = typeof value === "number";
   const coerce = (s: string) => (numeric ? Number(s) : s);
@@ -68,6 +106,8 @@ function CellView({ cell, value, onChange }: { cell: PaneCell; value: unknown; o
           options={(cell.options ?? []).map((o) => ({ value: o.value, label: o.label ?? o.value, icon: o.icon, title: o.label ?? o.value }))}
         />
       );
+    case "select":
+      return <SelectCell panelId={panelId} cell={cell} value={value} onChange={onChange} />;
     case "toggle":
       return <Toggle label={cell.label} title={tip} checked={!!value} onChange={onChange} />;
     case "swatch":
@@ -109,13 +149,13 @@ function CellView({ cell, value, onChange }: { cell: PaneCell; value: unknown; o
   }
 }
 
-function Cell({ cell, params, write, stack }: { cell: PaneCell; params: Params; write: (p: Params) => void; stack: boolean }) {
+function Cell({ panelId, cell, params, write, stack }: { panelId: string; cell: PaneCell; params: Params; write: (p: Params) => void; stack: boolean }) {
   // Cells size to their content; a declared row span is only a min-height.
   const minHeight = stack ? undefined : spanToPixels([1, normalizeSpan(cell.span, 99)[1]]).height;
   return (
     <div className="pd-cell" style={minHeight && minHeight > 52 ? { minHeight } : undefined}>
       <span className="pd-cell-caption" title={cell.tooltip}>{cell.label}</span>
-      <CellView cell={cell} value={params[cell.param]} onChange={(v) => write({ [cell.param]: v })} />
+      <CellView panelId={panelId} cell={cell} value={params[cell.param]} onChange={(v) => write({ [cell.param]: v })} />
     </div>
   );
 }
@@ -299,7 +339,7 @@ export function PaneDrawer(props: PaneDrawerProps) {
         ) : current?.body ? (
           <div className={current.body.layout === "grid" ? "pd-grid" : "pd-stack"}>
             {current.body.cells.map((c) => (
-              <Cell key={c.param} cell={c} params={params} write={write} stack={current.body!.layout === "stack"} />
+              <Cell key={c.param} panelId={panelId} cell={c} params={params} write={write} stack={current.body!.layout === "stack"} />
             ))}
           </div>
         ) : null}
