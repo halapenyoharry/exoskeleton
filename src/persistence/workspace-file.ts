@@ -68,10 +68,59 @@ export function parseWorkspaceDocument(raw: string): Workspace {
     }
   }
 
+  // Edge groups (the document on the left, settings on the right, the status
+  // bar below) ride inside each layout: open/collapsed state and size are part
+  // of the workspace, so a malformed entry would silently lose them.
+  checkEdgeGroups(ws.layout, "layout");
+  if (ws.mobileLayout !== undefined) checkEdgeGroups(ws.mobileLayout, "mobileLayout");
+
   // Secrets are dropped on import too: a document carrying someone else's
   // key would otherwise silently route this user's text through their
   // account (where the key owner can read request logs).
   return stripPanelParams(ws as Workspace, ["filePath", ...SECRET_PARAM_KEYS]);
+}
+
+/**
+ * Validates `layout.edgeGroups` when present: each position holds a finite
+ * `size`, a boolean `visible`, an optional boolean `collapsed`, and (when it
+ * carries panels) a `group` with a string id and string views.
+ */
+function checkEdgeGroups(layout: unknown, label: string): void {
+  const eg = (layout as { edgeGroups?: unknown } | null | undefined)?.edgeGroups;
+  if (eg === undefined) return;
+  const bad = (why: string) => new Error(`Invalid workspace structure: ${label}.edgeGroups ${why}`);
+  if (!eg || typeof eg !== "object" || Array.isArray(eg)) throw bad("is malformed");
+  for (const [pos, entry] of Object.entries(eg as Record<string, unknown>)) {
+    if (!["top", "bottom", "left", "right"].includes(pos)) throw bad(`has unknown position "${pos}"`);
+    const e = entry as {
+      size?: unknown;
+      visible?: unknown;
+      collapsed?: unknown;
+      group?: { id?: unknown; views?: unknown } | null;
+    } | null;
+    if (
+      !e ||
+      typeof e !== "object" ||
+      typeof e.size !== "number" ||
+      !Number.isFinite(e.size) ||
+      typeof e.visible !== "boolean" ||
+      (e.collapsed !== undefined && typeof e.collapsed !== "boolean")
+    ) {
+      throw bad(`"${pos}" is malformed`);
+    }
+    if (e.group !== undefined) {
+      const g = e.group;
+      if (
+        !g ||
+        typeof g !== "object" ||
+        typeof g.id !== "string" ||
+        !Array.isArray(g.views) ||
+        g.views.some((v) => typeof v !== "string")
+      ) {
+        throw bad(`"${pos}".group is malformed`);
+      }
+    }
+  }
 }
 
 /**

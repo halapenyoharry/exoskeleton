@@ -53,6 +53,21 @@ import {
   type AppStateV8,
   type Workspace,
 } from "./persistence/storage";
+import {
+  DOCUMENT_EDGE,
+  DOCUMENT_EDGE_ID,
+  DOCUMENT_PANEL_ID,
+  SETTINGS_EDGE,
+  SETTINGS_EDGE_ID,
+  SETTINGS_EDGE_MIN,
+  SETTINGS_EDGE_SIZE,
+  ensureDocumentEdge,
+  isDocumentOpen,
+  isPhoneWidth,
+  precreateEdgeGroups,
+  setDocumentOpen,
+  toggleDocument,
+} from "./persistence/document-edge";
 import { appStorage } from "./persistence/app-storage";
 import { createDebounce } from "./utils/debounce";
 import { errorText, inTauri, saveTextFile } from "./utils/file-io";
@@ -128,15 +143,11 @@ const components = {
 const storage = appStorage;
 
 // The Cmd+B-summoned settings panel lives in a Dockview 6 edge group on
-// the left side of the main grid. Same constant used by toggleSettings,
-// the auto-cleanup hook, and (implicitly) the serialized layout.
-const SIDE_EDGE = "left" as const;
-const SIDE_GROUP_ID = "side-grid";
-
-/** Phone: web runtime and a viewport at or below DECK_QUERY. */
-function isPhoneWidth(): boolean {
-  return isWebRuntime() && typeof window.matchMedia === "function" && window.matchMedia(DECK_QUERY).matches;
-}
+// the RIGHT side of the main grid (the left edge is the document: see
+// persistence/document-edge.ts). Same constants used by toggleSettings, the
+// auto-cleanup hook, and (implicitly) the serialized layout.
+const SIDE_EDGE = SETTINGS_EDGE;
+const SIDE_GROUP_ID = SETTINGS_EDGE_ID;
 
 /** Deck is opt-in: a phone shows the grid unless "One pane at a time" is on. */
 function wantsDeck(): boolean {
@@ -387,6 +398,8 @@ export default function App() {
           /* ≡ menu dismissed */
         } else if (closeOpenDrawers()) {
           /* drawer dismissed */
+        } else if (isDocumentOpen(api)) {
+          setDocumentOpen(api, false, true); // the document sheet closes before anything else
         } else if (api.hasMaximizedGroup()) {
           api.exitMaximizedGroup();
         } else {
@@ -442,7 +455,7 @@ export default function App() {
   // Toggle the settings panel. Extracted as a stable named function so the
   // menu-event handler below can invoke it; future header-action buttons or
   // programmatic invocations can call it the same way. Settings lives in a
-  // left edge group that's created on demand and torn down when its last
+  // right edge group that's created on demand and torn down when its last
   // panel closes (see onDidLayoutChange cleanup in onMainReady).
   function toggleSettings() {
     const api = mainApiRef.current;
@@ -458,8 +471,8 @@ export default function App() {
     if (!edge) {
       edge = api.addEdgeGroup(SIDE_EDGE, {
         id: SIDE_GROUP_ID,
-        initialSize: 320,
-        minimumSize: 200,
+        initialSize: SETTINGS_EDGE_SIZE,
+        minimumSize: SETTINGS_EDGE_MIN,
       });
     }
     api.addPanel({
@@ -484,9 +497,36 @@ export default function App() {
     };
   }, []);
 
+  /** Cmd+J: expand/collapse the document (left edge). On a phone it is a sheet. */
+  function toggleDocumentNow() {
+    const api = mainApiRef.current;
+    if (!api) return;
+    toggleDocument(api, isPhoneWidth());
+    save();
+  }
+
+  // Cmd+J / Ctrl+J. Tauri: native menu accelerator (same reason as Cmd+B
+  // above). Browser: a window keydown listener.
+  useEffect(() => {
+    if (inTauri()) {
+      const unlistenP = listen("shortcut:toggle-document", () => toggleDocumentNow());
+      return () => {
+        void unlistenP.then((fn) => fn()).catch(() => {});
+      };
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || e.key.toLowerCase() !== "j") return;
+      e.preventDefault();
+      toggleDocumentNow();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   function onMainReady(event: DockviewReadyEvent) {
     mainApiRef.current = event.api;
     const startInDeck = wantsDeck();
+    const phoneNow = isPhoneWidth();
     setDeckMode(startInDeck);
     let loadedDeck = false;
     if (appState) {
@@ -497,7 +537,11 @@ export default function App() {
         const layout = migrateSavedLayout(
           startInDeck ? deckLayoutFor(activeWs) : activeWs.layout,
           appState.version,
+          { phone: phoneNow },
         );
+        // Make the edge groups first so they keep their options (Dockview
+        // would otherwise create them from JSON with defaults).
+        precreateEdgeGroups(event.api, layout, phoneNow);
         event.api.fromJSON(layout);
         loadedDeck = startInDeck;
         // Add any panels the user's saved state predates. No-op when the
@@ -550,6 +594,18 @@ export default function App() {
       event.api.fromJSON(buildDeckLayout(grid));
     }
 
+    // The left edge always exists and always holds the document (collapsed
+    // when the saved layout predates it). Open/closed + size are persisted
+    // with the layout; a phone always starts collapsed.
+    ensureDocumentEdge(event.api, { phone: phoneNow });
+    event.api.getEdgeGroup(DOCUMENT_EDGE)?.onDidCollapsedChange(() => save());
+    // Dragging the edge's sash resizes it without any Dockview layout event;
+    // observe the group element so its size is saved with the workspace.
+    const docEdgeEl = event.api.groups.find((g) => g.id === DOCUMENT_EDGE_ID)?.element;
+    if (docEdgeEl && typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(() => save()).observe(docEdgeEl);
+    }
+
     // Rescue pathological saved layouts (panels absorbed into an edge
     // group, empty main grid). No-op when the layout is healthy; the
     // repaired arrangement is persisted by the next debounced save.
@@ -566,8 +622,9 @@ export default function App() {
       setIsStatusBarVisible(true);
     }
 
-    // Auto-cleanup: when the left edge group empties (e.g. user closes the
-    // settings tab), remove the edge group entirely. Mirrors the old
+    // Auto-cleanup: when the settings (right) edge group empties (e.g. user
+    // closes the settings tab), remove the edge group entirely. The document
+    // (left) edge is permanent. Mirrors the old
     // "auto-hide side-grid when empty" UX from the peer-grid era.
     event.api.onDidLayoutChange(() => {
       const edge = event.api.getEdgeGroup(SIDE_EDGE);
@@ -591,7 +648,14 @@ export default function App() {
       save();
     });
     event.api.onDidActivePanelChange((p) => {
-      if (isPhoneWidth() && p && p.id !== "menu" && p.id !== "status-bar" && p.id !== "settings") {
+      if (
+        isPhoneWidth() &&
+        p &&
+        p.id !== "menu" &&
+        p.id !== "status-bar" &&
+        p.id !== "settings" &&
+        p.id !== DOCUMENT_PANEL_ID
+      ) {
         const mru = mruRef.current;
         if (mru[mru.length - 1] !== p.id) {
           const i = mru.indexOf(p.id);
@@ -620,10 +684,17 @@ export default function App() {
     const H = window.innerHeight;
     const margin = 16;
     const narrow = W <= 600;
-    const width = narrow ? W - margin * 2 : 320;
+    // A phone's document sheet covers the grid: close it so the menu has the grid to itself.
+    if (narrow && isDocumentOpen(api)) setDocumentOpen(api, false, true);
+    // Floating positions are relative to the grid, which the left (document)
+    // edge pushes right by its width (a 40-44px strip even when collapsed).
+    const mid = document.querySelector<HTMLElement>(".dv-shell-middle-column");
+    const gridLeft = mid ? mid.getBoundingClientRect().left : 0;
+    const gridW = api.width > 0 ? api.width : W;
+    const width = narrow ? gridW - margin * 2 : 320;
     const height = narrow ? H - margin * 2 : Math.min(480, H - 70);
     // Desktop: sit just above the ⊞ button (bottom-right).
-    const x = narrow ? margin : Math.max(8, W - width - 12);
+    const x = narrow ? margin : Math.max(8, W - width - 12 - gridLeft);
     const y = narrow ? margin : Math.max(8, H - height - 58);
     api.addPanel({
       id: "menu",
@@ -816,6 +887,11 @@ export default function App() {
     },
     toggleSettings: () => {
       toggleSettings();
+      closeMenu();
+    },
+    isDocumentOpen: () => !!mainApiRef.current && isDocumentOpen(mainApiRef.current),
+    toggleDocument: () => {
+      toggleDocumentNow();
       closeMenu();
     },
   };

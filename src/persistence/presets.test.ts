@@ -31,10 +31,28 @@ test("minimal preset contains exactly editor, terminal, webview", () => {
   assert.deepStrictEqual(minimal.panelIds, ["editor", "terminal", "webview"]);
 });
 
-test("resolvePresetPanelIds resolves empty array to all available registry ids for everything preset", () => {
+test("resolvePresetPanelIds resolves empty array to every registry id but the document for everything preset", () => {
   const allRegistryIds = panelRegistry.map((p) => p.id);
   const resolved = resolvePresetPanelIds("everything", allRegistryIds);
-  assert.deepStrictEqual(resolved, allRegistryIds);
+  // json-edit is the document: it lives in the left edge, never in a preset's grid.
+  assert.deepStrictEqual(resolved, allRegistryIds.filter((id) => id !== "json-edit"));
+});
+
+test("no preset puts json-edit in its grid (the left edge always has it)", () => {
+  const allRegistryIds = panelRegistry.map((p) => p.id);
+  for (const preset of presets) {
+    assert.ok(!preset.panelIds.includes("json-edit"), `preset "${preset.id}" lists json-edit`);
+    assert.ok(
+      !resolvePresetPanelIds(preset.id, allRegistryIds).includes("json-edit"),
+      `preset "${preset.id}" resolves to a grid containing json-edit`,
+    );
+  }
+  assert.ok(!resolvePresetPanelIds("no-such-preset", allRegistryIds).includes("json-edit"));
+});
+
+test("json-lab and everything open the document edge; the rest start collapsed", () => {
+  const open = presets.filter((p) => p.documentOpen).map((p) => p.id).sort();
+  assert.deepStrictEqual(open, ["everything", "json-lab"]);
 });
 
 test("resolvePresetPanelIds resolves specific panelIds for minimal preset", () => {

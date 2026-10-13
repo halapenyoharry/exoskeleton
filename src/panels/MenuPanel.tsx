@@ -55,6 +55,20 @@ export default function MenuPanel(_props: IDockviewPanelProps) {
       </section>
 
       <section className="menu-section">
+        <div className="menu-list">
+          <button
+            className="menu-row"
+            onClick={m.toggleDocument}
+            aria-pressed={m.isDocumentOpen()}
+            title="The loaded document — edit, switch, or load from the Library (⌘J)"
+          >
+            <span className="menu-row-label">Document</span>
+            <span className="menu-row-mark">{m.isDocumentOpen() ? "●" : "○"}</span>
+          </button>
+        </div>
+      </section>
+
+      <section className="menu-section">
         <h3 className="menu-heading">Add panel</h3>
         <PanelPicker variant="list" onPick={m.addPanel} />
       </section>

@@ -29,6 +29,9 @@ export interface MenuActions {
   statusBarVisible: boolean;
   toggleStatusBar: () => void;
   toggleSettings: () => void;
+  /** The document edge (left): the loaded JSON document, always plugged in. */
+  isDocumentOpen: () => boolean;
+  toggleDocument: () => void;
 }
 
 export const MenuContext = createContext<MenuActions | null>(null);

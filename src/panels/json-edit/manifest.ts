@@ -41,8 +41,9 @@ const manifest: PanelManifest<JsonEditParams> = {
   capabilities: [],
   optionalCapabilities: ["fs"],
 
-  // layout — anchors the empty grid on first launch; visualizer panels
-  // position themselves "right" or "within" relative to this id.
+  // layout — json-edit is the DOCUMENT, not a grid pane: it lives in the left
+  // edge group ("document-edge", persistence/document-edge.ts), which every
+  // layout build/restore ensures. It has no `defaultLayout` on purpose.
   paramsDefault: jsonEditDefaults,
 
   npmDependencies: {

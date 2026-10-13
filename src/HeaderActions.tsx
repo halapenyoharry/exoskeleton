@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { IDockviewHeaderActionsProps } from "dockview";
 import { ensureCompanions } from "./persistence/default-layout";
+import { DOCUMENT_EDGE_ID } from "./persistence/document-edge";
 import "./HeaderActions.css";
 
 /**
@@ -57,6 +58,9 @@ export function RightHeaderActions(props: IDockviewHeaderActionsProps) {
   function popoutGroup() {
     props.containerApi.addPopoutGroup(props.group);
   }
+  // The document edge is structural: no + / popout / close-all. Its pill
+  // carries the ☰ document menu and × (collapse).
+  if (props.group.id === DOCUMENT_EDGE_ID) return null;
   return (
     <div className="header-actions header-actions--right">
       {maximized && (

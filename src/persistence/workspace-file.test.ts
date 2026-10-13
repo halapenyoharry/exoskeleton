@@ -156,3 +156,58 @@ test("workspace documents round-trip an optional mobileLayout and strip secrets 
   // absent stays absent
   assert.ok(!("mobileLayout" in parseWorkspaceDocument(serializeWorkspaceDocument(mockWorkspace))));
 });
+
+// ---- edge groups: the document edge's state is part of the workspace -------
+
+const docEdgeWorkspace = (): Workspace => ({
+  id: "ws-doc-edge",
+  name: "With a document edge",
+  layout: {
+    grid: { root: { type: "branch", data: [] }, height: 100, width: 100, orientation: "HORIZONTAL" },
+    panels: {
+      "json-edit": { id: "json-edit", contentComponent: "json-edit", params: { documentId: "doc-7", theme: "midnight-alaska" } },
+      settings: { id: "settings", contentComponent: "settings" },
+    },
+    edgeGroups: {
+      left: { size: 410, visible: true, collapsed: true, group: { id: "document-edge", views: ["json-edit"], activeView: "json-edit" } },
+      right: { size: 320, visible: true, group: { id: "side-grid", views: ["settings"], activeView: "settings" } },
+    },
+  } as any,
+  mobileLayout: {
+    grid: { root: { type: "branch", data: [] }, height: 100, width: 100, orientation: "HORIZONTAL" },
+    panels: { "json-edit": { id: "json-edit", contentComponent: "json-edit" } },
+    edgeGroups: {
+      left: { size: 275, visible: true, collapsed: true, group: { id: "document-edge", views: ["json-edit"], activeView: "json-edit" } },
+    },
+  } as any,
+  updatedAt: 1700000000000,
+});
+
+test("export/import keeps the document edge's open/collapsed state and size (desktop grid and phone deck)", () => {
+  const out = parseWorkspaceDocument(serializeWorkspaceDocument(docEdgeWorkspace()));
+  assert.deepStrictEqual(out.layout.edgeGroups, docEdgeWorkspace().layout.edgeGroups);
+  assert.deepStrictEqual(out.mobileLayout?.edgeGroups, docEdgeWorkspace().mobileLayout?.edgeGroups);
+  assert.strictEqual(out.layout.panels["json-edit"].params?.documentId, "doc-7");
+});
+
+test("parseWorkspaceDocument rejects malformed edgeGroups in layout or mobileLayout", () => {
+  const doc = (mutate: (ws: any) => void) => {
+    const ws = docEdgeWorkspace();
+    mutate(ws);
+    return JSON.stringify({ type: "exoskeleton-workspace", version: 8, workspace: ws });
+  };
+  assert.throws(() => parseWorkspaceDocument(doc((ws) => (ws.layout.edgeGroups = "left"))), /layout\.edgeGroups is malformed/);
+  assert.throws(() => parseWorkspaceDocument(doc((ws) => (ws.layout.edgeGroups.left.size = "wide"))), /"left" is malformed/);
+  assert.throws(() => parseWorkspaceDocument(doc((ws) => delete ws.layout.edgeGroups.left.visible)), /"left" is malformed/);
+  assert.throws(() => parseWorkspaceDocument(doc((ws) => (ws.layout.edgeGroups.left.collapsed = "yes"))), /"left" is malformed/);
+  assert.throws(() => parseWorkspaceDocument(doc((ws) => (ws.layout.edgeGroups.left.group.views = [7]))), /group is malformed/);
+  assert.throws(() => parseWorkspaceDocument(doc((ws) => (ws.layout.edgeGroups.middle = { size: 1, visible: true }))), /unknown position/);
+  assert.throws(
+    () => parseWorkspaceDocument(doc((ws) => (ws.mobileLayout.edgeGroups.left.group = null))),
+    /mobileLayout\.edgeGroups "left"\.group is malformed/,
+  );
+});
+
+test("a layout without edgeGroups is still valid (older exports)", () => {
+  assert.doesNotThrow(() => parseWorkspaceDocument(serializeWorkspaceDocument(mockWorkspace)));
+});

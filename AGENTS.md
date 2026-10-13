@@ -39,6 +39,8 @@ Sixteen panels via Dockview, registered in [src/App.tsx](src/App.tsx)'s `compone
 
 The rest: `tempo-clock`, `piano`, `scope` (OSC instruments), and the JSON suite — `json-edit` (CodeMirror 6) feeding seven viewers (`json-tree`, `json-graph`, `json-cytoscape`, `json-graph3d`, `json-circles`, `json-mass`, `json-dyadic`) over the in-process json-bus. Every panel has a manifest declaring `capabilities` / `optionalCapabilities` / `companions` (see [docs/panel-capability-map.md](docs/panel-capability-map.md)).
 
+**The document edge.** `json-edit` is not a grid pane: it is the document that is plugged in, and it lives in a left Dockview edge group (`document-edge`, [src/persistence/document-edge.ts](src/persistence/document-edge.ts)) that every layout build/restore ensures. Collapse/expand with ⌘J, ⊞ menu → Document, or by clicking the collapsed strip (a vertical tab: `{}` + the document title); open/collapsed state and size persist with the workspace (desktop grid and phone deck each keep their own). On a phone (≤600px, web) it is a full-width sheet over the grid that starts collapsed (a 44px strip) and closes first on the back gesture. Settings (⌘B) moved to the right edge. Presets never put `json-edit` in the grid; `migrateSavedLayout` moves a `json-edit` found in a saved grid onto the edge. Extra `json-edit-xxxx` clones in the grid are allowed.
+
 ## Where to look first
 
 Read these in order at the start of a session:

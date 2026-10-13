@@ -75,11 +75,15 @@ pub fn run() {
             let toggle_settings = MenuItemBuilder::with_id("toggle-settings", "Toggle Settings")
                 .accelerator("CmdOrCtrl+B")
                 .build(app)?;
+            // The document edge (left): the loaded JSON document, always plugged in.
+            let toggle_document = MenuItemBuilder::with_id("toggle-document", "Toggle Document")
+                .accelerator("CmdOrCtrl+J")
+                .build(app)?;
             let view_menu = Submenu::with_items(
                 app.handle(),
                 "View",
                 true,
-                &[&toggle_settings],
+                &[&toggle_settings, &toggle_document],
             )?;
             menu.append(&view_menu)?;
             app.set_menu(menu)?;
@@ -87,6 +91,8 @@ pub fn run() {
             app.handle().on_menu_event(|handle, event| {
                 if event.id() == "toggle-settings" {
                     let _ = handle.emit("shortcut:toggle-settings", ());
+                } else if event.id() == "toggle-document" {
+                    let _ = handle.emit("shortcut:toggle-document", ());
                 }
             });
 

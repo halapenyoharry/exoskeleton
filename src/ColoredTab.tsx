@@ -9,11 +9,14 @@ import dyadicManifest from "./panels/json-dyadic/manifest";
 import jsonEditManifest from "./panels/json-edit/manifest";
 import { emitPanelMenu, getPanelMenu, registerPanelMenu } from "./panel-menu";
 import { getStrip } from "./chrome/strip-registry";
+import { getToolbarText, onToolbarText } from "./chrome/runtime-options";
+import { DOCUMENT_EDGE_ID } from "./persistence/document-edge";
 import { getToolbar } from "./chrome/toolbar-registry";
 import "./chrome/toolbars";
 import "./chrome/strips";
 import type { PanelMenuItem } from "./panel-manifest";
 import "./ColoredTab.css";
+import "./DocumentEdge.css";
 
 // Manifests whose declared `menu` shows in the pill's ☰ menu.
 for (const m of [editorManifest, webviewManifest, dyadicManifest, jsonEditManifest]) {
@@ -135,6 +138,13 @@ function PillTab(props: IDockviewPanelHeaderProps) {
     () => props.api.getParameters<{ toolbarVisible?: boolean }>().toolbarVisible !== false,
   );
   const [moveOpen, setMoveOpen] = useState(false);
+  // The document edge (left): a one-pill group that is the loaded document.
+  // Its × collapses it (the document stays plugged in); collapsed, the group
+  // is a narrow strip and the pill becomes a vertical tab (see DocumentEdge.css),
+  // which Dockview expands when clicked.
+  const isDocEdge = props.api.group.id === DOCUMENT_EDGE_ID;
+  const [collapsed, setCollapsed] = useState(false);
+  const [docTitle, setDocTitle] = useState(() => (isDocEdge ? getToolbarText(id, "doc") : ""));
   // Phone tap-to-focus: was this pill already active when the press began?
   // (Dockview activates on press, so by click time `active` is always true.)
   const wasActiveRef = useRef(false);
@@ -151,6 +161,31 @@ function PillTab(props: IDockviewPanelHeaderProps) {
       d3.dispose();
     };
   }, [props.api]);
+
+  // Document edge: the strip's text is the document chip text (the same
+  // text json-edit publishes for its toolbar chip).
+  useEffect(() => {
+    if (!isDocEdge) return;
+    setDocTitle(getToolbarText(id, "doc"));
+    return onToolbarText(id, "doc", setDocTitle);
+  }, [isDocEdge, id]);
+
+  // Document edge: tag the group root and follow Dockview's collapsed class
+  // (it is toggled on every path: collapse()/expand(), fromJSON, auto-collapse).
+  useEffect(() => {
+    if (!isDocEdge) return;
+    const root = pillRef.current?.closest(".dv-groupview") as HTMLElement | null;
+    if (!root) return;
+    root.classList.add("exo-doc-edge");
+    const sync = () => setCollapsed(root.classList.contains("dv-edge-collapsed"));
+    sync();
+    const mo = new MutationObserver(sync);
+    mo.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => {
+      mo.disconnect();
+      root.classList.remove("exo-doc-edge");
+    };
+  }, [isDocEdge]);
 
   // Mark the group root so CSS can overlay the header on the content.
   useEffect(() => {
@@ -254,6 +289,7 @@ function PillTab(props: IDockviewPanelHeaderProps) {
 
   function onLabelClick() {
     const el = pillRef.current;
+    if (isDocEdge) return; // never maximized; Dockview expands the collapsed strip on click
     if (!wasActiveRef.current || !el) return;
     // Phone grid only: the deck is one group, so there is nothing to focus.
     if (!el.closest(".exo-phone") || el.closest(".exo-deck")) return;
@@ -304,13 +340,29 @@ function PillTab(props: IDockviewPanelHeaderProps) {
       </button>
     );
 
+  const stripTip = "The loaded document — edit, switch, or load from the Library";
   return (
     <div
       ref={pillRef}
       data-pane-chrome
-      className={`exo-pill${active ? " is-active" : ""}${open ? " is-open" : ""}`}
+      className={`exo-pill${active ? " is-active" : ""}${open ? " is-open" : ""}${
+        isDocEdge ? " exo-pill--doc" : ""
+      }${isDocEdge && collapsed ? " is-collapsed" : ""}`}
       style={{ color: accent, "--pill-accent": accent } as React.CSSProperties}
-      title={title}
+      title={isDocEdge && collapsed ? stripTip : title}
+      role={isDocEdge && collapsed ? "button" : undefined}
+      aria-label={isDocEdge && collapsed ? `Document: ${docTitle || "untitled"}. Expand` : undefined}
+      // Dockview toggles an edge group when its active tab is clicked. Collapsed,
+      // that is exactly the strip's job (click to expand), so let it through.
+      // Expanded, only × / Cmd+J / the ⊞ menu collapse: the ☰ menu, the label
+      // and the drawer buttons must not.
+      onClick={
+        isDocEdge
+          ? (e) => {
+              if (!collapsed) e.preventDefault();
+            }
+          : undefined
+      }
     >
       {hasMenu && (
         <button
@@ -344,6 +396,7 @@ function PillTab(props: IDockviewPanelHeaderProps) {
       >
         <span className="exo-pill__glyph">{glyph}</span>
         <span className="exo-pill__title">{title}</span>
+        {isDocEdge && <span className="exo-pill__doc">{docTitle || "untitled"}</span>}
       </span>
       {hasStrip && open && (
         <button
@@ -359,9 +412,10 @@ function PillTab(props: IDockviewPanelHeaderProps) {
       )}
       <button
         className="exo-pill__btn"
-        aria-label="Close panel"
+        aria-label={isDocEdge ? "Collapse document" : "Close panel"}
+        title={isDocEdge ? "Collapse the document (⌘J)" : undefined}
         {...guard}
-        onClick={() => props.api.close()}
+        onClick={() => (isDocEdge ? group.api.collapse() : props.api.close())}
       >
         ×
       </button>
@@ -373,7 +427,7 @@ function PillTab(props: IDockviewPanelHeaderProps) {
             style={{ left: menu.x, top: menu.y, color: accent }}
           >
             {(getPanelMenu(key) ?? []).map((item) => renderItem(item))}
-            {!hasStrip && (
+            {!hasStrip && !isDocEdge && (
               <>
             <button
               role="menuitem"

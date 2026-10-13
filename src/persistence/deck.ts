@@ -12,10 +12,22 @@ export const DECK_QUERY = "(max-width: 600px)";
 /** Panels that live in edge groups / transient UI; never part of the deck's tab set. */
 const NON_DECK_IDS = new Set(["status-bar", "settings", "menu"]);
 
-type GridNode = { type: "leaf" | "branch"; data: unknown; size?: number; visible?: boolean };
-type LeafData = { views: string[]; activeView?: string; id: string; [k: string]: unknown };
+export type GridNode = { type: "leaf" | "branch"; data: unknown; size?: number; visible?: boolean };
+export type LeafData = { views: string[]; activeView?: string; id: string; [k: string]: unknown };
 
-function leaves(node: GridNode | undefined, out: LeafData[] = []): LeafData[] {
+/** Panel ids living in edge groups (status bar, settings, the document):
+ *  structural chrome, never tabs of the deck and never folded into the grid. */
+export function edgeViewIds(layout: SerializedDockview): string[] {
+  const out: string[] = [];
+  const eg = (layout.edgeGroups ?? {}) as Record<string, { group?: { views?: unknown } } | undefined>;
+  for (const pos of ["top", "bottom", "left", "right"]) {
+    const views = eg[pos]?.group?.views;
+    if (Array.isArray(views)) for (const v of views) if (typeof v === "string") out.push(v);
+  }
+  return out;
+}
+
+export function leaves(node: GridNode | undefined, out: LeafData[] = []): LeafData[] {
   if (!node) return out;
   if (node.type === "leaf") out.push(node.data as LeafData);
   else for (const c of node.data as GridNode[]) leaves(c, out);
@@ -27,8 +39,9 @@ const root = (l: SerializedDockview) => l.grid?.root as unknown as GridNode | un
 /** Non-edge panel ids in visual order: grid leaves, then floating groups. */
 export function layoutPanelOrder(layout: SerializedDockview): string[] {
   const ids: string[] = [];
+  const edge = new Set(edgeViewIds(layout));
   const push = (id: string) => {
-    if (!NON_DECK_IDS.has(id) && layout.panels?.[id] && !ids.includes(id)) ids.push(id);
+    if (!NON_DECK_IDS.has(id) && !edge.has(id) && layout.panels?.[id] && !ids.includes(id)) ids.push(id);
   };
   for (const lf of leaves(root(layout))) lf.views.forEach(push);
   for (const g of layout.floatingGroups ?? []) g.data.views.forEach(push);
@@ -41,13 +54,14 @@ export function layoutActivePanel(layout: SerializedDockview): string | undefine
   const all = leaves(root(layout));
   const grp = all.find((l) => l.id === layout.activeGroup) ?? all[0];
   const a = grp?.activeView;
-  return a && !NON_DECK_IDS.has(a) ? a : layoutPanelOrder(layout)[0];
+  return a && !NON_DECK_IDS.has(a) && !edgeViewIds(layout).includes(a) ? a : layoutPanelOrder(layout)[0];
 }
 
 function singleGroup(base: SerializedDockview, views: string[], active: string | undefined, groupId: string): SerializedDockview {
   const panels: SerializedDockview["panels"] = {};
   for (const id of views) panels[id] = base.panels[id];
   for (const id of NON_DECK_IDS) if (id !== "menu" && base.panels?.[id]) panels[id] = base.panels[id];
+  for (const id of edgeViewIds(base)) if (base.panels?.[id]) panels[id] = base.panels[id];
   const out: SerializedDockview = {
     ...base,
     grid: {
@@ -113,7 +127,7 @@ function prune(node: GridNode, removed: Set<string>): GridNode[] {
   return [{ ...node, data: kids }];
 }
 
-function pruneRoot(grid: SerializedDockview, removed: Set<string>): SerializedDockview["grid"] {
+export function pruneRoot(grid: SerializedDockview, removed: Set<string>): SerializedDockview["grid"] {
   let rootNode = grid.grid.root as unknown as GridNode;
   let orientation = grid.grid.orientation;
   let kids = (rootNode.data as GridNode[]).flatMap((c) => prune(c, removed));
@@ -147,6 +161,7 @@ export function reconcileLayouts(
   if (srcIds.length === 0) {
     const panels: SerializedDockview["panels"] = {};
     for (const id of NON_DECK_IDS) if (target.panels?.[id]) panels[id] = target.panels[id];
+    for (const id of edgeViewIds(target)) if (target.panels?.[id]) panels[id] = target.panels[id];
     const out: SerializedDockview = {
       ...target,
       panels,

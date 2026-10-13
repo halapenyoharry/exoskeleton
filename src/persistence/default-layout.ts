@@ -12,8 +12,16 @@ import type {
 // This is the SCHEMA's idea of "what panels exist and how they're arranged."
 // State (the JSON saved between sessions) is a delta on top of this.
 
-import { defaultPresetId, isWebRuntime, resolvePresetPanelIds } from "./presets.ts";
+import { defaultPresetId, isWebRuntime, presets, resolvePresetPanelIds } from "./presets.ts";
 import { CURRENT_VERSION } from "./storage.ts";
+import {
+  DOCUMENT_PANEL_ID,
+  ensureDocumentEdge,
+  isPhoneWidth,
+  migrateEdgeLayout,
+  openDocument,
+  precreateEdgeGroups,
+} from "./document-edge.ts";
 
 export const DEFAULT_WEBVIEW_URL = "https://dockview.dev";
 
@@ -86,9 +94,14 @@ export const panelRegistry: RegistryEntry[] = [
     position: { referencePanel: "terminal", direction: "within" },
     introducedAt: 4,
   },
-  // v5 — JSON visualizer suite. The editor anchors the JSON workflow; the
-  // six viewer panels group into one tab strip (direction: "within") so
-  // users get a switchable visualization area, not six separate splits.
+  // v5 — JSON visualizer suite. The six viewer panels group into one tab
+  // strip (direction: "within") so users get a switchable visualization area,
+  // not six separate splits.
+  // json-edit is the DOCUMENT: it is not a grid pane. It lives in the left
+  // edge group ("document-edge", see document-edge.ts), which every layout
+  // build/restore ensures. Its registry entry exists so pickers list it and
+  // viewers can name it as a companion; addRegistryPanel/addOrFocusPanel route
+  // it to the edge (the `position` below is never used for placement).
   {
     id: "json-edit",
     component: "json-edit",
@@ -100,7 +113,7 @@ export const panelRegistry: RegistryEntry[] = [
     id: "json-tree",
     component: "json-tree",
     title: "tree",
-    position: { referencePanel: "json-edit", direction: "right" },
+    position: { referencePanel: "terminal", direction: "right" },
     introducedAt: 5,
     companions: ["json-edit"],
   },
@@ -176,7 +189,7 @@ export const panelRegistry: RegistryEntry[] = [
     id: "topology-extract",
     component: "topology-extract",
     title: "topology-extract",
-    position: { referencePanel: "json-edit", direction: "within" },
+    position: { referencePanel: "json-tree", direction: "within" },
     introducedAt: 9,
     companions: ["json-dyadic"],
   },
@@ -234,6 +247,7 @@ export const panelRegistry: RegistryEntry[] = [
 export function migrateSavedLayout(
   layout: SerializedDockview,
   savedVersion: number,
+  opts: { phone?: boolean } = {},
 ): SerializedDockview {
   let json = JSON.stringify(layout);
   if (savedVersion < 7) {
@@ -245,7 +259,9 @@ export function migrateSavedLayout(
     .replace(/"wordWrap"\s*:\s*"on"/g, '"lineWrapping":true')
     .replace(/"wordWrap"\s*:\s*"off"/g, '"lineWrapping":false')
     .replace(/"minimap"\s*:\s*(true|false),?/g, "");
-  return JSON.parse(json) as SerializedDockview;
+  // Document edge: json-edit in the grid moves to the left edge; the old
+  // left-edge settings group moves to the right edge.
+  return migrateEdgeLayout(JSON.parse(json) as SerializedDockview, opts);
 }
 
 /** Look up a registry entry by panel id (id === component for all entries). */
@@ -255,8 +271,9 @@ export function getRegistryEntry(id: string): RegistryEntry | undefined {
 
 /** Panels that legitimately live in an edge group. Anything else found in
  *  one is treated as misplaced by `repairLayout`. (status-bar → bottom,
- *  settings → the Cmd+B side-grid.) */
-const EDGE_RESIDENTS = new Set(["status-bar", "settings"]);
+ *  settings → the Cmd+B side-grid on the right, json-edit → the document edge
+ *  on the left.) */
+const EDGE_RESIDENTS = new Set(["status-bar", "settings", DOCUMENT_PANEL_ID]);
 
 /** First panel living in the main grid — the anchor for position
  *  fallbacks when a registry reference panel doesn't exist. */
@@ -285,6 +302,11 @@ export function addRegistryPanel(
   const existing = api.getPanel(entry.id);
   if (existing) return existing;
 
+  // The document is not a grid pane: it goes to the left edge.
+  if (entry.id === DOCUMENT_PANEL_ID) {
+    return ensureDocumentEdge(api, { phone: isPhoneWidth(), params: extraParams });
+  }
+
   // Registry entries never use `floating`; strip it (and the registry-only
   // fields) so the rebuilt options satisfy Dockview's position/floating
   // union cleanly.
@@ -300,11 +322,14 @@ export function addRegistryPanel(
   };
 
   let position = customPosition ?? registryPosition;
+  // A reference panel that lives in an edge group (the document, settings)
+  // counts as missing: Dockview would otherwise add the new panel INTO the edge.
   const referenceMissing =
     position &&
     "referencePanel" in position &&
     typeof position.referencePanel === "string" &&
-    !api.getPanel(position.referencePanel);
+    api.getPanel(position.referencePanel)?.api.location.type !== "grid" &&
+    api.getPanel(position.referencePanel)?.api.location.type !== "floating";
   if (!position || referenceMissing) {
     const anchor = mainGridAnchor(api);
     position = anchor
@@ -337,6 +362,11 @@ export function ensureCompanions(api: DockviewApi, id: string) {
  *  it's already open, adds it (at its registry position) if not, and
  *  ensures its companions exist either way. */
 export function addOrFocusPanel(api: DockviewApi, id: string) {
+  if (id === DOCUMENT_PANEL_ID) {
+    // The document edge opens and takes focus; no second canonical copy.
+    openDocument(api, isPhoneWidth());
+    return;
+  }
   const existing = api.getPanel(id);
   if (existing) {
     existing.api.setActive();
@@ -354,7 +384,7 @@ export function buildPreset(api: DockviewApi, presetId: string) {
   // Browser-only arrangements (ported from exo-skeleton.org). Desktop keeps
   // the registry positions below.
   if (isWebRuntime() && buildWebPreset(api, presetId, webPresetNarrow())) {
-    seedPresetDocument(presetId);
+    finishPreset(api, presetId);
     return;
   }
   const targetIds = new Set(
@@ -364,10 +394,21 @@ export function buildPreset(api: DockviewApi, presetId: string) {
     ),
   );
   for (const entry of panelRegistry) {
-    if (targetIds.has(entry.id)) {
+    // The document is not a grid pane (see finishPreset).
+    if (targetIds.has(entry.id) && entry.id !== DOCUMENT_PANEL_ID) {
       addRegistryPanel(api, entry);
     }
   }
+  finishPreset(api, presetId);
+}
+
+/** Every preset ends the same way: the left edge holds the document (open
+ *  when the preset is about JSON and we are not on a phone), and the JSON
+ *  Lab seeds the system map. */
+function finishPreset(api: DockviewApi, presetId: string) {
+  const phone = isPhoneWidth();
+  const open = !phone && presets.find((p) => p.id === presetId)?.documentOpen === true;
+  ensureDocumentEdge(api, { phone, open });
   seedPresetDocument(presetId);
 }
 
@@ -424,28 +465,20 @@ export function buildWebPreset(api: DockviewApi, presetId: string, narrow = fals
     return true;
   }
   if (presetId === "json-lab" && narrow) {
-    // Phone: json-edit full width on top (short), viewers 2 per row below:
+    // Phone: the document is the left-edge sheet; viewers 2 per row:
     // tree | graph over graph3d | cytoscape.
     buildSteps(api, [
-      ["json-edit", { direction: "right" }],
-      ["json-tree", { referencePanel: "json-edit", direction: "below" }],
+      ["json-tree", { direction: "right" }],
       ["json-graph", { referencePanel: "json-tree", direction: "right" }],
       ["json-graph3d", { referencePanel: "json-tree", direction: "below" }],
       ["json-cytoscape", { referencePanel: "json-graph", direction: "below" }],
     ]);
-    try {
-      const h = Math.max(120, Math.round(window.innerHeight * 0.2));
-      api.getPanel("json-edit")?.group.api.setSize({ height: h });
-    } catch {
-      /* sizing is cosmetic */
-    }
     return true;
   }
   if (presetId === "json-lab") {
-    // json-edit left; 2x2 right: tree | graph over graph3d | cytoscape
+    // The document is the left edge; 2x2 grid: tree | graph over graph3d | cytoscape
     buildSteps(api, [
-      ["json-edit", { direction: "right" }],
-      ["json-tree", { referencePanel: "json-edit", direction: "right" }],
+      ["json-tree", { direction: "right" }],
       ["json-graph", { referencePanel: "json-tree", direction: "right" }],
       ["json-graph3d", { referencePanel: "json-tree", direction: "below" }],
       ["json-cytoscape", { referencePanel: "json-graph", direction: "below" }],
@@ -470,10 +503,14 @@ export function applyWorkspaceState(
   api: DockviewApi,
   layout: SerializedDockview,
   version: number = CURRENT_VERSION,
+  phone: boolean = isPhoneWidth(),
 ) {
   api.clear();
   try {
-    const migrated = migrateSavedLayout(layout, version);
+    const migrated = migrateSavedLayout(layout, version, { phone });
+    // Edge groups restored from JSON are created with only an id; make the
+    // document/settings edges first so they keep their sizes and options.
+    precreateEdgeGroups(api, migrated, phone);
     api.fromJSON(migrated);
     migrateLayout(api, version);
   } catch (e) {
@@ -484,6 +521,9 @@ export function applyWorkspaceState(
     api.clear();
     buildDefaultLayout(api);
   }
+  // A layout with no document (e.g. saved before it existed) still gets the
+  // edge, collapsed: the document is always plugged in.
+  ensureDocumentEdge(api, { phone });
   repairLayout(api);
 }
 
