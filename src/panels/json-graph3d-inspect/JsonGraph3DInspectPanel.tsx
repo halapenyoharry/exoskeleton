@@ -26,6 +26,7 @@ import {
   CATEGORY_WIDTH,
   containmentGroups,
   degreeMap,
+  isRelationRow,
   linkColor,
   linkInlineText,
   nodeColor,
@@ -65,7 +66,7 @@ export interface JsonGraph3DInspectParams {
    *  >1 pushes everything but the hubs down (hubs stand out more). */
   nodeSizeExponent: number;
   hyperedgeTextScale: number;
-  /** How a reified relation (kind: "hyperedge") is drawn: its predicate
+  /** How a relation row (kind: "hyperedge" or "edge-as-node") is drawn: its predicate
    *  as text, its raw id, or a small junction dot. */
   hyperedgeLabel: HyperedgeLabel;
   nodeDefaultColor: string;
@@ -380,7 +381,7 @@ export default function JsonGraph3DInspectPanel(
   const nodeThreeObject = useCallback(
     (n: FGNode) => {
       const p = paramsRef.current;
-      const isHyper = n.kind === "hyperedge";
+      const isHyper = isRelationRow(n.kind);
       if (isHyper && p.hyperedgeLabel === "dot") {
         const dot = new THREE.Mesh(
           new THREE.SphereGeometry(p.nodeTextHeightMin * 0.35, 10, 8),
