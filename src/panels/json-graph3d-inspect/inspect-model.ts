@@ -4,7 +4,8 @@
 //
 // The inspect view reads TopoThink dyadic documents (nodes + links where
 // n-ary relations are reified as `kind: "hyperedge"` nodes with spoke
-// links) but degrades to any graph detectGraph() recognises. Category
+// links, and a reified arity-2 edge arrives as `kind: "edge-as-node"`)
+// but degrades to any graph detectGraph() recognises. Category
 // resolution, containment grouping and degree all tolerate missing
 // fields; they just produce less.
 
@@ -29,6 +30,17 @@ export function slug(label: string, maxWords: number): string {
   return words.slice(0, maxWords).join(" ") + "…";
 }
 
+/** A row that stands for a relation rather than an entity: the dyadic
+ *  projection's synthetic node for an n-ary edge (`hyperedge`), or an
+ *  arity-2 edge that is also a node because another edge points at it
+ *  (`edge-as-node`, i2t spec S4). Both carry the edge's i2t:* attrs, so
+ *  both can lend a category to their incidence links and take the
+ *  category color. (Since 2026-10-17 the i2t adapter merges the edge's
+ *  attrs onto edge-as-node rows; before that they arrived category-less.) */
+export function isRelationRow(kind: GraphNode["kind"] | undefined): boolean {
+  return kind === "hyperedge" || kind === "edge-as-node";
+}
+
 function categoryFromAttrs(
   attrs: Record<string, unknown> | undefined,
 ): EdgeCategory | undefined {
@@ -49,8 +61,8 @@ export function resolveLinkCategory(
   if (own) return own;
   for (const id of [link.source, link.target]) {
     const n = nodesById.get(id);
-    if (n?.kind === "hyperedge") {
-      const c = categoryFromAttrs(n.attrs);
+    if (isRelationRow(n?.kind)) {
+      const c = categoryFromAttrs(n?.attrs);
       if (c) return c;
     }
   }
@@ -101,7 +113,7 @@ export function containmentGroups(
 ): ContainmentGroup[] {
   const byRelation = new Map<string, ContainmentGroup>();
   for (const n of graph.nodes) {
-    if (n.kind === "hyperedge" && categoryFromAttrs(n.attrs) === "containment") {
+    if (isRelationRow(n.kind) && categoryFromAttrs(n.attrs) === "containment") {
       byRelation.set(n.id, { relationId: n.id, participantIds: [] });
     }
   }
@@ -110,7 +122,7 @@ export function containmentGroups(
     const rel = byRelation.get(l.source) ?? byRelation.get(l.target);
     if (!rel) continue;
     const member = rel.relationId === l.source ? l.target : l.source;
-    if (!nodesById.has(member) || nodesById.get(member)?.kind === "hyperedge") {
+    if (!nodesById.has(member) || isRelationRow(nodesById.get(member)?.kind)) {
       continue;
     }
     if (!rel.participantIds.includes(member)) rel.participantIds.push(member);
@@ -142,7 +154,7 @@ export function nodeColor(
     if (byKind) return byKind;
   }
   if (typeof node.attrs?.color === "string") return node.attrs.color;
-  if (node.kind === "hyperedge") {
+  if (isRelationRow(node.kind)) {
     const c = categoryFromAttrs(node.attrs);
     if (c) return overrides[`category:${c}`] ?? CATEGORY_TOKENS[c].color;
     return "#7a7f99";

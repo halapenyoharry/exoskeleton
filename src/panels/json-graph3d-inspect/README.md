@@ -7,7 +7,7 @@ A copy of [`json-graph3d`](../json-graph3d/README.md) rebuilt for *reading* a to
 | Node | sphere | the node's label as a text sprite (first `labelMaxWords` words, default 5) |
 | Node size | per kind | `degree` — `(degree/max)^nodeSizeExponent` mapped between `nodeTextHeightMin` and `Max` — or `uniform` |
 | Edge label | sprite of `label` when `always` | **role** on spokes, **predicate** on dyadic links; `always` by default; lies **along the edge** (`----- label ---->`, hinged billboard) or faces the viewer |
-| Relation nodes (hyperedges) | sphere + id | their **predicate** as smaller text in category color, or a junction `dot`, or the raw `id` |
+| Relation nodes (`hyperedge`, and reified `edge-as-node` edges) | sphere + id | their **predicate** as smaller text in category color, or a junction `dot`, or the raw `id` |
 | Edge color | layer hash | i2t **category** by default; `layer` or `predicate` hashing; any of them overridable |
 | Edge width | uniform | scaled per category (state_change 1.4 · interactivity 1.0 · reference 0.4 · containment hairline) |
 | Containment | lines like everything else | transparent **hull** around participants; spoke lines hidden (`showContainmentLinks` to bring them back) |

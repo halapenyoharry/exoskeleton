@@ -3,6 +3,7 @@ import assert from "node:assert";
 import {
   containmentGroups,
   degreeMap,
+  isRelationRow,
   linkColor,
   linkInlineText,
   nodeColor,
@@ -115,4 +116,58 @@ test("linkColor honors overrides then the chosen scheme", () => {
   assert.strictEqual(linkColor(l, "reference", "category", {}), CATEGORY_TOKENS.reference.color);
   assert.strictEqual(linkColor(l, "reference", "category", { "predicate:refers_to": "#abc" }), "#abc");
   assert.strictEqual(linkColor(l, "reference", "layer", { "layer:pointers": "#def" }), "#def");
+});
+
+// --- reified arity-2 edge (kind "edge-as-node") -------------------------
+// i2t spec S4: an edge whose id is also a node id, because another edge
+// points at it. The adapter merges the edge's attrs onto the row.
+const reified: DetectedGraph = {
+  nodes: [
+    { id: "x", label: "X", kind: "node" },
+    { id: "y", label: "Y", kind: "node" },
+    { id: "src", label: "Source", kind: "node" },
+    {
+      id: "edge:x-builds-y",
+      label: "x-builds-y (reified)",
+      kind: "edge-as-node",
+      attrs: {
+        "schema:name": "x-builds-y (reified)",
+        "i2t:reified": true,
+        "i2t:predicate": "builds",
+        "i2t:edge_category": "state_change",
+      },
+    },
+  ],
+  links: [
+    { source: "x", target: "edge:x-builds-y", role: "source", layer: "builds" },
+    { source: "edge:x-builds-y", target: "y", role: "target", layer: "builds" },
+    {
+      source: "src",
+      target: "edge:x-builds-y",
+      label: "grounds",
+      layer: "grounds",
+      attrs: { "i2t:predicate": "grounds", "i2t:edge_category": "reference" },
+    },
+  ],
+};
+const reifiedById = new Map<string, GraphNode>(reified.nodes.map((n) => [n.id, n]));
+
+test("isRelationRow covers hyperedge and edge-as-node, not entities", () => {
+  assert.strictEqual(isRelationRow("hyperedge"), true);
+  assert.strictEqual(isRelationRow("edge-as-node"), true);
+  assert.strictEqual(isRelationRow("node"), false);
+  assert.strictEqual(isRelationRow(undefined), false);
+});
+
+test("incidence links of an edge-as-node inherit its category from either endpoint", () => {
+  assert.strictEqual(resolveLinkCategory(reified.links[0], reifiedById), "state_change");
+  assert.strictEqual(resolveLinkCategory(reified.links[1], reifiedById), "state_change");
+});
+
+test("a link that points at an edge-as-node keeps its own category", () => {
+  assert.strictEqual(resolveLinkCategory(reified.links[2], reifiedById), "reference");
+});
+
+test("an edge-as-node takes its category color like a hyperedge row", () => {
+  assert.strictEqual(nodeColor(reified.nodes[3], {}, "#fff"), CATEGORY_TOKENS.state_change.color);
 });
