@@ -529,6 +529,11 @@ export default function App() {
       // First run (nothing saved yet): start a state so the debounced save
       // has something to write. Without this a first run never persisted,
       // which is every run in a fresh browser tab.
+      // NOTE: `version` here is the AppStateV8 *shape* version (literal 8),
+      // but migrateLayout reads the same field as the panel-registry schema
+      // version (CURRENT_VERSION, now 11). The two were conflated before
+      // this session; consequence: autoAdd panels re-add on every launch
+      // even if closed. Tracked in SESSIONS.md, not fixed here.
       const fresh: AppStateV8 = {
         version: 8,
         activeWorkspaceId: "default",
