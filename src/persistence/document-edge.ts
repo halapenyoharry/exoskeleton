@@ -24,7 +24,7 @@ export const DOCUMENT_EDGE_ID = "document-edge";
  *  settings (Cmd+B) and the menu (add panel / workspaces). */
 export const EDGE_TAB_IDS = ["settings", "menu"] as const;
 export type EdgeTabId = (typeof EDGE_TAB_IDS)[number];
-const EDGE_TAB_TITLES: Record<EdgeTabId, string> = { settings: "settings", menu: "menu" };
+const EDGE_TAB_TITLES: Record<EdgeTabId, string> = { settings: "settings", menu: "exoskeleton" };
 
 export const DOCUMENT_EDGE_SIZE = 360;
 export const DOCUMENT_EDGE_MIN = 280;
@@ -210,11 +210,7 @@ export function documentEdgeOptions(opts: { phone: boolean; collapsed: boolean }
 
 function addDocumentEdge(api: DockviewApi, opts: { phone: boolean; collapsed: boolean }) {
   const edge = api.addEdgeGroup(DOCUMENT_EDGE, documentEdgeOptions(opts));
-  // Vertical tab strip on the left: Dockview's own shape for a left edge.
-  // Dockview 8 sizes a collapsed edge group from its measured tab strip, so
-  // the strip must have a fixed cross size — a top header's width follows
-  // the group's and feeds back into it (the edge shrank to nothing).
-  edge.setHeaderPosition("left");
+  syncDocumentEdgeHeader(api);
   return edge;
 }
 
@@ -227,6 +223,21 @@ function addDocumentEdge(api: DockviewApi, opts: { phone: boolean; collapsed: bo
  */
 export function precreateEdgeGroups(api: DockviewApi, _layout: SerializedDockview, phone: boolean): void {
   if (!api.getEdgeGroup(DOCUMENT_EDGE)) addDocumentEdge(api, { phone, collapsed: true });
+}
+
+/**
+ * Header position follows the edge's state: expanded, the tabs run along the
+ * top so the active panel's title reads at the top of its content; collapsed,
+ * the header moves to the left and becomes the vertical strip. The strip must
+ * have a fixed cross size while collapsed because Dockview 8 sizes a
+ * collapsed edge group from its measured tab strip (a top header's width
+ * follows the group's and feeds back into it — the edge shrank to nothing).
+ */
+export function syncDocumentEdgeHeader(api: DockviewApi): void {
+  const edge = api.getEdgeGroup(DOCUMENT_EDGE);
+  if (!edge) return;
+  const want = edge.isCollapsed() ? "left" : "top";
+  if (edge.getHeaderPosition() !== want) edge.setHeaderPosition(want);
 }
 
 /**

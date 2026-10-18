@@ -60,6 +60,7 @@ import {
   DOCUMENT_EDGE_ID,
   DOCUMENT_PANEL_ID,
   ensureEdgeTabs,
+  syncDocumentEdgeHeader,
   toggleEdgeTab,
   ensureDocumentEdge,
   isDocumentOpen,
@@ -562,11 +563,13 @@ export default function App() {
     // when the saved layout predates it). Open/closed + size are persisted
     // with the layout; a phone always starts collapsed.
     ensureDocumentEdge(event.api, { phone: phoneNow });
-    // A saved layout may carry the old "top" header position; the document
-    // edge is a vertical strip on the left (see addDocumentEdge).
-    event.api.getEdgeGroup(DOCUMENT_EDGE)?.setHeaderPosition("left");
     ensureEdgeTabs(event.api);
-    event.api.getEdgeGroup(DOCUMENT_EDGE)?.onDidCollapsedChange(() => save());
+    // Tabs on top while expanded, vertical strip while collapsed.
+    syncDocumentEdgeHeader(event.api);
+    event.api.getEdgeGroup(DOCUMENT_EDGE)?.onDidCollapsedChange(() => {
+      syncDocumentEdgeHeader(event.api);
+      save();
+    });
     // Dragging the edge's sash resizes it without any Dockview layout event;
     // observe the group element so its size is saved with the workspace.
     const docEdgeEl = event.api.groups.find((g) => g.id === DOCUMENT_EDGE_ID)?.element;

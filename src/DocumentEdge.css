@@ -1,9 +1,9 @@
 /* ---- Document edge (left) -----------------------------------------------
    The loaded document is not a pane, it is the thing plugged in: one
-   `json-edit` in a Dockview edge group on the left (persistence/
-   document-edge.ts), with Dockview's own left-side header: a vertical tab
-   strip. Expanded, the strip sits beside the content; collapsed, the strip
-   is all that remains (Dockview sizes the collapsed edge from the strip) and
+   `json-edit` (with settings and the exoskeleton menu) in a Dockview edge
+   group on the left (persistence/document-edge.ts). Expanded, its tabs run
+   along the top like any group; collapsed, the header moves to the left and
+   the vertical strip is all that remains (Dockview sizes the collapsed edge from the strip) and
    the tab reads "json-edit - <document name>" (set with api.setTitle). Clicking the tab
    expands the edge; its × collapses it (ColoredTab.tsx closeActionOverride).
    ColoredTab.tsx tags the group root with `.exo-doc-edge`. Nothing here sets
@@ -15,7 +15,7 @@
 /* Vertical tabs read bottom-to-top (baseline on the right), as a left-edge
    tab does; Dockview's vertical strip writes top-to-bottom. One tab lives
    here, so turning the tabs container is safe. */
-.dv-groupview.exo-doc-edge .dv-tabs-container.dv-tabs-container-vertical {
+.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-tabs-container.dv-tabs-container-vertical {
   transform: rotate(180deg);
 }
 
