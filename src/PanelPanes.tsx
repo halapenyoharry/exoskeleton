@@ -25,6 +25,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import {
+  DockviewDefaultTab,
   DockviewReact,
   LayoutPriority,
   Orientation,
@@ -34,6 +35,7 @@ import {
   type DockviewApi,
   type DockviewPanelApi,
   type DockviewReadyEvent,
+  type IDockviewPanelHeaderProps,
   type IDockviewPanelProps,
   type IPaneviewPanelProps,
   type ISplitviewPanelProps,
@@ -280,9 +282,9 @@ interface Ctx {
   settingsPane: boolean;
   /** Edge-group panels: names only, Title Case, no glyphs. */
   plain: boolean;
-  /** Set by PanesCell; called by the nested Dockview when it mounts / changes. */
-  setNestedApi: (api: DockviewApi) => void;
-  onNestedChange: () => void;
+  /** Stable object (a ref) shared by PanesCell (sizing) and the nested
+   *  Dockview (which reports its api and active-tab changes into it). */
+  bridge: { nestedApi: DockviewApi | null; onChange: () => void };
   params: Params;
   write: (p: Params) => void;
   about?: { description?: string; docs?: string };
@@ -322,6 +324,11 @@ function ControlsTab(props: IDockviewPanelProps<{ paneId: string }>) {
 
 const nestedComponents = { controls: ControlsTab };
 
+/** The nested tabs are not closable. */
+function ControlsTabHeader(props: IDockviewPanelHeaderProps) {
+  return <DockviewDefaultTab {...props} hideClose />;
+}
+
 /** Body of the "Controls" pane: the nested Dockview. */
 function ControlsPane(_props: IPaneviewPanelProps<{ paneId: string }>) {
   const ctx = useContext(PanelPanesCtx);
@@ -351,15 +358,17 @@ function ControlsPane(_props: IPaneviewPanelProps<{ paneId: string }>) {
     e.api.getPanel(first)?.api.setActive();
     e.api.onDidActivePanelChange((ev) => {
       if (ev.panel) panelApi.updateParameters({ controlsTab: ev.panel.id });
-      ctx.onNestedChange();
+      ctx.bridge.onChange();
     });
-    ctx.setNestedApi(e.api);
+    ctx.bridge.nestedApi = e.api;
+    ctx.bridge.onChange();
   };
   return (
     <div className="pp-controls">
       <DockviewReact
         theme={themeGithubDark}
         components={nestedComponents}
+        defaultTabComponent={ControlsTabHeader}
         onReady={onReady}
         locked
         disableDnd
@@ -374,7 +383,6 @@ function PanesCell(props: ISplitviewPanelProps) {
   const ctx = useContext(PanelPanesCtx);
   const hostRef = useRef<HTMLDivElement | null>(null);
   const paneApiRef = useRef<PaneviewReadyEvent["api"] | null>(null);
-  const nestedApiRef = useRef<DockviewApi | null>(null);
   const NESTED_STRIP = 35; // the theme's --dv-tabs-and-actions-container-height
 
   // Size the top cell to what is showing: each pane header, plus (for the
@@ -388,13 +396,13 @@ function PanesCell(props: ISplitviewPanelProps) {
     for (const p of pane.panels) {
       total += PANE_HEADER;
       if (p.id === CONTROLS_ID && p.api.isExpanded) {
-        const active = nestedApiRef.current?.activePanel?.id;
+        const active = ctx?.bridge.nestedApi?.activePanel?.id;
         const body = active ? host.querySelector<HTMLElement>(`[data-controls-tab="${active}"]`) : null;
         total += NESTED_STRIP + (body ? body.scrollHeight : 0);
       }
     }
     props.api.setSize({ size: total });
-  }, [props.api]);
+  }, [props.api, ctx]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -412,14 +420,11 @@ function PanesCell(props: ISplitviewPanelProps) {
     };
   }, [fit]);
 
-  // Let the nested Dockview report into this cell (active tab changed, mounted).
+  // The nested Dockview reports into this cell through the bridge.
   useEffect(() => {
     if (!ctx) return;
-    ctx.setNestedApi = (api) => {
-      nestedApiRef.current = api;
-      requestAnimationFrame(() => fit());
-    };
-    ctx.onNestedChange = () => requestAnimationFrame(() => fit());
+    ctx.bridge.onChange = () => requestAnimationFrame(() => fit());
+    if (ctx.bridge.nestedApi) requestAnimationFrame(() => fit());
   }, [ctx, fit]);
 
   const onReady = (e: PaneviewReadyEvent) => {
@@ -502,6 +507,7 @@ export function PanelPanes({ panelId, api, containerApi, panes, titlePane, setti
   const [params, write] = useParams(api);
   const unregisterRef = useRef<(() => void) | null>(null);
   useEffect(() => () => unregisterRef.current?.(), []);
+  const bridge = useRef<{ nestedApi: DockviewApi | null; onChange: () => void }>({ nestedApi: null, onChange: () => {} }).current;
   const onReady = (e: SplitviewReadyEvent) => {
     const top = e.api.addPanel({ id: "panes", component: "panes", minimumSize: PANE_HEADER, snap: true, size: PANE_HEADER * 2 + 35 + 60 });
     e.api.addPanel({ id: "content", component: "content", priority: LayoutPriority.High });
@@ -520,8 +526,7 @@ export function PanelPanes({ panelId, api, containerApi, panes, titlePane, setti
       value={{
         panelId, api, containerApi, panes, titlePane, settingsPane, params, write, about, content: children,
         plain: !!titlePane,
-        setNestedApi: () => {},
-        onNestedChange: () => {},
+        bridge,
       }}
     >
       <div className="pp-root">
