@@ -78,6 +78,13 @@ export const graphLibrary: GraphLibraryEntry[] = [
     load: () => import('./messy.json').then((m) => m.default),
   },
   {
+    id: 'berry-thief',
+    title: 'Berry Thief',
+    description: 'The Epic of Elinor Jones, Act 1, Chapter 1: 70 entities, 117 relations, hand-built gold extraction (information2topology/data/examples/berry-thief).',
+    shape: 'topology',
+    load: () => import('./berry-thief.json').then((m) => m.default),
+  },
+  {
     id: 'exoskeleton-system',
     title: 'Exoskeleton system map',
     description: 'Hand-verified TopoThink map of the Exoskeleton app: containment, state change, interactivity, reference.',

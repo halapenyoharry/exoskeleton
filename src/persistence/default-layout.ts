@@ -405,7 +405,7 @@ export function buildPreset(api: DockviewApi, presetId: string) {
 
 /** Every preset ends the same way: the left edge holds the document (open
  *  when the preset is about JSON and we are not on a phone), and the JSON
- *  Lab seeds the system map. */
+ *  Lab seeds chapter one of Elinor Jones. */
 function finishPreset(api: DockviewApi, presetId: string) {
   const phone = isPhoneWidth();
   const open = !phone && presets.find((p) => p.id === presetId)?.documentOpen === true;
@@ -427,7 +427,8 @@ function hasContent(v: unknown): boolean {
 }
 
 /** The JSON Lab opens drawing something: if the active document is empty,
- *  load the bundled system map. Never overwrites an existing document. */
+ *  load chapter one of The Epic of Elinor Jones ("Berry Thief"). Never
+ *  overwrites an existing document. */
 function seedPresetDocument(presetId: string) {
   if (presetId !== "json-lab" || typeof window === "undefined") return;
   void (async () => {
@@ -438,7 +439,7 @@ function seedPresetDocument(presetId: string) {
         import("../data/library.ts"),
       ]);
       if (hasContent(getJson(getActiveDocumentId()))) return;
-      await openLibraryDocument("exoskeleton-system");
+      await openLibraryDocument("berry-thief");
     } catch (e) {
       console.warn("[exoskeleton] could not seed the JSON Lab document:", e);
     }
