@@ -60,7 +60,7 @@ export function layoutActivePanel(layout: SerializedDockview): string | undefine
 function singleGroup(base: SerializedDockview, views: string[], active: string | undefined, groupId: string): SerializedDockview {
   const panels: SerializedDockview["panels"] = {};
   for (const id of views) panels[id] = base.panels[id];
-  for (const id of NON_DECK_IDS) if (id !== "menu" && base.panels?.[id]) panels[id] = base.panels[id];
+  for (const id of NON_DECK_IDS) if (base.panels?.[id]) panels[id] = base.panels[id];
   for (const id of edgeViewIds(base)) if (base.panels?.[id]) panels[id] = base.panels[id];
   const out: SerializedDockview = {
     ...base,

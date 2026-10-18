@@ -42,3 +42,22 @@
   .pp-pane { --xo-min-h: 36px; }
   .pp-btn, .pp-stepper button, .pp-select { min-height: 36px; }
 }
+
+/* action / text cells: a row of round icon buttons and a text chip. */
+.pp-cell--bare { justify-content: center; min-width: 0; }
+.pp-action {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font: inherit; font-size: 14px; cursor: pointer;
+  color: var(--panel-accent, #7ddff5); background: transparent;
+  border: 1px solid color-mix(in srgb, var(--panel-accent, #7ddff5) 60%, transparent);
+}
+.pp-action:hover { background: color-mix(in srgb, var(--panel-accent, #7ddff5) 18%, transparent); }
+.pp-text {
+  min-height: 32px; padding: 0 12px; border-radius: 16px;
+  font: inherit; font-size: 12px; cursor: pointer; white-space: nowrap;
+  max-width: 260px; overflow: hidden; text-overflow: ellipsis;
+  color: var(--panel-accent, #7ddff5); background: transparent;
+  border: 1px solid color-mix(in srgb, var(--panel-accent, #7ddff5) 60%, transparent);
+}
+@media (pointer: coarse) { .pp-action { width: 44px; height: 44px; } .pp-text { min-height: 44px; } }

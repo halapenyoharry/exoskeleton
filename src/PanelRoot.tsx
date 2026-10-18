@@ -4,8 +4,6 @@ import { resolveComponentKey } from "./ColoredTab";
 import { PanelPanes } from "./PanelPanes";
 import "./chrome/panes";
 import { getPanes } from "./chrome/panes-registry";
-import "./chrome/header-actions";
-import { getHeaderActions } from "./chrome/header-actions-registry";
 
 interface PanelErrorBoundaryProps {
   panelTitle: string;
@@ -128,7 +126,6 @@ export function PanelRoot({
   children,
   style,
   hasPanes,
-  hasHeaderActions,
 }: {
   accent?: string;
   className?: string;
@@ -136,14 +133,11 @@ export function PanelRoot({
   style?: CSSProperties;
   /** true when the panel declares panes (its inline toolbar is hidden by CSS). */
   hasPanes?: boolean;
-  /** true when the panel declares header actions (its inline .panel-toolbar is hidden by CSS). */
-  hasHeaderActions?: boolean;
 }) {
   return (
     <div
       className={className ? `panel-pad ${className}` : "panel-pad"}
       data-has-panes={hasPanes ? "true" : undefined}
-      data-has-header-actions={hasHeaderActions ? "true" : undefined}
       style={{ "--panel-accent": accent ?? "transparent", ...style } as CSSProperties}
     >
       {children}
@@ -167,7 +161,6 @@ export function exoPanel<P extends Record<string, any>>(
     const componentKey = resolveComponentKey(props.api.id) ?? props.api.id;
     const panes = getPanes(componentKey);
     const hasPanes = !!panes && panes.some((p) => p.kind === "pane");
-    const hasHeaderActions = !!getHeaderActions(componentKey);
     const content = <Component {...props} />;
     return (
       <PanelErrorBoundary
@@ -175,7 +168,7 @@ export function exoPanel<P extends Record<string, any>>(
         accent={accent}
         onClose={() => props.api.close()}
       >
-        <PanelRoot accent={accent} hasPanes={hasPanes} hasHeaderActions={hasHeaderActions}>
+        <PanelRoot accent={accent} hasPanes={hasPanes}>
           {hasPanes ? (
             <PanelPanes panelId={props.api.id} api={props.api} containerApi={props.containerApi} panes={panes!}>
               {content}

@@ -21,7 +21,7 @@ import {
 } from "../../data/json-bus";
 import { openLibraryDocument } from "../../data/library";
 import { onPanelMenu } from "../../panel-menu";
-import { publishHeaderActionText } from "../../chrome/runtime-options";
+import { publishText } from "../../chrome/runtime-options";
 import {
   getActiveDocumentId,
   onActiveDocumentIdChange,
@@ -385,7 +385,7 @@ export default function JsonEditPanel(
     else if (itemId === "format") formatJson();
     else if (itemId === "doc") {
       if (docsRef.current.length < 2) return;
-      const chip = containerRef.current?.parentElement?.querySelector<HTMLElement>('[data-toolbar-item="doc"]');
+      const chip = containerRef.current?.parentElement?.querySelector<HTMLElement>('[data-action-item="doc"]');
       const body = containerRef.current;
       const left = chip && body ? Math.max(0, chip.getBoundingClientRect().left - body.getBoundingClientRect().left) : 8;
       setDocMenu((m) => (m ? null : { left }));
@@ -577,7 +577,7 @@ export default function JsonEditPanel(
   docsRef.current = pickerEntries;
   const docTitle = docLabel(currentMeta?.title);
   useEffect(() => {
-    publishHeaderActionText(props.api.id, "doc", docTitle);
+    publishText(props.api.id, "doc", docTitle);
     // The tab reads "<panel title> - <document name>" when a document is
     // named — plain Dockview: api.setTitle, nothing drawn by us.
     const base = "json-edit";

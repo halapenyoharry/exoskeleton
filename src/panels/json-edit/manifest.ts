@@ -1,6 +1,5 @@
 import { graphLibrary } from "../../fixtures/graphs";
 import type { PanelManifest } from "../../panel-manifest";
-import { jsonEditHeaderActions } from "../../chrome/header-actions/json-edit.header-actions";
 import JsonEditPanel, {
   jsonEditDefaults,
   type JsonEditParams,
@@ -14,7 +13,6 @@ const manifest: PanelManifest<JsonEditParams> = {
   description:
     "CodeMirror 6 JSON editor. Publishes parsed JSON to the json-bus (default channel 'default'); JSON-visualizer panels subscribe to render.",
 
-  headerActions: jsonEditHeaderActions,
 
   // pill ☰ menu; handled in JsonEditPanel via onPanelMenu
   menu: [

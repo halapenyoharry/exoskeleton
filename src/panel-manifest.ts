@@ -142,9 +142,15 @@ export interface PanelMenuItem {
  * Each cell binds to a panel param of the same name.
  */
 export interface PaneCell {
-  type: "segmented" | "toggle" | "swatch" | "stepper" | "dial" | "select";
-  /** Panel param this cell reads and writes. */
-  param: string;
+  type: "segmented" | "toggle" | "swatch" | "stepper" | "dial" | "select" | "action" | "text";
+  /** Panel param this cell reads and writes (value cells). */
+  param?: string;
+  /** action / text: the id sent to emitPanelMenu(panelId, action) on click. */
+  action?: string;
+  /** action: the glyph on the button. */
+  icon?: string;
+  /** text: key of text the panel publishes via publishText(panelId, key, …). */
+  textFrom?: string;
   label: string;
   tooltip?: string;
   /** Kept for declarations that still carry it; the Paneview ignores it. */
@@ -159,21 +165,6 @@ export interface PaneCell {
   min?: number;
   max?: number;
   step?: number;
-}
-
-/** One item in a panel's Dockview header actions (rendered next to its tab
- *  by HeaderActions.tsx). A click calls emitPanelMenu(panelId, id), the same
- *  bus as menu items and pane actions. */
-export interface HeaderActionItem {
-  id: string;
-  icon: string;
-  label: string;
-  tooltip?: string;
-  disabled?: boolean;
-  /** 'button' (default) is a round icon; 'chip' is a small text label. */
-  kind?: 'button' | 'chip';
-  /** chip only: runtime-text key the panel publishes via publishHeaderActionText. */
-  textFrom?: string;
 }
 
 export interface PanelPane {
@@ -202,10 +193,6 @@ export interface PanelManifest<P extends Record<string, any> = Record<string, an
   /** `true`: the panel renders its own inline toolbar row inside its content
    *  (hidden by CSS when the panel also declares panes). */
   toolbar?: boolean;
-
-  /** Items rendered in the group's Dockview header actions next to the tab
-   *  (registered in src/chrome/header-actions). Clicks arrive via onPanelMenu. */
-  headerActions?: HeaderActionItem[];
 
   /** Declared panes (and header-action buttons). See PanelPane. Up to 4. */
   panes?: PanelPane[];

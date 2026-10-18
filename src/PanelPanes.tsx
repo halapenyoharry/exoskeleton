@@ -33,7 +33,8 @@ import {
   type SplitviewReadyEvent,
 } from "dockview-react";
 import { Segmented, SwatchPicker, Toggle } from "./components/toolbar/Toolbar";
-import { getOptions, onOptions, type RuntimeOption } from "./chrome/runtime-options";
+import { getOptions, onOptions, getText, onText, type RuntimeOption } from "./chrome/runtime-options";
+import { emitPanelMenu } from "./panel-menu";
 import type { PaneCell, PanelPane } from "./panel-manifest";
 import pkg from "../package.json";
 import "./PanelPanes.css";
@@ -99,11 +100,46 @@ function SelectCell({ panelId, cell, value, onChange }: { panelId: string; cell:
   );
 }
 
+function TextCell({ panelId, cell }: { panelId: string; cell: PaneCell }) {
+  const key = cell.textFrom ?? cell.action ?? cell.label;
+  const [text, setText] = useState(() => getText(panelId, key));
+  useEffect(() => {
+    setText(getText(panelId, key));
+    return onText(panelId, key, setText);
+  }, [panelId, key]);
+  return (
+    <button
+      type="button"
+      className="pp-text"
+      data-action-item={cell.action ?? key}
+      title={cell.tooltip ?? cell.label}
+      onClick={() => emitPanelMenu(panelId, cell.action ?? key)}
+    >
+      {text || cell.label}
+    </button>
+  );
+}
+
 function CellView({ panelId, cell, value, onChange }: { panelId: string; cell: PaneCell; value: unknown; onChange: (v: unknown) => void }) {
   const tip = cell.tooltip ?? cell.label;
   const numeric = typeof value === "number";
   const coerce = (s: string) => (numeric ? Number(s) : s);
   switch (cell.type) {
+    case "action":
+      return (
+        <button
+          type="button"
+          className="pp-action"
+          data-action-item={cell.action ?? cell.label}
+          aria-label={cell.label}
+          title={cell.tooltip ?? cell.label}
+          onClick={() => emitPanelMenu(panelId, cell.action ?? cell.label)}
+        >
+          {cell.icon ?? cell.label}
+        </button>
+      );
+    case "text":
+      return <TextCell panelId={panelId} cell={cell} />;
     case "segmented":
       return (
         <Segmented<string>
@@ -158,10 +194,12 @@ function CellView({ panelId, cell, value, onChange }: { panelId: string; cell: P
 }
 
 function Cell({ panelId, cell, params, write }: { panelId: string; cell: PaneCell; params: Params; write: (p: Params) => void }) {
+  const bare = cell.type === "action" || cell.type === "text";
+  const param = cell.param ?? "";
   return (
-    <div className="pp-cell">
-      <span className="pp-cell-caption" title={cell.tooltip}>{cell.label}</span>
-      <CellView panelId={panelId} cell={cell} value={params[cell.param]} onChange={(v) => write({ [cell.param]: v })} />
+    <div className={bare ? "pp-cell pp-cell--bare" : "pp-cell"}>
+      {!bare && <span className="pp-cell-caption" title={cell.tooltip}>{cell.label}</span>}
+      <CellView panelId={panelId} cell={cell} value={param ? params[param] : undefined} onChange={(v) => param && write({ [param]: v })} />
     </div>
   );
 }
@@ -242,8 +280,8 @@ function PaneCell(props: IPaneviewPanelProps<{ paneId: string }>) {
   return (
     <div className="pp-pane">
       <div className={pane.body.layout === "grid" ? "pp-grid" : "pp-stack"}>
-        {pane.body.cells.map((c) => (
-          <Cell key={c.param} panelId={panelId} cell={c} params={params} write={write} />
+        {pane.body.cells.map((c, i) => (
+          <Cell key={c.param ?? c.action ?? c.textFrom ?? i} panelId={panelId} cell={c} params={params} write={write} />
         ))}
       </div>
     </div>

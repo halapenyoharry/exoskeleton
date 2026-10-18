@@ -59,10 +59,8 @@ import {
   DOCUMENT_EDGE,
   DOCUMENT_EDGE_ID,
   DOCUMENT_PANEL_ID,
-  SETTINGS_EDGE,
-  SETTINGS_EDGE_ID,
-  SETTINGS_EDGE_MIN,
-  SETTINGS_EDGE_SIZE,
+  ensureEdgeTabs,
+  toggleEdgeTab,
   ensureDocumentEdge,
   isDocumentOpen,
   isPhoneWidth,
@@ -144,12 +142,6 @@ const components = {
 // every reload used to fall back to the default layout).
 const storage = appStorage;
 
-// The Cmd+B-summoned settings panel lives in a Dockview 6 edge group on
-// the RIGHT side of the main grid (the left edge is the document: see
-// persistence/document-edge.ts). Same constants used by toggleSettings, the
-// auto-cleanup hook, and (implicitly) the serialized layout.
-const SIDE_EDGE = SETTINGS_EDGE;
-const SIDE_GROUP_ID = SETTINGS_EDGE_ID;
 
 /** Deck is opt-in: a phone shows the grid unless "One pane at a time" is on. */
 function wantsDeck(): boolean {
@@ -188,11 +180,8 @@ export default function App() {
   const deckStatusWantedRef = useRef(false);
   const collapsingRef = useRef(false);
   const mruRef = useRef<string[]>([]);
-  // Floating ⊞ add-panel menu (bottom-right, next to the astromech
-  // summoner). The roster is read fresh from the registry on each open,
-  // so open/closed markers stay accurate without extra subscriptions.
-  // The ⊞ button toggles a Dockview floating group holding the `menu`
-  // panel (see toggleMenu). It is stripped from saved layouts.
+  // The ⊞ menu (add panel / workspaces) and settings are tabs in the
+  // document edge (left), beside json-edit; see ensureEdgeTabs.
 
   // Preferences state. Currently empty (see Preferences interface in
   // storage.ts); included in the save so future fields persist automatically.
@@ -394,9 +383,7 @@ export default function App() {
     const onPop = () => {
       const api = mainApiRef.current;
       if (api) {
-        if (api.getPanel("menu")) {
-          api.getPanel("menu")?.api.close();
-        } else if (closeBackClosers()) {
+        if (closeBackClosers()) {
           /* ≡ menu dismissed */
         } else if (isDocumentOpen(api)) {
           setDocumentOpen(api, false, true); // the document sheet closes before anything else
@@ -452,35 +439,12 @@ export default function App() {
     setIsStatusBarVisible(true);
   }
 
-  // Toggle the settings panel. Extracted as a stable named function so the
-  // menu-event handler below can invoke it; future header-action buttons or
-  // programmatic invocations can call it the same way. Settings lives in a
-  // right edge group that's created on demand and torn down when its last
-  // panel closes (see onDidLayoutChange cleanup in onMainReady).
+  // Cmd+B: the settings tab in the document edge (left). Open it, or
+  // collapse the edge when settings is already showing.
   function toggleSettings() {
     const api = mainApiRef.current;
     if (!api) return;
-
-    const existing = api.getPanel("settings");
-    if (existing) {
-      api.removePanel(existing);
-      return;
-    }
-
-    let edge = api.getEdgeGroup(SIDE_EDGE);
-    if (!edge) {
-      edge = api.addEdgeGroup(SIDE_EDGE, {
-        id: SIDE_GROUP_ID,
-        initialSize: SETTINGS_EDGE_SIZE,
-        minimumSize: SETTINGS_EDGE_MIN,
-      });
-    }
-    api.addPanel({
-      id: "settings",
-      component: "settings",
-      title: "settings",
-      position: { referenceGroup: edge.id },
-    });
+    toggleEdgeTab(api, "settings", isPhoneWidth());
   }
 
   // Cmd+B / Ctrl+B is wired via a Tauri Menu accelerator on the Rust side
@@ -601,6 +565,7 @@ export default function App() {
     // A saved layout may carry the old "top" header position; the document
     // edge is a vertical strip on the left (see addDocumentEdge).
     event.api.getEdgeGroup(DOCUMENT_EDGE)?.setHeaderPosition("left");
+    ensureEdgeTabs(event.api);
     event.api.getEdgeGroup(DOCUMENT_EDGE)?.onDidCollapsedChange(() => save());
     // Dragging the edge's sash resizes it without any Dockview layout event;
     // observe the group element so its size is saved with the workspace.
@@ -625,19 +590,7 @@ export default function App() {
       setIsStatusBarVisible(true);
     }
 
-    // Auto-cleanup: when the settings (right) edge group empties (e.g. user
-    // closes the settings tab), remove the edge group entirely. The document
-    // (left) edge is permanent. Mirrors the old
-    // "auto-hide side-grid when empty" UX from the peer-grid era.
     event.api.onDidLayoutChange(() => {
-      const edge = event.api.getEdgeGroup(SIDE_EDGE);
-      if (edge) {
-        const group = event.api.groups.find((g) => g.id === edge.id);
-        if (group && group.panels.length === 0) {
-          event.api.removeEdgeGroup(SIDE_EDGE);
-        }
-      }
-
       const bottom = event.api.getEdgeGroup("bottom");
       if (bottom) {
         const group = event.api.groups.find((g) => g.id === bottom.id);
@@ -672,40 +625,11 @@ export default function App() {
     });
   }
 
+  // The menu is a tab in the document edge. "Closing" it after an action
+  // only matters on a phone, where the edge is a sheet over the grid.
   function closeMenu() {
-    mainApiRef.current?.getPanel("menu")?.api.close();
-  }
-
-  function toggleMenu() {
     const api = mainApiRef.current;
-    if (!api) return;
-    const existing = api.getPanel("menu");
-    if (existing) {
-      existing.api.close();
-      return;
-    }
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-    const margin = 16;
-    const narrow = W <= 600;
-    // A phone's document sheet covers the grid: close it so the menu has the grid to itself.
-    if (narrow && isDocumentOpen(api)) setDocumentOpen(api, false, true);
-    // Floating positions are relative to the grid, which the left (document)
-    // edge pushes right by its width (a 40-44px strip even when collapsed).
-    const mid = document.querySelector<HTMLElement>(".dv-shell-middle-column");
-    const gridLeft = mid ? mid.getBoundingClientRect().left : 0;
-    const gridW = api.width > 0 ? api.width : W;
-    const width = narrow ? gridW - margin * 2 : 320;
-    const height = narrow ? H - margin * 2 : Math.min(480, H - 70);
-    // Desktop: sit just above the ⊞ button (bottom-right).
-    const x = narrow ? margin : Math.max(8, W - width - 12 - gridLeft);
-    const y = narrow ? margin : Math.max(8, H - height - 58);
-    api.addPanel({
-      id: "menu",
-      component: "menu",
-      title: "menu",
-      floating: { width, height, x, y },
-    });
+    if (api && isPhoneWidth() && isDocumentOpen(api)) setDocumentOpen(api, false, true);
   }
 
   function handleSwitchWorkspace(id: string) {
@@ -921,15 +845,6 @@ export default function App() {
           title="Summon Astromech Status Bar"
         >
           ⌬
-        </button>
-      )}
-      {mainApiRef.current && (
-        <button
-          className="add-panel-btn"
-          onClick={toggleMenu}
-          title="menu: add panels, workspaces, about"
-        >
-          ⊞
         </button>
       )}
     </div>

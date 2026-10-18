@@ -36,22 +36,22 @@ export function onOptions(panelId: string, key: string, cb: Listener): () => voi
   };
 }
 
-// Runtime text for header-action chips (HeaderActionItem.textFrom). Same shape as options.
+// Runtime text for pane `text` cells (PaneCell.textFrom). Same shape as options.
 type TextListener = (text: string) => void;
 const texts = new Map<string, string>();
 const textListeners = new Map<string, Set<TextListener>>();
 
-export function publishHeaderActionText(panelId: string, key: string, text: string): void {
+export function publishText(panelId: string, key: string, text: string): void {
   const id = k(panelId, key);
   texts.set(id, text);
   for (const cb of [...(textListeners.get(id) ?? [])]) cb(text);
 }
 
-export function getHeaderActionText(panelId: string, key: string): string {
+export function getText(panelId: string, key: string): string {
   return texts.get(k(panelId, key)) ?? "";
 }
 
-export function onHeaderActionText(panelId: string, key: string, cb: TextListener): () => void {
+export function onText(panelId: string, key: string, cb: TextListener): () => void {
   const id = k(panelId, key);
   let set = textListeners.get(id);
   if (!set) textListeners.set(id, (set = new Set()));

@@ -20,11 +20,11 @@ export const DOCUMENT_PANEL_ID = "json-edit";
 export const DOCUMENT_EDGE = "left" as const;
 export const DOCUMENT_EDGE_ID = "document-edge";
 
-/** Cmd+B settings group (moved from the left edge to the right edge). */
-export const SETTINGS_EDGE = "right" as const;
-export const SETTINGS_EDGE_ID = "side-grid";
-export const SETTINGS_EDGE_SIZE = 320;
-export const SETTINGS_EDGE_MIN = 200;
+/** The other tabs that live in the document edge beside `json-edit`:
+ *  settings (Cmd+B) and the menu (add panel / workspaces). */
+export const EDGE_TAB_IDS = ["settings", "menu"] as const;
+export type EdgeTabId = (typeof EDGE_TAB_IDS)[number];
+const EDGE_TAB_TITLES: Record<EdgeTabId, string> = { settings: "settings", menu: "menu" };
 
 export const DOCUMENT_EDGE_SIZE = 360;
 export const DOCUMENT_EDGE_MIN = 280;
@@ -104,14 +104,15 @@ function removeFromNonEdge(
  * Bring a saved layout in line with the document-edge arrangement. Idempotent
  * and pure; returns the SAME object when nothing needs to change.
  *
- *  - a left edge group that is not the document edge (the pre-change Cmd+B
- *    settings group, id "side-grid") moves to the right edge;
- *  - a panel with id exactly `json-edit` in the grid / a floating group / a
- *    popout moves to the document edge (empty grid groups are pruned);
+ *  - the document edge (left) holds `json-edit`, `settings` and `menu`;
+ *  - any other left edge group (the pre-change Cmd+B settings group,
+ *    id "side-grid") and any right edge group fold into it: their views join
+ *    the document edge and the group goes away;
+ *  - `json-edit` / `settings` / `menu` found in the grid, a floating group or
+ *    a popout move to the document edge (empty grid groups are pruned);
  *  - on a phone the document edge always starts collapsed (it opens as a sheet).
  *
- * `edgeGroups` is otherwise left alone: the status bar and settings entries,
- * sizes and collapsed flags survive untouched.
+ * The status bar entry, sizes and collapsed flags survive untouched.
  */
 export function migrateEdgeLayout(
   layout: SerializedDockview,
@@ -119,32 +120,48 @@ export function migrateEdgeLayout(
 ): SerializedDockview {
   const edges: EdgeMap = { ...((layout.edgeGroups ?? {}) as EdgeMap) };
   let changed = false;
+  const joining: string[] = [];
 
-  const left = edges.left;
-  if (left?.group && left.group.id !== DOCUMENT_EDGE_ID && !edges.right) {
-    edges.right = left;
+  if (edges.left?.group && edges.left.group.id !== DOCUMENT_EDGE_ID) {
+    joining.push(...edges.left.group.views);
     delete edges.left;
     changed = true;
   }
-
-  const { layout: stripped, found } = removeFromNonEdge(layout, DOCUMENT_PANEL_ID);
-  if (found) {
+  if (edges.right?.group) {
+    joining.push(...edges.right.group.views);
+    delete edges.right;
     changed = true;
-    const doc = edges.left?.group;
-    if (doc && doc.id === DOCUMENT_EDGE_ID) {
-      if (!doc.views.includes(DOCUMENT_PANEL_ID)) {
-        edges.left = {
-          ...edges.left!,
-          group: { ...doc, views: [...doc.views, DOCUMENT_PANEL_ID], activeView: doc.activeView ?? DOCUMENT_PANEL_ID },
-        };
-      }
-    } else {
-      edges.left = {
-        size: DOCUMENT_EDGE_SIZE,
-        visible: true,
-        group: { id: DOCUMENT_EDGE_ID, views: [DOCUMENT_PANEL_ID], activeView: DOCUMENT_PANEL_ID },
-      };
+  }
+
+  let stripped: SerializedDockview = layout;
+  for (const id of [DOCUMENT_PANEL_ID, ...EDGE_TAB_IDS]) {
+    const r = removeFromNonEdge(stripped, id);
+    if (r.found) {
+      stripped = r.layout;
+      joining.push(id);
+      changed = true;
     }
+  }
+
+  if (joining.length > 0) {
+    const doc = edges.left?.group?.id === DOCUMENT_EDGE_ID ? edges.left : undefined;
+    const have = new Set(doc?.group?.views ?? []);
+    const views = [...(doc?.group?.views ?? [])];
+    for (const id of joining) {
+      if (!have.has(id) && (id === DOCUMENT_PANEL_ID || layout.panels?.[id])) {
+        views.push(id);
+        have.add(id);
+      }
+    }
+    // Keep the document first so the strip reads document, settings, menu.
+    views.sort((x, y) => (x === DOCUMENT_PANEL_ID ? -1 : y === DOCUMENT_PANEL_ID ? 1 : 0));
+    const activeView = doc?.group?.activeView && have.has(doc.group.activeView) ? doc.group.activeView : views[0];
+    edges.left = {
+      size: doc?.size ?? DOCUMENT_EDGE_SIZE,
+      visible: doc?.visible ?? true,
+      ...(doc?.collapsed !== undefined ? { collapsed: doc.collapsed } : {}),
+      group: { ...(doc?.group ?? {}), id: DOCUMENT_EDGE_ID, views, activeView },
+    };
   }
 
   const doc = edges.left;
@@ -208,16 +225,46 @@ function addDocumentEdge(api: DockviewApi, opts: { phone: boolean; collapsed: bo
  * Call before `api.fromJSON(layout)`. The document edge is created collapsed;
  * the layout's own edge state then overrides that.
  */
-export function precreateEdgeGroups(api: DockviewApi, layout: SerializedDockview, phone: boolean): void {
+export function precreateEdgeGroups(api: DockviewApi, _layout: SerializedDockview, phone: boolean): void {
   if (!api.getEdgeGroup(DOCUMENT_EDGE)) addDocumentEdge(api, { phone, collapsed: true });
-  const right = (layout.edgeGroups as EdgeMap | undefined)?.right;
-  if (right && !api.getEdgeGroup(SETTINGS_EDGE)) {
-    api.addEdgeGroup(SETTINGS_EDGE, {
-      id: right.group?.id ?? SETTINGS_EDGE_ID,
-      initialSize: SETTINGS_EDGE_SIZE,
-      minimumSize: SETTINGS_EDGE_MIN,
-    });
+}
+
+/**
+ * The document edge also holds the settings and menu tabs. Idempotent; never
+ * steals focus and never expands the edge.
+ */
+export function ensureEdgeTabs(api: DockviewApi): void {
+  const edge = api.getEdgeGroup(DOCUMENT_EDGE);
+  if (!edge) return;
+  const prev = api.activePanel;
+  for (const id of EDGE_TAB_IDS) {
+    if (api.getPanel(id)) continue;
+    try {
+      api.addPanel({ id, component: id, title: EDGE_TAB_TITLES[id], position: { referenceGroup: edge.id } });
+    } catch (e) {
+      console.warn(`[exoskeleton] ensureEdgeTabs ${id} failed:`, e);
+    }
   }
+  if (prev && prev.id !== api.activePanel?.id) prev.api.setActive();
+}
+
+/** Expand the document edge and focus one of its tabs (settings / menu). */
+export function openEdgeTab(api: DockviewApi, id: EdgeTabId, phone: boolean): void {
+  ensureDocumentEdge(api, { phone });
+  ensureEdgeTabs(api);
+  const panel = api.getPanel(id);
+  if (!panel) return;
+  if (panel.api.location.type === "edge") api.getEdgeGroup(DOCUMENT_EDGE)?.expand();
+  panel.api.setActive();
+}
+
+/** Cmd+B / ⊞: open the tab, or collapse the edge when it is already showing. */
+export function toggleEdgeTab(api: DockviewApi, id: EdgeTabId, phone: boolean): void {
+  const panel = api.getPanel(id);
+  const edge = api.getEdgeGroup(DOCUMENT_EDGE);
+  const showing = !!panel && !!edge && !edge.isCollapsed() && panel.api.location.type === "edge" && api.activePanel?.id === id;
+  if (showing) edge!.collapse();
+  else openEdgeTab(api, id, phone);
 }
 
 /**

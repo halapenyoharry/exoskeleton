@@ -5,15 +5,12 @@ import { ensureCompanions } from "./persistence/default-layout";
 import { DOCUMENT_EDGE_ID } from "./persistence/document-edge";
 import { emitPanelMenu, getPanelMenu, registerPanelMenu } from "./panel-menu";
 import { getPanes } from "./chrome/panes-registry";
-import { getHeaderActions } from "./chrome/header-actions-registry";
-import { getHeaderActionText, onHeaderActionText } from "./chrome/runtime-options";
 import { resolveComponentKey } from "./ColoredTab";
-import type { HeaderActionItem, PanelMenuItem } from "./panel-manifest";
+import type { PanelMenuItem } from "./panel-manifest";
 import editorManifest from "./panels/editor.manifest";
 import webviewManifest from "./panels/webview.manifest";
 import dyadicManifest from "./panels/json-dyadic/manifest";
 import jsonEditManifest from "./panels/json-edit/manifest";
-import "./chrome/header-actions";
 import "./chrome/panes";
 import "./HeaderActions.css";
 
@@ -32,33 +29,11 @@ export function closeBackClosers(): boolean {
   return true;
 }
 
-function Chip({ panelId, item }: { panelId: string; item: HeaderActionItem }) {
-  const key = item.textFrom ?? item.id;
-  const [text, setText] = useState(() => getHeaderActionText(panelId, key));
-  useEffect(() => {
-    setText(getHeaderActionText(panelId, key));
-    return onHeaderActionText(panelId, key, setText);
-  }, [panelId, key]);
-  return (
-    <button
-      type="button"
-      className="header-btn header-btn--chip"
-      aria-label={item.label}
-      title={item.tooltip ?? item.label}
-      disabled={item.disabled}
-      onClick={() => emitPanelMenu(panelId, item.id)}
-    >
-      {text || item.label}
-    </button>
-  );
-}
-
 /**
  * leftHeaderActionsComponent — renders right after the tabs, for the
- * ACTIVE panel: its ≡ menu (manifest.menu), its declared header actions
- * (manifest.headerActions: open/save/…/document name), and the action
- * buttons among its declared panes (e.g. fit). Everything the tab used to
- * carry besides its name lives here, in Dockview's own slot.
+ * ACTIVE panel: its ≡ menu (manifest.menu) and the action buttons among
+ * its declared panes (e.g. fit). Everything the tab used to carry besides
+ * its name lives here, in Dockview's own slot.
  */
 export function LeftHeaderActions(props: IDockviewHeaderActionsProps) {
   const active = props.activePanel;
@@ -88,10 +63,9 @@ export function LeftHeaderActions(props: IDockviewHeaderActionsProps) {
   const id = active.id;
   const key = resolveComponentKey(id) ?? id;
   const menuItems = getPanelMenu(key);
-  const actions = getHeaderActions(key) ?? [];
   const paneActions = (getPanes(key) ?? []).filter((p) => p.kind === "action");
   const isDocEdge = props.group.id === DOCUMENT_EDGE_ID;
-  if (!menuItems && actions.length === 0 && paneActions.length === 0) return null;
+  if (!menuItems && paneActions.length === 0) return null;
 
   const act = (fn: () => void) => () => {
     setMenu(null);
@@ -137,23 +111,6 @@ export function LeftHeaderActions(props: IDockviewHeaderActionsProps) {
         >
           ≡
         </button>
-      )}
-      {actions.map((it: HeaderActionItem) =>
-        it.kind === "chip" ? (
-          <Chip key={it.id} panelId={id} item={it} />
-        ) : (
-          <button
-            key={it.id}
-            type="button"
-            className="header-btn header-btn--icon"
-            aria-label={it.label}
-            title={it.tooltip ?? it.label}
-            disabled={it.disabled}
-            onClick={() => emitPanelMenu(id, it.id)}
-          >
-            {it.icon}
-          </button>
-        ),
       )}
       {paneActions.map((a) => (
         <button

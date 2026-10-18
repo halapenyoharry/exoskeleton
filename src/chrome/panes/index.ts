@@ -7,3 +7,5 @@ import "./json-tree.panes.ts";
 import "./json-circles.panes.ts";
 import "./json-mass.panes.ts";
 import "./json-dyadic.panes.ts";
+import "./json-edit.panes.ts";
+import "./editor.panes.ts";

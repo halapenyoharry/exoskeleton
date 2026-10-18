@@ -1,7 +1,8 @@
 import type { SerializedDockview } from "dockview-react";
 
-/** Panel ids that are transient UI and must never be persisted. */
-export const TRANSIENT_PANEL_IDS = ["menu"] as const;
+/** Panel ids that are transient UI and must never be persisted. (None today:
+ *  the menu became a tab in the document edge on 2026-10-18.) */
+export const TRANSIENT_PANEL_IDS: readonly string[] = [];
 
 /**
  * Returns a copy of a serialized layout without transient panels (the

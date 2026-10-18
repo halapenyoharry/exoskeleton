@@ -21,6 +21,7 @@ import {
   migrateEdgeLayout,
   openDocument,
   precreateEdgeGroups,
+  ensureEdgeTabs,
 } from "./document-edge.ts";
 
 export const DEFAULT_WEBVIEW_URL = "https://dockview.dev";
@@ -273,7 +274,7 @@ export function getRegistryEntry(id: string): RegistryEntry | undefined {
  *  one is treated as misplaced by `repairLayout`. (status-bar → bottom,
  *  settings → the Cmd+B side-grid on the right, json-edit → the document edge
  *  on the left.) */
-const EDGE_RESIDENTS = new Set(["status-bar", "settings", DOCUMENT_PANEL_ID]);
+const EDGE_RESIDENTS = new Set(["status-bar", "settings", "menu", DOCUMENT_PANEL_ID]);
 
 /** First panel living in the main grid — the anchor for position
  *  fallbacks when a registry reference panel doesn't exist. */
@@ -513,6 +514,7 @@ export function applyWorkspaceState(
     precreateEdgeGroups(api, migrated, phone);
     api.fromJSON(migrated);
     migrateLayout(api, version);
+    ensureEdgeTabs(api);
   } catch (e) {
     console.warn(
       "[exoskeleton] applyWorkspaceState fromJSON failed, falling back to defaults:",

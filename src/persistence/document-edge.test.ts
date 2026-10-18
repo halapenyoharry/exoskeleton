@@ -4,10 +4,12 @@ import type { SerializedDockview } from "dockview-react";
 import {
   DOCUMENT_EDGE_ID,
   DOCUMENT_PANEL_ID,
-  SETTINGS_EDGE_ID,
   migrateEdgeLayout,
 } from "./document-edge.ts";
 import { buildDeckLayout, edgeViewIds, layoutPanelOrder, reconcileLayouts } from "./deck.ts";
+
+/** The pre-2026-10-12 Cmd+B settings group id, as old saved layouts carry it. */
+const SETTINGS_EDGE_ID = "side-grid";
 import { migrateSavedLayout } from "./default-layout.ts";
 
 const p = (id: string, params?: Record<string, unknown>) => ({
@@ -79,7 +81,7 @@ test("json-edit in the grid moves to the document edge; empty grid group is remo
   assert.ok(!JSON.stringify(next.grid.root).includes('"g1"'), "the emptied grid group is gone");
   const left = edges(next).left;
   assert.strictEqual(left.group.id, DOCUMENT_EDGE_ID);
-  assert.deepStrictEqual(left.group.views, [DOCUMENT_PANEL_ID]);
+  assert.deepStrictEqual(left.group.views, [DOCUMENT_PANEL_ID, "settings"]);
   assert.strictEqual(left.group.activeView, DOCUMENT_PANEL_ID);
   assert.strictEqual(left.visible, true);
   assert.ok(!left.collapsed, "desktop: a migrated document is expanded, it was on screen before");
@@ -91,17 +93,17 @@ test("json-edit in the grid moves to the document edge; empty grid group is remo
   assert.deepStrictEqual(gridIds(legacy()).sort(), ["editor", "json-edit", "json-tree"]);
 });
 
-test("a legacy left-edge settings group moves to the right edge; status bar untouched", () => {
+test("a legacy left-edge settings group folds into the document edge; status bar untouched", () => {
   const next = migrateEdgeLayout(legacy());
   const e = edges(next);
-  assert.strictEqual(e.right.group.id, SETTINGS_EDGE_ID);
-  assert.deepStrictEqual(e.right.group.views, ["settings"]);
-  assert.strictEqual(e.right.size, 320);
+  assert.ok(!e.right, "no right edge group any more");
+  assert.strictEqual(e.left.group.id, DOCUMENT_EDGE_ID);
+  assert.deepStrictEqual(e.left.group.views, ["json-edit", "settings"]);
+  assert.strictEqual(e.left.size, 360);
   assert.deepStrictEqual(e.bottom, edges(legacy()).bottom);
-  assert.notStrictEqual(e.left.group.id, SETTINGS_EDGE_ID);
 });
 
-test("settings alone on the left (no json-edit anywhere): left is vacated, nothing else invented", () => {
+test("settings alone on the left (no json-edit anywhere): the group becomes the document edge holding settings", () => {
   const l = legacy();
   l.grid = {
     ...l.grid,
@@ -110,8 +112,9 @@ test("settings alone on the left (no json-edit anywhere): left is vacated, nothi
   delete (l.panels as any)["json-edit"];
   delete (l.panels as any)["json-tree"];
   const next = migrateEdgeLayout(l);
-  assert.ok(!edges(next).left, "the document edge is created at runtime (ensureDocumentEdge), not by the migration");
-  assert.strictEqual(edges(next).right.group.id, SETTINGS_EDGE_ID);
+  assert.strictEqual(edges(next).left.group.id, DOCUMENT_EDGE_ID);
+  assert.deepStrictEqual(edges(next).left.group.views, ["settings"]);
+  assert.ok(!edges(next).right);
 });
 
 test("on a phone the migrated document edge starts collapsed", () => {
@@ -152,7 +155,7 @@ test("json-edit in a floating group moves too; an emptied floating group is drop
   ] as any;
   const next = migrateEdgeLayout(l);
   assert.ok(!next.floatingGroups || next.floatingGroups.length === 0);
-  assert.deepStrictEqual(edges(next).left.group.views, [DOCUMENT_PANEL_ID]);
+  assert.deepStrictEqual(edges(next).left.group.views, [DOCUMENT_PANEL_ID, "settings"]);
 });
 
 test("a grid copy next to an existing document edge is dropped; the edge entry wins", () => {
@@ -165,7 +168,7 @@ test("a grid copy next to an existing document edge is dropped; the edge entry w
   assert.ok(!gridIds(next).includes("json-edit"));
   assert.strictEqual(edges(next).left.size, 500);
   assert.strictEqual(edges(next).left.collapsed, true);
-  assert.deepStrictEqual(edges(next).left.group.views, [DOCUMENT_PANEL_ID]);
+  assert.deepStrictEqual(edges(next).left.group.views, [DOCUMENT_PANEL_ID, "settings"]);
 });
 
 test("a json-edit-only grid migrates to an empty grid with the document on the edge", () => {
@@ -177,14 +180,14 @@ test("a json-edit-only grid migrates to an empty grid with the document on the e
   const next = migrateEdgeLayout(l);
   assert.deepStrictEqual((next.grid.root as any).data, []);
   assert.strictEqual(next.activeGroup, undefined);
-  assert.deepStrictEqual(edges(next).left.group.views, [DOCUMENT_PANEL_ID]);
+  assert.deepStrictEqual(edges(next).left.group.views, [DOCUMENT_PANEL_ID, "settings"]);
 });
 
 test("migrateSavedLayout runs the edge migration (every load path goes through it)", () => {
   const next = migrateSavedLayout(legacy(), 11, { phone: true });
   assert.strictEqual(edges(next).left.group.id, DOCUMENT_EDGE_ID);
   assert.strictEqual(edges(next).left.collapsed, true);
-  assert.strictEqual(edges(next).right.group.id, SETTINGS_EDGE_ID);
+  assert.ok(!edges(next).right);
 });
 
 // ---- deck / reconcile leave edge groups alone ------------------------------
@@ -222,5 +225,5 @@ test("a legacy grid reconciled into a migrated deck still ends with one document
   // ...and the load-time migration (migrateSavedLayout) takes it back out.
   const loaded = migrateSavedLayout(merged, 11);
   assert.ok(!gridIds(loaded).includes("json-edit"));
-  assert.deepStrictEqual(edges(loaded).left.group.views, [DOCUMENT_PANEL_ID]);
+  assert.deepStrictEqual(edges(loaded).left.group.views, [DOCUMENT_PANEL_ID, "settings"]);
 });
