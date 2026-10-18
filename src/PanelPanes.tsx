@@ -338,7 +338,7 @@ function PanesCell(props: ISplitviewPanelProps) {
     const expanded = (ctx.params.panesExpanded as Record<string, boolean> | undefined) ?? {};
     // Edge-group panels (titlePane set): names only, Title Case, no glyphs.
     const plain = !!ctx.titlePane;
-    const titleCase = (t: string) => t.replace(/(^|[\s-])([a-z])/g, (m, pre, c) => pre + c.toUpperCase());
+    const titleCase = (t: string) => t.replace(/(^|[\s-])([a-z])/g, (_m, pre: string, c: string) => pre + c.toUpperCase());
     const add = (id: string, title: string, icon: string | undefined, headerOnly = false) => {
       const label = plain ? titleCase(title) : icon ? `${icon} ${title}` : title;
       // The ⚙ pane starts folded; declared panes start open. Both remember.
