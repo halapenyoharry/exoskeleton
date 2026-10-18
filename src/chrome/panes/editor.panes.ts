@@ -10,9 +10,9 @@ export const editorPanes: PanelPane[] = [
     body: {
       layout: "grid",
       cells: [
-        { type: "action", action: "open", icon: "📂", label: "Open", tooltip: "Open a file" },
-        { type: "action", action: "save", icon: "💾", label: "Save", tooltip: "Save the file" },
-        { type: "action", action: "saveAs", icon: "⤓", label: "Save As", tooltip: "Save as…" },
+        { type: "action", action: "open", icon: "⤒", label: "Open", tooltip: "Open a file" },
+        { type: "action", action: "save", icon: "⤓", label: "Save", tooltip: "Save the file" },
+        { type: "action", action: "saveAs", icon: "⇲", label: "Save As", tooltip: "Save as…" },
       ],
     },
   },

@@ -142,7 +142,7 @@ export interface PanelMenuItem {
  * Each cell binds to a panel param of the same name.
  */
 export interface PaneCell {
-  type: "segmented" | "toggle" | "swatch" | "stepper" | "dial" | "select" | "action" | "text";
+  type: "segmented" | "toggle" | "swatch" | "stepper" | "dial" | "select" | "action" | "text" | "menu";
   /** Panel param this cell reads and writes (value cells). */
   param?: string;
   /** action / text: the id sent to emitPanelMenu(panelId, action) on click. */

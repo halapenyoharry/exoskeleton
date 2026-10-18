@@ -43,6 +43,7 @@ import {
   type SplitviewReadyEvent,
 } from "dockview-react";
 import { registerPanesVisibility, setPanesVisible } from "./panes-visibility";
+import { PanelMenuButton } from "./PanelMenuButton";
 import { Segmented, SwatchPicker, Toggle } from "./components/toolbar/Toolbar";
 import { getOptions, onOptions, getText, onText, type RuntimeOption } from "./chrome/runtime-options";
 import { emitPanelMenu } from "./panel-menu";
@@ -136,11 +137,27 @@ function TextCell({ panelId, cell }: { panelId: string; cell: PaneCell }) {
   );
 }
 
+function MenuCell({ cell }: { cell: PaneCell }) {
+  const ctx = useContext(PanelPanesCtx);
+  if (!ctx) return null;
+  return (
+    <PanelMenuButton
+      panelId={ctx.panelId}
+      api={ctx.api}
+      containerApi={ctx.containerApi}
+      structural={!!ctx.titlePane}
+      className={`pp-action${cell.tooltip ? "" : ""}`}
+    />
+  );
+}
+
 function CellView({ panelId, cell, value, onChange }: { panelId: string; cell: PaneCell; value: unknown; onChange: (v: unknown) => void }) {
   const tip = cell.tooltip ?? cell.label;
   const numeric = typeof value === "number";
   const coerce = (s: string) => (numeric ? Number(s) : s);
   switch (cell.type) {
+    case "menu":
+      return <MenuCell cell={cell} />;
     case "action":
       return (
         <button
@@ -210,7 +227,7 @@ function CellView({ panelId, cell, value, onChange }: { panelId: string; cell: P
 }
 
 function Cell({ panelId, cell, params, write }: { panelId: string; cell: PaneCell; params: Params; write: (p: Params) => void }) {
-  const bare = cell.type === "action" || cell.type === "text";
+  const bare = cell.type === "action" || cell.type === "text" || cell.type === "menu";
   const param = cell.param ?? "";
   return (
     <div className={bare ? "pp-cell pp-cell--bare" : "pp-cell"}>
