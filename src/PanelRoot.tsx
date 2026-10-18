@@ -1,5 +1,5 @@
 import { Component, type ComponentType, type CSSProperties, type ErrorInfo, type ReactNode } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import { resolveComponentKey } from "./ColoredTab";
 import { initPaneChrome, setPaneOpen, setPanePinned, usePaneChrome } from "./pane-chrome-state";
 

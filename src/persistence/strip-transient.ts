@@ -1,4 +1,4 @@
-import type { SerializedDockview } from "dockview";
+import type { SerializedDockview } from "dockview-react";
 
 /** Panel ids that are transient UI and must never be persisted. */
 export const TRANSIENT_PANEL_IDS = ["menu"] as const;
@@ -12,12 +12,13 @@ export function stripTransientPanels(layout: SerializedDockview): SerializedDock
   const panels = Object.fromEntries(
     Object.entries(layout.panels ?? {}).filter(([id]) => !transient.has(id)),
   );
+  // Dockview 8: a floating entry carries `data` (one group) or `grid`
+  // (nested layout); only the `data` form is filtered here.
   const floatingGroups = layout.floatingGroups
-    ?.map((g) => ({
-      ...g,
-      data: { ...g.data, views: g.data.views.filter((v) => !transient.has(v)) },
-    }))
-    .filter((g) => g.data.views.length > 0);
+    ?.map((g) =>
+      g.data ? { ...g, data: { ...g.data, views: g.data.views.filter((v) => !transient.has(v)) } } : g,
+    )
+    .filter((g) => !g.data || g.data.views.length > 0);
   const out: SerializedDockview = { ...layout, panels };
   if (floatingGroups) out.floatingGroups = floatingGroups;
   return out;

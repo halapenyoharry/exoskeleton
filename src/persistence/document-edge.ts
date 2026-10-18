@@ -11,7 +11,7 @@
 //
 // Only type imports from dockview: node tests load this file directly.
 
-import type { DockviewApi, IDockviewPanel, SerializedDockview } from "dockview";
+import type { DockviewApi, IDockviewPanel, SerializedDockview } from "dockview-react";
 import { DECK_QUERY, leaves, pruneRoot, type GridNode, type LeafData } from "./deck.ts";
 import { isWebRuntime } from "./presets.ts";
 
@@ -66,16 +66,18 @@ function removeFromNonEdge(
     found = true;
     out = { ...out, grid: pruneRoot(out, new Set([id])) };
   }
-  const strip = <T extends { data: { views: string[]; activeView?: string } }>(groups: T[] | undefined) =>
+  // Dockview 8: a floating/popout entry carries either `data` (one group) or
+  // `grid` (nested layout); only the `data` form can hold the document.
+  const strip = <T extends { data?: { views: string[]; activeView?: string } }>(groups: T[] | undefined) =>
     groups
       ?.map((g) => {
-        if (!g.data.views.includes(id)) return g;
+        if (!g.data || !g.data.views.includes(id)) return g;
         found = true;
         const views = g.data.views.filter((v) => v !== id);
         const activeView = g.data.activeView && views.includes(g.data.activeView) ? g.data.activeView : views[0];
         return { ...g, data: { ...g.data, views, activeView } };
       })
-      .filter((g) => g.data.views.length > 0);
+      .filter((g) => !g.data || g.data.views.length > 0);
   if (layout.floatingGroups) out = { ...out, floatingGroups: strip(layout.floatingGroups) };
   if (layout.popoutGroups) out = { ...out, popoutGroups: strip(layout.popoutGroups) };
 
@@ -84,8 +86,8 @@ function removeFromNonEdge(
       leaves(out.grid?.root as unknown as GridNode | undefined).map((l: LeafData) => l.id),
     );
     const otherIds = new Set<string>([
-      ...(out.floatingGroups ?? []).map((g) => g.data.id),
-      ...(out.popoutGroups ?? []).map((g) => g.data.id),
+      ...(out.floatingGroups ?? []).map((g) => g.data?.id ?? ""),
+      ...(out.popoutGroups ?? []).map((g) => g.data?.id ?? ""),
       ...Object.values((out.edgeGroups ?? {}) as EdgeMap).map((e) => e?.group?.id ?? ""),
     ]);
     if (!gridIds.has(out.activeGroup) && !otherIds.has(out.activeGroup)) {

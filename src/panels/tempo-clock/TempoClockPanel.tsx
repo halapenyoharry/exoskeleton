@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import { sendOsc } from "../../osc";
 import "./TempoClockPanel.css";
 

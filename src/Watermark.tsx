@@ -1,4 +1,4 @@
-import type { IWatermarkPanelProps } from "dockview";
+import type { IWatermarkPanelProps } from "dockview-react";
 import {
   addOrFocusPanel,
   buildPreset,

@@ -1,6 +1,6 @@
 import { publishOptions } from "../../chrome/runtime-options";
 import { useEffect, useMemo, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import {
   getActiveDocumentId,
   onActiveDocumentIdChange,

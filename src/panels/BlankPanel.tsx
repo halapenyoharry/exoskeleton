@@ -1,4 +1,4 @@
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import PanelPicker from "../PanelPicker";
 import { ensureCompanions, getRegistryEntry } from "../persistence/default-layout";
 import "./BlankPanel.css";

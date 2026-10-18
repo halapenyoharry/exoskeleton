@@ -4,7 +4,7 @@ import type {
   DockviewApi,
   IDockviewPanel,
   SerializedDockview,
-} from "dockview";
+} from "dockview-react";
 
 // The default panel arrangement — what Exoskeleton looks like on first launch,
 // or after the user resets/clears their saved state.

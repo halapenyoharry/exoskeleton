@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert";
-import type { SerializedDockview } from "dockview";
+import type { SerializedDockview } from "dockview-react";
 import {
   buildDeckLayout,
   layoutPanelOrder,

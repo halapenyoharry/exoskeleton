@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { IDockviewHeaderActionsProps } from "dockview";
+import type { IDockviewHeaderActionsProps } from "dockview-react";
 import { ensureCompanions } from "./persistence/default-layout";
 import { DOCUMENT_EDGE_ID } from "./persistence/document-edge";
 import "./HeaderActions.css";

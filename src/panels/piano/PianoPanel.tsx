@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import { sendOsc } from "../../osc";
 import "./PianoPanel.css";
 

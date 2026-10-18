@@ -9,7 +9,7 @@
 // when the panel becomes visible again.
 
 import { useEffect, useState } from "react";
-import type { DockviewPanelApi } from "dockview";
+import type { DockviewPanelApi } from "dockview-react";
 import { getJson, onJsonChange, type JsonValue } from "./json-bus";
 
 export function useJsonDoc(

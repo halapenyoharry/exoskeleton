@@ -13,7 +13,7 @@ import {
   type AppStateV8,
   type AppStateV7,
 } from "./storage.ts";
-import type { SerializedDockview } from "dockview";
+import type { SerializedDockview } from "dockview-react";
 
 const dummyLayout = {
   grid: { root: { type: "branch", data: [] }, height: 100, width: 100, orientation: "HORIZONTAL" },

@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 
 /**
  * OSC argument type names. A panel declaring its OSC integration lists

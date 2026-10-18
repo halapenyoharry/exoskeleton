@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./chrome-settings";
 import { initPaneChrome, registerBackCloser, setPaneOpen, setPanePinned, usePaneChrome } from "./pane-chrome-state";
 import { createPortal } from "react-dom";
-import type { IDockviewPanelHeaderProps } from "dockview";
+import type { IDockviewPanelHeaderProps } from "dockview-react";
 import editorManifest from "./panels/editor.manifest";
 import webviewManifest from "./panels/webview.manifest";
 import dyadicManifest from "./panels/json-dyadic/manifest";

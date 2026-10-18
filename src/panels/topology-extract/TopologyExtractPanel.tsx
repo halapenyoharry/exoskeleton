@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import { setJson, uniqueJsonId, type JsonValue } from "../../data/json-bus";
 import { setActiveDocumentId } from "../../osc/channels";
 import {

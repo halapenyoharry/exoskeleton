@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import { subscribeOsc, sendOsc, retain } from "./channels";
 import type { ProceduralSuiteParams } from "./types";
 import { getAvailableAddress, getControlAddress, getPingAddress } from "./channels";

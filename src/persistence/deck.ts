@@ -4,7 +4,7 @@
 // (`layout` = grid, `mobileLayout` = deck) and swaps by viewport width.
 // No runtime imports (node tests load this file directly).
 
-import type { SerializedDockview } from "dockview";
+import type { SerializedDockview } from "dockview-react";
 
 /** Deck mode applies at or below this width (web runtime only). */
 export const DECK_QUERY = "(max-width: 600px)";
@@ -44,8 +44,8 @@ export function layoutPanelOrder(layout: SerializedDockview): string[] {
     if (!NON_DECK_IDS.has(id) && !edge.has(id) && layout.panels?.[id] && !ids.includes(id)) ids.push(id);
   };
   for (const lf of leaves(root(layout))) lf.views.forEach(push);
-  for (const g of layout.floatingGroups ?? []) g.data.views.forEach(push);
-  for (const g of layout.popoutGroups ?? []) g.data.views.forEach(push);
+  for (const g of layout.floatingGroups ?? []) g.data?.views.forEach(push);
+  for (const g of layout.popoutGroups ?? []) g.data?.views.forEach(push);
   return ids;
 }
 
@@ -200,8 +200,8 @@ export function reconcileLayouts(
   };
   if (target.floatingGroups) {
     const fg = target.floatingGroups
-      .map((g) => ({ ...g, data: { ...g.data, views: g.data.views.filter((v) => !removed.has(v)) } }))
-      .filter((g) => g.data.views.length > 0);
+      .map((g) => (g.data ? { ...g, data: { ...g.data, views: g.data.views.filter((v) => !removed.has(v)) } } : g))
+      .filter((g) => !g.data || g.data.views.length > 0);
     out.floatingGroups = fg;
   }
   return stripMaximized(out);

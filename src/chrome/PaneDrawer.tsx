@@ -4,7 +4,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import type { DockviewApi, DockviewPanelApi } from "dockview";
+import type { DockviewApi, DockviewPanelApi } from "dockview-react";
 import { Segmented, SwatchPicker, Toggle } from "../components/toolbar/Toolbar";
 import { emitPanelMenu } from "../panel-menu";
 import { getOptions, onOptions } from "./runtime-options";

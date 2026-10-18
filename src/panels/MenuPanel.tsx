@@ -1,4 +1,4 @@
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import PanelPicker from "../PanelPicker";
 import pkg from "../../package.json";

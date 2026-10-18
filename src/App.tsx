@@ -2,9 +2,10 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   DockviewReact,
+  themeGithubDark,
   type DockviewApi,
   type DockviewReadyEvent,
-} from "dockview";
+} from "dockview-react";
 import { listen } from "@tauri-apps/api/event";
 import ColoredTab from "./ColoredTab";
 import Watermark from "./Watermark";
@@ -647,7 +648,8 @@ export default function App() {
       if (deckModeRef.current) collapseDeck(event.api);
       save();
     });
-    event.api.onDidActivePanelChange((p) => {
+    event.api.onDidActivePanelChange((e) => {
+      const p = e.panel; // Dockview 8: event is { panel, origin }, not the panel
       if (
         isPhoneWidth() &&
         p &&
@@ -898,9 +900,10 @@ export default function App() {
 
   return (
     <MenuContext.Provider value={menuActions}>
-    <div className={`dockview-theme-abyss app-frame${deckMode ? " exo-deck" : ""}${phone ? " exo-phone" : ""}`}>
+    <div className={`app-frame${deckMode ? " exo-deck" : ""}${phone ? " exo-phone" : ""}`}>
       <DockviewReact
         components={components}
+        theme={themeGithubDark}
         // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —
         singleTabMode="fullwidth"
         disableTabsOverflowList

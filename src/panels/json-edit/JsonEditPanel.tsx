@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import { EditorView, keymap, lineNumbers } from "@codemirror/view";
 import { EditorState, EditorSelection, Prec } from "@codemirror/state";
 import { basicSetup } from "codemirror";
