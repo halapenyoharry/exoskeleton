@@ -1,72 +1,41 @@
 /* ---- Document edge (left) -----------------------------------------------
    The loaded document is not a pane, it is the thing plugged in: one
    `json-edit` in a Dockview edge group on the left (persistence/
-   document-edge.ts). Expanded, it is an ordinary group with one tab.
-   Collapsed, Dockview hides the content and keeps the header, which we turn
-   into a full-height vertical strip: the {} glyph over the document's name.
-   Clicking the tab expands the edge (Dockview toggles an edge group on a
-   tab click). ColoredTab.tsx tags the group root with `.exo-doc-edge`. */
+   document-edge.ts), with Dockview's own left-side header: a vertical tab
+   strip. Expanded, the strip sits beside the content; collapsed, the strip
+   is all that remains (Dockview sizes the collapsed edge from the strip) and
+   the tab shows the {} glyph over the document's name. Clicking the tab
+   expands the edge; its × collapses it (ColoredTab.tsx closeActionOverride).
+   ColoredTab.tsx tags the group root with `.exo-doc-edge`. Nothing here sets
+   a size: the strip's width is the theme's tab-strip height, which is what
+   keeps the collapsed edge stable. */
 
 .dv-groupview.exo-doc-edge { background: #0a0e27; }
 
-.dv-groupview.exo-doc-edge.dv-edge-collapsed {
-  cursor: pointer;
-  border-right: 1px solid color-mix(in srgb, var(--accent-json-edit) 45%, transparent);
-  box-sizing: border-box;
-}
-.dv-groupview.exo-doc-edge.dv-edge-collapsed > .dv-tabs-and-actions-container {
-  --dv-tabs-and-actions-container-height: 100%;
-  height: 100%;
-  background: transparent;
-}
-.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-scrollable,
-.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-tabs-container,
-.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-tab {
-  flex: 1 1 auto;
-  width: 100%;
-  max-width: none;
-  height: 100%;
-  min-width: 0;
-  padding: 0;
-}
-.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-void-container,
-.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-right-actions-container,
-.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-left-actions-container,
-.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab-action,
+/* Collapsed: glyph + document name, no title, no ×. */
+.dv-groupview.exo-doc-edge.dv-edge-collapsed { cursor: pointer; }
 .dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab-content {
-  display: none;
+  font-size: 0; /* hides "json-edit"; the ::before glyph keeps its own size */
 }
-.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  height: 100%;
-  padding: 12px 0;
-  gap: 12px;
-  color: var(--accent-json-edit);
-}
-.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab::before {
-  content: "{}";
+.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab-content::before {
   font-size: 14px;
+  margin: 0 0 10px 0;
 }
+.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab-action { display: none; }
 .dv-groupview.exo-doc-edge.dv-edge-collapsed .exo-tab__doc {
-  display: block;
-  min-height: 0;
-  max-height: 100%;
+  display: inline-block;
+  font-size: 12px;
+  color: var(--accent-json-edit);
+  max-height: 60vh;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 12px;
-  color: var(--accent-json-edit);
-  writing-mode: vertical-rl;
-  transform: rotate(180deg); /* reads bottom-to-top, like a left-edge tab */
   pointer-events: none;
 }
 
 /* Phone: the collapsed strip is the glyph only. */
 .exo-phone .dv-groupview.exo-doc-edge.dv-edge-collapsed .exo-tab__doc { display: none; }
-.exo-phone .dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab::before { font-size: 18px; }
+.exo-phone .dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab-content::before { font-size: 18px; }
 
 /* Phone: the expanded document is a sheet over the grid, full width. */
 .exo-phone .dv-shell > .dv-split-view-container > .dv-view-container > .dv-view:has(> .dv-groupview.exo-doc-edge:not(.dv-edge-collapsed)) {

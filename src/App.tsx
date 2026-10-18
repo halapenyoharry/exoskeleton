@@ -598,6 +598,9 @@ export default function App() {
     // when the saved layout predates it). Open/closed + size are persisted
     // with the layout; a phone always starts collapsed.
     ensureDocumentEdge(event.api, { phone: phoneNow });
+    // A saved layout may carry the old "top" header position; the document
+    // edge is a vertical strip on the left (see addDocumentEdge).
+    event.api.getEdgeGroup(DOCUMENT_EDGE)?.setHeaderPosition("left");
     event.api.getEdgeGroup(DOCUMENT_EDGE)?.onDidCollapsedChange(() => save());
     // Dragging the edge's sash resizes it without any Dockview layout event;
     // observe the group element so its size is saved with the workspace.

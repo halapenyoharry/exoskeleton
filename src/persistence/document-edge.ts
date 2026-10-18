@@ -193,9 +193,11 @@ export function documentEdgeOptions(opts: { phone: boolean; collapsed: boolean }
 
 function addDocumentEdge(api: DockviewApi, opts: { phone: boolean; collapsed: boolean }) {
   const edge = api.addEdgeGroup(DOCUMENT_EDGE, documentEdgeOptions(opts));
-  // Horizontal header: the pill overlays the content like every other pane.
-  // (Dockview's default for a left edge is a vertical tab strip.)
-  edge.setHeaderPosition("top");
+  // Vertical tab strip on the left: Dockview's own shape for a left edge.
+  // Dockview 8 sizes a collapsed edge group from its measured tab strip, so
+  // the strip must have a fixed cross size — a top header's width follows
+  // the group's and feeds back into it (the edge shrank to nothing).
+  edge.setHeaderPosition("left");
   return edge;
 }
 
