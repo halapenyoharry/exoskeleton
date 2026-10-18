@@ -97,8 +97,9 @@ export default function ColoredTab(props: IDockviewPanelHeaderProps) {
   const id = props.api.id;
   const key = resolveComponentKey(id) ?? id;
   const accent = accents[key] ?? "inherit";
-  const glyph = glyphs[key] ?? '"·"';
   const isDocEdge = props.api.group.id === DOCUMENT_EDGE_ID;
+  // Document-edge tabs are names only: no glyph (they read differently on purpose).
+  const glyph = isDocEdge ? '""' : (glyphs[key] ?? '"·"');
   const rootRef = useRef<HTMLDivElement | null>(null);
   // Phone tap-to-focus: was this tab already active when the press began?
   const wasActiveRef = useRef(false);

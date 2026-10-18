@@ -24,7 +24,7 @@ export const DOCUMENT_EDGE_ID = "document-edge";
  *  settings (Cmd+B) and the menu (add panel / workspaces). */
 export const EDGE_TAB_IDS = ["settings", "menu"] as const;
 export type EdgeTabId = (typeof EDGE_TAB_IDS)[number];
-const EDGE_TAB_TITLES: Record<EdgeTabId, string> = { settings: "settings", menu: "exoskeleton" };
+const EDGE_TAB_TITLES: Record<EdgeTabId, string> = { settings: "Settings", menu: "Exo-skeleton" };
 
 export const DOCUMENT_EDGE_SIZE = 360;
 export const DOCUMENT_EDGE_MIN = 280;
@@ -301,7 +301,7 @@ export function ensureDocumentEdge(
     const panel = api.addPanel({
       id: DOCUMENT_PANEL_ID,
       component: "json-edit",
-      title: "json-edit",
+      title: "JSON Edit",
       ...(opts.params ? { params: opts.params } : {}),
       position: { referenceGroup: edge.id },
     });

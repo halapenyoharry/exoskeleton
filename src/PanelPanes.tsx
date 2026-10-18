@@ -336,15 +336,21 @@ function PanesCell(props: ISplitviewPanelProps) {
     paneApiRef.current = e.api;
     if (!ctx) return;
     const expanded = (ctx.params.panesExpanded as Record<string, boolean> | undefined) ?? {};
+    // Edge-group panels (titlePane set): names only, Title Case, no glyphs.
+    const plain = !!ctx.titlePane;
+    const titleCase = (t: string) => t.replace(/(^|[\s-])([a-z])/g, (m, pre, c) => pre + c.toUpperCase());
     const add = (id: string, title: string, icon: string | undefined, headerOnly = false) => {
+      const label = plain ? titleCase(title) : icon ? `${icon} ${title}` : title;
+      // The ⚙ pane starts folded; declared panes start open. Both remember.
+      const open = id === SETTINGS_ID ? expanded[id] === true : expanded[id] !== false;
       const panel = e.api.addPanel({
         id,
         component: "pane",
-        title: icon ? `${icon} ${title}` : title,
+        title: label,
         headerSize: PANE_HEADER,
         minimumBodySize: 0,
         maximumBodySize: headerOnly ? 0 : undefined,
-        isExpanded: headerOnly ? false : expanded[id] !== false,
+        isExpanded: headerOnly ? false : open,
         ...(headerOnly ? { headerComponent: "title" } : {}),
         params: { paneId: id },
       });
