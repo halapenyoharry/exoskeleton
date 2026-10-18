@@ -1,7 +1,8 @@
-import { Component, type ComponentType, type CSSProperties, type ErrorInfo, type ReactNode } from "react";
+import { Component, useEffect, useState, type ComponentType, type CSSProperties, type ErrorInfo, type ReactNode } from "react";
 import type { IDockviewPanelProps } from "dockview-react";
 import { resolveComponentKey } from "./ColoredTab";
 import { PanelPanes } from "./PanelPanes";
+import { DOCUMENT_EDGE_ID } from "./persistence/document-edge";
 import "./chrome/panes";
 import { getPanes } from "./chrome/panes-registry";
 
@@ -157,10 +158,21 @@ export function exoPanel<P extends Record<string, any>>(
   accent?: string,
 ) {
   return function Wrapped(props: IDockviewPanelProps<P>) {
-    const title = props.api.title ?? props.api.id;
     const componentKey = resolveComponentKey(props.api.id) ?? props.api.id;
     const panes = getPanes(componentKey);
     const hasPanes = !!panes && panes.some((p) => p.kind === "pane");
+    // In the document edge (vertical tab strip on the left) the title also
+    // reads at the top of the content; follow group moves and renames.
+    const [inEdge, setInEdge] = useState(() => props.api.group.id === DOCUMENT_EDGE_ID);
+    const [title, setTitle] = useState(() => props.api.title ?? props.api.id);
+    useEffect(() => {
+      const d1 = props.api.onDidGroupChange(() => setInEdge(props.api.group.id === DOCUMENT_EDGE_ID));
+      const d2 = props.api.onDidTitleChange((e) => setTitle(e.title));
+      return () => {
+        d1.dispose();
+        d2.dispose();
+      };
+    }, [props.api]);
     const content = <Component {...props} />;
     return (
       <PanelErrorBoundary
@@ -169,8 +181,15 @@ export function exoPanel<P extends Record<string, any>>(
         onClose={() => props.api.close()}
       >
         <PanelRoot accent={accent} hasPanes={hasPanes}>
-          {hasPanes ? (
-            <PanelPanes panelId={props.api.id} api={props.api} containerApi={props.containerApi} panes={panes!}>
+          {hasPanes || inEdge ? (
+            <PanelPanes
+              panelId={props.api.id}
+              api={props.api}
+              containerApi={props.containerApi}
+              panes={panes ?? []}
+              titlePane={inEdge ? title : undefined}
+              settingsPane={hasPanes}
+            >
               {content}
             </PanelPanes>
           ) : (

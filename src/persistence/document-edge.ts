@@ -226,18 +226,17 @@ export function precreateEdgeGroups(api: DockviewApi, _layout: SerializedDockvie
 }
 
 /**
- * Header position follows the edge's state: expanded, the tabs run along the
- * top so the active panel's title reads at the top of its content; collapsed,
- * the header moves to the left and becomes the vertical strip. The strip must
- * have a fixed cross size while collapsed because Dockview 8 sizes a
+ * The document edge's header is always on the left: a vertical tab strip,
+ * expanded or collapsed. It must stay vertical because Dockview 8 sizes a
  * collapsed edge group from its measured tab strip (a top header's width
  * follows the group's and feeds back into it — the edge shrank to nothing).
+ * The active panel's title is shown at the top of its content by the
+ * title pane PanelPanes adds for edge panels (PanelRoot.tsx).
  */
 export function syncDocumentEdgeHeader(api: DockviewApi): void {
   const edge = api.getEdgeGroup(DOCUMENT_EDGE);
   if (!edge) return;
-  const want = edge.isCollapsed() ? "left" : "top";
-  if (edge.getHeaderPosition() !== want) edge.setHeaderPosition(want);
+  if (edge.getHeaderPosition() !== "left") edge.setHeaderPosition("left");
 }
 
 /**

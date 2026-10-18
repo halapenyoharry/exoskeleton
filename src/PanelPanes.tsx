@@ -41,6 +41,7 @@ import "./PanelPanes.css";
 
 const PANE_HEADER = 24;
 const SETTINGS_ID = "__pane";
+const TITLE_ID = "__title";
 const ACCENTS = ["#7ddff5", "#ffb454", "#7dffb0", "#ff7da8", "#b69cff"];
 
 type Params = Record<string, unknown>;
@@ -260,6 +261,10 @@ interface Ctx {
   api: DockviewPanelApi;
   containerApi: DockviewApi;
   panes: PanelPane[];
+  /** Header-only first pane carrying the panel's title (edge-group panels). */
+  titlePane?: string;
+  /** The "⚙ pane" settings pane (window / move / follow / accent / about). */
+  settingsPane: boolean;
   params: Params;
   write: (p: Params) => void;
   about?: { description?: string; docs?: string };
@@ -272,6 +277,7 @@ function PaneCell(props: IPaneviewPanelProps<{ paneId: string }>) {
   const ctx = useContext(PanelPanesCtx);
   if (!ctx) return null;
   const { panelId, api, containerApi, panes, params, write, about } = ctx;
+  if (props.params.paneId === TITLE_ID) return null;
   if (props.params.paneId === SETTINGS_ID) {
     return <div className="pp-pane"><PaneSettings api={api} containerApi={containerApi} params={params} write={write} about={about} /></div>;
   }
@@ -330,30 +336,41 @@ function PanesCell(props: ISplitviewPanelProps) {
     paneApiRef.current = e.api;
     if (!ctx) return;
     const expanded = (ctx.params.panesExpanded as Record<string, boolean> | undefined) ?? {};
-    const add = (id: string, title: string, icon: string | undefined) => {
+    const add = (id: string, title: string, icon: string | undefined, headerOnly = false) => {
       const panel = e.api.addPanel({
         id,
         component: "pane",
         title: icon ? `${icon} ${title}` : title,
         headerSize: PANE_HEADER,
         minimumBodySize: 0,
-        isExpanded: expanded[id] !== false,
+        maximumBodySize: headerOnly ? 0 : undefined,
+        isExpanded: headerOnly ? false : expanded[id] !== false,
+        ...(headerOnly ? { headerComponent: "title" } : {}),
         params: { paneId: id },
       });
+      if (headerOnly) return;
       panel.api.onDidExpansionChange((ev) => {
         const cur = (ctx.api.getParameters().panesExpanded as Record<string, boolean> | undefined) ?? {};
         ctx.api.updateParameters({ panesExpanded: { ...cur, [id]: ev.isExpanded } });
         fit();
       });
     };
+    // Edge-group panels: the title reads at the top of the content (the
+    // group's own header is the vertical strip on the left).
+    if (ctx.titlePane) add(TITLE_ID, ctx.titlePane, undefined, true);
     for (const p of ctx.panes) if (p.kind === "pane") add(p.id, p.label, p.icon);
-    add(SETTINGS_ID, "pane", "⚙");
+    if (ctx.settingsPane) add(SETTINGS_ID, "pane", "⚙");
     requestAnimationFrame(() => fit());
   };
 
   return (
     <div className="pp-panes-cell" ref={hostRef}>
-      <PaneviewReact className={themeGithubDark.className} components={{ pane: PaneCellWithTag }} onReady={onReady} />
+      <PaneviewReact
+        className={themeGithubDark.className}
+        components={{ pane: PaneCellWithTag }}
+        headerComponents={{ title: TitleHeader }}
+        onReady={onReady}
+      />
     </div>
   );
 }
@@ -365,6 +382,13 @@ function PaneCellWithTag(props: IPaneviewPanelProps<{ paneId: string }>) {
       <PaneCell {...props} />
     </div>
   );
+}
+
+/** Header of the title pane: renders the live title from context (a pane's
+ *  own title is fixed at creation; json-edit's changes with the document). */
+function TitleHeader(_props: IPaneviewPanelProps) {
+  const ctx = useContext(PanelPanesCtx);
+  return <div className="pp-title">{ctx?.titlePane}</div>;
 }
 
 function ContentCell(_props: ISplitviewPanelProps) {
@@ -379,18 +403,21 @@ export interface PanelPanesProps {
   api: DockviewPanelApi;
   containerApi: DockviewApi;
   panes: PanelPane[];
+  titlePane?: string;
+  /** Default true. */
+  settingsPane?: boolean;
   about?: { description?: string; docs?: string };
   children: ReactNode;
 }
 
-export function PanelPanes({ panelId, api, containerApi, panes, about, children }: PanelPanesProps) {
+export function PanelPanes({ panelId, api, containerApi, panes, titlePane, settingsPane = true, about, children }: PanelPanesProps) {
   const [params, write] = useParams(api);
   const onReady = (e: SplitviewReadyEvent) => {
     e.api.addPanel({ id: "panes", component: "panes", minimumSize: PANE_HEADER, snap: true, size: PANE_HEADER * (panes.length + 1) + 60 });
     e.api.addPanel({ id: "content", component: "content", priority: LayoutPriority.High });
   };
   return (
-    <PanelPanesCtx.Provider value={{ panelId, api, containerApi, panes, params, write, about, content: children }}>
+    <PanelPanesCtx.Provider value={{ panelId, api, containerApi, panes, titlePane, settingsPane, params, write, about, content: children }}>
       <div className="pp-root">
         <SplitviewReact className={themeGithubDark.className} orientation={Orientation.VERTICAL} components={components} onReady={onReady} />
       </div>
