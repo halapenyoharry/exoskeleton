@@ -15,6 +15,3 @@
    currentColor cascades through tab content + close X. */
 .dv-tab.dv-active-tab .exo-tab .dv-default-tab { color: var(--tab-accent, inherit); }
 .dv-tab.dv-inactive-tab .exo-tab .dv-default-tab { color: color-mix(in srgb, var(--tab-accent, currentColor) 70%, transparent); }
-
-/* Document name, shown only on the collapsed document edge (DocumentEdge.css). */
-.exo-tab__doc { display: none; }

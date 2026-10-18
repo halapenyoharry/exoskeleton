@@ -4,7 +4,7 @@
    document-edge.ts), with Dockview's own left-side header: a vertical tab
    strip. Expanded, the strip sits beside the content; collapsed, the strip
    is all that remains (Dockview sizes the collapsed edge from the strip) and
-   the tab shows the {} glyph over the document's name. Clicking the tab
+   the tab reads "json-edit - <document name>" (set with api.setTitle). Clicking the tab
    expands the edge; its × collapses it (ColoredTab.tsx closeActionOverride).
    ColoredTab.tsx tags the group root with `.exo-doc-edge`. Nothing here sets
    a size: the strip's width is the theme's tab-strip height, which is what
@@ -12,29 +12,12 @@
 
 .dv-groupview.exo-doc-edge { background: #0a0e27; }
 
-/* Collapsed: glyph + document name, no title, no ×. */
+/* Collapsed: the tab (glyph + "json-edit - <document>") is the strip; no ×. */
 .dv-groupview.exo-doc-edge.dv-edge-collapsed { cursor: pointer; }
-.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab-content {
-  font-size: 0; /* hides "json-edit"; the ::before glyph keeps its own size */
-}
-.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab-content::before {
-  font-size: 14px;
-  margin: 0 0 10px 0;
-}
 .dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab-action { display: none; }
-.dv-groupview.exo-doc-edge.dv-edge-collapsed .exo-tab__doc {
-  display: inline-block;
-  font-size: 12px;
-  color: var(--accent-json-edit);
-  max-height: 60vh;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  pointer-events: none;
-}
 
 /* Phone: the collapsed strip is the glyph only. */
-.exo-phone .dv-groupview.exo-doc-edge.dv-edge-collapsed .exo-tab__doc { display: none; }
+.exo-phone .dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab-content { font-size: 0; }
 .exo-phone .dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab-content::before { font-size: 18px; }
 
 /* Phone: the expanded document is a sheet over the grid, full width. */

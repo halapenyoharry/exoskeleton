@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { DockviewDefaultTab, type IDockviewPanelHeaderProps } from "dockview-react";
 import { DOCUMENT_EDGE_ID } from "./persistence/document-edge";
-import { getHeaderActionText, onHeaderActionText } from "./chrome/runtime-options";
 import "./ColoredTab.css";
 import "./DocumentEdge.css";
 
@@ -99,16 +98,8 @@ export default function ColoredTab(props: IDockviewPanelHeaderProps) {
   const glyph = glyphs[key] ?? '"·"';
   const isDocEdge = props.api.group.id === DOCUMENT_EDGE_ID;
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const [docTitle, setDocTitle] = useState(() => (isDocEdge ? getHeaderActionText(id, "doc") : ""));
   // Phone tap-to-focus: was this tab already active when the press began?
   const wasActiveRef = useRef(false);
-
-  // Document edge: the collapsed strip shows the document's name.
-  useEffect(() => {
-    if (!isDocEdge) return;
-    setDocTitle(getHeaderActionText(id, "doc"));
-    return onHeaderActionText(id, "doc", setDocTitle);
-  }, [isDocEdge, id]);
 
   // Document edge: tag the group root so DocumentEdge.css can style the
   // collapsed strip (Dockview toggles .dv-edge-collapsed on it).
@@ -145,7 +136,6 @@ export default function ColoredTab(props: IDockviewPanelHeaderProps) {
         {...props}
         closeActionOverride={isDocEdge ? () => props.api.group.api.collapse() : undefined}
       />
-      {isDocEdge && <span className="exo-tab__doc">{docTitle || "untitled"}</span>}
     </div>
   );
 }

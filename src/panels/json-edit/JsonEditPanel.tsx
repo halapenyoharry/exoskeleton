@@ -578,7 +578,12 @@ export default function JsonEditPanel(
   const docTitle = docLabel(currentMeta?.title);
   useEffect(() => {
     publishHeaderActionText(props.api.id, "doc", docTitle);
-  }, [props.api.id, docTitle]);
+    // The tab reads "<panel title> - <document name>" when a document is
+    // named — plain Dockview: api.setTitle, nothing drawn by us.
+    const base = "json-edit";
+    const named = currentMeta?.title && currentMeta.title.trim();
+    props.api.setTitle(named ? `${base} - ${currentMeta!.title.trim()}` : base);
+  }, [props.api, docTitle, currentMeta?.title]);
   useEffect(() => {
     if (!docMenu) return;
     const close = () => setDocMenu(null);
