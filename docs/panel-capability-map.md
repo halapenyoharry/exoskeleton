@@ -1,6 +1,6 @@
 # Panel Capability Map
 
-What each of the 23 exoskeleton panels needs from its host — and therefore where it can run. A unit runs in any host that provides the capabilities it declares. Most declare nothing.
+What each of the 24 exoskeleton panels needs from its host — and therefore where it can run. A unit runs in any host that provides the capabilities it declares. Most declare nothing.
 
 ## How to read it
 

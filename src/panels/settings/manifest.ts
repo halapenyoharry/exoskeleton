@@ -8,7 +8,7 @@ const manifest: PanelManifest = {
   title: "settings",
   component: SettingsPanel,
   description:
-    "Workspace settings. Summoned with Cmd+B into the left side-grid edge group; not part of the default layout.",
+    "Workspace settings. A tab in the json-edit group; Cmd+B focuses it (adding it if needed).",
 
   accent: "#8896a0",
   glyph: "⚙",

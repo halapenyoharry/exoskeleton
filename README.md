@@ -107,7 +107,7 @@ chmod +x Exoskeleton_*.AppImage
 
 ## First run
 
-On first launch Exoskeleton opens with the **Minimal** preset: just the editor, terminal, and web viewport. The other thirteen panels aren't gone — they're one click away. Click the **⊞** button in the bottom floating toolbar to:
+On first launch Exoskeleton opens with the **Minimal** preset: the editor, terminal, web viewport, and the **add** tab (⊞). The other panels aren't gone — they're one click away. Open the **add** tab to:
 
 - add any panel from the full registry,
 - switch to a different preset (**JSON Lab**, **AV Lab**, **Everything**),
@@ -122,7 +122,7 @@ The **Watermark** screen (shown whenever the active workspace's grid is empty) o
 
 You never need to leave the app or touch Finder to recover from a messy grid:
 
-- **⊞ menu → "Reset layout to preset…"** — reachable at any time, asks for confirmation, and resets only the active workspace.
+- **add tab → "Reset layout…"** — reachable at any time, asks for confirmation, and resets only the active workspace.
 - If the app itself won't launch usefully, delete the state file and relaunch: `~/Library/Application Support/dev.harold.exoskeleton/` (macOS) or the platform-equivalent app-data directory on Linux.
 
 ---
@@ -159,7 +159,7 @@ npm run tauri build
 
 Exoskeleton schema v8 introduces multi-workspace support and workspace document portable serialization.
 
-- **Workspace Switcher**: Click the **⊞** button in the bottom floating toolbar to switch between saved workspaces, create new ones, rename, or delete.
+- **Workspace Switcher**: The **add** tab (⊞) lists saved workspaces — switch, create, rename, delete, export, import, or open one in a new window.
 - **Export / Import**: Save any workspace configuration as a portable `.exo.json` file to share or back up, and import `.exo.json` files seamlessly. Imported files are treated as untrusted: any file path a panel had open is dropped on import, so importing someone else's workspace never silently opens a file from your machine — you re-open documents yourself if you want them.
 - **Multi-Window Workspaces**: Click **❐** next to any workspace to open it in a separate, independent OS window.
 

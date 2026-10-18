@@ -399,3 +399,15 @@ Done: (1) Dockview 6.0.5 → 8.6.0. The `dockview` package is now a pure re-expo
 Not verified visually — Harold to look at 1421. Known rough edges: controls-row open/folded state is not persisted; json-edit's hamburger dropdown is pre-existing non-Dockview UI, moved as-is (flagged, not new).
 Next: Harold reviews; then move ⊞ add-panel menu + settings into the json-edit group as panels, remove the floating ⊞ and the status-bar summoner (status bar becomes a permanent bottom edge group), remove the left edge group and point Cmd+B at the settings tab; schema bump for the layout change.
 Open: three.js duplicate-instance warning; reference edges not dashed in 3D-Inspect.
+
+## 2026-10-18 (later — chrome into Dockview: add-panel + settings as tabs, status bar permanent)
+
+State: `osc-retainer-unification`; schema version 12. `npx tsc --noEmit` clean, `npm test` 148/148, `npm run build` green. Main-checkout dev server on http://localhost:1421.
+Last: Harold clarified the Dockview rule gates NEW UI only; existing features (json-edit ☰ menu etc.) are kept as-is without per-item approval (memory updated). Then the approved chrome move, done without further questions:
+1. New `src/panels/add-panel/` (AddPanelPanel + manifest + css): the former floating ⊞ popup — panel roster with ●/+ markers, workspace list with switch/create/rename/delete/export/import/open-in-window, and Reset layout — now an ordinary Dockview panel, title "add", glyph ⊞, registry entry v12 `within json-edit`, `autoAdd: true` so existing layouts get it. Workspace handlers reach it through `src/workspace-actions.ts` (React context; dockview-react portals keep context).
+2. `settings` is a normal registry panel (v12, within json-edit, autoAdd). The left edge group, `SIDE_EDGE`/`SIDE_GROUP_ID`, and its auto-cleanup are gone; Cmd+B calls `addOrFocusPanel(api, "settings")`. `EDGE_RESIDENTS` is now just status-bar, so repairLayout rescues settings out of an old saved edge group.
+3. Floating ⊞ button, its backdrop/menu, and the status-bar summoner removed from App.tsx and CSS. Status bar is permanent: edge group created with `collapsedSize: 6`; its ✕ now calls `containerApi.getEdgeGroup("bottom").collapse()` (Dockview 8 edge-group collapse) instead of closing; onDidLayoutChange re-mounts it if ever emptied.
+4. Presets: add-panel added to minimal/json-lab/av-lab/procedural-lab (json-lab also gets settings); presets tests updated; README ⊞ references rewritten; capability map count 24.
+Not verified visually. Expand-from-collapsed-strip is Dockview's own interaction on the 6px strip — if it turns out not to be clickable, an `expand()` trigger is needed somewhere (header action is the Dockview-native spot).
+Next: Harold reviews on 1421 (theme, strips, add tab, settings tab, status-bar collapse/expand). Then: persist ParametersSplit open/folded state per panel; dashed reference edges in 3D-Inspect.
+Open: three.js duplicate-instance warning.

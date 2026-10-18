@@ -19,6 +19,8 @@ import TerminalPanel from "./panels/TerminalPanel";
 import LanWebview from "./panels/LanWebview";
 import TempoClockPanel from "./panels/tempo-clock/TempoClockPanel";
 import SettingsPanel from "./panels/settings/SettingsPanel";
+import AddPanelPanel from "./panels/add-panel/AddPanelPanel";
+import { WorkspaceActionsContext } from "./workspace-actions";
 import PianoPanel from "./panels/piano/PianoPanel";
 import JsonEditPanel from "./panels/json-edit/JsonEditPanel";
 import JsonTreePanel from "./panels/json-tree/JsonTreePanel";
@@ -34,10 +36,8 @@ import {
   buildPreset,
   migrateLayout,
   migrateSavedLayout,
-  panelRegistry,
   repairLayout,
 } from "./persistence/default-layout";
-import { panelAccent, panelGlyph } from "./ColoredTab";
 import {
   createWorkspace,
   deleteWorkspace,
@@ -94,6 +94,7 @@ const components = {
   webview:         exoPanel(LanWebview,         "var(--accent-webview)"),
   "tempo-clock":   exoPanel(TempoClockPanel,    "var(--accent-tempo-clock)"),
   settings:        exoPanel(SettingsPanel,      "var(--accent-settings)"),
+  "add-panel":     exoPanel(AddPanelPanel,      "var(--accent-add-panel)"),
   piano:           exoPanel(PianoPanel,         "var(--accent-piano)"),
   scope:           lazyPanel(ScopePanel,        "var(--accent-scope)"),
   "json-edit":     exoPanel(JsonEditPanel,      "var(--accent-json-edit)"),
@@ -122,11 +123,6 @@ const components = {
 // every reload used to fall back to the default layout).
 const storage = appStorage;
 
-// The Cmd+B-summoned settings panel lives in a Dockview 6 edge group on
-// the left side of the main grid. Same constant used by toggleSettings,
-// the auto-cleanup hook, and (implicitly) the serialized layout.
-const SIDE_EDGE = "left" as const;
-const SIDE_GROUP_ID = "side-grid";
 
 export default function App() {
   // Initial-load gate. `undefined` = loading; null = no saved state; an
@@ -141,11 +137,6 @@ export default function App() {
   }, [appState]);
 
   const mainApiRef = useRef<DockviewApi | null>(null);
-  const [isStatusBarVisible, setIsStatusBarVisible] = useState(false);
-  // Floating ⊞ add-panel menu (bottom-right, next to the astromech
-  // summoner). The roster is read fresh from the registry on each open,
-  // so open/closed markers stay accurate without extra subscriptions.
-  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
 
   // Preferences state. Currently empty (see Preferences interface in
   // storage.ts); included in the save so future fields persist automatically.
@@ -238,6 +229,7 @@ export default function App() {
         id: "status-bar-group",
         initialSize: 40,
         minimumSize: 40,
+        collapsedSize: 6,
       });
     }
     let panel = api.getPanel("status-bar");
@@ -251,38 +243,15 @@ export default function App() {
     if (panel) {
       panel.group.header.hidden = true;
     }
-    setIsStatusBarVisible(true);
   }
 
-  // Toggle the settings panel. Extracted as a stable named function so the
-  // menu-event handler below can invoke it; future header-action buttons or
-  // programmatic invocations can call it the same way. Settings lives in a
-  // left edge group that's created on demand and torn down when its last
-  // panel closes (see onDidLayoutChange cleanup in onMainReady).
+  // Cmd+B: focus the settings tab, adding it to the json-edit group (or
+  // the main grid anchor) if it isn't open. Settings is an ordinary panel
+  // since v12; no edge group involved.
   function toggleSettings() {
     const api = mainApiRef.current;
     if (!api) return;
-
-    const existing = api.getPanel("settings");
-    if (existing) {
-      api.removePanel(existing);
-      return;
-    }
-
-    let edge = api.getEdgeGroup(SIDE_EDGE);
-    if (!edge) {
-      edge = api.addEdgeGroup(SIDE_EDGE, {
-        id: SIDE_GROUP_ID,
-        initialSize: 320,
-        minimumSize: 200,
-      });
-    }
-    api.addPanel({
-      id: "settings",
-      component: "settings",
-      title: "settings",
-      position: { referenceGroup: edge.id },
-    });
+    addOrFocusPanel(api, "settings");
   }
 
   // Cmd+B / Ctrl+B is wired via a Tauri Menu accelerator on the Rust side
@@ -356,29 +325,19 @@ export default function App() {
       mountStatusBar(event.api);
     } else {
       statusBarPanel.group.header.hidden = true;
-      setIsStatusBarVisible(true);
     }
 
-    // Auto-cleanup: when the left edge group empties (e.g. user closes the
-    // settings tab), remove the edge group entirely. Mirrors the old
-    // "auto-hide side-grid when empty" UX from the peer-grid era.
+    // The status bar is permanent: if its edge group is ever emptied
+    // (an old layout, a stray close), put it back rather than leaving the
+    // strip blank. Collapsing is the way to get it out of the way.
     event.api.onDidLayoutChange(() => {
-      const edge = event.api.getEdgeGroup(SIDE_EDGE);
-      if (edge) {
-        const group = event.api.groups.find((g) => g.id === edge.id);
-        if (group && group.panels.length === 0) {
-          event.api.removeEdgeGroup(SIDE_EDGE);
-        }
-      }
-
       const bottom = event.api.getEdgeGroup("bottom");
       if (bottom) {
         const group = event.api.groups.find((g) => g.id === bottom.id);
-        if (group && group.panels.length === 0) {
-          event.api.removeEdgeGroup("bottom");
-        }
+        if (group && group.panels.length === 0) mountStatusBar(event.api);
+      } else if (!event.api.getPanel("status-bar")) {
+        mountStatusBar(event.api);
       }
-      setIsStatusBarVisible(!!event.api.getPanel("status-bar"));
 
       save();
     });
@@ -394,7 +353,6 @@ export default function App() {
     if (targetWs && mainApiRef.current) {
       applyWorkspaceState(mainApiRef.current, targetWs.layout, next.version);
     }
-    setIsAddMenuOpen(false);
   }
 
   function handleCreateWorkspace() {
@@ -407,7 +365,6 @@ export default function App() {
     if (mainApiRef.current) {
       applyWorkspaceState(mainApiRef.current, newWs.layout, next.version);
     }
-    setIsAddMenuOpen(false);
   }
 
   function handleRenameWorkspace() {
@@ -441,7 +398,6 @@ export default function App() {
   async function handleExportWorkspace() {
     if (!appState) return;
     save.flush();
-    setIsAddMenuOpen(false);
     const activeWs = getActiveWorkspace(appState);
     const jsonStr = serializeWorkspaceDocument(activeWs);
     const safeName = activeWs.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
@@ -482,7 +438,6 @@ export default function App() {
       reader.readAsText(file);
     };
     input.click();
-    setIsAddMenuOpen(false);
   }
 
   function handleOpenWorkspaceInNewWindow(workspaceId: string, e: React.MouseEvent) {
@@ -491,167 +446,48 @@ export default function App() {
     invoke("open_workspace_window", { workspaceId }).catch((err) => {
       console.error("[exoskeleton] failed to open workspace window:", err);
     });
-    setIsAddMenuOpen(false);
   }
 
   if (appState === undefined) {
     return <div className="app-frame app-frame--loading" />;
   }
 
+  const workspaceActions = {
+    appState,
+    switchWorkspace: handleSwitchWorkspace,
+    createWorkspace: handleCreateWorkspace,
+    renameWorkspace: handleRenameWorkspace,
+    deleteWorkspace: handleDeleteWorkspace,
+    exportWorkspace: () => void handleExportWorkspace(),
+    importWorkspace: handleImportWorkspace,
+    openWorkspaceInNewWindow: handleOpenWorkspaceInNewWindow,
+    resetLayout: () => {
+      if (
+        window.confirm(
+          "Reset layout to default (Minimal)? Any unsaved panel position changes will be cleared.",
+        )
+      ) {
+        mainApiRef.current?.clear();
+        buildPreset(mainApiRef.current!, DEFAULT_PRESET_ID);
+      }
+    },
+  };
+
   return (
-    <div className="app-frame">
-      <DockviewReact
-        components={components}
-        theme={themeGithubDark}
-        // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —
-        defaultTabComponent={ColoredTab}
-        watermarkComponent={Watermark}
-        prefixHeaderActionsComponent={PrefixHeaderActions}
-        leftHeaderActionsComponent={LeftHeaderActions}
-        rightHeaderActionsComponent={RightHeaderActions}
-        onReady={onMainReady}
-      />
-      {!isStatusBarVisible && mainApiRef.current && (
-        <button
-          className="status-bar-summoner-btn"
-          onClick={() => mountStatusBar(mainApiRef.current!)}
-          title="Summon Astromech Status Bar"
-        >
-          ⌬
-        </button>
-      )}
-      {mainApiRef.current && (
-        <button
-          className="add-panel-btn"
-          onClick={() => setIsAddMenuOpen((v) => !v)}
-          title="add a panel or manage workspaces"
-        >
-          ⊞
-        </button>
-      )}
-      {isAddMenuOpen && mainApiRef.current && (
-        <>
-          <div
-            className="add-panel-backdrop"
-            onClick={() => setIsAddMenuOpen(false)}
-          />
-          <div className="add-panel-menu">
-            {appState && (
-              <div className="workspace-menu-section">
-                <div className="workspace-menu-header">
-                  <span className="workspace-menu-title">Workspaces</span>
-                  <div className="workspace-menu-actions">
-                    <button
-                      className="workspace-action-btn"
-                      onClick={handleCreateWorkspace}
-                      title="Create new workspace"
-                    >
-                      + New
-                    </button>
-                    <button
-                      className="workspace-action-btn"
-                      onClick={handleExportWorkspace}
-                      title="Export active workspace (.exo.json)"
-                    >
-                      Export
-                    </button>
-                    <button
-                      className="workspace-action-btn"
-                      onClick={handleImportWorkspace}
-                      title="Import workspace document (.exo.json)"
-                    >
-                      Import
-                    </button>
-                    <button
-                      className="workspace-action-btn"
-                      onClick={handleRenameWorkspace}
-                      title="Rename active workspace"
-                    >
-                      ✎
-                    </button>
-                    <button
-                      className="workspace-action-btn workspace-action-btn--danger"
-                      onClick={handleDeleteWorkspace}
-                      title="Delete active workspace"
-                    >
-                      🗑
-                    </button>
-                  </div>
-                </div>
-                <div className="workspace-list">
-                  {listWorkspaces(appState).map((ws) => {
-                    const isActive = ws.id === appState.activeWorkspaceId;
-                    return (
-                      <button
-                        key={ws.id}
-                        className={`workspace-item ${isActive ? "workspace-item--active" : ""}`}
-                        onClick={() => handleSwitchWorkspace(ws.id)}
-                      >
-                        <span className="workspace-name">{ws.name}</span>
-                        <div className="workspace-item-controls">
-                          <button
-                            className="workspace-popout-btn"
-                            onClick={(e) => handleOpenWorkspaceInNewWindow(ws.id, e)}
-                            title="Open workspace in new window"
-                          >
-                            ❐
-                          </button>
-                          {isActive && <span className="workspace-indicator">●</span>}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="add-panel-divider" />
-              </div>
-            )}
-            {panelRegistry.map((entry) => {
-              const open = !!mainApiRef.current?.getPanel(entry.id);
-              return (
-                <button
-                  key={entry.id}
-                  className="add-panel-item"
-                  onClick={() => {
-                    addOrFocusPanel(mainApiRef.current!, entry.id);
-                    setIsAddMenuOpen(false);
-                  }}
-                >
-                  <span
-                    className="add-panel-glyph"
-                    style={{ color: panelAccent(entry.id) }}
-                  >
-                    {panelGlyph(entry.id)}
-                  </span>
-                  <span className="add-panel-name">{entry.id}</span>
-                  <span className="add-panel-state">
-                    {open ? "●" : "+"}
-                  </span>
-                </button>
-              );
-            })}
-            <div className="add-panel-divider" />
-            <button
-              className="add-panel-item add-panel-reset"
-              onClick={() => {
-                if (
-                  window.confirm(
-                    "Reset layout to default (Minimal)? Any unsaved panel position changes will be cleared.",
-                  )
-                ) {
-                  mainApiRef.current?.clear();
-                  buildPreset(mainApiRef.current!, DEFAULT_PRESET_ID);
-                  setIsAddMenuOpen(false);
-                }
-              }}
-            >
-              <span className="add-panel-glyph" style={{ color: "#ff5252" }}>
-                ↺
-              </span>
-              <span className="add-panel-name">Reset layout...</span>
-            </button>
-          </div>
-        </>
-      )}
-    </div>
+    <WorkspaceActionsContext.Provider value={workspaceActions}>
+      <div className="app-frame">
+        <DockviewReact
+          components={components}
+          theme={themeGithubDark}
+          // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —
+          defaultTabComponent={ColoredTab}
+          watermarkComponent={Watermark}
+          prefixHeaderActionsComponent={PrefixHeaderActions}
+          leftHeaderActionsComponent={LeftHeaderActions}
+          rightHeaderActionsComponent={RightHeaderActions}
+          onReady={onMainReady}
+        />
+      </div>
+    </WorkspaceActionsContext.Provider>
   );
 }

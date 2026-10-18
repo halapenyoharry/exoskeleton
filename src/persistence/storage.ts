@@ -32,7 +32,10 @@ import type { SerializedDockview } from "dockview-react";
 //       3D topological manifolds.
 //  11 — json-graph3d-inspect: text-sprite 3D graph with category colors
 //       and containment hulls.
-export const CURRENT_VERSION = 11;
+//  12 — add-panel + settings as tabs in the json-edit group; floating ⊞
+//       and status-bar summoner removed; status bar is a permanent
+//       collapsible bottom edge group.
+export const CURRENT_VERSION = 12;
 
 export interface Preferences {
   // Empty for now; reserved for theme, tab-position, etc. when those land.

@@ -13,19 +13,19 @@ export const presets: LayoutPreset[] = [
     id: "minimal",
     name: "Minimal",
     description: "Editor, terminal, and a webview. Everything else is one click away.",
-    panelIds: ["editor", "terminal", "webview"],
+    panelIds: ["editor", "terminal", "webview", "add-panel"],
   },
   {
     id: "json-lab",
     name: "JSON Lab",
     description: "JSON editor feeding the tree, graph, and 3D viewers.",
-    panelIds: ["json-edit", "json-tree", "json-graph3d", "json-graph3d-inspect", "topology-extract"],
+    panelIds: ["json-edit", "add-panel", "settings", "json-tree", "json-graph3d", "json-graph3d-inspect", "topology-extract"],
   },
   {
     id: "av-lab",
     name: "AV Lab",
     description: "Tempo clock, piano, and oscilloscope over the OSC bus.",
-    panelIds: ["tempo-clock", "piano", "scope"],
+    panelIds: ["tempo-clock", "piano", "scope", "add-panel"],
   },
   {
     id: "procedural-lab",
@@ -37,6 +37,7 @@ export const presets: LayoutPreset[] = [
       "procedural-visuals-balls",
       "procedural-visuals-fountain",
       "procedural-visuals-recursive",
+      "add-panel",
     ],
   },
   {

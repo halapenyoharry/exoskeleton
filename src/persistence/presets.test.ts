@@ -25,10 +25,10 @@ test("all preset panelIds entries name real panelRegistry ids", () => {
   }
 });
 
-test("minimal preset contains exactly editor, terminal, webview", () => {
+test("minimal preset contains exactly editor, terminal, webview, add-panel", () => {
   const minimal = presets.find((p) => p.id === "minimal");
   assert.ok(minimal, "minimal preset should exist");
-  assert.deepStrictEqual(minimal.panelIds, ["editor", "terminal", "webview"]);
+  assert.deepStrictEqual(minimal.panelIds, ["editor", "terminal", "webview", "add-panel"]);
 });
 
 test("resolvePresetPanelIds resolves empty array to all available registry ids for everything preset", () => {
@@ -40,7 +40,7 @@ test("resolvePresetPanelIds resolves empty array to all available registry ids f
 test("resolvePresetPanelIds resolves specific panelIds for minimal preset", () => {
   const allRegistryIds = panelRegistry.map((p) => p.id);
   const resolved = resolvePresetPanelIds("minimal", allRegistryIds);
-  assert.deepStrictEqual(resolved, ["editor", "terminal", "webview"]);
+  assert.deepStrictEqual(resolved, ["editor", "terminal", "webview", "add-panel"]);
 });
 
 test("resolvePresetPanelIds falls back to DEFAULT_PRESET_ID for unknown preset id", () => {

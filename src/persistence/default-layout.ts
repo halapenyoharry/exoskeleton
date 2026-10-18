@@ -158,6 +158,25 @@ export const panelRegistry: RegistryEntry[] = [
     introducedAt: 6,
     companions: ["json-edit"],
   },
+  // v12 — chrome into Dockview: the ⊞ roster/workspace menu and settings
+  // become ordinary tabs in the json-edit group (no floating button, no
+  // left edge group). autoAdd so existing layouts pick them up.
+  {
+    id: "add-panel",
+    component: "add-panel",
+    title: "add",
+    position: { referencePanel: "json-edit", direction: "within" },
+    introducedAt: 12,
+    autoAdd: true,
+  },
+  {
+    id: "settings",
+    component: "settings",
+    title: "settings",
+    position: { referencePanel: "json-edit", direction: "within" },
+    introducedAt: 12,
+    autoAdd: true,
+  },
   // v11 — json-graph3d-inspect: reading-oriented sibling of json-graph3d.
   // Text-sprite nodes, inline edge roles, category colors, containment hulls.
   {
@@ -254,9 +273,10 @@ export function getRegistryEntry(id: string): RegistryEntry | undefined {
 }
 
 /** Panels that legitimately live in an edge group. Anything else found in
- *  one is treated as misplaced by `repairLayout`. (status-bar → bottom,
- *  settings → the Cmd+B side-grid.) */
-const EDGE_RESIDENTS = new Set(["status-bar", "settings"]);
+ *  one is treated as misplaced by `repairLayout`. (status-bar → bottom.
+ *  settings used to live in a left edge group; since v12 it is a normal
+ *  tab, so an old saved layout with it in an edge group gets repaired.) */
+const EDGE_RESIDENTS = new Set(["status-bar"]);
 
 /** First panel living in the main grid — the anchor for position
  *  fallbacks when a registry reference panel doesn't exist. */

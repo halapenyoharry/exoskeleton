@@ -73,10 +73,10 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
     setGraphsConnected(!connected);
   };
 
+  // ✕ collapses the bottom edge group to its strip (Dockview 8 edge-group
+  // collapse) rather than closing the panel; click the strip to expand.
   const handleClose = () => {
-    if (props.api) {
-      props.api.close();
-    }
+    props.containerApi?.getEdgeGroup("bottom")?.collapse();
   };
 
   return (
@@ -115,7 +115,7 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
         <button
           className="status-bar-close-btn"
           onClick={handleClose}
-          title="Minimize Status Bar"
+          title="Collapse status bar (click the strip to expand)"
         >
           ✕
         </button>
