@@ -12,6 +12,13 @@
 
 .dv-groupview.exo-doc-edge { background: #0a0e27; }
 
+/* Vertical tabs read bottom-to-top (baseline on the right), as a left-edge
+   tab does; Dockview's vertical strip writes top-to-bottom. One tab lives
+   here, so turning the tabs container is safe. */
+.dv-groupview.exo-doc-edge .dv-tabs-container.dv-tabs-container-vertical {
+  transform: rotate(180deg);
+}
+
 /* Collapsed: the tab (glyph + "json-edit - <document>") is the strip; no ×. */
 .dv-groupview.exo-doc-edge.dv-edge-collapsed { cursor: pointer; }
 .dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab-action { display: none; }
