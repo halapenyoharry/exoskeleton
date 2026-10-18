@@ -177,6 +177,9 @@ export interface PanelPane {
   tooltip?: string;
   /** Panes only. */
   body?: { layout: "grid" | "stack"; cells: PaneCell[] };
+  /** Panes only: tabs with the same label are bundled under a Dockview tab
+   *  group (a chip in the tab bar that collapses/expands them together). */
+  tabGroup?: string;
 }
 
 export interface PanelManifest<P extends Record<string, any> = Record<string, any>> {

@@ -1,25 +1,31 @@
 // The controls of a panel, as Dockview primitives. A panel *declares* its
 // panes (manifest.panes: PanelPane[], registered in src/chrome/panes); the
-// host renders them here as a Paneview inside a vertical Splitview:
+// host renders them here:
 //
-//   ┌ pane header (click to fold) ─ "look" ─────────────────┐
-//   │ cells bound to panel params                           │
-//   ├ pane header ─ "structure" ────────────────────────────┤
-//   │ …                                                     │
-//   ├ sash (drag past the minimum → the whole top cell snaps away)
-//   │ panel content (LayoutPriority.High)                   │
-//   └───────────────────────────────────────────────────────┘
+//   Splitview (vertical) inside the panel
+//   ├ top cell (snap: drag the sash past the minimum and it is gone;
+//   │          a button in the group's header actions brings it back)
+//   │  └ Paneview
+//   │     ├ title pane (edge-group panels only; header, no body)
+//   │     └ "Controls" pane (fold by its header)
+//   │        └ nested Dockview, one locked group:
+//   │           one tab per declared pane ("layout", "labels", "physics"…)
+//   │           + a "Pane" tab (window / move / follow / accent / about);
+//   │           tabs sharing a declared `tabGroup` sit under a Dockview
+//   │           tab-group chip
+//   └ content cell (LayoutPriority.High)
 //
-// Declared actions (PanelPane kind "action", e.g. fit) are not here: they
-// render in the group's header actions (HeaderActions.tsx). Every pane's
-// folded/expanded state is persisted in the panel's params (`panesExpanded`).
+// Declared actions (PanelPane kind "action", e.g. fit) render in the
+// group's header actions (HeaderActions.tsx). The active tab and the pane's
+// folded state persist in the panel's params (`controlsTab`, `panesExpanded`).
 //
 // dockview-react renders nested components through React portals, so the
-// context below crosses the Splitview/Paneview boundary intact; all state
-// stays in the panel's params.
+// context below crosses every boundary intact; all state stays in the
+// panel's params.
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import {
+  DockviewReact,
   LayoutPriority,
   Orientation,
   PaneviewReact,
@@ -27,11 +33,14 @@ import {
   themeGithubDark,
   type DockviewApi,
   type DockviewPanelApi,
+  type DockviewReadyEvent,
+  type IDockviewPanelProps,
   type IPaneviewPanelProps,
   type ISplitviewPanelProps,
   type PaneviewReadyEvent,
   type SplitviewReadyEvent,
 } from "dockview-react";
+import { registerPanesVisibility, setPanesVisible } from "./panes-visibility";
 import { Segmented, SwatchPicker, Toggle } from "./components/toolbar/Toolbar";
 import { getOptions, onOptions, getText, onText, type RuntimeOption } from "./chrome/runtime-options";
 import { emitPanelMenu } from "./panel-menu";
@@ -42,6 +51,10 @@ import "./PanelPanes.css";
 const PANE_HEADER = 24;
 const SETTINGS_ID = "__pane";
 const TITLE_ID = "__title";
+const CONTROLS_ID = "__controls";
+/** Placeholder names; Harold's to set. */
+const CONTROLS_TITLE = "Controls";
+const SETTINGS_TITLE = "Pane";
 const ACCENTS = ["#7ddff5", "#ffb454", "#7dffb0", "#ff7da8", "#b69cff"];
 
 type Params = Record<string, unknown>;
@@ -263,8 +276,13 @@ interface Ctx {
   panes: PanelPane[];
   /** Header-only first pane carrying the panel's title (edge-group panels). */
   titlePane?: string;
-  /** The "⚙ pane" settings pane (window / move / follow / accent / about). */
+  /** The "Pane" settings tab (window / move / follow / accent / about). */
   settingsPane: boolean;
+  /** Edge-group panels: names only, Title Case, no glyphs. */
+  plain: boolean;
+  /** Set by PanesCell; called by the nested Dockview when it mounts / changes. */
+  setNestedApi: (api: DockviewApi) => void;
+  onNestedChange: () => void;
   params: Params;
   write: (p: Params) => void;
   about?: { description?: string; docs?: string };
@@ -273,23 +291,81 @@ interface Ctx {
 
 const PanelPanesCtx = createContext<Ctx | null>(null);
 
-function PaneCell(props: IPaneviewPanelProps<{ paneId: string }>) {
+/** One tab of the nested Dockview: the cells of one declared pane, or the
+ *  "Pane" settings. Tagged so PanesCell can measure the active tab. */
+function ControlsTab(props: IDockviewPanelProps<{ paneId: string }>) {
   const ctx = useContext(PanelPanesCtx);
   if (!ctx) return null;
   const { panelId, api, containerApi, panes, params, write, about } = ctx;
-  if (props.params.paneId === TITLE_ID) return null;
-  if (props.params.paneId === SETTINGS_ID) {
-    return <div className="pp-pane"><PaneSettings api={api} containerApi={containerApi} params={params} write={write} about={about} /></div>;
+  const id = props.params.paneId;
+  let inner: ReactNode = null;
+  if (id === SETTINGS_ID) {
+    inner = <PaneSettings api={api} containerApi={containerApi} params={params} write={write} about={about} />;
+  } else {
+    const pane = panes.find((p) => p.id === id);
+    if (pane?.body) {
+      inner = (
+        <div className={pane.body.layout === "grid" ? "pp-grid" : "pp-stack"}>
+          {pane.body.cells.map((c, i) => (
+            <Cell key={c.param ?? c.action ?? c.textFrom ?? i} panelId={panelId} cell={c} params={params} write={write} />
+          ))}
+        </div>
+      );
+    }
   }
-  const pane = panes.find((p) => p.id === props.params.paneId);
-  if (!pane?.body) return null;
   return (
-    <div className="pp-pane">
-      <div className={pane.body.layout === "grid" ? "pp-grid" : "pp-stack"}>
-        {pane.body.cells.map((c, i) => (
-          <Cell key={c.param ?? c.action ?? c.textFrom ?? i} panelId={panelId} cell={c} params={params} write={write} />
-        ))}
-      </div>
+    <div className="pp-pane" data-controls-tab={id}>
+      {inner}
+    </div>
+  );
+}
+
+const nestedComponents = { controls: ControlsTab };
+
+/** Body of the "Controls" pane: the nested Dockview. */
+function ControlsPane(_props: IPaneviewPanelProps<{ paneId: string }>) {
+  const ctx = useContext(PanelPanesCtx);
+  if (!ctx) return null;
+  const onReady = (e: DockviewReadyEvent) => {
+    const { panes, api: panelApi, settingsPane } = ctx;
+    const sets = panes.filter((p) => p.kind === "pane");
+    const titleCase = (t: string) => t.replace(/(^|[\s-])([a-z])/g, (_m, pre: string, c: string) => pre + c.toUpperCase());
+    for (const p of sets) {
+      e.api.addPanel({ id: p.id, component: "controls", title: ctx.plain ? titleCase(p.label) : p.label, params: { paneId: p.id } });
+    }
+    if (settingsPane) {
+      e.api.addPanel({ id: SETTINGS_ID, component: "controls", title: SETTINGS_TITLE, params: { paneId: SETTINGS_ID } });
+    }
+    // Tab groups: tabs sharing a declared label sit under one chip.
+    const group = e.api.groups[0];
+    if (group) {
+      const byLabel = new Map<string, string[]>();
+      for (const p of sets) if (p.tabGroup) byLabel.set(p.tabGroup, [...(byLabel.get(p.tabGroup) ?? []), p.id]);
+      for (const [label, ids] of byLabel) {
+        const tg = e.api.createTabGroup({ groupId: group.id, label });
+        for (const id of ids) e.api.addPanelToTabGroup({ groupId: group.id, tabGroupId: tg.id, panelId: id });
+      }
+    }
+    const remembered = panelApi.getParameters().controlsTab as string | undefined;
+    const first = remembered && e.api.getPanel(remembered) ? remembered : sets[0]?.id ?? SETTINGS_ID;
+    e.api.getPanel(first)?.api.setActive();
+    e.api.onDidActivePanelChange((ev) => {
+      if (ev.panel) panelApi.updateParameters({ controlsTab: ev.panel.id });
+      ctx.onNestedChange();
+    });
+    ctx.setNestedApi(e.api);
+  };
+  return (
+    <div className="pp-controls">
+      <DockviewReact
+        theme={themeGithubDark}
+        components={nestedComponents}
+        onReady={onReady}
+        locked
+        disableDnd
+        disableFloatingGroups
+        hideBorders
+      />
     </div>
   );
 }
@@ -298,9 +374,12 @@ function PanesCell(props: ISplitviewPanelProps) {
   const ctx = useContext(PanelPanesCtx);
   const hostRef = useRef<HTMLDivElement | null>(null);
   const paneApiRef = useRef<PaneviewReadyEvent["api"] | null>(null);
+  const nestedApiRef = useRef<DockviewApi | null>(null);
+  const NESTED_STRIP = 35; // the theme's --dv-tabs-and-actions-container-height
 
-  // Size the top cell to its panes: each pane is a header plus, when
-  // expanded, its measured body. Measured, so wrapping grows the row.
+  // Size the top cell to what is showing: each pane header, plus (for the
+  // Controls pane, when expanded) the nested tab strip and the active tab's
+  // measured content. Measured, so wrapping grows the row.
   const fit = useCallback(() => {
     const pane = paneApiRef.current;
     const host = hostRef.current;
@@ -308,9 +387,10 @@ function PanesCell(props: ISplitviewPanelProps) {
     let total = 0;
     for (const p of pane.panels) {
       total += PANE_HEADER;
-      if (p.api.isExpanded) {
-        const body = host.querySelector<HTMLElement>(`[data-pane-body="${p.id}"]`);
-        total += body ? body.scrollHeight : 0;
+      if (p.id === CONTROLS_ID && p.api.isExpanded) {
+        const active = nestedApiRef.current?.activePanel?.id;
+        const body = active ? host.querySelector<HTMLElement>(`[data-controls-tab="${active}"]`) : null;
+        total += NESTED_STRIP + (body ? body.scrollHeight : 0);
       }
     }
     props.api.setSize({ size: total });
@@ -322,7 +402,7 @@ function PanesCell(props: ISplitviewPanelProps) {
     const ro = new ResizeObserver(() => fit());
     ro.observe(host);
     const mo = new MutationObserver(() => {
-      host.querySelectorAll(".pp-pane").forEach((el) => ro.observe(el));
+      host.querySelectorAll("[data-controls-tab]").forEach((el) => ro.observe(el));
       fit();
     });
     mo.observe(host, { childList: true, subtree: true });
@@ -332,40 +412,47 @@ function PanesCell(props: ISplitviewPanelProps) {
     };
   }, [fit]);
 
+  // Let the nested Dockview report into this cell (active tab changed, mounted).
+  useEffect(() => {
+    if (!ctx) return;
+    ctx.setNestedApi = (api) => {
+      nestedApiRef.current = api;
+      requestAnimationFrame(() => fit());
+    };
+    ctx.onNestedChange = () => requestAnimationFrame(() => fit());
+  }, [ctx, fit]);
+
   const onReady = (e: PaneviewReadyEvent) => {
     paneApiRef.current = e.api;
     if (!ctx) return;
     const expanded = (ctx.params.panesExpanded as Record<string, boolean> | undefined) ?? {};
-    // Edge-group panels (titlePane set): names only, Title Case, no glyphs.
-    const plain = !!ctx.titlePane;
-    const titleCase = (t: string) => t.replace(/(^|[\s-])([a-z])/g, (_m, pre: string, c: string) => pre + c.toUpperCase());
-    const add = (id: string, title: string, icon: string | undefined, headerOnly = false) => {
-      const label = plain ? titleCase(title) : icon ? `${icon} ${title}` : title;
-      // The ⚙ pane starts folded; declared panes start open. Both remember.
-      const open = id === SETTINGS_ID ? expanded[id] === true : expanded[id] !== false;
-      const panel = e.api.addPanel({
-        id,
+    if (ctx.titlePane) {
+      e.api.addPanel({
+        id: TITLE_ID,
         component: "pane",
-        title: label,
+        title: ctx.titlePane,
         headerSize: PANE_HEADER,
         minimumBodySize: 0,
-        maximumBodySize: headerOnly ? 0 : undefined,
-        isExpanded: headerOnly ? false : open,
-        ...(headerOnly ? { headerComponent: "title" } : {}),
-        params: { paneId: id },
+        maximumBodySize: 0,
+        isExpanded: false,
+        headerComponent: "title",
+        params: { paneId: TITLE_ID },
       });
-      if (headerOnly) return;
-      panel.api.onDidExpansionChange((ev) => {
-        const cur = (ctx.api.getParameters().panesExpanded as Record<string, boolean> | undefined) ?? {};
-        ctx.api.updateParameters({ panesExpanded: { ...cur, [id]: ev.isExpanded } });
-        fit();
-      });
-    };
-    // Edge-group panels: the title reads at the top of the content (the
-    // group's own header is the vertical strip on the left).
-    if (ctx.titlePane) add(TITLE_ID, ctx.titlePane, undefined, true);
-    for (const p of ctx.panes) if (p.kind === "pane") add(p.id, p.label, p.icon);
-    if (ctx.settingsPane) add(SETTINGS_ID, "pane", "⚙");
+    }
+    const controls = e.api.addPanel({
+      id: CONTROLS_ID,
+      component: "controls",
+      title: CONTROLS_TITLE,
+      headerSize: PANE_HEADER,
+      minimumBodySize: 0,
+      isExpanded: expanded[CONTROLS_ID] !== false,
+      params: { paneId: CONTROLS_ID },
+    });
+    controls.api.onDidExpansionChange((ev) => {
+      const cur = (ctx.api.getParameters().panesExpanded as Record<string, boolean> | undefined) ?? {};
+      ctx.api.updateParameters({ panesExpanded: { ...cur, [CONTROLS_ID]: ev.isExpanded } });
+      fit();
+    });
     requestAnimationFrame(() => fit());
   };
 
@@ -373,7 +460,7 @@ function PanesCell(props: ISplitviewPanelProps) {
     <div className="pp-panes-cell" ref={hostRef}>
       <PaneviewReact
         className={themeGithubDark.className}
-        components={{ pane: PaneCellWithTag }}
+        components={{ pane: EmptyPane, controls: ControlsPane }}
         headerComponents={{ title: TitleHeader }}
         onReady={onReady}
       />
@@ -381,13 +468,8 @@ function PanesCell(props: ISplitviewPanelProps) {
   );
 }
 
-/** Tags the body so PanesCell can measure it per pane. */
-function PaneCellWithTag(props: IPaneviewPanelProps<{ paneId: string }>) {
-  return (
-    <div data-pane-body={props.api.id} className="pp-pane-body">
-      <PaneCell {...props} />
-    </div>
-  );
+function EmptyPane(_props: IPaneviewPanelProps) {
+  return null;
 }
 
 /** Header of the title pane: renders the live title from context (a pane's
@@ -418,12 +500,30 @@ export interface PanelPanesProps {
 
 export function PanelPanes({ panelId, api, containerApi, panes, titlePane, settingsPane = true, about, children }: PanelPanesProps) {
   const [params, write] = useParams(api);
+  const unregisterRef = useRef<(() => void) | null>(null);
+  useEffect(() => () => unregisterRef.current?.(), []);
   const onReady = (e: SplitviewReadyEvent) => {
-    e.api.addPanel({ id: "panes", component: "panes", minimumSize: PANE_HEADER, snap: true, size: PANE_HEADER * (panes.length + 1) + 60 });
+    const top = e.api.addPanel({ id: "panes", component: "panes", minimumSize: PANE_HEADER, snap: true, size: PANE_HEADER * 2 + 35 + 60 });
     e.api.addPanel({ id: "content", component: "content", priority: LayoutPriority.High });
+    // Snapped away → a restore button in the group's header actions.
+    unregisterRef.current = registerPanesVisibility(panelId, {
+      visible: top.api.isVisible,
+      show: () => {
+        top.api.setVisible(true);
+        top.api.setSize({ size: PANE_HEADER * 2 + 35 + 60 });
+      },
+    });
+    top.api.onDidVisibilityChange((ev) => setPanesVisible(panelId, ev.isVisible));
   };
   return (
-    <PanelPanesCtx.Provider value={{ panelId, api, containerApi, panes, titlePane, settingsPane, params, write, about, content: children }}>
+    <PanelPanesCtx.Provider
+      value={{
+        panelId, api, containerApi, panes, titlePane, settingsPane, params, write, about, content: children,
+        plain: !!titlePane,
+        setNestedApi: () => {},
+        onNestedChange: () => {},
+      }}
+    >
       <div className="pp-root">
         <SplitviewReact className={themeGithubDark.className} orientation={Orientation.VERTICAL} components={components} onReady={onReady} />
       </div>

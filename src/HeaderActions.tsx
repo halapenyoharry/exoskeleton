@@ -6,6 +6,7 @@ import { DOCUMENT_EDGE_ID } from "./persistence/document-edge";
 import { emitPanelMenu, getPanelMenu, registerPanelMenu } from "./panel-menu";
 import { getPanes } from "./chrome/panes-registry";
 import { resolveComponentKey } from "./ColoredTab";
+import { getPanesVisibility, subscribePanesVisibility } from "./panes-visibility";
 import type { PanelMenuItem } from "./panel-manifest";
 import editorManifest from "./panels/editor.manifest";
 import webviewManifest from "./panels/webview.manifest";
@@ -59,13 +60,19 @@ export function LeftHeaderActions(props: IDockviewHeaderActionsProps) {
     };
   }, [menu]);
 
+  // Re-render when any panel's controls cell is snapped away / restored.
+  const [, bump] = useState(0);
+  useEffect(() => subscribePanesVisibility(() => bump((v) => v + 1)), []);
+
   if (!active) return null;
   const id = active.id;
   const key = resolveComponentKey(id) ?? id;
   const menuItems = getPanelMenu(key);
   const paneActions = (getPanes(key) ?? []).filter((p) => p.kind === "action");
   const isDocEdge = props.group.id === DOCUMENT_EDGE_ID;
-  if (!menuItems && paneActions.length === 0) return null;
+  const panesVis = getPanesVisibility(id);
+  const showRestore = !!panesVis && !panesVis.visible;
+  if (!menuItems && paneActions.length === 0 && !showRestore) return null;
 
   const act = (fn: () => void) => () => {
     setMenu(null);
@@ -110,6 +117,17 @@ export function LeftHeaderActions(props: IDockviewHeaderActionsProps) {
           onClick={toggleMenu}
         >
           ≡
+        </button>
+      )}
+      {showRestore && (
+        <button
+          type="button"
+          className="header-btn header-btn--icon"
+          aria-label="Show controls"
+          title="Show controls"
+          onClick={() => panesVis!.show()}
+        >
+          ▤
         </button>
       )}
       {paneActions.map((a) => (
