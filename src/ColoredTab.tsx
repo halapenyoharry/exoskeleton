@@ -1,4 +1,4 @@
-import { DockviewDefaultTab, type IDockviewPanelHeaderProps } from "dockview";
+import { DockviewDefaultTab, type IDockviewPanelHeaderProps } from "dockview-react";
 import "./ColoredTab.css";
 
 // Customize Dockview's default tab without replacing it. The default tab

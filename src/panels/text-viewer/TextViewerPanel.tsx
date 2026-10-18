@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDetectedGraph } from "../../data/json-utils/docStats";
 import ReactMarkdown from "react-markdown";

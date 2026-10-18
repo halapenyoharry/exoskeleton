@@ -1,5 +1,5 @@
 import { Component, type ComponentType, type CSSProperties, type ErrorInfo, type ReactNode } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 
 interface PanelErrorBoundaryProps {
   panelTitle: string;

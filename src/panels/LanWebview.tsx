@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import "./LanWebview.css";
 
 const FALLBACK_URL = "https://dockview.dev";

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import { onOsc } from "../../osc";
 import "./ScopePanel.css";
 

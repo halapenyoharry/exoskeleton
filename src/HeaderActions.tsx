@@ -1,4 +1,4 @@
-import type { IDockviewHeaderActionsProps } from "dockview";
+import type { IDockviewHeaderActionsProps } from "dockview-react";
 import { panelAccent } from "./ColoredTab";
 import { ensureCompanions } from "./persistence/default-layout";
 import "./HeaderActions.css";

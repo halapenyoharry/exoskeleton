@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { startJsonBusPersistence } from "./data/json-bus-persist";
-import "dockview/dist/styles/dockview.css";
+import "dockview-react/dist/styles/dockview.css";
 import "@xterm/xterm/css/xterm.css";
 import "./theme.css";
 

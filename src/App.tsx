@@ -2,9 +2,10 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   DockviewReact,
+  themeGithubDark,
   type DockviewApi,
   type DockviewReadyEvent,
-} from "dockview";
+} from "dockview-react";
 import { listen } from "@tauri-apps/api/event";
 import ColoredTab from "./ColoredTab";
 import Watermark from "./Watermark";
@@ -498,9 +499,10 @@ export default function App() {
   }
 
   return (
-    <div className="dockview-theme-abyss app-frame">
+    <div className="app-frame">
       <DockviewReact
         components={components}
+        theme={themeGithubDark}
         // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —
         defaultTabComponent={ColoredTab}
         watermarkComponent={Watermark}

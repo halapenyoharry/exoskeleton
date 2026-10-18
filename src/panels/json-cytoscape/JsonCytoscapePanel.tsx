@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import cytoscape from "cytoscape";
 import type { Core, ElementDefinition, LayoutOptions } from "cytoscape";
 import fcose from "cytoscape-fcose";

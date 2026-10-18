@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import { getJson, onJsonChange } from "../data/json-bus";
 import {
   areGraphsConnected,

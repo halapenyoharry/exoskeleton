@@ -6,7 +6,7 @@
 //   - State   = the JSON on disk this module reads/writes (runtime).
 // State is always a delta on top of schema; never a replacement.
 
-import type { SerializedDockview } from "dockview";
+import type { SerializedDockview } from "dockview-react";
 
 // Schema version history:
 //   1 — initial (editor / terminal / webview, separate sideGrid field)
