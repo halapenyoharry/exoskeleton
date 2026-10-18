@@ -1,139 +1,174 @@
-<mxfile host="Electron" type="device">
-  <diagram id="layout-mgmt" name="Layout management — Exoskeleton">
-    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" background="#0a0e26">
-      <root>
-        <mxCell id="0"/>
-        <mxCell id="1" parent="0"/>
-
-        <!-- ================= LEFT: ZONING VIEW (declarative layer, drawn) ================= -->
-        <mxCell id="zoning-title" value="ZONING VIEW — named regions, drawn to proportion. Geometry here is illustrative: the engine recomputes it on every resize." style="text;html=1;align=left;verticalAlign=middle;fontColor=#DCE5E7;fontSize=13;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="40" y="30" width="760" height="30" as="geometry"/>
-        </mxCell>
-
-        <!-- Dockview shell -->
-        <mxCell id="shell" value="dv-shell  (window)" style="swimlane;html=1;startSize=24;rounded=1;fillColor=#101538;strokeColor=#7c8cff;fontColor=#DCE5E7;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="40" y="70" width="760" height="520" as="geometry"/>
-        </mxCell>
-
-        <!-- Edge groups -->
-        <mxCell id="edge-left" value="edge: left&#xa;settings (Cmd+B)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b122c;strokeColor=#b388ff;fontColor=#f3e5f5;dashed=1" vertex="1" parent="shell">
-          <mxGeometry x="10" y="34" width="70" height="440" as="geometry"/>
-        </mxCell>
-        <mxCell id="edge-bottom" value="edge: bottom — status-bar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b122c;strokeColor=#b388ff;fontColor=#f3e5f5;dashed=1" vertex="1" parent="shell">
-          <mxGeometry x="10" y="480" width="740" height="30" as="geometry"/>
-        </mxCell>
-
-        <!-- Main grid = split tree -->
-        <mxCell id="grid" value="main grid  (split tree)" style="swimlane;html=1;startSize=22;rounded=1;fillColor=#0d1230;strokeColor=#18ffff;fontColor=#e0f7fa" vertex="1" parent="shell">
-          <mxGeometry x="90" y="34" width="660" height="440" as="geometry"/>
-        </mxCell>
-
-        <mxCell id="grp-left" value="group A  (tabs)&#xa;json-edit · dyadic · topology-extract" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#072b38;strokeColor=#18ffff;fontColor=#e0f7fa" vertex="1" parent="grid">
-          <mxGeometry x="10" y="30" width="180" height="400" as="geometry"/>
-        </mxCell>
-
-        <!-- The pane under study -->
-        <mxCell id="grp-center" value="group B  (tabs) — 3D-Inspect" style="swimlane;html=1;startSize=22;rounded=1;fillColor=#2b1d05;strokeColor=#ffd166;fontColor=#fff8e1;fontStyle=1" vertex="1" parent="grid">
-          <mxGeometry x="200" y="30" width="260" height="400" as="geometry"/>
-        </mxCell>
-        <mxCell id="pane-header" value="region: header&#xa;title + controls" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3a2a0a;strokeColor=#ffd166;fontColor=#fff8e1" vertex="1" parent="grp-center">
-          <mxGeometry x="8" y="30" width="244" height="40" as="geometry"/>
-        </mxCell>
-        <mxCell id="pane-body" value="region: body&#xa;WebGL canvas (fills remainder)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2b1d05;strokeColor=#ffd166;fontColor=#fff8e1" vertex="1" parent="grp-center">
-          <mxGeometry x="8" y="78" width="244" height="314" as="geometry"/>
-        </mxCell>
-        <mxCell id="pane-legend" value="overlay: legend&#xa;(absolute, bottom-right)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1c23;strokeColor=#7f8aa8;fontColor=#eceff1;dashed=1;fontSize=10" vertex="1" parent="grp-center">
-          <mxGeometry x="140" y="330" width="108" height="54" as="geometry"/>
-        </mxCell>
-
-        <mxCell id="grp-right-top" value="group C — cyto" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b122c;strokeColor=#b388ff;fontColor=#f3e5f5" vertex="1" parent="grid">
-          <mxGeometry x="470" y="30" width="180" height="195" as="geometry"/>
-        </mxCell>
-        <mxCell id="grp-right-bottom" value="group D — 3d" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2b1d05;strokeColor=#ff9f1c;fontColor=#fff8e1" vertex="1" parent="grid">
-          <mxGeometry x="470" y="235" width="180" height="195" as="geometry"/>
-        </mxCell>
-
-        <!-- ================= RIGHT: TREE VIEW (the same structure, as the engine holds it) ================= -->
-        <mxCell id="tree-title" value="TREE VIEW — the same layout as the engine stores it. Internal nodes are containers; leaves are named regions; content binds to a leaf by name." style="text;html=1;align=left;verticalAlign=middle;fontColor=#DCE5E7;fontSize=13;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="860" y="30" width="760" height="30" as="geometry"/>
-        </mxCell>
-
-        <mxCell id="t-shell" value="shell" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#101538;strokeColor=#7c8cff;fontColor=#DCE5E7;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="1160" y="80" width="120" height="36" as="geometry"/>
-        </mxCell>
-        <mxCell id="t-edge-left" value="edge: left" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b122c;strokeColor=#b388ff;fontColor=#f3e5f5;dashed=1" vertex="1" parent="1">
-          <mxGeometry x="900" y="160" width="110" height="36" as="geometry"/>
-        </mxCell>
-        <mxCell id="t-grid" value="split: horizontal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0d1230;strokeColor=#18ffff;fontColor=#e0f7fa" vertex="1" parent="1">
-          <mxGeometry x="1160" y="160" width="120" height="36" as="geometry"/>
-        </mxCell>
-        <mxCell id="t-edge-bottom" value="edge: bottom" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b122c;strokeColor=#b388ff;fontColor=#f3e5f5;dashed=1" vertex="1" parent="1">
-          <mxGeometry x="1430" y="160" width="110" height="36" as="geometry"/>
-        </mxCell>
-
-        <mxCell id="t-grpA" value="group A (tabs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#072b38;strokeColor=#18ffff;fontColor=#e0f7fa" vertex="1" parent="1">
-          <mxGeometry x="960" y="250" width="120" height="36" as="geometry"/>
-        </mxCell>
-        <mxCell id="t-grpB" value="group B (tabs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2b1d05;strokeColor=#ffd166;fontColor=#fff8e1;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="1160" y="250" width="120" height="36" as="geometry"/>
-        </mxCell>
-        <mxCell id="t-splitV" value="split: vertical" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0d1230;strokeColor=#18ffff;fontColor=#e0f7fa" vertex="1" parent="1">
-          <mxGeometry x="1360" y="250" width="120" height="36" as="geometry"/>
-        </mxCell>
-        <mxCell id="t-grpC" value="group C — cyto" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b122c;strokeColor=#b388ff;fontColor=#f3e5f5" vertex="1" parent="1">
-          <mxGeometry x="1300" y="330" width="110" height="36" as="geometry"/>
-        </mxCell>
-        <mxCell id="t-grpD" value="group D — 3d" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2b1d05;strokeColor=#ff9f1c;fontColor=#fff8e1" vertex="1" parent="1">
-          <mxGeometry x="1430" y="330" width="110" height="36" as="geometry"/>
-        </mxCell>
-
-        <mxCell id="t-settings" value="settings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1c23;strokeColor=#7f8aa8;fontColor=#eceff1" vertex="1" parent="1">
-          <mxGeometry x="900" y="250" width="110" height="36" as="geometry"/>
-        </mxCell>
-        <mxCell id="t-status" value="status-bar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1c23;strokeColor=#7f8aa8;fontColor=#eceff1" vertex="1" parent="1">
-          <mxGeometry x="1530" y="250" width="110" height="36" as="geometry"/>
-        </mxCell>
-
-        <!-- Leaves of group B: the pane's own regions -->
-        <mxCell id="t-header" value="region: header" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3a2a0a;strokeColor=#ffd166;fontColor=#fff8e1" vertex="1" parent="1">
-          <mxGeometry x="1060" y="330" width="110" height="36" as="geometry"/>
-        </mxCell>
-        <mxCell id="t-body" value="region: body" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2b1d05;strokeColor=#ffd166;fontColor=#fff8e1" vertex="1" parent="1">
-          <mxGeometry x="1180" y="330" width="110" height="36" as="geometry"/>
-        </mxCell>
-        <mxCell id="t-legend" value="overlay: legend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1c23;strokeColor=#7f8aa8;fontColor=#eceff1;dashed=1" vertex="1" parent="1">
-          <mxGeometry x="1180" y="400" width="110" height="36" as="geometry"/>
-        </mxCell>
-        <mxCell id="t-tabsA" value="json-edit · dyadic · topology-extract" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1c23;strokeColor=#7f8aa8;fontColor=#eceff1;fontSize=10" vertex="1" parent="1">
-          <mxGeometry x="900" y="330" width="150" height="36" as="geometry"/>
-        </mxCell>
-
-        <!-- Tree edges (containment) -->
-        <mxCell id="e1" style="endArrow=none;strokeColor=#7c8cff;html=1" edge="1" parent="1" source="t-shell" target="t-edge-left"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e2" style="endArrow=none;strokeColor=#7c8cff;html=1" edge="1" parent="1" source="t-shell" target="t-grid"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e3" style="endArrow=none;strokeColor=#7c8cff;html=1" edge="1" parent="1" source="t-shell" target="t-edge-bottom"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e4" style="endArrow=none;strokeColor=#18ffff;html=1" edge="1" parent="1" source="t-grid" target="t-grpA"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e5" style="endArrow=none;strokeColor=#18ffff;html=1" edge="1" parent="1" source="t-grid" target="t-grpB"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e6" style="endArrow=none;strokeColor=#18ffff;html=1" edge="1" parent="1" source="t-grid" target="t-splitV"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e7" style="endArrow=none;strokeColor=#18ffff;html=1" edge="1" parent="1" source="t-splitV" target="t-grpC"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e8" style="endArrow=none;strokeColor=#18ffff;html=1" edge="1" parent="1" source="t-splitV" target="t-grpD"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e9" style="endArrow=none;strokeColor=#ffd166;html=1" edge="1" parent="1" source="t-grpB" target="t-header"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e10" style="endArrow=none;strokeColor=#ffd166;html=1" edge="1" parent="1" source="t-grpB" target="t-body"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e11" style="endArrow=none;strokeColor=#7f8aa8;dashed=1;html=1" edge="1" parent="1" source="t-body" target="t-legend"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e12" style="endArrow=none;strokeColor=#b388ff;dashed=1;html=1" edge="1" parent="1" source="t-edge-left" target="t-settings"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e13" style="endArrow=none;strokeColor=#b388ff;dashed=1;html=1" edge="1" parent="1" source="t-edge-bottom" target="t-status"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e14" style="endArrow=none;strokeColor=#7f8aa8;dashed=1;html=1" edge="1" parent="1" source="t-grpA" target="t-tabsA"><mxGeometry relative="1" as="geometry"/></mxCell>
-
-        <!-- Assignment arrows: content binds to a region by NAME (dashed, cross-view) -->
-        <mxCell id="a1" value="binds by name" style="endArrow=block;dashed=1;strokeColor=#ffd166;fontColor=#ffd166;html=1;fontSize=10;curved=1" edge="1" parent="1" source="t-grpB" target="grp-center">
-          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1000" y="140"/></Array></mxGeometry>
-        </mxCell>
-
-        <!-- Legend / reading key -->
-        <mxCell id="key" value="Reading key — solid border: region in the split tree. Dashed border: edge group or overlay (positioned by role, not by split). Swimlane title bar: a container. Left view is what a designer zones; right view is what the engine stores; the only persisted geometry is split proportions. Rectangle sizes on the left are computed by the engine from the tree on the right plus the window size — edit the tree, not the rectangles." style="text;html=1;align=left;verticalAlign=top;fontColor=#9aa3c7;fontSize=11;whiteSpace=wrap" vertex="1" parent="1">
-          <mxGeometry x="860" y="480" width="780" height="110" as="geometry"/>
-        </mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
+<mxfile host="65bd71144e">
+    <diagram id="layout-mgmt" name="Layout management — Exoskeleton">
+        <mxGraphModel dx="728" dy="957" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" background="#0a0e26" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="zoning-title" value="ZONING VIEW — named regions, drawn to proportion. Geometry here is illustrative: the engine recomputes it on every resize." style="text;html=1;align=left;verticalAlign=middle;fontColor=#DCE5E7;fontSize=13;fontStyle=1" parent="1" vertex="1">
+                    <mxGeometry x="40" y="30" width="760" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="shell" value="dv-shell  (window)" style="swimlane;html=1;startSize=24;rounded=1;fillColor=#101538;strokeColor=#7c8cff;fontColor=#DCE5E7;fontStyle=1" parent="1" vertex="1">
+                    <mxGeometry x="40" y="70" width="760" height="520" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-left" value="edge: left&#10;settings (Cmd+B)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b122c;strokeColor=#b388ff;fontColor=#f3e5f5;dashed=1" parent="shell" vertex="1">
+                    <mxGeometry x="10" y="34" width="70" height="440" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-bottom" value="edge: bottom — status-bar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b122c;strokeColor=#b388ff;fontColor=#f3e5f5;dashed=1" parent="shell" vertex="1">
+                    <mxGeometry x="10" y="480" width="740" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="grid" value="main grid  (split tree)" style="swimlane;html=1;startSize=22;rounded=1;fillColor=#0d1230;strokeColor=#18ffff;fontColor=#e0f7fa" parent="shell" vertex="1">
+                    <mxGeometry x="90" y="34" width="660" height="440" as="geometry"/>
+                </mxCell>
+                <mxCell id="grp-left" value="group A  (tabs)&#10;json-edit · dyadic · topology-extract" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#072b38;strokeColor=#18ffff;fontColor=#e0f7fa" parent="grid" vertex="1">
+                    <mxGeometry x="10" y="30" width="180" height="400" as="geometry"/>
+                </mxCell>
+                <mxCell id="grp-center" value="group B  (tabs) — 3D-Inspect" style="swimlane;html=1;startSize=22;rounded=1;fillColor=#2b1d05;strokeColor=#ffd166;fontColor=#fff8e1;fontStyle=1" parent="grid" vertex="1">
+                    <mxGeometry x="200" y="30" width="260" height="400" as="geometry"/>
+                </mxCell>
+                <mxCell id="pane-header" value="region: header&#10;title + controls" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3a2a0a;strokeColor=#ffd166;fontColor=#fff8e1" parent="grp-center" vertex="1">
+                    <mxGeometry x="8" y="30" width="244" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="pane-body" value="region: body&#10;WebGL canvas (fills remainder)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2b1d05;strokeColor=#ffd166;fontColor=#fff8e1" parent="grp-center" vertex="1">
+                    <mxGeometry x="8" y="78" width="244" height="314" as="geometry"/>
+                </mxCell>
+                <mxCell id="pane-legend" value="overlay: legend&#10;(absolute, bottom-right)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1c23;strokeColor=#7f8aa8;fontColor=#eceff1;dashed=1;fontSize=10" parent="grp-center" vertex="1">
+                    <mxGeometry x="140" y="330" width="108" height="54" as="geometry"/>
+                </mxCell>
+                <mxCell id="grp-right-top" value="group C — cyto" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b122c;strokeColor=#b388ff;fontColor=#f3e5f5" parent="grid" vertex="1">
+                    <mxGeometry x="470" y="30" width="180" height="195" as="geometry"/>
+                </mxCell>
+                <mxCell id="grp-right-bottom" value="group D — 3d" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2b1d05;strokeColor=#ff9f1c;fontColor=#fff8e1" parent="grid" vertex="1">
+                    <mxGeometry x="470" y="235" width="180" height="195" as="geometry"/>
+                </mxCell>
+                <mxCell id="tree-title" value="TREE VIEW — the same layout as the engine stores it. Internal nodes are containers; leaves are named regions; content binds to a leaf by name." style="text;html=1;align=left;verticalAlign=middle;fontColor=#DCE5E7;fontSize=13;fontStyle=1" parent="1" vertex="1">
+                    <mxGeometry x="860" y="30" width="760" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-shell" value="shell" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#101538;strokeColor=#7c8cff;fontColor=#DCE5E7;fontStyle=1" parent="1" vertex="1">
+                    <mxGeometry x="1160" y="80" width="120" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-edge-left" value="edge: left" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b122c;strokeColor=#b388ff;fontColor=#f3e5f5;dashed=1" parent="1" vertex="1">
+                    <mxGeometry x="900" y="160" width="110" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-grid" value="split: horizontal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0d1230;strokeColor=#18ffff;fontColor=#e0f7fa" parent="1" vertex="1">
+                    <mxGeometry x="1160" y="160" width="120" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-edge-bottom" value="edge: bottom" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b122c;strokeColor=#b388ff;fontColor=#f3e5f5;dashed=1" parent="1" vertex="1">
+                    <mxGeometry x="1430" y="160" width="110" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-grpA" value="group A (tabs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#072b38;strokeColor=#18ffff;fontColor=#e0f7fa" parent="1" vertex="1">
+                    <mxGeometry x="960" y="250" width="120" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-grpB" value="group B (tabs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2b1d05;strokeColor=#ffd166;fontColor=#fff8e1;fontStyle=1" parent="1" vertex="1">
+                    <mxGeometry x="1160" y="250" width="120" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-splitV" value="split: vertical" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0d1230;strokeColor=#18ffff;fontColor=#e0f7fa" parent="1" vertex="1">
+                    <mxGeometry x="1360" y="250" width="120" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-grpC" value="group C — cyto" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b122c;strokeColor=#b388ff;fontColor=#f3e5f5" parent="1" vertex="1">
+                    <mxGeometry x="1300" y="330" width="110" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-grpD" value="group D — 3d" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2b1d05;strokeColor=#ff9f1c;fontColor=#fff8e1" parent="1" vertex="1">
+                    <mxGeometry x="1430" y="330" width="110" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-settings" value="settings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1c23;strokeColor=#7f8aa8;fontColor=#eceff1" parent="1" vertex="1">
+                    <mxGeometry x="900" y="250" width="110" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-status" value="status-bar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1c23;strokeColor=#7f8aa8;fontColor=#eceff1" parent="1" vertex="1">
+                    <mxGeometry x="1530" y="250" width="110" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-header" value="region: header" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3a2a0a;strokeColor=#ffd166;fontColor=#fff8e1" parent="1" vertex="1">
+                    <mxGeometry x="1060" y="330" width="110" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-body" value="region: body" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2b1d05;strokeColor=#ffd166;fontColor=#fff8e1" parent="1" vertex="1">
+                    <mxGeometry x="1180" y="330" width="110" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-legend" value="overlay: legend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1c23;strokeColor=#7f8aa8;fontColor=#eceff1;dashed=1" parent="1" vertex="1">
+                    <mxGeometry x="1180" y="400" width="110" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-tabsA" value="json-edit · dyadic · topology-extract" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1c23;strokeColor=#7f8aa8;fontColor=#eceff1;fontSize=10" parent="1" vertex="1">
+                    <mxGeometry x="900" y="330" width="150" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" style="endArrow=none;strokeColor=#7c8cff;html=1" parent="1" source="t-shell" target="t-edge-left" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2" style="endArrow=none;strokeColor=#7c8cff;html=1" parent="1" source="t-shell" target="t-grid" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3" style="endArrow=none;strokeColor=#7c8cff;html=1" parent="1" source="t-shell" target="t-edge-bottom" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4" style="endArrow=none;strokeColor=#18ffff;html=1" parent="1" source="t-grid" target="t-grpA" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5" style="endArrow=none;strokeColor=#18ffff;html=1" parent="1" source="t-grid" target="t-grpB" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6" style="endArrow=none;strokeColor=#18ffff;html=1" parent="1" source="t-grid" target="t-splitV" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7" style="endArrow=none;strokeColor=#18ffff;html=1" parent="1" source="t-splitV" target="t-grpC" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e8" style="endArrow=none;strokeColor=#18ffff;html=1" parent="1" source="t-splitV" target="t-grpD" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e9" style="endArrow=none;strokeColor=#ffd166;html=1" parent="1" source="t-grpB" target="t-header" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e10" style="endArrow=none;strokeColor=#ffd166;html=1" parent="1" source="t-grpB" target="t-body" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e11" style="endArrow=none;strokeColor=#7f8aa8;dashed=1;html=1" parent="1" source="t-body" target="t-legend" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e12" style="endArrow=none;strokeColor=#b388ff;dashed=1;html=1" parent="1" source="t-edge-left" target="t-settings" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e13" style="endArrow=none;strokeColor=#b388ff;dashed=1;html=1" parent="1" source="t-edge-bottom" target="t-status" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e14" style="endArrow=none;strokeColor=#7f8aa8;dashed=1;html=1" parent="1" source="t-grpA" target="t-tabsA" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a1" value="binds by name" style="endArrow=block;dashed=1;strokeColor=#ffd166;fontColor=#ffd166;html=1;fontSize=10;curved=1" parent="1" source="t-grpB" target="grp-center" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1000" y="140"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="key" value="Reading key — solid border: region in the split tree. Dashed border: edge group or overlay (positioned by role, not by split). Swimlane title bar: a container. Left view is what a designer zones; right view is what the engine stores; the only persisted geometry is split proportions. Rectangle sizes on the left are computed by the engine from the tree on the right plus the window size — edit the tree, not the rectangles." style="text;html=1;align=left;verticalAlign=top;fontColor=#9aa3c7;fontSize=11;whiteSpace=wrap" parent="1" vertex="1">
+                    <mxGeometry x="860" y="480" width="780" height="110" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="ldMdpe056fh8aAZo5-Vn" name="What we see — stored layout">
+<mxGraphModel dx="728" dy="957" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" background="#0a0e26" math="0" shadow="0">
+<root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+<mxCell id="p2-title" value="WHAT WE SEE — rendered from the layout Dockview actually stored on disk (~/Library/Application Support/dev.harold.exoskeleton/exoskeleton.json, saved 2026-10-10). Rectangles are the stored split sizes × 1.5. Right: the same file as the tree it is, children in stored order." style="text;html=1;align=left;verticalAlign=middle;fontColor=#DCE5E7;fontSize=13;fontStyle=1;whiteSpace=wrap" vertex="1" parent="1"><mxGeometry x="40" y="30" width="1500" height="60" as="geometry"/></mxCell>
+<mxCell id="p2-shell" value="dv-shell  800×473 (stored)" style="swimlane;html=1;startSize=24;rounded=1;fillColor=#101538;strokeColor=#7c8cff;fontColor=#DCE5E7;fontStyle=1" vertex="1" parent="1"><mxGeometry x="40" y="120" width="1220" height="794" as="geometry"/></mxCell>
+<mxCell id="p2-n3-r" value="group: editor  [400×236]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#072b38;strokeColor=#18ffff;fontColor=#DCE5E7;" vertex="1" parent="p2-shell"><mxGeometry x="10" y="24" width="600" height="354" as="geometry"/></mxCell>
+<mxCell id="p2-n4-r" value="group: terminal  [400×237]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2b1d05;strokeColor=#ffb300;fontColor=#DCE5E7;" vertex="1" parent="p2-shell"><mxGeometry x="10" y="378" width="600" height="356" as="geometry"/></mxCell>
+<mxCell id="p2-n5-r" value="group: webview  [400×473]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0d2818;strokeColor=#6dffaa;fontColor=#DCE5E7;" vertex="1" parent="p2-shell"><mxGeometry x="610" y="24" width="600" height="710" as="geometry"/></mxCell>
+<mxCell id="p2-status-r" value="edge: bottom — status-bar (not in the split tree)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b122c;strokeColor=#b388ff;fontColor=#DCE5E7;dashed=1;" vertex="1" parent="p2-shell"><mxGeometry x="10" y="742" width="1200" height="32" as="geometry"/></mxCell>
+<mxCell id="p2-t-root" value="shell" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#101538;strokeColor=#7c8cff;fontColor=#DCE5E7;" vertex="1" parent="1"><mxGeometry x="1360" y="160" width="190" height="40" as="geometry"/></mxCell>
+<mxCell id="p2-n1" value="split: horizontal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0d1230;strokeColor=#18ffff;fontColor=#DCE5E7;" vertex="1" parent="1"><mxGeometry x="1360" y="250" width="190" height="40" as="geometry"/></mxCell>
+<mxCell id="p2-n2" value="split: vertical" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0d1230;strokeColor=#18ffff;fontColor=#DCE5E7;" vertex="1" parent="1"><mxGeometry x="1360" y="340" width="190" height="40" as="geometry"/></mxCell>
+<mxCell id="p2-n5" value="group: webview" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0d2818;strokeColor=#6dffaa;fontColor=#DCE5E7;" vertex="1" parent="1"><mxGeometry x="1570" y="340" width="190" height="40" as="geometry"/></mxCell>
+<mxCell id="p2-n3" value="group: editor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#072b38;strokeColor=#18ffff;fontColor=#DCE5E7;" vertex="1" parent="1"><mxGeometry x="1360" y="430" width="190" height="40" as="geometry"/></mxCell>
+<mxCell id="p2-n4" value="group: terminal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2b1d05;strokeColor=#ffb300;fontColor=#DCE5E7;" vertex="1" parent="1"><mxGeometry x="1570" y="430" width="190" height="40" as="geometry"/></mxCell>
+<mxCell id="p2-e1" style="endArrow=none;strokeColor=#18ffff;html=1" edge="1" parent="1" source="p2-t-root" target="p2-n1"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="p2-e2" style="endArrow=none;strokeColor=#18ffff;html=1" edge="1" parent="1" source="p2-n1" target="p2-n2"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="p2-e3" style="endArrow=none;strokeColor=#18ffff;html=1" edge="1" parent="1" source="p2-n2" target="p2-n3"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="p2-e4" style="endArrow=none;strokeColor=#18ffff;html=1" edge="1" parent="1" source="p2-n2" target="p2-n4"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="p2-e5" style="endArrow=none;strokeColor=#18ffff;html=1" edge="1" parent="1" source="p2-n1" target="p2-n5"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="p2-t-status" value="edge: bottom — status-bar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b122c;strokeColor=#b388ff;fontColor=#DCE5E7;dashed=1;" vertex="1" parent="1"><mxGeometry x="1780" y="160" width="190" height="40" as="geometry"/></mxCell>
+<mxCell id="p2-e-status" style="endArrow=none;strokeColor=#b388ff;html=1" edge="1" parent="1" source="p2-t-root" target="p2-t-status"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="p2-note" value="Reading it: the root is a HORIZONTAL split, so its children run left→right on screen in stored order: first a VERTICAL split (whose children run top→bottom: editor, then terminal), then the webview group. Top→bottom in the tree is depth (what contains what); left→right among siblings is screen order along the parent&#39;s axis. That is the only sense in which the tree has a direction. The layout in your Chrome screenshot (json-edit | 3D-Inspect | cyto/3d) was never written to this file — the browser build has no Tauri store — so this page shows the last layout the desktop app saved." style="text;html=1;align=left;verticalAlign=top;fontColor=#9aa3c7;fontSize=11;whiteSpace=wrap" vertex="1" parent="1"><mxGeometry x="40" y="933" width="1500" height="90" as="geometry"/></mxCell>
+</root>
+</mxGraphModel>
+</diagram>
 </mxfile>
