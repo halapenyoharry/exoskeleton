@@ -163,7 +163,7 @@ export default function JsonGraphPanel(
   > | null>(null);
   const resetRef = useRef<() => void>(() => {});
 
-  // Drawer-strip "fit" button dispatches to the hidden toolbar's action.
+  // Header-action "fit" dispatches to the hidden toolbar's action.
   const menuRef = useRef<(id: string) => void>(() => {});
   menuRef.current = (id) => {
     if (id === "fit") resetRef.current();

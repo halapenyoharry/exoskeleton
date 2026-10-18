@@ -1,14 +1,14 @@
-// Drawer strip for json-graph3d. Params from JsonGraph3DPanel.tsx
+// Panes for json-graph3d. Params from JsonGraph3DPanel.tsx
 // (JsonGraph3DParams). Imported for its side effect via ./index.ts.
 // TODO: the "fit" button emits emitPanelMenu(panelId, "fit"); JsonGraph3DPanel
 // does not yet subscribe with onPanelMenu (its toolbar called resetView).
 
-import type { PaneStripItem } from "../../panel-manifest.ts";
-import { registerStrip } from "../strip-registry.ts";
+import type { PanelPane } from "../../panel-manifest.ts";
+import { registerPanes } from "../panes-registry.ts";
 
-export const json3dStrip: PaneStripItem[] = [
+export const json3dStrip: PanelPane[] = [
   {
-    id: "view", kind: "tab", icon: "◈", label: "view", tooltip: "Dimensions and labels",
+    id: "view", kind: "pane", icon: "◈", label: "view", tooltip: "Dimensions and labels",
     body: {
       layout: "grid",
       cells: [
@@ -20,7 +20,7 @@ export const json3dStrip: PaneStripItem[] = [
     },
   },
   {
-    id: "motion", kind: "tab", icon: "⌗", label: "motion", tooltip: "Physics and particles",
+    id: "motion", kind: "pane", icon: "⌗", label: "motion", tooltip: "Physics and particles",
     body: {
       layout: "stack",
       cells: [
@@ -29,7 +29,7 @@ export const json3dStrip: PaneStripItem[] = [
       ],
     },
   },
-  { id: "fit", kind: "button", icon: "⤢", label: "fit", tooltip: "Fit graph to view" },
+  { id: "fit", kind: "action", icon: "⤢", label: "fit", tooltip: "Fit graph to view" },
 ];
 
-registerStrip("json-graph3d", json3dStrip);
+registerPanes("json-graph3d", json3dStrip);

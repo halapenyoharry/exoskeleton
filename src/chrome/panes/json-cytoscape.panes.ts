@@ -1,14 +1,14 @@
-// Drawer strip for json-cytoscape. Params from JsonCytoscapePanel.tsx
+// Panes for json-cytoscape. Params from JsonCytoscapePanel.tsx
 // (JsonCytoscapeParams, CytoscapeLayoutName).
 // TODO: the "fit" button emits emitPanelMenu(panelId, "fit"); the panel does
 // not yet subscribe with onPanelMenu (its toolbar called resetView).
 
-import type { PaneStripItem } from "../../panel-manifest.ts";
-import { registerStrip } from "../strip-registry.ts";
+import type { PanelPane } from "../../panel-manifest.ts";
+import { registerPanes } from "../panes-registry.ts";
 
-export const jsonCytoscapeStrip: PaneStripItem[] = [
+export const jsonCytoscapeStrip: PanelPane[] = [
   {
-    id: "layout", kind: "tab", icon: "⌗", label: "layout", tooltip: "Layout algorithm",
+    id: "layout", kind: "pane", icon: "⌗", label: "layout", tooltip: "Layout algorithm",
     body: {
       layout: "grid",
       cells: [
@@ -22,7 +22,7 @@ export const jsonCytoscapeStrip: PaneStripItem[] = [
     },
   },
   {
-    id: "style", kind: "tab", icon: "◐", label: "style", tooltip: "Edges and labels",
+    id: "style", kind: "pane", icon: "◐", label: "style", tooltip: "Edges and labels",
     body: {
       layout: "stack",
       cells: [
@@ -31,7 +31,7 @@ export const jsonCytoscapeStrip: PaneStripItem[] = [
       ],
     },
   },
-  { id: "fit", kind: "button", icon: "⤢", label: "fit", tooltip: "Fit graph to view" },
+  { id: "fit", kind: "action", icon: "⤢", label: "fit", tooltip: "Fit graph to view" },
 ];
 
-registerStrip("json-cytoscape", jsonCytoscapeStrip);
+registerPanes("json-cytoscape", jsonCytoscapeStrip);

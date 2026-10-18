@@ -493,7 +493,7 @@ export default function JsonDyadicPanel(
     .map((l) => topology.layers.get(l))
     .filter((l): l is LayerData => Boolean(l));
 
-  // Publish layer choices for the drawer's select cell.
+  // Publish layer choices for the pane's select cell.
   useEffect(() => {
     publishOptions(
       props.api.id,
@@ -508,7 +508,7 @@ export default function JsonDyadicPanel(
     );
   }, [props.api.id, topology, layerOrder, activeDocId]);
 
-  // Reflect the derived default in the drawer (select binds to the param).
+  // Reflect the derived default in the pane (select binds to the param).
   useEffect(() => {
     if (effectiveLayer && params.selectedLayer !== effectiveLayer) {
       props.api.updateParameters({ selectedLayer: effectiveLayer });

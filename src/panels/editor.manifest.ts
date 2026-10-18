@@ -1,6 +1,6 @@
 import type { PanelManifest } from "../panel-manifest";
 import EditorPanel from "./EditorPanel";
-import { editorToolbar } from "../chrome/toolbars/editor.toolbar";
+import { editorHeaderActions } from "../chrome/header-actions/editor.header-actions";
 
 // Manifest for a core (in-repo) panel. Core panels never get "installed",
 // but declaring them in the same contract as library panels means every
@@ -9,7 +9,7 @@ import { editorToolbar } from "../chrome/toolbars/editor.toolbar";
 const manifest: PanelManifest = {
   id: "editor",
   title: "editor",
-  toolbar: editorToolbar,
+  headerActions: editorHeaderActions,
   menu: [
     { id: "new", label: "New", shortcut: "⌘N" },
     { id: "open", label: "Open…", shortcut: "⌘O" },

@@ -10,7 +10,9 @@ import { listen } from "@tauri-apps/api/event";
 import ColoredTab from "./ColoredTab";
 import Watermark from "./Watermark";
 import {
+  LeftHeaderActions,
   RightHeaderActions,
+  closeBackClosers,
 } from "./HeaderActions";
 import EditorPanel from "./panels/EditorPanel";
 import TerminalPanel from "./panels/TerminalPanel";
@@ -30,7 +32,6 @@ import { MenuContext, type MenuActions } from "./panels/menu-context";
 import { stripTransientPanels } from "./persistence/strip-transient";
 import { loadDeckOptIn, saveDeckOptIn } from "./chrome-settings";
 import { DECK_QUERY, buildDeckLayout, reconcileLayouts } from "./persistence/deck";
-import { closeBackClosers, closeOpenDrawers } from "./pane-chrome-state";
 import { exoPanel } from "./PanelRoot";
 import {
   addOrFocusPanel,
@@ -397,8 +398,6 @@ export default function App() {
           api.getPanel("menu")?.api.close();
         } else if (closeBackClosers()) {
           /* ≡ menu dismissed */
-        } else if (closeOpenDrawers()) {
-          /* drawer dismissed */
         } else if (isDocumentOpen(api)) {
           setDocumentOpen(api, false, true); // the document sheet closes before anything else
         } else if (api.hasMaximizedGroup()) {
@@ -905,9 +904,8 @@ export default function App() {
         components={components}
         theme={themeGithubDark}
         // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —
-        singleTabMode="fullwidth"
-        disableTabsOverflowList
         defaultTabComponent={ColoredTab}
+        leftHeaderActionsComponent={LeftHeaderActions}
         watermarkComponent={Watermark}
         rightHeaderActionsComponent={RightHeaderActions}
         floatingGroupBounds="boundedWithinViewport"

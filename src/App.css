@@ -352,11 +352,9 @@
 
 /* ---- Toolbar row contract ---------------------------------------------
    .panel-header / .panel-toolbar = the panel's toolbar row: controls only,
-   never a text label (the pill carries the name). Normal-flow row at the
-   top of the panel. In single-tab groups the header strip floats over the
-   content, so the row pads itself past the pill (left) and corner controls
-   (right). Controls wrap rather than overflow. Hidden by the host when the
-   panel root has data-toolbar-visible="false". */
+   never a text label (the tab carries the name). Normal-flow row at the
+   top of the panel.
+   Controls wrap rather than overflow. */
 .panel-pad .panel-header,
 .panel-pad .panel-toolbar {
   display: flex;
@@ -373,15 +371,6 @@
   letter-spacing: normal;
   text-transform: none;
   flex-shrink: 0;
-}
-.dv-groupview.exo-single-tab .panel-pad:not([data-has-toolbar="true"]) .panel-header,
-.dv-groupview.exo-single-tab .panel-pad:not([data-has-toolbar="true"]) .panel-toolbar {
-  padding-left: calc(var(--exo-pill-w, 160px) + 12px);
-  padding-right: var(--exo-corner-w, 96px);
-}
-.panel-pad[data-toolbar-visible="false"] .panel-header,
-.panel-pad[data-toolbar-visible="false"] .panel-toolbar {
-  display: none;
 }
 .panel-pad .panel-header > .dp-header-doc,
 .panel-pad .panel-toolbar > .dp-header-doc {
@@ -408,12 +397,13 @@
   row-gap: 6px;
 }
 
-/* Panels with a registered drawer strip: their inline toolbar lives in the drawer. */
-.panel-pad[data-has-strip="true"] .panel-header,
-.panel-pad[data-has-strip="true"] .panel-toolbar { display: none; }
-/* Panels with a slim toolbar: inline .panel-toolbar buttons are replaced.
-   (.panel-header stays: it is content such as a document selector.) */
-.panel-pad[data-has-toolbar="true"] .panel-toolbar { display: none; }
+/* Panels that declare panes: their controls live in the Paneview above the
+   content, so the inline toolbar row is hidden. */
+.panel-pad[data-has-panes="true"] .panel-header,
+.panel-pad[data-has-panes="true"] .panel-toolbar { display: none; }
+/* Panels that declare header actions: inline .panel-toolbar buttons are
+   replaced by Dockview header actions. (.panel-header stays: content.) */
+.panel-pad[data-has-header-actions="true"] .panel-toolbar { display: none; }
 
 /* Editor status line (path · dirty · flash): content-level, below the pill. */
 .editor-status {

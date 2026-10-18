@@ -1,4 +1,4 @@
-// Runtime options for drawer `select` cells (PaneCell.optionsFrom). A panel
+// Runtime options for pane `select` cells (PaneCell.optionsFrom). A panel
 // publishes the choices it only knows at runtime (e.g. detected layers); the
 // drawer reads and subscribes. In-process only, same style as panel-menu.ts.
 
@@ -36,22 +36,22 @@ export function onOptions(panelId: string, key: string, cb: Listener): () => voi
   };
 }
 
-// Runtime text for toolbar chips (ToolbarItem.textFrom). Same shape as options.
+// Runtime text for header-action chips (HeaderActionItem.textFrom). Same shape as options.
 type TextListener = (text: string) => void;
 const texts = new Map<string, string>();
 const textListeners = new Map<string, Set<TextListener>>();
 
-export function publishToolbarText(panelId: string, key: string, text: string): void {
+export function publishHeaderActionText(panelId: string, key: string, text: string): void {
   const id = k(panelId, key);
   texts.set(id, text);
   for (const cb of [...(textListeners.get(id) ?? [])]) cb(text);
 }
 
-export function getToolbarText(panelId: string, key: string): string {
+export function getHeaderActionText(panelId: string, key: string): string {
   return texts.get(k(panelId, key)) ?? "";
 }
 
-export function onToolbarText(panelId: string, key: string, cb: TextListener): () => void {
+export function onHeaderActionText(panelId: string, key: string, cb: TextListener): () => void {
   const id = k(panelId, key);
   let set = textListeners.get(id);
   if (!set) textListeners.set(id, (set = new Set()));

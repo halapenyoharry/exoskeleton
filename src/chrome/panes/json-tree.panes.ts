@@ -1,11 +1,11 @@
-// Drawer strip for json-tree. Params from JsonTreePanel.tsx (JsonTreeParams).
+// Panes for json-tree. Params from JsonTreePanel.tsx (JsonTreeParams).
 
-import type { PaneStripItem } from "../../panel-manifest.ts";
-import { registerStrip } from "../strip-registry.ts";
+import type { PanelPane } from "../../panel-manifest.ts";
+import { registerPanes } from "../panes-registry.ts";
 
-export const jsonTreeStrip: PaneStripItem[] = [
+export const jsonTreeStrip: PanelPane[] = [
   {
-    id: "layout", kind: "tab", icon: "⌗", label: "layout", tooltip: "Tree layout and orientation",
+    id: "layout", kind: "pane", icon: "⌗", label: "layout", tooltip: "Tree layout and orientation",
     body: {
       layout: "grid",
       cells: [
@@ -18,7 +18,7 @@ export const jsonTreeStrip: PaneStripItem[] = [
     },
   },
   {
-    id: "labels", kind: "tab", icon: "Ⓝ", label: "labels", tooltip: "Array indices and primitives",
+    id: "labels", kind: "pane", icon: "Ⓝ", label: "labels", tooltip: "Array indices and primitives",
     body: {
       layout: "stack",
       cells: [
@@ -27,7 +27,7 @@ export const jsonTreeStrip: PaneStripItem[] = [
       ],
     },
   },
-  { id: "reset", kind: "button", icon: "⤢", label: "reset", tooltip: "Reset view" },
+  { id: "reset", kind: "action", icon: "⤢", label: "reset", tooltip: "Reset view" },
 ];
 
-registerStrip("json-tree", jsonTreeStrip);
+registerPanes("json-tree", jsonTreeStrip);

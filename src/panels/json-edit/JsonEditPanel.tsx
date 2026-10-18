@@ -21,7 +21,7 @@ import {
 } from "../../data/json-bus";
 import { openLibraryDocument } from "../../data/library";
 import { onPanelMenu } from "../../panel-menu";
-import { publishToolbarText } from "../../chrome/runtime-options";
+import { publishHeaderActionText } from "../../chrome/runtime-options";
 import {
   getActiveDocumentId,
   onActiveDocumentIdChange,
@@ -577,7 +577,7 @@ export default function JsonEditPanel(
   docsRef.current = pickerEntries;
   const docTitle = docLabel(currentMeta?.title);
   useEffect(() => {
-    publishToolbarText(props.api.id, "doc", docTitle);
+    publishHeaderActionText(props.api.id, "doc", docTitle);
   }, [props.api.id, docTitle]);
   useEffect(() => {
     if (!docMenu) return;

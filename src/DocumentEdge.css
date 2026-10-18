@@ -1,86 +1,56 @@
 /* ---- Document edge (left) -----------------------------------------------
-   The loaded JSON document is not a pane, it is the thing plugged in: one
+   The loaded document is not a pane, it is the thing plugged in: one
    `json-edit` in a Dockview edge group on the left (persistence/
-   document-edge.ts). Expanded, it is an ordinary single-pill group (the
-   pill overlays the content, see ColoredTab.css). Collapsed, Dockview hides
-   the content and leaves only the header, so the pill is restyled into a
-   full-height vertical tab: the {} glyph over the document chip text.
-   Clicking it expands the edge (Dockview toggles an edge group on a tab click).
-   ColoredTab.tsx tags the group root with `.exo-doc-edge` and the pill with
-   `.exo-pill--doc` (+ `.is-collapsed`). */
+   document-edge.ts). Expanded, it is an ordinary group with one tab.
+   Collapsed, Dockview hides the content and keeps the header, which we turn
+   into a full-height vertical strip: the {} glyph over the document's name.
+   Clicking the tab expands the edge (Dockview toggles an edge group on a
+   tab click). ColoredTab.tsx tags the group root with `.exo-doc-edge`. */
 
-/* Expanded: the pill names the panel; the document text is a strip-only label. */
-.exo-pill--doc .exo-pill__doc { display: none; }
+.dv-groupview.exo-doc-edge { background: #0a0e27; }
 
-.dv-groupview.exo-doc-edge {
-  background: #0a0e27;
-}
-
-/* Collapsed: the header becomes the whole strip. */
-.dockview-theme-abyss .dv-groupview.exo-single-tab.exo-doc-edge.dv-edge-collapsed {
+.dv-groupview.exo-doc-edge.dv-edge-collapsed {
   cursor: pointer;
   border-right: 1px solid color-mix(in srgb, var(--accent-json-edit) 45%, transparent);
   box-sizing: border-box;
 }
-.dockview-theme-abyss .dv-groupview.exo-single-tab.exo-doc-edge.dv-edge-collapsed > .dv-tabs-and-actions-container {
-  position: relative;
-  inset: auto;
-  width: 100%;
+.dv-groupview.exo-doc-edge.dv-edge-collapsed > .dv-tabs-and-actions-container {
+  --dv-tabs-and-actions-container-height: 100%;
   height: 100%;
   background: transparent;
-  pointer-events: auto;
 }
-.dockview-theme-abyss .dv-groupview.exo-single-tab.exo-doc-edge.dv-edge-collapsed > .dv-tabs-and-actions-container::before {
-  display: none; /* no scrim: nothing to float over */
-}
-.dockview-theme-abyss .dv-groupview.exo-single-tab.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-scrollable,
-.dockview-theme-abyss .dv-groupview.exo-single-tab.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-tabs-container,
-.dockview-theme-abyss .dv-groupview.exo-single-tab.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-tab,
-.dockview-theme-abyss .dv-groupview.exo-single-tab.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-tab.dv-active-tab,
-.dockview-theme-abyss .dv-groupview.exo-single-tab.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-tab.dv-inactive-tab {
+.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-scrollable,
+.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-tabs-container,
+.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-tab {
   flex: 1 1 auto;
   width: 100%;
   max-width: none;
   height: 100%;
   min-width: 0;
+  padding: 0;
 }
-.dockview-theme-abyss .dv-groupview.exo-single-tab.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-void-container,
-.dockview-theme-abyss .dv-groupview.exo-single-tab.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-right-actions-container {
+.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-void-container,
+.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-right-actions-container,
+.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-tabs-and-actions-container .dv-left-actions-container,
+.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab-action,
+.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab-content {
   display: none;
 }
-
-.dockview-theme-abyss .dv-groupview.exo-single-tab.exo-doc-edge.dv-edge-collapsed .exo-pill.exo-pill--doc.is-collapsed {
+.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab {
+  display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   align-items: center;
-  width: 100%;
+  justify-content: flex-start;
   height: 100%;
-  max-width: none;
-  margin: 0;
   padding: 12px 0;
-  border: none;
-  border-radius: 0;
-  background: transparent;
-  color: var(--pill-accent) !important;
-  opacity: 0.9;
-  cursor: pointer;
-}
-.dockview-theme-abyss .dv-groupview.exo-single-tab.exo-doc-edge.dv-edge-collapsed .exo-pill.exo-pill--doc.is-collapsed:hover {
-  background: color-mix(in srgb, var(--pill-accent) 14%, transparent);
-  opacity: 1;
-}
-.exo-pill--doc.is-collapsed .exo-pill__btn { display: none !important; }
-.exo-pill--doc.is-collapsed .exo-pill__label {
-  flex-direction: column;
-  min-width: 0;
-  max-height: 100%;
-  padding: 0;
   gap: 12px;
-  cursor: pointer;
+  color: var(--accent-json-edit);
 }
-.exo-pill--doc.is-collapsed .exo-pill__glyph { font-size: 14px; }
-.exo-pill--doc.is-collapsed .exo-pill__title { display: none; }
-.exo-pill--doc.is-collapsed .exo-pill__doc {
+.dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab::before {
+  content: "{}";
+  font-size: 14px;
+}
+.dv-groupview.exo-doc-edge.dv-edge-collapsed .exo-tab__doc {
   display: block;
   min-height: 0;
   max-height: 100%;
@@ -88,19 +58,17 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 12px;
+  color: var(--accent-json-edit);
   writing-mode: vertical-rl;
   transform: rotate(180deg); /* reads bottom-to-top, like a left-edge tab */
+  pointer-events: none;
 }
 
 /* Phone: the collapsed strip is the glyph only. */
-.exo-phone .exo-pill--doc.is-collapsed .exo-pill__doc { display: none; }
-.exo-phone .exo-pill--doc.is-collapsed .exo-pill__glyph { font-size: 18px; }
+.exo-phone .dv-groupview.exo-doc-edge.dv-edge-collapsed .exo-tab__doc { display: none; }
+.exo-phone .dv-groupview.exo-doc-edge.dv-edge-collapsed .dv-default-tab::before { font-size: 18px; }
 
-/* Phone: the expanded document is a sheet over the grid, full width. The edge
-   is a normal Dockview edge group (its splitview slot is at most the
-   viewport minus the grid's 100px minimum), so the sheet is that slot's view
-   stretched over everything; its sash is dead weight and goes away. The
-   collapsed strip stays the 44px collapsedSize set at creation. */
+/* Phone: the expanded document is a sheet over the grid, full width. */
 .exo-phone .dv-shell > .dv-split-view-container > .dv-view-container > .dv-view:has(> .dv-groupview.exo-doc-edge:not(.dv-edge-collapsed)) {
   width: 100% !important;
   z-index: 30;

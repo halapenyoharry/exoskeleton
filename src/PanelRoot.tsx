@@ -1,33 +1,11 @@
 import { Component, type ComponentType, type CSSProperties, type ErrorInfo, type ReactNode } from "react";
 import type { IDockviewPanelProps } from "dockview-react";
 import { resolveComponentKey } from "./ColoredTab";
-import { initPaneChrome, setPaneOpen, setPanePinned, usePaneChrome } from "./pane-chrome-state";
-
-import { PaneDrawer } from "./chrome/PaneDrawer";
-import "./chrome/strips";
-import { getStrip } from "./chrome/strip-registry";
-import "./chrome/toolbars";
-import { getToolbar } from "./chrome/toolbar-registry";
-import { SlimToolbar } from "./chrome/SlimToolbar";
-import type { ToolbarItem } from "./panel-manifest";
-
-function PaneDrawerHost(props: IDockviewPanelProps<any>) {
-  const id = props.api.id;
-  initPaneChrome(id, (props.params as { drawerPinned?: boolean } | undefined)?.drawerPinned === true);
-  const { open, pinned } = usePaneChrome(id);
-  return (
-    <PaneDrawer
-      panelId={id}
-      componentKey={resolveComponentKey(id) ?? id}
-      api={props.api}
-      containerApi={props.containerApi}
-      open={open}
-      onOpenChange={(o) => setPaneOpen(id, o)}
-      pinned={pinned}
-      onPinnedChange={(v) => setPanePinned(id, v, props.api)}
-    />
-  );
-}
+import { PanelPanes } from "./PanelPanes";
+import "./chrome/panes";
+import { getPanes } from "./chrome/panes-registry";
+import "./chrome/header-actions";
+import { getHeaderActions } from "./chrome/header-actions-registry";
 
 interface PanelErrorBoundaryProps {
   panelTitle: string;
@@ -143,42 +121,31 @@ export class PanelErrorBoundary extends Component<
  * the root element. App.css's `.panel-pad::before` reads that variable
  * to paint the 3px stripe at the top of the panel. Pass any valid CSS
  * color, typically a `var()` reference (e.g. `"var(--accent-editor)"`).
- *
- * The optional `className` is appended to the base `panel-pad` class —
- * useful when a panel needs its own root-level styling hook (e.g.
- * `.my-panel-root`) without recreating the positioning recipe.
  */
 export function PanelRoot({
   accent,
   className,
   children,
   style,
-  toolbarVisible,
-  hasStrip,
-  toolbar,
-  panelId,
+  hasPanes,
+  hasHeaderActions,
 }: {
   accent?: string;
   className?: string;
   children: ReactNode;
   style?: CSSProperties;
-  /** false hides the panel's toolbar row (.panel-header / .panel-toolbar). */
-  toolbarVisible?: boolean;
-  /** true when the panel has a registered drawer strip (inline toolbar hidden by CSS). */
-  hasStrip?: boolean;
-  /** Declared slim toolbar items; rendered as a dedicated row above the content. */
-  toolbar?: ToolbarItem[];
-  panelId?: string;
+  /** true when the panel declares panes (its inline toolbar is hidden by CSS). */
+  hasPanes?: boolean;
+  /** true when the panel declares header actions (its inline .panel-toolbar is hidden by CSS). */
+  hasHeaderActions?: boolean;
 }) {
   return (
     <div
       className={className ? `panel-pad ${className}` : "panel-pad"}
-      data-toolbar-visible={toolbarVisible === false ? "false" : undefined}
-      data-has-strip={hasStrip ? "true" : undefined}
-      data-has-toolbar={toolbar ? "true" : undefined}
+      data-has-panes={hasPanes ? "true" : undefined}
+      data-has-header-actions={hasHeaderActions ? "true" : undefined}
       style={{ "--panel-accent": accent ?? "transparent", ...style } as CSSProperties}
     >
-      {toolbar && panelId && <SlimToolbar panelId={panelId} items={toolbar} />}
       {children}
     </div>
   );
@@ -187,9 +154,9 @@ export function PanelRoot({
 /**
  * Registration helper: takes a pure panel component and produces a
  * wrapped version to put in the Dockview `components` map. The wrapper
- * forwards all props transparently and wraps the component in a
- * `PanelErrorBoundary` so any throwing panel is isolated from the rest
- * of the grid.
+ * forwards all props transparently, wraps the component in a
+ * `PanelErrorBoundary`, and — when the panel declares panes — hosts it
+ * inside a Splitview whose top cell is the Paneview of those panes.
  */
 export function exoPanel<P extends Record<string, any>>(
   Component: ComponentType<IDockviewPanelProps<P>>,
@@ -198,25 +165,24 @@ export function exoPanel<P extends Record<string, any>>(
   return function Wrapped(props: IDockviewPanelProps<P>) {
     const title = props.api.title ?? props.api.id;
     const componentKey = resolveComponentKey(props.api.id) ?? props.api.id;
-    const hasStrip = !!getStrip(componentKey);
-    const toolbar = getToolbar(componentKey);
+    const panes = getPanes(componentKey);
+    const hasPanes = !!panes && panes.some((p) => p.kind === "pane");
+    const hasHeaderActions = !!getHeaderActions(componentKey);
+    const content = <Component {...props} />;
     return (
       <PanelErrorBoundary
         panelTitle={title}
         accent={accent}
         onClose={() => props.api.close()}
       >
-        <PanelRoot
-          accent={accent}
-          hasStrip={hasStrip}
-          toolbar={toolbar}
-          panelId={props.api.id}
-          toolbarVisible={
-            (props.params as { toolbarVisible?: boolean } | undefined)?.toolbarVisible
-          }
-        >
-          <Component {...props} />
-          <PaneDrawerHost {...props} />
+        <PanelRoot accent={accent} hasPanes={hasPanes} hasHeaderActions={hasHeaderActions}>
+          {hasPanes ? (
+            <PanelPanes panelId={props.api.id} api={props.api} containerApi={props.containerApi} panes={panes!}>
+              {content}
+            </PanelPanes>
+          ) : (
+            content
+          )}
         </PanelRoot>
       </PanelErrorBoundary>
     );

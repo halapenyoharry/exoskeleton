@@ -122,7 +122,7 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
         </button>
       </div>
       {/* Status line lives in the content, not the toolbar, so it stays
-          visible when the toolbar is replaced by the pane drawer. */}
+          visible when the toolbar is replaced by header actions. */}
       <div className="editor-status">
         <span style={{ flex: 1, color: "#4a6a78", fontStyle: dirty ? "italic" : "normal" }}>
           {path ?? "untitled"}{dirty ? " •" : ""}

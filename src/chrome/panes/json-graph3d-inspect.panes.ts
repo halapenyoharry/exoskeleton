@@ -1,12 +1,12 @@
-// Drawer strip for json-graph3d-inspect. Param names and option values are
+// Panes for json-graph3d-inspect. Param names and option values are
 // taken from JsonGraph3DInspectPanel.tsx. Imported for its side effect.
 
-import type { PaneStripItem } from "../../panel-manifest.ts";
-import { registerStrip } from "../strip-registry.ts";
+import type { PanelPane } from "../../panel-manifest.ts";
+import { registerPanes } from "../panes-registry.ts";
 
-export const json3dInspectStrip: PaneStripItem[] = [
+export const json3dInspectPanes: PanelPane[] = [
   {
-    id: "look", kind: "tab", icon: "◐", label: "look", tooltip: "How edges, nodes and labels are drawn",
+    id: "look", kind: "pane", icon: "◐", label: "look", tooltip: "How edges, nodes and labels are drawn",
     body: {
       layout: "grid",
       cells: [
@@ -22,7 +22,7 @@ export const json3dInspectStrip: PaneStripItem[] = [
     },
   },
   {
-    id: "structure", kind: "tab", icon: "⬡", label: "structure", tooltip: "Hulls, containment and relations",
+    id: "structure", kind: "pane", icon: "⬡", label: "structure", tooltip: "Hulls, containment and relations",
     body: {
       layout: "grid",
       cells: [
@@ -36,7 +36,7 @@ export const json3dInspectStrip: PaneStripItem[] = [
     },
   },
   {
-    id: "motion", kind: "tab", icon: "◫", label: "motion", tooltip: "Dimensions, physics and legend",
+    id: "motion", kind: "pane", icon: "◫", label: "motion", tooltip: "Dimensions, physics and legend",
     body: {
       layout: "grid",
       cells: [
@@ -47,7 +47,7 @@ export const json3dInspectStrip: PaneStripItem[] = [
       ],
     },
   },
-  { id: "fit", kind: "button", icon: "⤢", label: "fit", tooltip: "Fit graph to view" },
+  { id: "fit", kind: "action", icon: "⤢", label: "fit", tooltip: "Fit graph to view" },
 ];
 
-registerStrip("json-graph3d-inspect", json3dInspectStrip);
+registerPanes("json-graph3d-inspect", json3dInspectPanes);

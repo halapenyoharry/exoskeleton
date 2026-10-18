@@ -340,7 +340,7 @@ export default function JsonGraph3DPanel(
     fgRef.current?.zoomToFit(params.fitDuration, params.fitPadding);
   };
 
-  // Drawer-strip "fit" button dispatches to the hidden toolbar's action.
+  // Header-action "fit" dispatches to the hidden toolbar's action.
   const menuRef = useRef<(id: string) => void>(() => {});
   menuRef.current = (id) => {
     if (id === "fit") resetView();

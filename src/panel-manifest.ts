@@ -136,11 +136,10 @@ export interface PanelMenuItem {
 }
 
 /**
- * Pane chrome v2 drawer vocabulary. A panel *declares* its drawer strip
- * (docs/design/pane-chrome-blueprint.drawio, sections B, C, E, G); the host
- * (src/chrome/PaneDrawer.tsx) renders it. Each cell binds to a panel param
- * of the same name. Max 4 author positions; the host appends a settings tab
- * and an orientation button.
+ * Declared controls. A panel *declares* its panes (PanelPane[], registered
+ * in src/chrome/panes); the host (src/PanelPanes.tsx) renders them as a
+ * Dockview Paneview inside a vertical Splitview above the panel's content.
+ * Each cell binds to a panel param of the same name.
  */
 export interface PaneCell {
   type: "segmented" | "toggle" | "swatch" | "stepper" | "dial" | "select";
@@ -148,7 +147,7 @@ export interface PaneCell {
   param: string;
   label: string;
   tooltip?: string;
-  /** [columns, rows] on the 52px grid unit: 1x1, 2x1, 2x2, 3x1. Default [1,1]. */
+  /** Kept for declarations that still carry it; the Paneview ignores it. */
   span?: [number, number];
   /** segmented / swatch choices. Option values are strings; numeric params
    *  are matched by String(value) and written back as numbers when the
@@ -162,9 +161,10 @@ export interface PaneCell {
   step?: number;
 }
 
-/** One icon button in a panel's slim toolbar (pane chrome v2.1). A click calls
- *  emitPanelMenu(panelId, id), the same bus as menu items and strip buttons. */
-export interface ToolbarItem {
+/** One item in a panel's Dockview header actions (rendered next to its tab
+ *  by HeaderActions.tsx). A click calls emitPanelMenu(panelId, id), the same
+ *  bus as menu items and pane actions. */
+export interface HeaderActionItem {
   id: string;
   icon: string;
   label: string;
@@ -172,17 +172,19 @@ export interface ToolbarItem {
   disabled?: boolean;
   /** 'button' (default) is a round icon; 'chip' is a small text label. */
   kind?: 'button' | 'chip';
-  /** chip only: runtime-text key the panel publishes via publishToolbarText. */
+  /** chip only: runtime-text key the panel publishes via publishHeaderActionText. */
   textFrom?: string;
 }
 
-export interface PaneStripItem {
+export interface PanelPane {
   id: string;
-  kind: "tab" | "button";
+  /** "pane": a foldable Paneview pane of cells. "action": a button in the
+   *  group's header actions (emits emitPanelMenu(panelId, id)). */
+  kind: "pane" | "action";
   icon: string;
   label: string;
   tooltip?: string;
-  /** Tabs only. */
+  /** Panes only. */
   body?: { layout: "grid" | "stack"; cells: PaneCell[] };
 }
 
@@ -197,16 +199,18 @@ export interface PanelManifest<P extends Record<string, any> = Record<string, an
   /** Title shown in the tab. Defaults to `id` if omitted. */
   title?: string;
 
-  /** `true`: the panel renders its own hideable inline toolbar (legacy flag).
-   *  `ToolbarItem[]`: the host renders a slim icon toolbar row; the pill's
-   *  menu gets a "show toolbar" toggle that writes `toolbarVisible` into
-   *  panel params (default true). Clicks arrive via onPanelMenu. */
-  toolbar?: boolean | ToolbarItem[];
+  /** `true`: the panel renders its own inline toolbar row inside its content
+   *  (hidden by CSS when the panel also declares panes). */
+  toolbar?: boolean;
 
-  /** Drawer strip (pane chrome v2). See PaneStripItem. Up to 4 positions. */
-  strip?: PaneStripItem[];
+  /** Items rendered in the group's Dockview header actions next to the tab
+   *  (registered in src/chrome/header-actions). Clicks arrive via onPanelMenu. */
+  headerActions?: HeaderActionItem[];
 
-  /** Panel-specific items for the pill's ☰ menu. See PanelMenuItem. */
+  /** Declared panes (and header-action buttons). See PanelPane. Up to 4. */
+  panes?: PanelPane[];
+
+  /** Panel-specific items for the ≡ menu in the header actions. See PanelMenuItem. */
   menu?: PanelMenuItem[];
 
   /** The React component itself. */

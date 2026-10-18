@@ -1,6 +1,6 @@
-import type { ToolbarItem } from "../../panel-manifest.ts";
+import type { HeaderActionItem } from "../../panel-manifest.ts";
 
-export const jsonEditToolbar: ToolbarItem[] = [
+export const jsonEditHeaderActions: HeaderActionItem[] = [
   { id: "open", icon: "📂", label: "Open", tooltip: "Open file…" },
   { id: "save", icon: "⤓", label: "Download", tooltip: "Download JSON" },
   { id: "copy", icon: "⧉", label: "Copy", tooltip: "Copy JSON" },

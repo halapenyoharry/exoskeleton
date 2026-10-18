@@ -131,7 +131,7 @@ export default function JsonTreePanel(
   const svgRef = useRef<SVGSVGElement | null>(null);
   const resetRef = useRef<() => void>(() => {});
 
-  // Drawer-strip "reset" button dispatches to the hidden toolbar's action.
+  // Header-action "reset" dispatches to the hidden toolbar's action.
   const menuRef = useRef<(id: string) => void>(() => {});
   menuRef.current = (id) => {
     if (id === "reset") resetRef.current();
