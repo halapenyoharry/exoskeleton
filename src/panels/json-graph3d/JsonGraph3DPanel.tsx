@@ -23,6 +23,7 @@ import {
   colorForLayer,
 } from "../../data/json-utils/layers";
 import "./JsonGraph3DPanel.css";
+import { ParametersSplit } from "../../ParametersSplit";
 
 export type Graph3DLabelMode = "always" | "hover" | "never";
 
@@ -372,59 +373,57 @@ export default function JsonGraph3DPanel(
   const tooltipsEnabled = params.labelMode !== "never";
 
   return (
-    <>
-      <div className="panel-header json-graph3d-header">
-        <span>json-graph3d</span>
-        <div className="json-graph3d-controls">
-          <select
-            value={params.dimensions}
-            onChange={(e) =>
-              updateParam(
-                "dimensions",
-                Number(e.target.value) as 2 | 3,
-              )
-            }
-            title="2D or 3D layout"
-          >
-            <option value={2}>2D</option>
-            <option value={3}>3D</option>
-          </select>
-          <select
-            value={params.labelMode}
-            onChange={(e) =>
-              updateParam("labelMode", e.target.value as Graph3DLabelMode)
-            }
-            title="Label visibility mode"
-          >
-            <option value="always">always</option>
-            <option value="hover">hover</option>
-            <option value="never">never</option>
-          </select>
-          <label title="Show traveling particles on directed edges">
-            <input
-              type="checkbox"
-              checked={params.particles}
-              onChange={(e) => updateParam("particles", e.target.checked)}
-            />
-            particles
-          </label>
-          <label title="Freeze the physics simulation">
-            <input
-              type="checkbox"
-              checked={params.freezeLayout}
-              onChange={(e) => updateParam("freezeLayout", e.target.checked)}
-            />
-            freeze
-          </label>
-          <button
-            onClick={resetView}
-            title="Fit graph to view"
-            className="json-graph3d-reset-btn"
-          >
-            ⤢
-          </button>
-        </div>
+    <ParametersSplit title="graph-parameters" controls={
+      <div className="json-graph3d-controls">
+        <select
+          value={params.dimensions}
+          onChange={(e) =>
+            updateParam(
+              "dimensions",
+              Number(e.target.value) as 2 | 3,
+            )
+          }
+          title="2D or 3D layout"
+        >
+          <option value={2}>2D</option>
+          <option value={3}>3D</option>
+        </select>
+        <select
+          value={params.labelMode}
+          onChange={(e) =>
+            updateParam("labelMode", e.target.value as Graph3DLabelMode)
+          }
+          title="Label visibility mode"
+        >
+          <option value="always">always</option>
+          <option value="hover">hover</option>
+          <option value="never">never</option>
+        </select>
+        <label title="Show traveling particles on directed edges">
+          <input
+            type="checkbox"
+            checked={params.particles}
+            onChange={(e) => updateParam("particles", e.target.checked)}
+          />
+          particles
+        </label>
+        <label title="Freeze the physics simulation">
+          <input
+            type="checkbox"
+            checked={params.freezeLayout}
+            onChange={(e) => updateParam("freezeLayout", e.target.checked)}
+          />
+          freeze
+        </label>
+        <button
+          onClick={resetView}
+          title="Fit graph to view"
+          className="json-graph3d-reset-btn"
+        >
+          ⤢
+        </button>
       </div>
+    }>
       <div className="panel-body json-graph3d-body" ref={containerRef}>
         {!isGraph && (
           <div className="json-graph3d-empty">
@@ -561,6 +560,6 @@ export default function JsonGraph3DPanel(
           />
         )}
       </div>
-    </>
+    </ParametersSplit>
   );
 }

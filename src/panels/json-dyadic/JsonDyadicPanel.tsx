@@ -22,6 +22,7 @@ import type {
   TopoLink,
 } from "./types";
 import "./JsonDyadicPanel.css";
+import { ParametersSplit } from "../../ParametersSplit";
 
 // ─── params ─────────────────────────────────────────────────────────────
 
@@ -497,13 +498,9 @@ export default function JsonDyadicPanel(
     .filter((l): l is LayerData => Boolean(l));
 
   return (
-    <>
-      <div className="panel-header dp-header">
-        <span>json-dyadic</span>
-        <span className="dp-header-doc">{activeDocId}</span>
-      </div>
-
+    <ParametersSplit title="graph-parameters" controls={
       <div className="panel-toolbar dp-toolbar">
+        <span className="dp-header-doc">{activeDocId}</span>
         <label className="dp-picker">
           layer
           <select
@@ -547,6 +544,8 @@ export default function JsonDyadicPanel(
 
         {params.showCategoryLegend && <CategoryLegend />}
       </div>
+    }>
+
 
       <div className="panel-body dp-body">
         {topology.warnings.length > 0 && doc === undefined && (
@@ -608,7 +607,7 @@ export default function JsonDyadicPanel(
           </details>
         )}
       </div>
-    </>
+    </ParametersSplit>
   );
 }
 

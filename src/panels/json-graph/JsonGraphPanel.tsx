@@ -23,6 +23,7 @@ import {
   colorForLayer,
 } from "../../data/json-utils/layers";
 import "./JsonGraphPanel.css";
+import { ParametersSplit } from "../../ParametersSplit";
 
 interface SimNode extends GraphNode, d3.SimulationNodeDatum {}
 interface SimLink extends d3.SimulationLinkDatum<SimNode> {
@@ -450,27 +451,25 @@ export default function JsonGraphPanel(
   }, [params.layerVisibility]);
 
   return (
-    <>
-      <div className="panel-header json-graph-header">
-        <span>json-graph</span>
-        <div className="json-graph-controls">
-          <label title="Freeze the physics simulation">
-            <input
-              type="checkbox"
-              checked={params.freezeLayout}
-              onChange={(e) => updateParam("freezeLayout", e.target.checked)}
-            />
-            freeze
-          </label>
-          <button
-            onClick={() => resetRef.current()}
-            title="Fit graph to view"
-            className="json-graph-reset-btn"
-          >
-            ⤢
-          </button>
-        </div>
+    <ParametersSplit title="graph-parameters" controls={
+      <div className="json-graph-controls">
+        <label title="Freeze the physics simulation">
+          <input
+            type="checkbox"
+            checked={params.freezeLayout}
+            onChange={(e) => updateParam("freezeLayout", e.target.checked)}
+          />
+          freeze
+        </label>
+        <button
+          onClick={() => resetRef.current()}
+          title="Fit graph to view"
+          className="json-graph-reset-btn"
+        >
+          ⤢
+        </button>
       </div>
+    }>
       <div className="panel-body json-graph-body">
         {!isGraph && (
           <div className="json-graph-empty">
@@ -494,6 +493,6 @@ export default function JsonGraphPanel(
           <div className="json-graph-canvas" ref={containerRef} />
         )}
       </div>
-    </>
+    </ParametersSplit>
   );
 }

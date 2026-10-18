@@ -10,6 +10,7 @@ import {
 } from "../utils/file-io";
 import { useFlash } from "../utils/useFlash";
 import "./EditorPanel.css";
+import { ParametersSplit } from "../ParametersSplit";
 
 // TODO: replace this textarea with @marktext/muya for live-preview markdown.
 // Muya 0.2.5 on npm is the latest published but flagged "not for production"
@@ -86,8 +87,7 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
 
   // Pure content — the host wraps this in PanelRoot via exoPanel().
   return (
-    <>
-      <div className="panel-header">editor</div>
+    <ParametersSplit title="file" controls={
       <div className="panel-toolbar">
         <button onClick={openFile}>open</button>
         <button onClick={saveFile} disabled={!dirty && !!path}>
@@ -107,6 +107,7 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
           </span>
         )}
       </div>
+    }>
       <textarea
         className="editor-textarea"
         value={text}
@@ -116,6 +117,6 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
         }}
         spellCheck={false}
       />
-    </>
+    </ParametersSplit>
   );
 }

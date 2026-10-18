@@ -1,0 +1,34 @@
+/* Cell sizing only. Sash, pane header, colors come from the Dockview theme. */
+.parameters-split-root {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.parameters-split-controls-cell,
+.parameters-split-content-cell {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.parameters-split-section {
+  padding: 4px 8px;
+  box-sizing: border-box;
+}
+
+/* Shared look for the control rows every panel puts in the section. */
+.parameters-split-section .panel-controls,
+.parameters-split-section .panel-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}

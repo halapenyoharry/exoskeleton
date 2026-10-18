@@ -36,6 +36,7 @@ import {
 import { useFlash } from "../../utils/useFlash";
 import { midnightAlaskaExtension, MIDNIGHT_ALASKA } from "./themes/midnight-alaska";
 import "./JsonEditPanel.css";
+import { ParametersSplit } from "../../ParametersSplit";
 
 export interface JsonEditParams {
   /** json-bus document this panel edits (when not following the active one). */
@@ -524,107 +525,105 @@ export default function JsonEditPanel(
     : [{ id: docId, meta: { title: `${docId} (empty)`, createdAt: "", updatedAt: "" } }, ...docs];
 
   return (
-    <>
-      <div className="panel-header">
-        <div className="json-edit-header-container">
-          <div className="json-edit-header-left">
-            <span>json-edit</span>
-            {renaming !== null ? (
-              <input
-                className="json-edit-rename"
-                autoFocus
-                value={renaming}
-                onChange={(e) => setRenaming(e.target.value)}
-                onBlur={commitRename}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") commitRename();
-                  if (e.key === "Escape") setRenaming(null);
-                }}
-              />
-            ) : (
-              <select
-                className="json-edit-doc-picker"
-                value={docId}
-                onChange={(e) => selectDoc(e.target.value)}
-                title={currentMeta?.source ? `${docId} · from ${currentMeta.source}` : docId}
-              >
-                {pickerEntries.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.meta.title}
-                    {d.meta.title !== d.id ? `  ·  ${d.id}` : ""}
-                  </option>
-                ))}
-              </select>
-            )}
-            {parseError && (
-              <span className="json-edit-parse-error" title={parseError}>
-                ⚠ JSON parse error
-              </span>
-            )}
-            {flash && (
-              <span
-                className={`json-edit-flash json-edit-flash--${flash.kind}`}
-                title="Click to dismiss"
-                onClick={clear}
-              >
-                {flash.kind === "error" ? "⚠ " : "✓ "}
-                {flash.text}
-              </span>
-            )}
-          </div>
-          <div className="json-edit-menu-wrapper" ref={menuRef}>
-            <button
-              className="json-edit-hamburger-btn"
-              onClick={() => {
-                setMenuOpen(!menuOpen);
-                setConfirmDelete(false);
+    <ParametersSplit title="document" controls={
+      <div className="json-edit-header-container">
+        <div className="json-edit-header-left">
+                      {renaming !== null ? (
+            <input
+              className="json-edit-rename"
+              autoFocus
+              value={renaming}
+              onChange={(e) => setRenaming(e.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitRename();
+                if (e.key === "Escape") setRenaming(null);
               }}
-              title="Documents and files"
+            />
+          ) : (
+            <select
+              className="json-edit-doc-picker"
+              value={docId}
+              onChange={(e) => selectDoc(e.target.value)}
+              title={currentMeta?.source ? `${docId} · from ${currentMeta.source}` : docId}
             >
-              ☰
-            </button>
-            {menuOpen && (
-              <div className="json-edit-dropdown">
-                <button className="json-edit-dropdown-item" onClick={newDocument}>
-                  New document
+              {pickerEntries.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.meta.title}
+                  {d.meta.title !== d.id ? `  ·  ${d.id}` : ""}
+                </option>
+              ))}
+            </select>
+          )}
+          {parseError && (
+            <span className="json-edit-parse-error" title={parseError}>
+              ⚠ JSON parse error
+            </span>
+          )}
+          {flash && (
+            <span
+              className={`json-edit-flash json-edit-flash--${flash.kind}`}
+              title="Click to dismiss"
+              onClick={clear}
+            >
+              {flash.kind === "error" ? "⚠ " : "✓ "}
+              {flash.text}
+            </span>
+          )}
+        </div>
+        <div className="json-edit-menu-wrapper" ref={menuRef}>
+          <button
+            className="json-edit-hamburger-btn"
+            onClick={() => {
+              setMenuOpen(!menuOpen);
+              setConfirmDelete(false);
+            }}
+            title="Documents and files"
+          >
+            ☰
+          </button>
+          {menuOpen && (
+            <div className="json-edit-dropdown">
+              <button className="json-edit-dropdown-item" onClick={newDocument}>
+                New document
+              </button>
+              <button className="json-edit-dropdown-item" onClick={openFiles}>
+                Open file(s)… <span>⌘O</span>
+              </button>
+              <div className="json-edit-dropdown-sep" />
+              <button className="json-edit-dropdown-item" onClick={() => saveToFile(false)}>
+                {inTauri() ? "Save" : "Download"} <span>⌘S</span>
+              </button>
+              {inTauri() && (
+                <button className="json-edit-dropdown-item" onClick={() => saveToFile(true)}>
+                  Save As… <span>⌥⌘S</span>
                 </button>
-                <button className="json-edit-dropdown-item" onClick={openFiles}>
-                  Open file(s)… <span>⌘O</span>
-                </button>
-                <div className="json-edit-dropdown-sep" />
-                <button className="json-edit-dropdown-item" onClick={() => saveToFile(false)}>
-                  {inTauri() ? "Save" : "Download"} <span>⌘S</span>
-                </button>
-                {inTauri() && (
-                  <button className="json-edit-dropdown-item" onClick={() => saveToFile(true)}>
-                    Save As… <span>⌥⌘S</span>
-                  </button>
-                )}
-                <button className="json-edit-dropdown-item" onClick={copyJson}>
-                  Copy JSON
-                </button>
-                <div className="json-edit-dropdown-sep" />
-                <button
-                  className="json-edit-dropdown-item"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setRenaming(currentMeta?.title ?? docId);
-                  }}
-                >
-                  Rename…
-                </button>
-                <button
-                  className={`json-edit-dropdown-item ${confirmDelete ? "json-edit-dropdown-item--danger" : ""}`}
-                  onClick={deleteDocument}
-                >
-                  {confirmDelete ? "Click again to delete" : "Delete document"}
-                </button>
-              </div>
-            )}
-          </div>
+              )}
+              <button className="json-edit-dropdown-item" onClick={copyJson}>
+                Copy JSON
+              </button>
+              <div className="json-edit-dropdown-sep" />
+              <button
+                className="json-edit-dropdown-item"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setRenaming(currentMeta?.title ?? docId);
+                }}
+              >
+                Rename…
+              </button>
+              <button
+                className={`json-edit-dropdown-item ${confirmDelete ? "json-edit-dropdown-item--danger" : ""}`}
+                onClick={deleteDocument}
+              >
+                {confirmDelete ? "Click again to delete" : "Delete document"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
+    }>
       <div className="panel-body json-edit-body" ref={containerRef} />
-    </>
+    </ParametersSplit>
   );
 }

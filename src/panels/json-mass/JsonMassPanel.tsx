@@ -6,6 +6,7 @@ import { getDocStats } from "../../data/json-utils/docStats";
 import { useElementSize } from "../../useElementSize";
 import { jsonToHierarchy } from "../../data/json-utils/jsonToHierarchy";
 import "./JsonMassPanel.css";
+import { ParametersSplit } from "../../ParametersSplit";
 
 /**
  * json-mass: circle-packing weighted by *mass* (line count, image weight,
@@ -423,9 +424,8 @@ export default function JsonMassPanel(
   ]);
 
   return (
-    <>
-      <div className="panel-header json-mass-header">
-        <span>json-mass</span>
+    <ParametersSplit title="graph-parameters" controls={
+      <div className="panel-controls">
         <button
           onClick={() => resetRef.current()}
           title="Reset view"
@@ -434,6 +434,7 @@ export default function JsonMassPanel(
           ⤢
         </button>
       </div>
+    }>
       <div className="panel-body json-mass-body" ref={containerRef}>
         {perfBlocked && (
           <div className="json-mass-perf-warning">
@@ -447,6 +448,6 @@ export default function JsonMassPanel(
           </div>
         )}
       </div>
-    </>
+    </ParametersSplit>
   );
 }

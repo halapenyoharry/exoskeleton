@@ -9,6 +9,7 @@ import {
   type HierarchyNode,
 } from "../../data/json-utils/jsonToHierarchy";
 import "./JsonTreePanel.css";
+import { ParametersSplit } from "../../ParametersSplit";
 
 export type JsonTreeLayout = "cluster" | "tidy";
 export type JsonTreeDirection = "LR" | "RL" | "TB" | "BT";
@@ -304,61 +305,59 @@ export default function JsonTreePanel(
   ]);
 
   return (
-    <>
-      <div className="panel-header json-tree-header">
-        <span>json-tree</span>
-        <div className="json-tree-controls">
-          <select
-            value={params.layout}
+    <ParametersSplit title="graph-parameters" controls={
+      <div className="json-tree-controls">
+        <select
+          value={params.layout}
+          onChange={(e) =>
+            updateParam("layout", e.target.value as JsonTreeLayout)
+          }
+          title="Layout algorithm"
+        >
+          <option value="cluster">cluster</option>
+          <option value="tidy">tidy</option>
+        </select>
+        <select
+          value={params.direction}
+          onChange={(e) =>
+            updateParam("direction", e.target.value as JsonTreeDirection)
+          }
+          title="Orientation"
+        >
+          <option value="LR">L → R</option>
+          <option value="RL">R → L</option>
+          <option value="TB">T ↓ B</option>
+          <option value="BT">B ↑ T</option>
+        </select>
+        <label title="Toggle [N] prefix on array items">
+          <input
+            type="checkbox"
+            checked={params.showArrayIndices}
             onChange={(e) =>
-              updateParam("layout", e.target.value as JsonTreeLayout)
+              updateParam("showArrayIndices", e.target.checked)
             }
-            title="Layout algorithm"
-          >
-            <option value="cluster">cluster</option>
-            <option value="tidy">tidy</option>
-          </select>
-          <select
-            value={params.direction}
+          />
+          [N]
+        </label>
+        <label title="Separate primitive values into child nodes">
+          <input
+            type="checkbox"
+            checked={params.explodePrimitives}
             onChange={(e) =>
-              updateParam("direction", e.target.value as JsonTreeDirection)
+              updateParam("explodePrimitives", e.target.checked)
             }
-            title="Orientation"
-          >
-            <option value="LR">L → R</option>
-            <option value="RL">R → L</option>
-            <option value="TB">T ↓ B</option>
-            <option value="BT">B ↑ T</option>
-          </select>
-          <label title="Toggle [N] prefix on array items">
-            <input
-              type="checkbox"
-              checked={params.showArrayIndices}
-              onChange={(e) =>
-                updateParam("showArrayIndices", e.target.checked)
-              }
-            />
-            [N]
-          </label>
-          <label title="Separate primitive values into child nodes">
-            <input
-              type="checkbox"
-              checked={params.explodePrimitives}
-              onChange={(e) =>
-                updateParam("explodePrimitives", e.target.checked)
-              }
-            />
-            explode
-          </label>
-          <button
-            className="json-tree-reset-btn"
-            onClick={() => resetRef.current()}
-            title="Reset view"
-          >
-            ⤢
-          </button>
-        </div>
+          />
+          explode
+        </label>
+        <button
+          className="json-tree-reset-btn"
+          onClick={() => resetRef.current()}
+          title="Reset view"
+        >
+          ⤢
+        </button>
       </div>
+    }>
       <div className="panel-body json-tree-body" ref={containerRef}>
         {perfBlocked && (
           <div className="json-tree-perf-warning">
@@ -376,6 +375,6 @@ export default function JsonTreePanel(
           </div>
         )}
       </div>
-    </>
+    </ParametersSplit>
   );
 }

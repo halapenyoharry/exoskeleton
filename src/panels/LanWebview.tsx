@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { IDockviewPanelProps } from "dockview-react";
 import "./LanWebview.css";
+import { ParametersSplit } from "../ParametersSplit";
 
 const FALLBACK_URL = "https://dockview.dev";
 
@@ -25,8 +26,7 @@ export default function LanWebview(props: IDockviewPanelProps<LanWebviewParams>)
 
   // Pure content — the host wraps this in PanelRoot via exoPanel().
   return (
-    <>
-      <div className="panel-header">webview</div>
+    <ParametersSplit title="address" controls={
       <div className="panel-toolbar">
         <input
           value={url}
@@ -40,6 +40,7 @@ export default function LanWebview(props: IDockviewPanelProps<LanWebviewParams>)
         <button onClick={go}>go</button>
         <button onClick={() => setReloadKey((k) => k + 1)}>reload</button>
       </div>
+    }>
       <div className="panel-body">
         <iframe
           key={reloadKey}
@@ -49,6 +50,6 @@ export default function LanWebview(props: IDockviewPanelProps<LanWebviewParams>)
           allow="clipboard-write; fullscreen"
         />
       </div>
-    </>
+    </ParametersSplit>
   );
 }

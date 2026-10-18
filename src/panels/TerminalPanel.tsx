@@ -92,7 +92,6 @@ export default function TerminalPanel() {
   // Pure content — the host wraps this in PanelRoot via exoPanel().
   return (
     <>
-      <div className="panel-header">terminal</div>
       <div ref={hostRef} className="terminal-host" />
     </>
   );

@@ -15,6 +15,7 @@ import {
   type HierarchyNode,
 } from "../../data/json-utils/jsonToHierarchy";
 import "./JsonCirclesPanel.css";
+import { ParametersSplit } from "../../ParametersSplit";
 
 type PackNode = d3.HierarchyCircularNode<HierarchyNode>;
 
@@ -423,29 +424,27 @@ export default function JsonCirclesPanel(
   ]);
 
   return (
-    <>
-      <div className="panel-header json-circles-header">
-        <span>json-circles</span>
-        <div className="json-circles-controls">
-          <label title="Toggle [N] prefix on array items">
-            <input
-              type="checkbox"
-              checked={params.showArrayIndices}
-              onChange={(e) =>
-                updateParam("showArrayIndices", e.target.checked)
-              }
-            />
-            [N]
-          </label>
-          <button
-            onClick={() => resetRef.current()}
-            title="Reset view"
-            className="json-circles-reset-btn"
-          >
-            ⤢
-          </button>
-        </div>
+    <ParametersSplit title="graph-parameters" controls={
+      <div className="json-circles-controls">
+        <label title="Toggle [N] prefix on array items">
+          <input
+            type="checkbox"
+            checked={params.showArrayIndices}
+            onChange={(e) =>
+              updateParam("showArrayIndices", e.target.checked)
+            }
+          />
+          [N]
+        </label>
+        <button
+          onClick={() => resetRef.current()}
+          title="Reset view"
+          className="json-circles-reset-btn"
+        >
+          ⤢
+        </button>
       </div>
+    }>
       <div className="panel-body json-circles-body" ref={containerRef}>
         {perfBlocked && (
           <div className="json-circles-perf-warning">
@@ -459,6 +458,6 @@ export default function JsonCirclesPanel(
           </div>
         )}
       </div>
-    </>
+    </ParametersSplit>
   );
 }

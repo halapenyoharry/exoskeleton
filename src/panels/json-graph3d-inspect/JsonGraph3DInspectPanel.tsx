@@ -1,17 +1,6 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import {
-  LayoutPriority,
-  Orientation,
-  PaneviewReact,
-  SplitviewReact,
-  themeGithubDark,
-  type IDockviewPanelProps,
-  type IPaneviewPanelProps,
-  type ISplitviewPanelProps,
-  type PaneviewReadyEvent,
-  type SplitviewApi,
-  type SplitviewReadyEvent,
-} from "dockview-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { IDockviewPanelProps } from "dockview-react";
+import { ParametersSplit } from "../../ParametersSplit";
 import ForceGraph3D from "react-force-graph-3d";
 import type { ForceGraphMethods } from "react-force-graph-3d";
 import SpriteText from "three-spritetext";
@@ -256,92 +245,6 @@ interface HullHandle {
   mesh: THREE.Mesh;
   material: THREE.MeshBasicMaterial;
 }
-
-// --- Layout inside the panel: Dockview Splitview + Paneview ---------------
-// One column, two rows. Row 1 is a Paneview of collapsible control
-// sections, sized to its content and snap-collapsible by dragging the
-// sash past its minimum. Row 2 is the graph and takes everything else
-// (LayoutPriority.High). Both are Dockview primitives themed with the
-// same class as the dock, so sizing and chrome follow the theme.
-//
-// dockview-react renders nested components through React portals, so the
-// context below crosses the Splitview/Paneview boundary intact; the cells
-// are thin and all state stays in the panel component.
-
-const PANE_HEADER = 24;
-/** Body height of the single graph-parameters section: room for the
- *  controls to wrap onto ~3 rows at typical widths; scrolls beyond that. */
-const PANE_BODY = 96;
-
-interface Section {
-  id: string;
-  title: string;
-  node: ReactNode;
-}
-
-interface InspectLayoutCtx {
-  sections: Section[];
-  body: ReactNode;
-}
-
-const InspectLayout = createContext<InspectLayoutCtx>({ sections: [], body: null });
-
-function SectionCell(props: IPaneviewPanelProps<{ sectionId: string }>) {
-  const { sections } = useContext(InspectLayout);
-  const section = sections.find((x) => x.id === props.params.sectionId);
-  return <div className="json-graph3d-inspect-section">{section?.node}</div>;
-}
-
-function ControlsCell(props: ISplitviewPanelProps) {
-  const { sections } = useContext(InspectLayout);
-  const paneApiRef = useRef<PaneviewReadyEvent["api"] | null>(null);
-
-  // Keep the controls row exactly as tall as its expanded sections.
-  const fit = useCallback(() => {
-    const pane = paneApiRef.current;
-    if (!pane) return;
-    const total = pane.panels.reduce(
-      (sum, p) => sum + PANE_HEADER + (p.api.isExpanded ? PANE_BODY : 0),
-      0,
-    );
-    props.api.setSize({ size: total });
-  }, [props.api]);
-
-  const onReady = (e: PaneviewReadyEvent) => {
-    paneApiRef.current = e.api;
-    for (const sec of sections) {
-      const panel = e.api.addPanel({
-        id: sec.id,
-        component: "section",
-        title: sec.title,
-        headerSize: PANE_HEADER,
-        minimumBodySize: PANE_BODY,
-        maximumBodySize: PANE_BODY,
-        isExpanded: true,
-        params: { sectionId: sec.id },
-      });
-      panel.api.onDidExpansionChange(() => fit());
-    }
-    fit();
-  };
-
-  return (
-    <div className="json-graph3d-inspect-controls-cell">
-      <PaneviewReact
-        className={themeGithubDark.className}
-        components={{ section: SectionCell }}
-        onReady={onReady}
-      />
-    </div>
-  );
-}
-
-function GraphCell(_props: ISplitviewPanelProps) {
-  const { body } = useContext(InspectLayout);
-  return <div className="json-graph3d-inspect-graph-cell">{body}</div>;
-}
-
-const splitComponents = { controls: ControlsCell, graph: GraphCell };
 
 export default function JsonGraph3DInspectPanel(
   props: IDockviewPanelProps<JsonGraph3DInspectParams>,
@@ -804,12 +707,8 @@ export default function JsonGraph3DInspectPanel(
     return true;
   };
 
-  const sections: Section[] = [
-    {
-      id: "graph-parameters",
-      title: "graph-parameters",
-      node: (
-        <div className="json-graph3d-inspect-controls">
+  const controls = (
+    <div className="json-graph3d-inspect-controls">
           <select
             value={params.dimensions}
             onChange={(e) => updateParam("dimensions", Number(e.target.value) as 2 | 3)}
@@ -906,9 +805,7 @@ export default function JsonGraph3DInspectPanel(
             contain-lines
           </label>
         </div>
-      ),
-    },
-  ];
+  );
 
   const body = (
     <div className="json-graph3d-inspect-body" ref={containerRef}>
@@ -1021,33 +918,9 @@ export default function JsonGraph3DInspectPanel(
     </div>
   );
 
-  const splitApiRef = useRef<SplitviewApi | null>(null);
-  const onSplitReady = (e: SplitviewReadyEvent) => {
-    splitApiRef.current = e.api;
-    e.api.addPanel({
-      id: "controls",
-      component: "controls",
-      minimumSize: PANE_HEADER,
-      snap: true,
-      size: sections.length * (PANE_HEADER + PANE_BODY),
-    });
-    e.api.addPanel({
-      id: "graph",
-      component: "graph",
-      priority: LayoutPriority.High,
-    });
-  };
-
   return (
-    <InspectLayout.Provider value={{ sections, body }}>
-      <div className="json-graph3d-inspect-root">
-        <SplitviewReact
-          className={themeGithubDark.className}
-          orientation={Orientation.VERTICAL}
-          components={splitComponents}
-          onReady={onSplitReady}
-        />
-      </div>
-    </InspectLayout.Provider>
+    <ParametersSplit title="graph-parameters" controls={controls}>
+      {body}
+    </ParametersSplit>
   );
 }

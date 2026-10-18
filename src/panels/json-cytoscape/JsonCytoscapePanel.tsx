@@ -22,6 +22,7 @@ import {
   colorForLayer,
 } from "../../data/json-utils/layers";
 import "./JsonCytoscapePanel.css";
+import { ParametersSplit } from "../../ParametersSplit";
 
 cytoscape.use(fcose);
 
@@ -488,50 +489,48 @@ export default function JsonCytoscapePanel(
   };
 
   return (
-    <>
-      <div className="panel-header json-cytoscape-header">
-        <span>json-cytoscape</span>
-        <div className="json-cytoscape-controls">
-          <select
-            value={params.layout}
-            onChange={(e) =>
-              updateParam("layout", e.target.value as CytoscapeLayoutName)
-            }
-            title="Layout algorithm"
-          >
-            <option value="fcose">fcose</option>
-            <option value="cose">cose</option>
-            <option value="breadthfirst">breadthfirst</option>
-            <option value="concentric">concentric</option>
-            <option value="circle">circle</option>
-            <option value="grid">grid</option>
-            <option value="random">random</option>
-          </select>
-          <label title="Curve multi-edges">
-            <input
-              type="checkbox"
-              checked={params.curveEdges}
-              onChange={(e) => updateParam("curveEdges", e.target.checked)}
-            />
-            curve
-          </label>
-          <label title="Label-primary: text IS the node, no circle chrome">
-            <input
-              type="checkbox"
-              checked={params.labelPrimary}
-              onChange={(e) => updateParam("labelPrimary", e.target.checked)}
-            />
-            label
-          </label>
-          <button
-            onClick={resetView}
-            title="Fit graph to view"
-            className="json-cytoscape-reset-btn"
-          >
-            ⤢
-          </button>
-        </div>
+    <ParametersSplit title="graph-parameters" controls={
+      <div className="json-cytoscape-controls">
+        <select
+          value={params.layout}
+          onChange={(e) =>
+            updateParam("layout", e.target.value as CytoscapeLayoutName)
+          }
+          title="Layout algorithm"
+        >
+          <option value="fcose">fcose</option>
+          <option value="cose">cose</option>
+          <option value="breadthfirst">breadthfirst</option>
+          <option value="concentric">concentric</option>
+          <option value="circle">circle</option>
+          <option value="grid">grid</option>
+          <option value="random">random</option>
+        </select>
+        <label title="Curve multi-edges">
+          <input
+            type="checkbox"
+            checked={params.curveEdges}
+            onChange={(e) => updateParam("curveEdges", e.target.checked)}
+          />
+          curve
+        </label>
+        <label title="Label-primary: text IS the node, no circle chrome">
+          <input
+            type="checkbox"
+            checked={params.labelPrimary}
+            onChange={(e) => updateParam("labelPrimary", e.target.checked)}
+          />
+          label
+        </label>
+        <button
+          onClick={resetView}
+          title="Fit graph to view"
+          className="json-cytoscape-reset-btn"
+        >
+          ⤢
+        </button>
       </div>
+    }>
       <div className="panel-body json-cytoscape-body">
         {!isGraph && (
           <div className="json-cytoscape-empty">
@@ -575,6 +574,6 @@ export default function JsonCytoscapePanel(
           </div>
         )}
       </div>
-    </>
+    </ParametersSplit>
   );
 }
