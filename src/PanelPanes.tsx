@@ -461,13 +461,16 @@ function PanesCell(props: ISplitviewPanelProps) {
         params: { paneId: TITLE_ID },
       });
     }
+    // Default: folded in the grid, open in the left edge group (the title
+    // pane marks edge panels). A remembered state always wins.
+    const defaultOpen = !!ctx.titlePane;
     const controls = e.api.addPanel({
       id: CONTROLS_ID,
       component: "controls",
       title: CONTROLS_TITLE,
       headerSize: PANE_HEADER,
       minimumBodySize: 0,
-      isExpanded: expanded[CONTROLS_ID] !== false,
+      isExpanded: expanded[CONTROLS_ID] ?? defaultOpen,
       params: { paneId: CONTROLS_ID },
     });
     controls.api.onDidExpansionChange((ev) => {
