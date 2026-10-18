@@ -2,13 +2,29 @@
   --accent-json-graph3d-inspect: #ffd166;
 }
 
-.json-graph3d-inspect-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+/* Panel layout: a Dockview Splitview (vertical) whose first cell is a
+   Paneview of control sections and whose second cell is the graph. The
+   Dockview theme class supplies the sash, pane headers and colors; the
+   rules here only size the cells and the control rows. */
+.json-graph3d-inspect-root {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.json-graph3d-inspect-controls-cell,
+.json-graph3d-inspect-graph-cell {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.json-graph3d-inspect-section {
+  height: 100%;
+  overflow: auto;
   padding: 4px 8px;
-  font-size: 12px;
+  box-sizing: border-box;
 }
 
 .json-graph3d-inspect-controls {
@@ -52,7 +68,8 @@
 
 .json-graph3d-inspect-body {
   position: relative;
-  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
   min-height: 0;
   overflow: hidden;
 }

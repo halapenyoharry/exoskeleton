@@ -1,5 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { IDockviewPanelProps } from "dockview-react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  LayoutPriority,
+  Orientation,
+  PaneviewReact,
+  SplitviewReact,
+  themeGithubDark,
+  type IDockviewPanelProps,
+  type IPaneviewPanelProps,
+  type ISplitviewPanelProps,
+  type PaneviewReadyEvent,
+  type SplitviewApi,
+  type SplitviewReadyEvent,
+} from "dockview-react";
 import ForceGraph3D from "react-force-graph-3d";
 import type { ForceGraphMethods } from "react-force-graph-3d";
 import SpriteText from "three-spritetext";
@@ -244,6 +256,92 @@ interface HullHandle {
   mesh: THREE.Mesh;
   material: THREE.MeshBasicMaterial;
 }
+
+// --- Layout inside the panel: Dockview Splitview + Paneview ---------------
+// One column, two rows. Row 1 is a Paneview of collapsible control
+// sections, sized to its content and snap-collapsible by dragging the
+// sash past its minimum. Row 2 is the graph and takes everything else
+// (LayoutPriority.High). Both are Dockview primitives themed with the
+// same class as the dock, so sizing and chrome follow the theme.
+//
+// dockview-react renders nested components through React portals, so the
+// context below crosses the Splitview/Paneview boundary intact; the cells
+// are thin and all state stays in the panel component.
+
+const PANE_HEADER = 24;
+/** One wrapped row of controls. If a narrow panel wraps a section to two
+ *  rows the body scrolls rather than growing; see README. */
+const PANE_BODY = 34;
+
+interface Section {
+  id: string;
+  title: string;
+  node: ReactNode;
+}
+
+interface InspectLayoutCtx {
+  sections: Section[];
+  body: ReactNode;
+}
+
+const InspectLayout = createContext<InspectLayoutCtx>({ sections: [], body: null });
+
+function SectionCell(props: IPaneviewPanelProps<{ sectionId: string }>) {
+  const { sections } = useContext(InspectLayout);
+  const section = sections.find((x) => x.id === props.params.sectionId);
+  return <div className="json-graph3d-inspect-section">{section?.node}</div>;
+}
+
+function ControlsCell(props: ISplitviewPanelProps) {
+  const { sections } = useContext(InspectLayout);
+  const paneApiRef = useRef<PaneviewReadyEvent["api"] | null>(null);
+
+  // Keep the controls row exactly as tall as its expanded sections.
+  const fit = useCallback(() => {
+    const pane = paneApiRef.current;
+    if (!pane) return;
+    const total = pane.panels.reduce(
+      (sum, p) => sum + PANE_HEADER + (p.api.isExpanded ? PANE_BODY : 0),
+      0,
+    );
+    props.api.setSize({ size: total });
+  }, [props.api]);
+
+  const onReady = (e: PaneviewReadyEvent) => {
+    paneApiRef.current = e.api;
+    for (const sec of sections) {
+      const panel = e.api.addPanel({
+        id: sec.id,
+        component: "section",
+        title: sec.title,
+        headerSize: PANE_HEADER,
+        minimumBodySize: PANE_BODY,
+        maximumBodySize: PANE_BODY,
+        isExpanded: true,
+        params: { sectionId: sec.id },
+      });
+      panel.api.onDidExpansionChange(() => fit());
+    }
+    fit();
+  };
+
+  return (
+    <div className="json-graph3d-inspect-controls-cell">
+      <PaneviewReact
+        className={themeGithubDark.className}
+        components={{ section: SectionCell }}
+        onReady={onReady}
+      />
+    </div>
+  );
+}
+
+function GraphCell(_props: ISplitviewPanelProps) {
+  const { body } = useContext(InspectLayout);
+  return <div className="json-graph3d-inspect-graph-cell">{body}</div>;
+}
+
+const splitComponents = { controls: ControlsCell, graph: GraphCell };
 
 export default function JsonGraph3DInspectPanel(
   props: IDockviewPanelProps<JsonGraph3DInspectParams>,
@@ -706,10 +804,11 @@ export default function JsonGraph3DInspectPanel(
     return true;
   };
 
-  return (
-    <>
-      <div className="panel-header json-graph3d-inspect-header">
-        <span>3D-Inspect</span>
+  const sections: Section[] = [
+    {
+      id: "view",
+      title: "view",
+      node: (
         <div className="json-graph3d-inspect-controls">
           <select
             value={params.dimensions}
@@ -719,6 +818,33 @@ export default function JsonGraph3DInspectPanel(
             <option value={2}>2D</option>
             <option value={3}>3D</option>
           </select>
+          <label title="Freeze the physics simulation">
+            <input
+              type="checkbox"
+              checked={params.freezeLayout}
+              onChange={(e) => updateParam("freezeLayout", e.target.checked)}
+            />
+            freeze
+          </label>
+          <label title="Show the category legend">
+            <input
+              type="checkbox"
+              checked={params.showLegend}
+              onChange={(e) => updateParam("showLegend", e.target.checked)}
+            />
+            legend
+          </label>
+          <button onClick={resetView} title="Fit graph to view" className="json-graph3d-inspect-reset-btn">
+            ⤢ fit
+          </button>
+        </div>
+      ),
+    },
+    {
+      id: "labels",
+      title: "labels",
+      node: (
+        <div className="json-graph3d-inspect-controls">
           <select
             value={params.edgeLabels}
             onChange={(e) => updateParam("edgeLabels", e.target.value as InspectLabelMode)}
@@ -729,6 +855,23 @@ export default function JsonGraph3DInspectPanel(
             <option value="never">edges: never</option>
           </select>
           <select
+            value={params.edgeLabelOrientation}
+            onChange={(e) => updateParam("edgeLabelOrientation", e.target.value as EdgeLabelOrientation)}
+            title="Edge label orientation"
+          >
+            <option value="along">labels: along edge</option>
+            <option value="billboard">labels: face viewer</option>
+          </select>
+          <select
+            value={params.hyperedgeLabel}
+            onChange={(e) => updateParam("hyperedgeLabel", e.target.value as HyperedgeLabel)}
+            title="How reified relations (hyperedge nodes) are drawn"
+          >
+            <option value="predicate">relations: predicate</option>
+            <option value="dot">relations: dot</option>
+            <option value="id">relations: id</option>
+          </select>
+          <select
             value={params.nodeSizeBy}
             onChange={(e) => updateParam("nodeSizeBy", e.target.value as NodeSizeBy)}
             title="What drives node text size"
@@ -736,6 +879,14 @@ export default function JsonGraph3DInspectPanel(
             <option value="degree">size: degree</option>
             <option value="uniform">size: uniform</option>
           </select>
+        </div>
+      ),
+    },
+    {
+      id: "color",
+      title: "color & hulls",
+      node: (
+        <div className="json-graph3d-inspect-controls">
           <select
             value={params.edgeColorBy}
             onChange={(e) => updateParam("edgeColorBy", e.target.value as EdgeColorBy)}
@@ -770,45 +921,13 @@ export default function JsonGraph3DInspectPanel(
             />
             contain-lines
           </label>
-          <select
-            value={params.hyperedgeLabel}
-            onChange={(e) => updateParam("hyperedgeLabel", e.target.value as HyperedgeLabel)}
-            title="How reified relations (hyperedge nodes) are drawn"
-          >
-            <option value="predicate">relations: predicate</option>
-            <option value="dot">relations: dot</option>
-            <option value="id">relations: id</option>
-          </select>
-          <select
-            value={params.edgeLabelOrientation}
-            onChange={(e) => updateParam("edgeLabelOrientation", e.target.value as EdgeLabelOrientation)}
-            title="Edge label orientation"
-          >
-            <option value="along">labels: along edge</option>
-            <option value="billboard">labels: face viewer</option>
-          </select>
-          <label title="Freeze the physics simulation">
-            <input
-              type="checkbox"
-              checked={params.freezeLayout}
-              onChange={(e) => updateParam("freezeLayout", e.target.checked)}
-            />
-            freeze
-          </label>
-          <label title="Show the category legend">
-            <input
-              type="checkbox"
-              checked={params.showLegend}
-              onChange={(e) => updateParam("showLegend", e.target.checked)}
-            />
-            legend
-          </label>
-          <button onClick={resetView} title="Fit graph to view" className="json-graph3d-inspect-reset-btn">
-            ⤢
-          </button>
         </div>
-      </div>
-      <div className="panel-body json-graph3d-inspect-body" ref={containerRef}>
+      ),
+    },
+  ];
+
+  const body = (
+    <div className="json-graph3d-inspect-body" ref={containerRef}>
         {!isGraph && (
           <div className="json-graph3d-inspect-empty">
             {doc === undefined ? "Waiting for JSON…" : "No graph structure detected in this JSON."}
@@ -915,7 +1034,36 @@ export default function JsonGraph3DInspectPanel(
             warmupTicks={0}
           />
         )}
+    </div>
+  );
+
+  const splitApiRef = useRef<SplitviewApi | null>(null);
+  const onSplitReady = (e: SplitviewReadyEvent) => {
+    splitApiRef.current = e.api;
+    e.api.addPanel({
+      id: "controls",
+      component: "controls",
+      minimumSize: PANE_HEADER,
+      snap: true,
+      size: sections.length * (PANE_HEADER + PANE_BODY),
+    });
+    e.api.addPanel({
+      id: "graph",
+      component: "graph",
+      priority: LayoutPriority.High,
+    });
+  };
+
+  return (
+    <InspectLayout.Provider value={{ sections, body }}>
+      <div className="json-graph3d-inspect-root">
+        <SplitviewReact
+          className={themeGithubDark.className}
+          orientation={Orientation.VERTICAL}
+          components={splitComponents}
+          onReady={onSplitReady}
+        />
       </div>
-    </>
+    </InspectLayout.Provider>
   );
 }
