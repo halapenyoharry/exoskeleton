@@ -248,7 +248,12 @@ export function ensureEdgeTabs(api: DockviewApi): void {
   if (!edge) return;
   const prev = api.activePanel;
   for (const id of EDGE_TAB_IDS) {
-    if (api.getPanel(id)) continue;
+    const existing = api.getPanel(id);
+    if (existing) {
+      // Saved layouts carry the title they were saved with; keep it current.
+      if (existing.title !== EDGE_TAB_TITLES[id]) existing.api.setTitle(EDGE_TAB_TITLES[id]);
+      continue;
+    }
     try {
       api.addPanel({ id, component: id, title: EDGE_TAB_TITLES[id], position: { referenceGroup: edge.id } });
     } catch (e) {
