@@ -269,9 +269,9 @@ interface HullHandle {
 // are thin and all state stays in the panel component.
 
 const PANE_HEADER = 24;
-/** One wrapped row of controls. If a narrow panel wraps a section to two
- *  rows the body scrolls rather than growing; see README. */
-const PANE_BODY = 34;
+/** Body height of the single graph-parameters section: room for the
+ *  controls to wrap onto ~3 rows at typical widths; scrolls beyond that. */
+const PANE_BODY = 96;
 
 interface Section {
   id: string;
@@ -806,8 +806,8 @@ export default function JsonGraph3DInspectPanel(
 
   const sections: Section[] = [
     {
-      id: "view",
-      title: "view",
+      id: "graph-parameters",
+      title: "graph-parameters",
       node: (
         <div className="json-graph3d-inspect-controls">
           <select
@@ -837,14 +837,6 @@ export default function JsonGraph3DInspectPanel(
           <button onClick={resetView} title="Fit graph to view" className="json-graph3d-inspect-reset-btn">
             ⤢ fit
           </button>
-        </div>
-      ),
-    },
-    {
-      id: "labels",
-      title: "labels",
-      node: (
-        <div className="json-graph3d-inspect-controls">
           <select
             value={params.edgeLabels}
             onChange={(e) => updateParam("edgeLabels", e.target.value as InspectLabelMode)}
@@ -879,14 +871,6 @@ export default function JsonGraph3DInspectPanel(
             <option value="degree">size: degree</option>
             <option value="uniform">size: uniform</option>
           </select>
-        </div>
-      ),
-    },
-    {
-      id: "color",
-      title: "color & hulls",
-      node: (
-        <div className="json-graph3d-inspect-controls">
           <select
             value={params.edgeColorBy}
             onChange={(e) => updateParam("edgeColorBy", e.target.value as EdgeColorBy)}
