@@ -85,6 +85,13 @@ export const graphLibrary: GraphLibraryEntry[] = [
     load: () => import('./berry-thief.json').then((m) => m.default),
   },
   {
+    id: 'scarlet-letter',
+    title: 'The Scarlet Letter',
+    description: 'Hawthorne, 1850: all 25 chapters, 1,122 nodes, 4,153 links. Paragraph layer with prose (public domain) merged with a per-chapter entity extraction (information2topology book pipeline, 2026-10-18).',
+    shape: 'topology',
+    load: () => import('./scarlet-letter.json').then((m) => m.default),
+  },
+  {
     id: 'exoskeleton-system',
     title: 'Exoskeleton system map',
     description: 'Hand-verified TopoThink map of the Exoskeleton app: containment, state change, interactivity, reference.',
