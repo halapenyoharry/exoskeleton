@@ -37,6 +37,7 @@ const accents: Record<string, string> = {
   "procedural-visuals-fountain": "var(--accent-procedural-fountain)",
   "procedural-visuals-recursive": "var(--accent-procedural-recursive)",
   "procedural-visuals-manifold": "var(--accent-procedural-manifold)",
+  "json-attention": "var(--accent-json-attention)",
 };
 
 const glyphs: Record<string, string> = {
@@ -64,6 +65,7 @@ const glyphs: Record<string, string> = {
   "procedural-visuals-fountain": '"≈"',
   "procedural-visuals-recursive": '"▣"',
   "procedural-visuals-manifold": '"◎"',
+  "json-attention": '"◉"',
 };
 
 /** Resolve a panel id to the component key the accent/glyph maps use.
