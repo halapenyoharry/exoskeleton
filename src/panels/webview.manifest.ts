@@ -6,6 +6,7 @@ import LanWebview, { type LanWebviewParams } from "./LanWebview";
 const manifest: PanelManifest<LanWebviewParams> = {
   id: "webview",
   title: "webview",
+  toolbar: true,
   component: LanWebview,
   description:
     "Iframe with a URL bar, for LAN HTTP services and other iframe-friendly surfaces.",

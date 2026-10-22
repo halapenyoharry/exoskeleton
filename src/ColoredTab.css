@@ -1,7 +1,8 @@
-/* Glyph prefix on the tab title — rendered via ::before so we don't have to
-   replace DockviewDefaultTab and lose its drag-and-drop wiring. The glyph
-   character comes from a CSS variable (--tab-glyph) set per-panel by
-   ColoredTab.tsx. */
+/* Dockview's default tab with a per-panel accent and glyph. The glyph is a
+   ::before on the tab content so DockviewDefaultTab keeps its drag wiring. */
+.exo-tab {
+  display: contents;
+}
 .dv-default-tab .dv-default-tab-content::before {
   content: var(--tab-glyph, "");
   margin-right: 8px;
@@ -10,6 +11,7 @@
   display: inline-block;
   letter-spacing: 0;
 }
-
-/* The accent color is carried on the root tab style attribute set by
-   ColoredTab.tsx, so currentColor cascades through tab content + close X. */
+/* The accent color is carried on the wrapper's style attribute, so
+   currentColor cascades through tab content + close X. */
+.dv-tab.dv-active-tab .exo-tab .dv-default-tab { color: var(--tab-accent, inherit); }
+.dv-tab.dv-inactive-tab .exo-tab .dv-default-tab { color: color-mix(in srgb, var(--tab-accent, currentColor) 70%, transparent); }

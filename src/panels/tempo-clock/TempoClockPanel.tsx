@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import { sendOsc } from "../../osc";
 import "./TempoClockPanel.css";
 
@@ -66,7 +66,6 @@ export default function TempoClockPanel(
 
   return (
     <>
-      <div className="panel-header">tempo</div>
       <div className="tempo-clock-body">
         <div className="tempo-clock-controls">
           <button onClick={toggle} className="tempo-clock-play">

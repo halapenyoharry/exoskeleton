@@ -1,40 +1,108 @@
-import type { IDockviewHeaderActionsProps } from "dockview";
-import { panelAccent } from "./ColoredTab";
+import { useEffect, useState } from "react";
+import type { IDockviewHeaderActionsProps } from "dockview-react";
 import { ensureCompanions } from "./persistence/default-layout";
+import { DOCUMENT_EDGE_ID } from "./persistence/document-edge";
+import { emitPanelMenu, getPanelMenu, registerPanelMenu } from "./panel-menu";
+import { getPanes } from "./chrome/panes-registry";
+import { resolveComponentKey } from "./ColoredTab";
+import { getPanesVisibility, subscribePanesVisibility } from "./panes-visibility";
+import { PanelMenuButton, panelHasMenuCell } from "./PanelMenuButton";
+import editorManifest from "./panels/editor.manifest";
+import webviewManifest from "./panels/webview.manifest";
+import dyadicManifest from "./panels/json-dyadic/manifest";
+import jsonEditManifest from "./panels/json-edit/manifest";
+import "./chrome/panes";
 import "./HeaderActions.css";
 
+export { closeBackClosers } from "./PanelMenuButton";
+
+// Manifests whose declared `menu` shows in the ≡ menu.
+for (const m of [editorManifest, webviewManifest, dyadicManifest, jsonEditManifest]) {
+  registerPanelMenu(m.id, m.menu);
+}
+
 /**
- * prefixHeaderActionsComponent — renders BEFORE the tabs in the header bar.
- * Demo: a small colored dot that mirrors the active panel's accent color.
- * Shows the slot exists and that you can read the group's active panel.
+ * leftHeaderActionsComponent — renders right after the tabs, for the
+ * ACTIVE panel: its ≡ menu (manifest.menu) and the action buttons among
+ * its declared panes (e.g. fit). Everything the tab used to carry besides
+ * its name lives here, in Dockview's own slot.
  */
-export function PrefixHeaderActions(props: IDockviewHeaderActionsProps) {
-  // panelAccent resolves the id (clone-aware: "json-tree-x3f9" → the
-  // json-tree accent). "inherit" means unknown — render transparent.
-  const accent = props.activePanel ? panelAccent(props.activePanel.id) : "inherit";
+export function LeftHeaderActions(props: IDockviewHeaderActionsProps) {
+  const active = props.activePanel;
+  // Re-render when any panel's controls cell is snapped away / restored.
+  const [, bump] = useState(0);
+  useEffect(() => subscribePanesVisibility(() => bump((v) => v + 1)), []);
+
+  if (!active) return null;
+  const id = active.id;
+  const key = resolveComponentKey(id) ?? id;
+  const panes = getPanes(key);
+  const showMenu = !!getPanelMenu(key) && !panelHasMenuCell(panes);
+  const paneActions = (panes ?? []).filter((p) => p.kind === "action");
+  const isDocEdge = props.group.id === DOCUMENT_EDGE_ID;
+  const panesVis = getPanesVisibility(id);
+  const showRestore = !!panesVis && !panesVis.visible;
+  if (!showMenu && paneActions.length === 0 && !showRestore) return null;
+
   return (
-    <div className="header-actions header-actions--prefix">
-      <span
-        className="header-dot"
-        style={{ background: accent === "inherit" ? "transparent" : accent }}
-      />
+    <div className="header-actions header-actions--left">
+      {showMenu && (
+        <PanelMenuButton panelId={id} api={active.api} containerApi={props.containerApi} structural={isDocEdge} className="header-btn header-btn--menu" />
+      )}
+      {showRestore && (
+        <button
+          type="button"
+          className="header-btn header-btn--icon"
+          aria-label="Show controls"
+          title="Show controls"
+          onClick={() => panesVis!.show()}
+        >
+          ▤
+        </button>
+      )}
+      {paneActions.map((a) => (
+        <button
+          key={a.id}
+          type="button"
+          className="header-btn header-btn--icon"
+          aria-label={a.label}
+          title={a.tooltip ?? a.label}
+          onClick={() => emitPanelMenu(id, a.id)}
+        >
+          {a.icon}
+        </button>
+      ))}
     </div>
   );
 }
 
 /**
- * leftHeaderActionsComponent — renders to the right of the tabs, left of the right-actions slot.
- * Demo: a "+ tab" button that adds another panel of the active panel's type as a tab.
- * Shows: per-group action, access to activePanel and containerApi, programmatic addPanel.
+ * rightHeaderActionsComponent — renders at the far right of the header bar:
+ *   - ⤡ all: while this group is maximized (phone tap-to-focus), restores the grid.
+ *   - +: a blank tab with a component picker (alt-click: clone the active tab's type).
+ *   - ⤴ popout: tears the whole group out into its own window.
+ *   - ⨯ close-group: closes every panel in this group at once.
  */
-export function LeftHeaderActions(props: IDockviewHeaderActionsProps) {
-  function addTab() {
+export function RightHeaderActions(props: IDockviewHeaderActionsProps) {
+  const [maximized, setMaximized] = useState(() => props.group.api.isMaximized());
+  useEffect(() => {
+    const sync = () => setMaximized(props.group.api.isMaximized());
+    sync();
+    const d = props.containerApi.onDidMaximizedGroupChange(sync);
+    return () => d.dispose();
+  }, [props.containerApi, props.group]);
+  function addBlank() {
+    const id = `blank-${Math.random().toString(36).slice(2, 6)}`;
+    props.containerApi.addPanel({
+      id,
+      component: "blank",
+      title: "new",
+      position: { referenceGroup: props.group },
+    });
+  }
+  function cloneTab() {
     const active = props.activePanel;
     if (!active) return;
-    // The panel's real component name — NOT a substring of its id.
-    // (The old `id.split("-")[0]` produced "json"/"tempo" for every
-    // hyphenated panel, which isn't a registered component, so + threw
-    // for the whole json-* family. Hypergraph observation #3.)
     const component = active.view.contentComponent;
     const newId = `${component}-${Math.random().toString(36).slice(2, 6)}`;
     props.containerApi.addPanel({
@@ -43,48 +111,35 @@ export function LeftHeaderActions(props: IDockviewHeaderActionsProps) {
       title: active.title ?? component,
       position: { referenceGroup: props.group },
     });
-    // A cloned json viewer needs its json-bus producer too.
     ensureCompanions(props.containerApi, component);
   }
-  return (
-    <div className="header-actions header-actions--left">
-      <button className="header-btn" title="add another tab of this type" onClick={addTab}>
-        +
-      </button>
-    </div>
-  );
-}
-
-/**
- * rightHeaderActionsComponent — renders at the far right of the header bar.
- * Two buttons:
- *   - ⤴ popout: tears the whole group out into its own OS-level window
- *     (Tauri spawns a fresh WebviewWindow; the panels keep their content,
- *     but they're now in a separate top-level window the user can move,
- *     resize, or close independently of the main one).
- *   - ⨯ close-group: closes every panel in this group at once.
- */
-export function RightHeaderActions(props: IDockviewHeaderActionsProps) {
   function closeGroup() {
     [...props.panels].forEach((p) => p.api.close());
   }
   function popoutGroup() {
     props.containerApi.addPopoutGroup(props.group);
   }
+  // The document edge is structural: no + / popout / close-all. Its tab's ×
+  // collapses the edge (ColoredTab.tsx).
+  if (props.group.id === DOCUMENT_EDGE_ID) return null;
   return (
     <div className="header-actions header-actions--right">
+      {maximized && (
+        <button className="header-btn header-btn--all" title="show all panes again" onClick={() => props.group.api.exitMaximized()}>
+          ⤡ all
+        </button>
+      )}
       <button
         className="header-btn"
-        title="pop out this group into its own window"
-        onClick={popoutGroup}
+        title="new blank tab (pick a component) — alt-click: duplicate this tab's type"
+        onClick={(e) => (e.altKey ? cloneTab() : addBlank())}
       >
+        +
+      </button>
+      <button className="header-btn header-btn--popout" title="pop out this group into its own window" onClick={popoutGroup}>
         ⤴
       </button>
-      <button
-        className="header-btn header-btn--danger"
-        title="close all panels in this group"
-        onClick={closeGroup}
-      >
+      <button className="header-btn header-btn--danger" title="close all panels in this group" onClick={closeGroup}>
         ⨯
       </button>
     </div>

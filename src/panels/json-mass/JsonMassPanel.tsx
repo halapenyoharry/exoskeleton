@@ -1,8 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import * as d3 from "d3";
+import {
+  getActiveDocumentId,
+  onActiveDocumentIdChange,
+  areGraphsConnected,
+  onGraphsConnectionChange,
+} from "../../osc/channels";
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats } from "../../data/json-utils/docStats";
+import { onPanelMenu } from "../../panel-menu";
 import { useElementSize } from "../../useElementSize";
 import { jsonToHierarchy } from "../../data/json-utils/jsonToHierarchy";
 import "./JsonMassPanel.css";
@@ -155,7 +162,20 @@ export default function JsonMassPanel(
 
 
   // Visibility-aware doc subscription; debounced resize (see the hooks).
-  const doc = useJsonDoc(props.api, params.documentId);
+  const [activeDocId, setActiveDocId] = useState(params.documentId);
+  const [connected, setConnected] = useState(areGraphsConnected());
+  useEffect(() => onGraphsConnectionChange(setConnected), []);
+  useEffect(() => {
+    if (!connected) {
+      setActiveDocId(params.documentId);
+      return;
+    }
+    setActiveDocId(getActiveDocumentId());
+    return onActiveDocumentIdChange((id) => {
+      setActiveDocId(id);
+    });
+  }, [connected, params.documentId]);
+  const doc = useJsonDoc(props.api, activeDocId);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const size = useElementSize(containerRef);
@@ -422,10 +442,17 @@ export default function JsonMassPanel(
     params.panZoomMax,
   ]);
 
+  useEffect(
+    () =>
+      onPanelMenu(props.api.id, (id) => {
+        if (id === "reset") resetRef.current();
+      }),
+    [props.api.id],
+  );
+
   return (
     <>
       <div className="panel-header json-mass-header">
-        <span>json-mass</span>
         <button
           onClick={() => resetRef.current()}
           title="Reset view"

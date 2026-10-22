@@ -1,0 +1,43 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "info2topo-shell",
+  "description": "Allows executing the info2topo python CLI",
+  "windows": ["*"],
+  "permissions": [
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "run-info2topo",
+          "cmd": "python3",
+          "args": [
+            "/Users/harold/Projects/information2topology/i2t_cli.py",
+            "extract",
+            { "validator": ".*" },
+            "--out",
+            { "validator": ".*" },
+            "--api-key",
+            { "validator": ".*" },
+            "--model",
+            { "validator": ".*" },
+            "--project"
+          ]
+        },
+        {
+          "name": "run-info2topo-no-model",
+          "cmd": "python3",
+          "args": [
+            "/Users/harold/Projects/information2topology/i2t_cli.py",
+            "extract",
+            { "validator": ".*" },
+            "--out",
+            { "validator": ".*" },
+            "--api-key",
+            { "validator": ".*" },
+            "--project"
+          ]
+        }
+      ]
+    }
+  ]
+}

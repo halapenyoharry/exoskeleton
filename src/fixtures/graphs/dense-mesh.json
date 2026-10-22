@@ -1,0 +1,768 @@
+{
+  "title": "Dense mesh",
+  "description": "40 nodes, 120 links, four groups. Force and 3D stress test.",
+  "nodes": [
+    {
+      "id": "n00",
+      "group": 1
+    },
+    {
+      "id": "n01",
+      "group": 1
+    },
+    {
+      "id": "n02",
+      "group": 3
+    },
+    {
+      "id": "n03",
+      "group": 2
+    },
+    {
+      "id": "n04",
+      "group": 2
+    },
+    {
+      "id": "n05",
+      "group": 2
+    },
+    {
+      "id": "n06",
+      "group": 1
+    },
+    {
+      "id": "n07",
+      "group": 1
+    },
+    {
+      "id": "n08",
+      "group": 4
+    },
+    {
+      "id": "n09",
+      "group": 1
+    },
+    {
+      "id": "n10",
+      "group": 1
+    },
+    {
+      "id": "n11",
+      "group": 1
+    },
+    {
+      "id": "n12",
+      "group": 2
+    },
+    {
+      "id": "n13",
+      "group": 2
+    },
+    {
+      "id": "n14",
+      "group": 1
+    },
+    {
+      "id": "n15",
+      "group": 2
+    },
+    {
+      "id": "n16",
+      "group": 4
+    },
+    {
+      "id": "n17",
+      "group": 2
+    },
+    {
+      "id": "n18",
+      "group": 4
+    },
+    {
+      "id": "n19",
+      "group": 3
+    },
+    {
+      "id": "n20",
+      "group": 1
+    },
+    {
+      "id": "n21",
+      "group": 2
+    },
+    {
+      "id": "n22",
+      "group": 4
+    },
+    {
+      "id": "n23",
+      "group": 3
+    },
+    {
+      "id": "n24",
+      "group": 3
+    },
+    {
+      "id": "n25",
+      "group": 2
+    },
+    {
+      "id": "n26",
+      "group": 2
+    },
+    {
+      "id": "n27",
+      "group": 3
+    },
+    {
+      "id": "n28",
+      "group": 1
+    },
+    {
+      "id": "n29",
+      "group": 1
+    },
+    {
+      "id": "n30",
+      "group": 4
+    },
+    {
+      "id": "n31",
+      "group": 1
+    },
+    {
+      "id": "n32",
+      "group": 3
+    },
+    {
+      "id": "n33",
+      "group": 3
+    },
+    {
+      "id": "n34",
+      "group": 3
+    },
+    {
+      "id": "n35",
+      "group": 1
+    },
+    {
+      "id": "n36",
+      "group": 4
+    },
+    {
+      "id": "n37",
+      "group": 1
+    },
+    {
+      "id": "n38",
+      "group": 4
+    },
+    {
+      "id": "n39",
+      "group": 1
+    }
+  ],
+  "links": [
+    {
+      "source": "n00",
+      "target": "n04",
+      "value": 5
+    },
+    {
+      "source": "n00",
+      "target": "n12",
+      "value": 5
+    },
+    {
+      "source": "n00",
+      "target": "n33",
+      "value": 1
+    },
+    {
+      "source": "n01",
+      "target": "n09",
+      "value": 5
+    },
+    {
+      "source": "n01",
+      "target": "n11",
+      "value": 3
+    },
+    {
+      "source": "n01",
+      "target": "n20",
+      "value": 4
+    },
+    {
+      "source": "n01",
+      "target": "n28",
+      "value": 1
+    },
+    {
+      "source": "n01",
+      "target": "n30",
+      "value": 1
+    },
+    {
+      "source": "n01",
+      "target": "n34",
+      "value": 3
+    },
+    {
+      "source": "n01",
+      "target": "n36",
+      "value": 3
+    },
+    {
+      "source": "n02",
+      "target": "n07",
+      "value": 2
+    },
+    {
+      "source": "n02",
+      "target": "n19",
+      "value": 1
+    },
+    {
+      "source": "n02",
+      "target": "n29",
+      "value": 2
+    },
+    {
+      "source": "n02",
+      "target": "n34",
+      "value": 5
+    },
+    {
+      "source": "n02",
+      "target": "n38",
+      "value": 1
+    },
+    {
+      "source": "n03",
+      "target": "n04",
+      "value": 1
+    },
+    {
+      "source": "n03",
+      "target": "n07",
+      "value": 4
+    },
+    {
+      "source": "n03",
+      "target": "n31",
+      "value": 1
+    },
+    {
+      "source": "n03",
+      "target": "n32",
+      "value": 5
+    },
+    {
+      "source": "n03",
+      "target": "n36",
+      "value": 2
+    },
+    {
+      "source": "n04",
+      "target": "n11",
+      "value": 2
+    },
+    {
+      "source": "n04",
+      "target": "n16",
+      "value": 4
+    },
+    {
+      "source": "n04",
+      "target": "n18",
+      "value": 5
+    },
+    {
+      "source": "n04",
+      "target": "n20",
+      "value": 2
+    },
+    {
+      "source": "n04",
+      "target": "n21",
+      "value": 3
+    },
+    {
+      "source": "n04",
+      "target": "n22",
+      "value": 5
+    },
+    {
+      "source": "n04",
+      "target": "n30",
+      "value": 5
+    },
+    {
+      "source": "n04",
+      "target": "n37",
+      "value": 4
+    },
+    {
+      "source": "n05",
+      "target": "n17",
+      "value": 2
+    },
+    {
+      "source": "n05",
+      "target": "n24",
+      "value": 5
+    },
+    {
+      "source": "n05",
+      "target": "n35",
+      "value": 2
+    },
+    {
+      "source": "n05",
+      "target": "n37",
+      "value": 3
+    },
+    {
+      "source": "n05",
+      "target": "n38",
+      "value": 4
+    },
+    {
+      "source": "n06",
+      "target": "n12",
+      "value": 3
+    },
+    {
+      "source": "n06",
+      "target": "n21",
+      "value": 4
+    },
+    {
+      "source": "n06",
+      "target": "n22",
+      "value": 5
+    },
+    {
+      "source": "n06",
+      "target": "n26",
+      "value": 4
+    },
+    {
+      "source": "n06",
+      "target": "n38",
+      "value": 1
+    },
+    {
+      "source": "n07",
+      "target": "n08",
+      "value": 2
+    },
+    {
+      "source": "n07",
+      "target": "n13",
+      "value": 2
+    },
+    {
+      "source": "n07",
+      "target": "n25",
+      "value": 1
+    },
+    {
+      "source": "n07",
+      "target": "n27",
+      "value": 3
+    },
+    {
+      "source": "n07",
+      "target": "n29",
+      "value": 1
+    },
+    {
+      "source": "n07",
+      "target": "n30",
+      "value": 5
+    },
+    {
+      "source": "n07",
+      "target": "n32",
+      "value": 5
+    },
+    {
+      "source": "n08",
+      "target": "n09",
+      "value": 2
+    },
+    {
+      "source": "n08",
+      "target": "n21",
+      "value": 5
+    },
+    {
+      "source": "n08",
+      "target": "n25",
+      "value": 2
+    },
+    {
+      "source": "n08",
+      "target": "n30",
+      "value": 1
+    },
+    {
+      "source": "n09",
+      "target": "n17",
+      "value": 1
+    },
+    {
+      "source": "n09",
+      "target": "n18",
+      "value": 1
+    },
+    {
+      "source": "n09",
+      "target": "n27",
+      "value": 2
+    },
+    {
+      "source": "n10",
+      "target": "n14",
+      "value": 1
+    },
+    {
+      "source": "n10",
+      "target": "n29",
+      "value": 1
+    },
+    {
+      "source": "n10",
+      "target": "n36",
+      "value": 3
+    },
+    {
+      "source": "n10",
+      "target": "n39",
+      "value": 1
+    },
+    {
+      "source": "n11",
+      "target": "n17",
+      "value": 5
+    },
+    {
+      "source": "n11",
+      "target": "n20",
+      "value": 2
+    },
+    {
+      "source": "n11",
+      "target": "n26",
+      "value": 3
+    },
+    {
+      "source": "n11",
+      "target": "n27",
+      "value": 4
+    },
+    {
+      "source": "n11",
+      "target": "n28",
+      "value": 2
+    },
+    {
+      "source": "n11",
+      "target": "n32",
+      "value": 5
+    },
+    {
+      "source": "n12",
+      "target": "n16",
+      "value": 2
+    },
+    {
+      "source": "n12",
+      "target": "n19",
+      "value": 5
+    },
+    {
+      "source": "n12",
+      "target": "n21",
+      "value": 5
+    },
+    {
+      "source": "n13",
+      "target": "n17",
+      "value": 4
+    },
+    {
+      "source": "n13",
+      "target": "n23",
+      "value": 2
+    },
+    {
+      "source": "n13",
+      "target": "n30",
+      "value": 4
+    },
+    {
+      "source": "n14",
+      "target": "n24",
+      "value": 4
+    },
+    {
+      "source": "n14",
+      "target": "n29",
+      "value": 2
+    },
+    {
+      "source": "n14",
+      "target": "n33",
+      "value": 1
+    },
+    {
+      "source": "n14",
+      "target": "n39",
+      "value": 1
+    },
+    {
+      "source": "n16",
+      "target": "n18",
+      "value": 4
+    },
+    {
+      "source": "n16",
+      "target": "n24",
+      "value": 3
+    },
+    {
+      "source": "n16",
+      "target": "n25",
+      "value": 4
+    },
+    {
+      "source": "n16",
+      "target": "n32",
+      "value": 4
+    },
+    {
+      "source": "n16",
+      "target": "n34",
+      "value": 4
+    },
+    {
+      "source": "n17",
+      "target": "n32",
+      "value": 1
+    },
+    {
+      "source": "n17",
+      "target": "n37",
+      "value": 1
+    },
+    {
+      "source": "n18",
+      "target": "n19",
+      "value": 1
+    },
+    {
+      "source": "n18",
+      "target": "n21",
+      "value": 4
+    },
+    {
+      "source": "n18",
+      "target": "n35",
+      "value": 3
+    },
+    {
+      "source": "n18",
+      "target": "n36",
+      "value": 1
+    },
+    {
+      "source": "n19",
+      "target": "n20",
+      "value": 2
+    },
+    {
+      "source": "n19",
+      "target": "n24",
+      "value": 2
+    },
+    {
+      "source": "n19",
+      "target": "n30",
+      "value": 2
+    },
+    {
+      "source": "n20",
+      "target": "n22",
+      "value": 5
+    },
+    {
+      "source": "n20",
+      "target": "n28",
+      "value": 4
+    },
+    {
+      "source": "n20",
+      "target": "n29",
+      "value": 2
+    },
+    {
+      "source": "n21",
+      "target": "n23",
+      "value": 4
+    },
+    {
+      "source": "n21",
+      "target": "n36",
+      "value": 2
+    },
+    {
+      "source": "n22",
+      "target": "n29",
+      "value": 3
+    },
+    {
+      "source": "n22",
+      "target": "n36",
+      "value": 4
+    },
+    {
+      "source": "n22",
+      "target": "n38",
+      "value": 2
+    },
+    {
+      "source": "n22",
+      "target": "n39",
+      "value": 1
+    },
+    {
+      "source": "n23",
+      "target": "n30",
+      "value": 4
+    },
+    {
+      "source": "n23",
+      "target": "n34",
+      "value": 5
+    },
+    {
+      "source": "n23",
+      "target": "n35",
+      "value": 1
+    },
+    {
+      "source": "n23",
+      "target": "n36",
+      "value": 1
+    },
+    {
+      "source": "n23",
+      "target": "n38",
+      "value": 5
+    },
+    {
+      "source": "n24",
+      "target": "n28",
+      "value": 1
+    },
+    {
+      "source": "n24",
+      "target": "n35",
+      "value": 1
+    },
+    {
+      "source": "n24",
+      "target": "n36",
+      "value": 2
+    },
+    {
+      "source": "n25",
+      "target": "n28",
+      "value": 2
+    },
+    {
+      "source": "n25",
+      "target": "n37",
+      "value": 4
+    },
+    {
+      "source": "n26",
+      "target": "n32",
+      "value": 4
+    },
+    {
+      "source": "n26",
+      "target": "n36",
+      "value": 4
+    },
+    {
+      "source": "n26",
+      "target": "n37",
+      "value": 2
+    },
+    {
+      "source": "n26",
+      "target": "n39",
+      "value": 4
+    },
+    {
+      "source": "n27",
+      "target": "n30",
+      "value": 1
+    },
+    {
+      "source": "n27",
+      "target": "n37",
+      "value": 2
+    },
+    {
+      "source": "n28",
+      "target": "n33",
+      "value": 4
+    },
+    {
+      "source": "n28",
+      "target": "n36",
+      "value": 1
+    },
+    {
+      "source": "n30",
+      "target": "n32",
+      "value": 4
+    },
+    {
+      "source": "n31",
+      "target": "n36",
+      "value": 3
+    },
+    {
+      "source": "n32",
+      "target": "n34",
+      "value": 4
+    },
+    {
+      "source": "n33",
+      "target": "n35",
+      "value": 3
+    },
+    {
+      "source": "n33",
+      "target": "n36",
+      "value": 4
+    },
+    {
+      "source": "n36",
+      "target": "n38",
+      "value": 5
+    },
+    {
+      "source": "n37",
+      "target": "n39",
+      "value": 4
+    }
+  ]
+}

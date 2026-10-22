@@ -2,16 +2,17 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   DockviewReact,
+  themeGithubDark,
   type DockviewApi,
   type DockviewReadyEvent,
-} from "dockview";
+} from "dockview-react";
 import { listen } from "@tauri-apps/api/event";
 import ColoredTab from "./ColoredTab";
 import Watermark from "./Watermark";
 import {
-  PrefixHeaderActions,
   LeftHeaderActions,
   RightHeaderActions,
+  closeBackClosers,
 } from "./HeaderActions";
 import EditorPanel from "./panels/EditorPanel";
 import TerminalPanel from "./panels/TerminalPanel";
@@ -24,6 +25,13 @@ import JsonTreePanel from "./panels/json-tree/JsonTreePanel";
 import JsonCirclesPanel from "./panels/json-circles/JsonCirclesPanel";
 import JsonGraphPanel from "./panels/json-graph/JsonGraphPanel";
 import StatusBarPanel from "./panels/StatusBarPanel";
+import TextViewerPanel from "./panels/text-viewer/TextViewerPanel";
+import BlankPanel from "./panels/BlankPanel";
+import MenuPanel from "./panels/MenuPanel";
+import { MenuContext, type MenuActions } from "./panels/menu-context";
+import { stripTransientPanels } from "./persistence/strip-transient";
+import { loadDeckOptIn, saveDeckOptIn } from "./chrome-settings";
+import { DECK_QUERY, buildDeckLayout, reconcileLayouts } from "./persistence/deck";
 import { exoPanel } from "./PanelRoot";
 import {
   addOrFocusPanel,
@@ -32,10 +40,8 @@ import {
   buildPreset,
   migrateLayout,
   migrateSavedLayout,
-  panelRegistry,
   repairLayout,
 } from "./persistence/default-layout";
-import { panelAccent, panelGlyph } from "./ColoredTab";
 import {
   createWorkspace,
   deleteWorkspace,
@@ -47,10 +53,26 @@ import {
   switchWorkspace,
   updateActiveWorkspaceLayout,
   type AppStateV8,
+  type Workspace,
 } from "./persistence/storage";
-import { tauriStorage } from "./persistence/tauri-storage";
+import {
+  DOCUMENT_EDGE,
+  DOCUMENT_EDGE_ID,
+  DOCUMENT_PANEL_ID,
+  ensureEdgeTabs,
+  syncDocumentEdgeHeader,
+  toggleEdgeTab,
+  ensureDocumentEdge,
+  isDocumentOpen,
+  isPhoneWidth,
+  precreateEdgeGroups,
+  setDocumentOpen,
+  toggleDocument,
+} from "./persistence/document-edge";
+import { appStorage } from "./persistence/app-storage";
 import { createDebounce } from "./utils/debounce";
-import { DEFAULT_PRESET_ID } from "./persistence/presets";
+import { errorText, inTauri, saveTextFile } from "./utils/file-io";
+import { defaultPresetId, isWebRuntime, presets } from "./persistence/presets";
 import {
   parseWorkspaceDocument,
   serializeWorkspaceDocument,
@@ -60,9 +82,17 @@ import "./App.css";
 // Lazy-loaded heavy visualization panels for optimal initial startup performance
 const JsonCytoscapePanel = lazy(() => import("./panels/json-cytoscape/JsonCytoscapePanel"));
 const JsonGraph3DPanel = lazy(() => import("./panels/json-graph3d/JsonGraph3DPanel"));
+const JsonGraph3DInspectPanel = lazy(() => import("./panels/json-graph3d-inspect/JsonGraph3DInspectPanel"));
 const JsonDyadicPanel = lazy(() => import("./panels/json-dyadic/JsonDyadicPanel"));
 const JsonMassPanel = lazy(() => import("./panels/json-mass/JsonMassPanel"));
+const JsonAttentionPanel = lazy(() => import("./panels/json-attention/JsonAttentionPanel"));
 const ScopePanel = lazy(() => import("./panels/scope/ScopePanel"));
+const TopologyExtractPanel = lazy(() => import("./panels/topology-extract/TopologyExtractPanel"));
+const ProceduralControlPanel = lazy(() => import("./panels/procedural-visuals-suite/ControlPanel"));
+const BouncingBallsPanel = lazy(() => import("./panels/procedural-visuals-suite/BouncingBallsPanel"));
+const FountainPanel = lazy(() => import("./panels/procedural-visuals-suite/FountainPanel"));
+const RecursiveSubdivisionPanel = lazy(() => import("./panels/procedural-visuals-suite/RecursiveSubdivisionPanel"));
+const ManifoldPanel = lazy(() => import("./panels/procedural-visuals-suite/ManifoldPanel"));
 
 function lazyPanel(Component: React.ComponentType<any>, accent: string) {
   const Wrapped = exoPanel(Component, accent);
@@ -79,6 +109,8 @@ function lazyPanel(Component: React.ComponentType<any>, accent: string) {
 // Each entry is wrapped with `exoPanel(Component, accent)` or `lazyPanel` so the host
 // (not the panel) owns positioning and the accent stripe.
 const components = {
+  blank:           exoPanel(BlankPanel,         "var(--accent-settings)"),
+  menu:            exoPanel(MenuPanel,          "var(--accent-settings)"),
   editor:          exoPanel(EditorPanel,        "var(--accent-editor)"),
   terminal:        exoPanel(TerminalPanel,      "var(--accent-terminal)"),
   webview:         exoPanel(LanWebview,         "var(--accent-webview)"),
@@ -93,22 +125,38 @@ const components = {
   "json-cytoscape":lazyPanel(JsonCytoscapePanel, "var(--accent-json-cytoscape)"),
   "json-graph":    exoPanel(JsonGraphPanel,     "var(--accent-json-graph)"),
   "json-graph3d":  lazyPanel(JsonGraph3DPanel,  "var(--accent-json-graph3d)"),
+  "json-graph3d-inspect": lazyPanel(JsonGraph3DInspectPanel, "var(--accent-json-graph3d-inspect)"),
   "json-dyadic":   lazyPanel(JsonDyadicPanel,   "var(--accent-json-dyadic)"),
+  "text-viewer":   exoPanel(TextViewerPanel,    "var(--accent-editor)"),
+  "topology-extract": lazyPanel(TopologyExtractPanel, "var(--accent-topology-extract)"),
+  "procedural-visuals-control":     lazyPanel(ProceduralControlPanel,    "var(--accent-procedural-control)"),
+  "procedural-visuals-balls":       lazyPanel(BouncingBallsPanel,        "var(--accent-procedural-balls)"),
+  "procedural-visuals-fountain":    lazyPanel(FountainPanel,             "var(--accent-procedural-fountain)"),
+  "procedural-visuals-recursive":   lazyPanel(RecursiveSubdivisionPanel, "var(--accent-procedural-recursive)"),
+  "procedural-visuals-manifold": lazyPanel(ManifoldPanel,  "var(--accent-procedural-manifold)"),
+  "json-attention":lazyPanel(JsonAttentionPanel,"var(--accent-json-attention)"),
   // Registered raw (no exoPanel wrapper) on purpose: the status bar owns
   // its full-width chrome and doesn't take the accent-stripe convention.
   "status-bar-panel": StatusBarPanel,
 };
 
-// Choose persistence backend by environment.
-// Today: Tauri only. Tomorrow: branch on window.__TAURI_INTERNALS__,
-// acquireVsCodeApi, etc. to pick web/vscode adapters.
-const storage = tauriStorage;
+// Persistence backend for this runtime: the Tauri store in the desktop app,
+// localStorage in a browser tab (where the Tauri store doesn't exist and
+// every reload used to fall back to the default layout).
+const storage = appStorage;
 
-// The Cmd+B-summoned settings panel lives in a Dockview 6 edge group on
-// the left side of the main grid. Same constant used by toggleSettings,
-// the auto-cleanup hook, and (implicitly) the serialized layout.
-const SIDE_EDGE = "left" as const;
-const SIDE_GROUP_ID = "side-grid";
+
+/** Deck is opt-in: a phone shows the grid unless "One pane at a time" is on. */
+function wantsDeck(): boolean {
+  return isPhoneWidth() && loadDeckOptIn();
+}
+
+/** The layout to show for a workspace in deck mode: its saved deck
+ *  reconciled with the grid (panels added/removed on desktop follow), or a
+ *  fresh deck built from the grid. */
+function deckLayoutFor(ws: Workspace) {
+  return ws.mobileLayout ? reconcileLayouts(ws.mobileLayout, ws.layout) : buildDeckLayout(ws.layout);
+}
 
 export default function App() {
   // Initial-load gate. `undefined` = loading; null = no saved state; an
@@ -124,10 +172,19 @@ export default function App() {
 
   const mainApiRef = useRef<DockviewApi | null>(null);
   const [isStatusBarVisible, setIsStatusBarVisible] = useState(false);
-  // Floating ⊞ add-panel menu (bottom-right, next to the astromech
-  // summoner). The roster is read fresh from the registry on each open,
-  // so open/closed markers stay accurate without extra subscriptions.
-  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  // Deck (phone) mode: single group of pills. Ref for handlers, state for render.
+  const deckModeRef = useRef(false);
+  const [deckMode, setDeckModeState] = useState(false);
+  // Phone width (grid or deck) and the persisted deck opt-in.
+  const [phone, setPhone] = useState(isPhoneWidth);
+  const [deckOptIn, setDeckOptInState] = useState(loadDeckOptIn);
+  const deckOptInRef = useRef(deckOptIn);
+  // In deck mode the status bar is hidden until opened from the ⊞ menu.
+  const deckStatusWantedRef = useRef(false);
+  const collapsingRef = useRef(false);
+  const mruRef = useRef<string[]>([]);
+  // The ⊞ menu (add panel / workspaces) and settings are tabs in the
+  // document edge (left), beside json-edit; see ensureEdgeTabs.
 
   // Preferences state. Currently empty (see Preferences interface in
   // storage.ts); included in the save so future fields persist automatically.
@@ -136,10 +193,15 @@ export default function App() {
   // Single debounced save. Reads the live api ref + current AppStateV8 each tick.
   const save = useRef(
     createDebounce(() => {
-      const main = mainApiRef.current?.toJSON();
+      const raw = mainApiRef.current?.toJSON();
+      const main = raw && stripTransientPanels(raw);
       const current = appStateRef.current;
       if (!main || !current) return;
-      const next = updateActiveWorkspaceLayout(current, main);
+      const next = updateActiveWorkspaceLayout(
+        current,
+        main,
+        deckModeRef.current ? "mobileLayout" : "layout",
+      );
       appStateRef.current = next;
       storage.save(next);
     }, 400),
@@ -203,7 +265,7 @@ export default function App() {
         setAppState(v8);
         const activeWs = getActiveWorkspace(v8);
         if (mainApiRef.current && activeWs) {
-          applyWorkspaceState(mainApiRef.current, activeWs.layout, v8.version);
+          applyWs(mainApiRef.current, activeWs, v8.version);
         }
       }
     };
@@ -212,6 +274,150 @@ export default function App() {
       window.removeEventListener("exoskeleton:state-applied", handleStateApplied);
     };
   }, []);
+
+  function setDeckMode(on: boolean) {
+    deckModeRef.current = on;
+    setDeckModeState(on);
+  }
+
+  function hideStatusBarInDeck(api: DockviewApi) {
+    if (deckStatusWantedRef.current) return;
+    const sb = api.getPanel("status-bar");
+    if (sb) api.removePanel(sb);
+    if (api.getEdgeGroup("bottom") && !api.getPanel("status-bar")) api.removeEdgeGroup("bottom");
+    setIsStatusBarVisible(!!api.getPanel("status-bar"));
+  }
+
+  /** Apply a workspace to the dock in whichever mode we are in. */
+  function applyWs(api: DockviewApi, ws: Workspace, version: number) {
+    if (deckModeRef.current) {
+      applyWorkspaceState(api, deckLayoutFor(ws), version);
+      hideStatusBarInDeck(api);
+    } else {
+      applyWorkspaceState(api, ws.layout, version);
+      ensureStatusBarChrome(api);
+    }
+  }
+
+  /** The status bar is restored by fromJSON with a visible header; (re)hide it,
+   *  or mount it if the saved grid lacked one. */
+  function ensureStatusBarChrome(api: DockviewApi) {
+    const sb = api.getPanel("status-bar");
+    if (!sb) {
+      mountStatusBar(api);
+      return;
+    }
+    sb.group.header.hidden = true;
+    setIsStatusBarVisible(true);
+  }
+
+  /** Width crossed the threshold: swap grid <-> deck, never flattening the grid. */
+  function swapMode(toDeck: boolean) {
+    const api = mainApiRef.current;
+    if (!api || deckModeRef.current === toDeck) return;
+    save.flush(); // writes the outgoing mode's slot
+    const cur = appStateRef.current;
+    if (!cur) return;
+    const ws = getActiveWorkspace(cur);
+    if (toDeck) {
+      setDeckMode(true);
+      const deck = deckLayoutFor(ws);
+      applyWorkspaceState(api, deck, cur.version);
+      hideStatusBarInDeck(api);
+    } else {
+      const deck = stripTransientPanels(api.toJSON());
+      const withDeck = updateActiveWorkspaceLayout(cur, deck, "mobileLayout");
+      const grid = reconcileLayouts(ws.layout, deck);
+      const next = updateActiveWorkspaceLayout(withDeck, grid, "layout");
+      appStateRef.current = next;
+      setAppState(next);
+      setDeckMode(false);
+      applyWorkspaceState(api, grid, next.version);
+      ensureStatusBarChrome(api);
+    }
+  }
+
+  /** Deck keeps exactly one main group: anything that opened a second group
+   *  (registry positions, drops) is folded back into it. */
+  function collapseDeck(api: DockviewApi) {
+    if (collapsingRef.current) return;
+    const mains = api.groups.filter((g) => g.api.location.type === "grid");
+    if (mains.length <= 1) return;
+    collapsingRef.current = true;
+    queueMicrotask(() => {
+      try {
+        const active = api.activePanel;
+        const live = api.groups.filter((g) => g.api.location.type === "grid");
+        const target = live.find((g) => g.panels.length > 0 && g === active?.group) ?? live[0];
+        for (const g of live) {
+          if (g === target) continue;
+          for (const p of [...g.panels]) p.api.moveTo({ group: target, position: "center" });
+        }
+        active?.api.setActive();
+      } catch (e) {
+        console.warn("[exoskeleton] collapseDeck failed:", e);
+      } finally {
+        collapsingRef.current = false;
+      }
+    });
+  }
+
+  // Width threshold: swap between grid and deck as the viewport crosses it.
+  useEffect(() => {
+    if (!isWebRuntime() || typeof window.matchMedia !== "function") return;
+    const mq = window.matchMedia(DECK_QUERY);
+    const onChange = () => {
+      setPhone(mq.matches);
+      swapMode(mq.matches && deckOptInRef.current);
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  // Back absorption (deck, web only): the phone's back gesture dismisses
+  // transient UI, then steps back through recently used panes. It never
+  // leaves the page: the sentinel entry is re-pushed after every pop.
+  useEffect(() => {
+    if (!phone || !isWebRuntime()) return;
+    const sentinel = { exo: "deck" };
+    if ((history.state as { exo?: string } | null)?.exo !== "deck") {
+      history.pushState(sentinel, "");
+    }
+    const onPop = () => {
+      const api = mainApiRef.current;
+      if (api) {
+        if (closeBackClosers()) {
+          /* ≡ menu dismissed */
+        } else if (isDocumentOpen(api)) {
+          setDocumentOpen(api, false, true); // the document sheet closes before anything else
+        } else if (api.hasMaximizedGroup()) {
+          api.exitMaximizedGroup();
+        } else {
+          const mru = mruRef.current;
+          mru.pop(); // current pane
+          while (mru.length) {
+            const prev = api.getPanel(mru[mru.length - 1]);
+            if (prev) {
+              prev.api.setActive();
+              break;
+            }
+            mru.pop();
+          }
+        }
+      }
+      history.pushState(sentinel, "");
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [phone]);
+
+  function toggleDeckOptIn() {
+    const on = !deckOptInRef.current;
+    deckOptInRef.current = on;
+    setDeckOptInState(on);
+    saveDeckOptIn(on);
+    swapMode(on && isPhoneWidth());
+  }
 
   function mountStatusBar(api: DockviewApi) {
     let bottom = api.getEdgeGroup("bottom");
@@ -236,35 +442,12 @@ export default function App() {
     setIsStatusBarVisible(true);
   }
 
-  // Toggle the settings panel. Extracted as a stable named function so the
-  // menu-event handler below can invoke it; future header-action buttons or
-  // programmatic invocations can call it the same way. Settings lives in a
-  // left edge group that's created on demand and torn down when its last
-  // panel closes (see onDidLayoutChange cleanup in onMainReady).
+  // Cmd+B: the settings tab in the document edge (left). Open it, or
+  // collapse the edge when settings is already showing.
   function toggleSettings() {
     const api = mainApiRef.current;
     if (!api) return;
-
-    const existing = api.getPanel("settings");
-    if (existing) {
-      api.removePanel(existing);
-      return;
-    }
-
-    let edge = api.getEdgeGroup(SIDE_EDGE);
-    if (!edge) {
-      edge = api.addEdgeGroup(SIDE_EDGE, {
-        id: SIDE_GROUP_ID,
-        initialSize: 320,
-        minimumSize: 200,
-      });
-    }
-    api.addPanel({
-      id: "settings",
-      component: "settings",
-      title: "settings",
-      position: { referenceGroup: edge.id },
-    });
+    toggleEdgeTab(api, "settings", isPhoneWidth());
   }
 
   // Cmd+B / Ctrl+B is wired via a Tauri Menu accelerator on the Rust side
@@ -274,21 +457,60 @@ export default function App() {
   // sees those (events don't cross the iframe boundary, and cross-origin
   // pages block injection of our own listener).
   useEffect(() => {
+    if (!inTauri()) return; // no native menu in a browser tab
     const unlistenP = listen("shortcut:toggle-settings", () => toggleSettings());
     return () => {
-      void unlistenP.then((fn) => fn());
+      void unlistenP.then((fn) => fn()).catch(() => {});
     };
+  }, []);
+
+  /** Cmd+J: expand/collapse the document (left edge). On a phone it is a sheet. */
+  function toggleDocumentNow() {
+    const api = mainApiRef.current;
+    if (!api) return;
+    toggleDocument(api, isPhoneWidth());
+    save();
+  }
+
+  // Cmd+J / Ctrl+J. Tauri: native menu accelerator (same reason as Cmd+B
+  // above). Browser: a window keydown listener.
+  useEffect(() => {
+    if (inTauri()) {
+      const unlistenP = listen("shortcut:toggle-document", () => toggleDocumentNow());
+      return () => {
+        void unlistenP.then((fn) => fn()).catch(() => {});
+      };
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || e.key.toLowerCase() !== "j") return;
+      e.preventDefault();
+      toggleDocumentNow();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   function onMainReady(event: DockviewReadyEvent) {
     mainApiRef.current = event.api;
+    const startInDeck = wantsDeck();
+    const phoneNow = isPhoneWidth();
+    setDeckMode(startInDeck);
+    let loadedDeck = false;
     if (appState) {
       const activeWs = getActiveWorkspace(appState);
       // Restore preferences so the first auto-save round-trips them.
       if (appState.preferences) prefsRef.current = appState.preferences;
       try {
-        const layout = migrateSavedLayout(activeWs.layout, appState.version);
+        const layout = migrateSavedLayout(
+          startInDeck ? deckLayoutFor(activeWs) : activeWs.layout,
+          appState.version,
+          { phone: phoneNow },
+        );
+        // Make the edge groups first so they keep their options (Dockview
+        // would otherwise create them from JSON with defaults).
+        precreateEdgeGroups(event.api, layout, phoneNow);
         event.api.fromJSON(layout);
+        loadedDeck = startInDeck;
         // Add any panels the user's saved state predates. No-op when the
         // saved version is already current. Without this, panels installed
         // after the user's last save would never appear unless they
@@ -306,6 +528,60 @@ export default function App() {
       }
     } else {
       buildDefaultLayout(event.api);
+      // First run (nothing saved yet): start a state so the debounced save
+      // has something to write. Without this a first run never persisted,
+      // which is every run in a fresh browser tab.
+      // NOTE: `version` here is the AppStateV8 *shape* version (literal 8),
+      // but migrateLayout reads the same field as the panel-registry schema
+      // version (CURRENT_VERSION, now 11). The two were conflated before
+      // this session; consequence: autoAdd panels re-add on every launch
+      // even if closed. Tracked in SESSIONS.md, not fixed here.
+      const fresh: AppStateV8 = {
+        version: 8,
+        activeWorkspaceId: "default",
+        workspaces: {
+          default: {
+            id: "default",
+            name: "Default Workspace",
+            layout: stripTransientPanels(event.api.toJSON()),
+            updatedAt: Date.now(),
+          },
+        },
+        preferences: {},
+      };
+      appStateRef.current = fresh;
+      setAppState(fresh);
+    }
+
+    // Phone with only a grid on hand (first run, or the fallback above):
+    // fold it into the deck; the grid stays in `layout` as the workspace's
+    // desktop arrangement.
+    if (startInDeck && !loadedDeck) {
+      const grid = stripTransientPanels(event.api.toJSON());
+      const cur = appStateRef.current;
+      if (cur && !appState) {
+        appStateRef.current = updateActiveWorkspaceLayout(cur, grid, "layout");
+      }
+      event.api.clear();
+      event.api.fromJSON(buildDeckLayout(grid));
+    }
+
+    // The left edge always exists and always holds the document (collapsed
+    // when the saved layout predates it). Open/closed + size are persisted
+    // with the layout; a phone always starts collapsed.
+    ensureDocumentEdge(event.api, { phone: phoneNow });
+    ensureEdgeTabs(event.api);
+    // Tabs on top while expanded, vertical strip while collapsed.
+    syncDocumentEdgeHeader(event.api);
+    event.api.getEdgeGroup(DOCUMENT_EDGE)?.onDidCollapsedChange(() => {
+      syncDocumentEdgeHeader(event.api);
+      save();
+    });
+    // Dragging the edge's sash resizes it without any Dockview layout event;
+    // observe the group element so its size is saved with the workspace.
+    const docEdgeEl = event.api.groups.find((g) => g.id === DOCUMENT_EDGE_ID)?.element;
+    if (docEdgeEl && typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(() => save()).observe(docEdgeEl);
     }
 
     // Rescue pathological saved layouts (panels absorbed into an edge
@@ -315,25 +591,16 @@ export default function App() {
 
     // Check if status bar is in the restored panel list; if not, mount it.
     const statusBarPanel = event.api.getPanel("status-bar");
-    if (!statusBarPanel) {
+    if (startInDeck) {
+      hideStatusBarInDeck(event.api);
+    } else if (!statusBarPanel) {
       mountStatusBar(event.api);
     } else {
       statusBarPanel.group.header.hidden = true;
       setIsStatusBarVisible(true);
     }
 
-    // Auto-cleanup: when the left edge group empties (e.g. user closes the
-    // settings tab), remove the edge group entirely. Mirrors the old
-    // "auto-hide side-grid when empty" UX from the peer-grid era.
     event.api.onDidLayoutChange(() => {
-      const edge = event.api.getEdgeGroup(SIDE_EDGE);
-      if (edge) {
-        const group = event.api.groups.find((g) => g.id === edge.id);
-        if (group && group.panels.length === 0) {
-          event.api.removeEdgeGroup(SIDE_EDGE);
-        }
-      }
-
       const bottom = event.api.getEdgeGroup("bottom");
       if (bottom) {
         const group = event.api.groups.find((g) => g.id === bottom.id);
@@ -343,9 +610,36 @@ export default function App() {
       }
       setIsStatusBarVisible(!!event.api.getPanel("status-bar"));
 
+      if (deckModeRef.current) collapseDeck(event.api);
       save();
     });
-    event.api.onDidActivePanelChange(save);
+    event.api.onDidActivePanelChange((e) => {
+      const p = e.panel; // Dockview 8: event is { panel, origin }, not the panel
+      if (
+        isPhoneWidth() &&
+        p &&
+        p.id !== "menu" &&
+        p.id !== "status-bar" &&
+        p.id !== "settings" &&
+        p.id !== DOCUMENT_PANEL_ID
+      ) {
+        const mru = mruRef.current;
+        if (mru[mru.length - 1] !== p.id) {
+          const i = mru.indexOf(p.id);
+          if (i >= 0) mru.splice(i, 1);
+          mru.push(p.id);
+          if (mru.length > 20) mru.shift();
+        }
+      }
+      save();
+    });
+  }
+
+  // The menu is a tab in the document edge. "Closing" it after an action
+  // only matters on a phone, where the edge is a sheet over the grid.
+  function closeMenu() {
+    const api = mainApiRef.current;
+    if (api && isPhoneWidth() && isDocumentOpen(api)) setDocumentOpen(api, false, true);
   }
 
   function handleSwitchWorkspace(id: string) {
@@ -355,9 +649,9 @@ export default function App() {
     setAppState(next);
     const targetWs = next.workspaces[id];
     if (targetWs && mainApiRef.current) {
-      applyWorkspaceState(mainApiRef.current, targetWs.layout, next.version);
+      applyWs(mainApiRef.current, targetWs, next.version);
     }
-    setIsAddMenuOpen(false);
+    closeMenu();
   }
 
   function handleCreateWorkspace() {
@@ -368,9 +662,9 @@ export default function App() {
     const { state: next, workspace: newWs } = createWorkspace(appState, name);
     setAppState(next);
     if (mainApiRef.current) {
-      applyWorkspaceState(mainApiRef.current, newWs.layout, next.version);
+      applyWs(mainApiRef.current, newWs, next.version);
     }
-    setIsAddMenuOpen(false);
+    closeMenu();
   }
 
   function handleRenameWorkspace() {
@@ -396,27 +690,25 @@ export default function App() {
       setAppState(next);
       const nextActiveWs = getActiveWorkspace(next);
       if (nextActiveWs && mainApiRef.current) {
-        applyWorkspaceState(mainApiRef.current, nextActiveWs.layout, next.version);
+        applyWs(mainApiRef.current, nextActiveWs, next.version);
       }
     }
   }
 
-  function handleExportWorkspace() {
+  async function handleExportWorkspace() {
     if (!appState) return;
     save.flush();
+    closeMenu();
     const activeWs = getActiveWorkspace(appState);
     const jsonStr = serializeWorkspaceDocument(activeWs);
-    const blob = new Blob([jsonStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
     const safeName = activeWs.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    a.download = `${safeName || "workspace"}.exo.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    setIsAddMenuOpen(false);
+    try {
+      await saveTextFile(jsonStr, `${safeName || "workspace"}.exo.json`, [
+        { name: "Exoskeleton workspace", extensions: ["json"] },
+      ]);
+    } catch (err) {
+      alert(`Failed to export workspace: ${errorText(err)}`);
+    }
   }
 
   function handleImportWorkspace() {
@@ -435,10 +727,15 @@ export default function App() {
           save.flush();
           const newId = `ws_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
           const workspaceToInsert = { ...importedWs, id: newId, updatedAt: Date.now() };
-          const { state: next } = createWorkspace(appState, workspaceToInsert.name, workspaceToInsert.layout);
+          const { state: next, workspace: created } = createWorkspace(
+            appState,
+            workspaceToInsert.name,
+            workspaceToInsert.layout,
+            workspaceToInsert.mobileLayout,
+          );
           setAppState(next);
           if (mainApiRef.current) {
-            applyWorkspaceState(mainApiRef.current, workspaceToInsert.layout, next.version);
+            applyWs(mainApiRef.current, created, next.version);
           }
         } catch (err) {
           alert(`Failed to import workspace: ${(err as Error).message}`);
@@ -447,7 +744,7 @@ export default function App() {
       reader.readAsText(file);
     };
     input.click();
-    setIsAddMenuOpen(false);
+    closeMenu();
   }
 
   function handleOpenWorkspaceInNewWindow(workspaceId: string, e: React.MouseEvent) {
@@ -456,26 +753,102 @@ export default function App() {
     invoke("open_workspace_window", { workspaceId }).catch((err) => {
       console.error("[exoskeleton] failed to open workspace window:", err);
     });
-    setIsAddMenuOpen(false);
+    closeMenu();
   }
 
   if (appState === undefined) {
     return <div className="app-frame app-frame--loading" />;
   }
 
+  const menuActions: MenuActions = {
+    workspaces: appState ? listWorkspaces(appState) : [],
+    activeWorkspaceId: appState?.activeWorkspaceId ?? "",
+    isPanelOpen: (id) => !!mainApiRef.current?.getPanel(id),
+    addPanel: (id) => {
+      if (mainApiRef.current) addOrFocusPanel(mainApiRef.current, id);
+      closeMenu();
+    },
+    switchWorkspace: handleSwitchWorkspace,
+    createWorkspace: handleCreateWorkspace,
+    renameWorkspace: handleRenameWorkspace,
+    deleteWorkspace: handleDeleteWorkspace,
+    openWorkspaceInNewWindow: (id) => handleOpenWorkspaceInNewWindow(id, { stopPropagation() {} } as React.MouseEvent),
+    exportWorkspace: handleExportWorkspace,
+    importWorkspace: handleImportWorkspace,
+    resetLayout: () => {
+      const api = mainApiRef.current;
+      if (!api) return;
+      if (
+        window.confirm(
+          `Reset layout to default (${presets.find((p) => p.id === defaultPresetId())?.name ?? "Minimal"})? Any unsaved panel position changes will be cleared.`,
+        )
+      ) {
+        api.clear();
+        buildPreset(api, defaultPresetId());
+        if (deckModeRef.current && appStateRef.current) {
+          // The preset is a grid: it becomes the desktop layout, and the
+          // deck is rebuilt from it.
+          const grid = stripTransientPanels(api.toJSON());
+          const reset = updateActiveWorkspaceLayout(appStateRef.current, grid, "layout");
+          const ws = getActiveWorkspace(reset);
+          const clean: AppStateV8 = {
+            ...reset,
+            workspaces: { ...reset.workspaces, [ws.id]: { ...ws } },
+          };
+          delete clean.workspaces[ws.id].mobileLayout;
+          appStateRef.current = clean;
+          setAppState(clean);
+          applyWs(api, clean.workspaces[ws.id], clean.version);
+        }
+      }
+    },
+    closeMenu,
+    deckMode,
+    phone,
+    deckOptIn,
+    toggleDeck: () => {
+      toggleDeckOptIn();
+      closeMenu();
+    },
+    statusBarVisible: isStatusBarVisible,
+    toggleStatusBar: () => {
+      const api = mainApiRef.current;
+      if (!api) return;
+      if (api.getPanel("status-bar")) {
+        deckStatusWantedRef.current = false;
+        hideStatusBarInDeck(api);
+      } else {
+        deckStatusWantedRef.current = true;
+        mountStatusBar(api);
+      }
+      closeMenu();
+    },
+    toggleSettings: () => {
+      toggleSettings();
+      closeMenu();
+    },
+    isDocumentOpen: () => !!mainApiRef.current && isDocumentOpen(mainApiRef.current),
+    toggleDocument: () => {
+      toggleDocumentNow();
+      closeMenu();
+    },
+  };
+
   return (
-    <div className="dockview-theme-abyss app-frame">
+    <MenuContext.Provider value={menuActions}>
+    <div className={`app-frame${deckMode ? " exo-deck" : ""}${phone ? " exo-phone" : ""}`}>
       <DockviewReact
         components={components}
+        theme={themeGithubDark}
         // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —
         defaultTabComponent={ColoredTab}
-        watermarkComponent={Watermark}
-        prefixHeaderActionsComponent={PrefixHeaderActions}
         leftHeaderActionsComponent={LeftHeaderActions}
+        watermarkComponent={Watermark}
         rightHeaderActionsComponent={RightHeaderActions}
+        floatingGroupBounds="boundedWithinViewport"
         onReady={onMainReady}
       />
-      {!isStatusBarVisible && mainApiRef.current && (
+      {!isStatusBarVisible && !deckMode && mainApiRef.current && (
         <button
           className="status-bar-summoner-btn"
           onClick={() => mountStatusBar(mainApiRef.current!)}
@@ -484,138 +857,7 @@ export default function App() {
           ⌬
         </button>
       )}
-      {mainApiRef.current && (
-        <button
-          className="add-panel-btn"
-          onClick={() => setIsAddMenuOpen((v) => !v)}
-          title="add a panel or manage workspaces"
-        >
-          ⊞
-        </button>
-      )}
-      {isAddMenuOpen && mainApiRef.current && (
-        <>
-          <div
-            className="add-panel-backdrop"
-            onClick={() => setIsAddMenuOpen(false)}
-          />
-          <div className="add-panel-menu">
-            {appState && (
-              <div className="workspace-menu-section">
-                <div className="workspace-menu-header">
-                  <span className="workspace-menu-title">Workspaces</span>
-                  <div className="workspace-menu-actions">
-                    <button
-                      className="workspace-action-btn"
-                      onClick={handleCreateWorkspace}
-                      title="Create new workspace"
-                    >
-                      + New
-                    </button>
-                    <button
-                      className="workspace-action-btn"
-                      onClick={handleExportWorkspace}
-                      title="Export active workspace (.exo.json)"
-                    >
-                      Export
-                    </button>
-                    <button
-                      className="workspace-action-btn"
-                      onClick={handleImportWorkspace}
-                      title="Import workspace document (.exo.json)"
-                    >
-                      Import
-                    </button>
-                    <button
-                      className="workspace-action-btn"
-                      onClick={handleRenameWorkspace}
-                      title="Rename active workspace"
-                    >
-                      ✎
-                    </button>
-                    <button
-                      className="workspace-action-btn workspace-action-btn--danger"
-                      onClick={handleDeleteWorkspace}
-                      title="Delete active workspace"
-                    >
-                      🗑
-                    </button>
-                  </div>
-                </div>
-                <div className="workspace-list">
-                  {listWorkspaces(appState).map((ws) => {
-                    const isActive = ws.id === appState.activeWorkspaceId;
-                    return (
-                      <button
-                        key={ws.id}
-                        className={`workspace-item ${isActive ? "workspace-item--active" : ""}`}
-                        onClick={() => handleSwitchWorkspace(ws.id)}
-                      >
-                        <span className="workspace-name">{ws.name}</span>
-                        <div className="workspace-item-controls">
-                          <button
-                            className="workspace-popout-btn"
-                            onClick={(e) => handleOpenWorkspaceInNewWindow(ws.id, e)}
-                            title="Open workspace in new window"
-                          >
-                            ❐
-                          </button>
-                          {isActive && <span className="workspace-indicator">●</span>}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="add-panel-divider" />
-              </div>
-            )}
-            {panelRegistry.map((entry) => {
-              const open = !!mainApiRef.current?.getPanel(entry.id);
-              return (
-                <button
-                  key={entry.id}
-                  className="add-panel-item"
-                  onClick={() => {
-                    addOrFocusPanel(mainApiRef.current!, entry.id);
-                    setIsAddMenuOpen(false);
-                  }}
-                >
-                  <span
-                    className="add-panel-glyph"
-                    style={{ color: panelAccent(entry.id) }}
-                  >
-                    {panelGlyph(entry.id)}
-                  </span>
-                  <span className="add-panel-name">{entry.id}</span>
-                  <span className="add-panel-state">
-                    {open ? "●" : "+"}
-                  </span>
-                </button>
-              );
-            })}
-            <div className="add-panel-divider" />
-            <button
-              className="add-panel-item add-panel-reset"
-              onClick={() => {
-                if (
-                  window.confirm(
-                    "Reset layout to default (Minimal)? Any unsaved panel position changes will be cleared.",
-                  )
-                ) {
-                  mainApiRef.current?.clear();
-                  buildPreset(mainApiRef.current!, DEFAULT_PRESET_ID);
-                  setIsAddMenuOpen(false);
-                }
-              }}
-            >
-              <span className="add-panel-glyph" style={{ color: "#ff5252" }}>
-                ↺
-              </span>
-              <span className="add-panel-name">Reset layout...</span>
-            </button>
-          </div>
-        </>
-      )}
     </div>
+    </MenuContext.Provider>
   );
 }

@@ -6,6 +6,7 @@ import JsonMassPanel, {
 
 const manifest: PanelManifest<JsonMassParams> = {
   id: "json-mass",
+  toolbar: true,
   title: "mass",
   component: JsonMassPanel,
   description:

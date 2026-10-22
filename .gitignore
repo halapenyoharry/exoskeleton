@@ -20,3 +20,7 @@ src-tauri/gen
 
 # personal material not meant for a public clone (see docs/ship-plan.md WP-21)
 local/
+_local/
+
+# local build options (see .env.example)
+.env.local

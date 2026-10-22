@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
+import { onPanelMenu } from "../../panel-menu";
 import ForceGraph3D from "react-force-graph-3d";
 import type { ForceGraphMethods } from "react-force-graph-3d";
 import SpriteText from "three-spritetext";
@@ -13,7 +14,7 @@ import {
   onNodeSelectionBroadcast,
   broadcastNodeFocus,
   onNodeFocusBroadcast,
-} from "../../data/json-bus";
+} from "../../osc/channels";
 import { type DetectedGraph } from "../../data/json-utils/graphDetect";
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats, getDetectedGraph } from "../../data/json-utils/docStats";
@@ -275,6 +276,7 @@ export default function JsonGraph3DPanel(
   const containerRef = useRef<HTMLDivElement | null>(null);
   const size = useElementSize(containerRef);
 
+  const prevFreezeRef = useRef(false);
   const fgRef = useRef<ForceGraphMethods<FGNode, FGLink> | undefined>(
     undefined,
   );
@@ -326,13 +328,24 @@ export default function JsonGraph3DPanel(
         n.fy = undefined;
         n.fz = undefined;
       }
-      fgRef.current?.d3ReheatSimulation();
+      // Reheat only when freeze is released. Reheating on every data swap
+      // flips the library's engineRunning on before its (deferred) update has
+      // built `layout`, so layoutTick reads `undefined.tick`.
+      if (prevFreezeRef.current) fgRef.current?.d3ReheatSimulation();
     }
+    prevFreezeRef.current = params.freezeLayout;
   }, [params.freezeLayout, data, perfBlocked]);
 
   const resetView = () => {
     fgRef.current?.zoomToFit(params.fitDuration, params.fitPadding);
   };
+
+  // Header-action "fit" dispatches to the hidden toolbar's action.
+  const menuRef = useRef<(id: string) => void>(() => {});
+  menuRef.current = (id) => {
+    if (id === "fit") resetView();
+  };
+  useEffect(() => onPanelMenu(props.api.id, (id) => menuRef.current(id)), [props.api.id]);
 
   // Listen for external Selection & Focus broadcasts
   useEffect(() => {
@@ -374,7 +387,6 @@ export default function JsonGraph3DPanel(
   return (
     <>
       <div className="panel-header json-graph3d-header">
-        <span>json-graph3d</span>
         <div className="json-graph3d-controls">
           <select
             value={params.dimensions}
@@ -446,6 +458,7 @@ export default function JsonGraph3DPanel(
         )}
         {isGraph && !perfBlocked && size.width > 0 && size.height > 0 && (
           <ForceGraph3D<FGNode, FGLink>
+            key={activeDocId}
             ref={fgRef}
             graphData={data}
             width={size.width}
@@ -527,7 +540,10 @@ export default function JsonGraph3DPanel(
             linkThreeObject={
               showInlineLabels
                 ? ((l: FGLink) => {
-                    const sprite = new SpriteText(l.label || "");
+                    // Spokes of a reified relation carry a role, not a
+                    // label; without this fallback "always" drew empty
+                    // sprites on every TopoThink dyadic document.
+                    const sprite = new SpriteText(l.label || l.role || "");
                     sprite.color = "#7ddff5";
                     sprite.textHeight = params.inlineLabelTextHeight;
                     sprite.backgroundColor = params.inlineLabelBg;

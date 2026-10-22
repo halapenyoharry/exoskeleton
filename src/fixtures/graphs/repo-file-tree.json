@@ -1,0 +1,218 @@
+{
+  "src": {
+    "src": {
+      "App.css": 9077,
+      "App.tsx": 25328,
+      "ColoredTab.css": 582,
+      "ColoredTab.tsx": 3865,
+      "HeaderActions.css": 725,
+      "HeaderActions.tsx": 3409,
+      "PanelRoot.tsx": 5164,
+      "Watermark.css": 2517,
+      "Watermark.tsx": 1652,
+      "assets": {
+        "react.svg": 4126
+      },
+      "data": {
+        "json-bus-persist.ts": 3917,
+        "json-bus.test.ts": 2961,
+        "json-bus.ts": 7444,
+        "json-utils": {
+          "docStats.ts": 3091,
+          "graphDetect.ts": 13448,
+          "jsonToHierarchy.ts": 2507,
+          "layers.ts": 1850
+        },
+        "useJsonDoc.ts": 1798
+      },
+      "fixtures": {
+        "graphs": {
+          "exoskeleton-system.json": 33412
+        }
+      },
+      "main.tsx": 577,
+      "osc": {
+        "channels": {
+          "active-doc.ts": 1698,
+          "codecs.test.ts": 6039,
+          "codecs.ts": 6785,
+          "connected.ts": 1530,
+          "focus.ts": 1175,
+          "index.ts": 1691,
+          "selection.ts": 2648,
+          "wiring.test.ts": 10751
+        },
+        "index.ts": 5240,
+        "local-sources.test.ts": 2079,
+        "local-sources.ts": 2522,
+        "pattern.test.ts": 1563,
+        "pattern.ts": 1338,
+        "retained.ts": 1283,
+        "retainer.test.ts": 4292,
+        "retainer.ts": 5617,
+        "types.ts": 741
+      },
+      "panel-manifest.ts": 8266,
+      "panels": {
+        "EditorPanel.css": 238,
+        "EditorPanel.tsx": 3855,
+        "LanWebview.css": 123,
+        "LanWebview.tsx": 1678,
+        "StatusBarPanel.css": 4394,
+        "StatusBarPanel.tsx": 3955,
+        "TerminalPanel.css": 276,
+        "TerminalPanel.tsx": 2781,
+        "editor.manifest.ts": 851,
+        "json-circles": {
+          "JsonCirclesPanel.css": 1899,
+          "JsonCirclesPanel.tsx": 13940,
+          "README.md": 1914,
+          "manifest.ts": 950
+        },
+        "json-cytoscape": {
+          "JsonCytoscapePanel.css": 2289,
+          "JsonCytoscapePanel.tsx": 17552,
+          "README.md": 3557,
+          "cytoscape-fcose.d.ts": 329,
+          "manifest.ts": 1011
+        },
+        "json-dyadic": {
+          "JsonDyadicPanel.css": 10105,
+          "JsonDyadicPanel.tsx": 21017,
+          "__fixtures__": {
+            "synthetic-topology.json": 2895
+          },
+          "categories.ts": 2593,
+          "manifest.ts": 1152,
+          "parse.test.ts": 6206,
+          "parse.ts": 9074,
+          "types.ts": 2810
+        },
+        "json-edit": {
+          "JsonEditPanel.css": 3035,
+          "JsonEditPanel.tsx": 20806,
+          "README.md": 5181,
+          "manifest.ts": 916,
+          "themes": {
+            "midnight-alaska.ts": 2188
+          }
+        },
+        "json-graph": {
+          "JsonGraphPanel.css": 2254,
+          "JsonGraphPanel.tsx": 14598,
+          "README.md": 3042,
+          "manifest.ts": 922
+        },
+        "json-graph3d-inspect": {
+          "JsonGraph3DInspectPanel.css": 2214,
+          "JsonGraph3DInspectPanel.tsx": 33402,
+          "README.md": 6145,
+          "inspect-model.test.ts": 4511,
+          "inspect-model.ts": 6925,
+          "manifest.ts": 1152,
+          "text-plane.ts": 3669
+        },
+        "json-graph3d": {
+          "JsonGraph3DPanel.css": 1652,
+          "JsonGraph3DPanel.tsx": 18426,
+          "README.md": 4058,
+          "manifest.ts": 1012
+        },
+        "json-mass": {
+          "JsonMassPanel.css": 1639,
+          "JsonMassPanel.tsx": 13428,
+          "README.md": 2675,
+          "manifest.ts": 868
+        },
+        "json-tree": {
+          "JsonTreePanel.css": 1622,
+          "JsonTreePanel.tsx": 11184,
+          "README.md": 2836,
+          "manifest.ts": 1021
+        },
+        "piano": {
+          "PianoPanel.css": 1640,
+          "PianoPanel.tsx": 5577,
+          "README.md": 1859,
+          "manifest.ts": 1303
+        },
+        "procedural-visuals-suite": {
+          "BouncingBallsPanel.tsx": 5937,
+          "ControlPanel.tsx": 16350,
+          "FountainPanel.tsx": 5648,
+          "ManifoldPanel.tsx": 3134,
+          "Panel.css": 8410,
+          "RecursiveSubdivisionPanel.tsx": 6139,
+          "channels.ts": 730,
+          "manifest.ts": 3952,
+          "manifold-scene.ts": 22974,
+          "suite.ts": 1479,
+          "types.ts": 953
+        },
+        "scope": {
+          "README.md": 2192,
+          "ScopePanel.css": 2602,
+          "ScopePanel.tsx": 11548,
+          "manifest.ts": 1568
+        },
+        "settings": {
+          "SettingsPanel.css": 1627,
+          "SettingsPanel.tsx": 2383,
+          "manifest.ts": 690
+        },
+        "status-bar.manifest.ts": 665,
+        "tempo-clock": {
+          "README.md": 2813,
+          "TempoClockPanel.css": 1605,
+          "TempoClockPanel.tsx": 2669,
+          "manifest.ts": 1299
+        },
+        "terminal-shell.test.ts": 1299,
+        "terminal-shell.ts": 706,
+        "terminal.manifest.ts": 767,
+        "text-viewer": {
+          "TextViewerPanel.css": 2934,
+          "TextViewerPanel.tsx": 5219,
+          "text-viewer.manifest.ts": 585
+        },
+        "topology-extract": {
+          "TopologyExtractPanel.css": 12320,
+          "TopologyExtractPanel.tsx": 31642,
+          "extract.test.ts": 9626,
+          "extract.ts": 23948,
+          "local-cli.ts": 2963,
+          "manifest.ts": 857,
+          "project.test.ts": 6789,
+          "project.ts": 8693,
+          "prompts.ts": 24455,
+          "transport.ts": 13429
+        },
+        "webview.manifest.ts": 841
+      },
+      "persistence": {
+        "app-storage.ts": 367,
+        "default-layout.ts": 16423,
+        "migration.test.ts": 1616,
+        "presets.test.ts": 1941,
+        "presets.ts": 1983,
+        "storage.test.ts": 1913,
+        "storage.ts": 7119,
+        "tauri-storage.ts": 1460,
+        "web-storage.ts": 1335,
+        "workspace-file.test.ts": 4996,
+        "workspace-file.ts": 3950,
+        "workspace.test.ts": 3619
+      },
+      "suite-manifest.ts": 1089,
+      "theme.css": 308,
+      "useElementSize.ts": 1266,
+      "utils": {
+        "debounce.test.ts": 1538,
+        "debounce.ts": 1226,
+        "file-io.ts": 7423,
+        "useFlash.ts": 1186
+      },
+      "vite-env.d.ts": 38
+    }
+  }
+}

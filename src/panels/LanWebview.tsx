@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import "./LanWebview.css";
 
 const FALLBACK_URL = "https://dockview.dev";
@@ -26,7 +26,6 @@ export default function LanWebview(props: IDockviewPanelProps<LanWebviewParams>)
   // Pure content — the host wraps this in PanelRoot via exoPanel().
   return (
     <>
-      <div className="panel-header">webview</div>
       <div className="panel-toolbar">
         <input
           value={url}

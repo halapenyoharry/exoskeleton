@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 
 /**
  * OSC argument type names. A panel declaring its OSC integration lists
@@ -121,6 +121,67 @@ export interface PanelTauriRequirements {
  * `paramsDefault`. Panels with no persisted state can omit it (defaults
  * to `unknown`).
  */
+/** One entry in a panel's ☰ menu. Items are *declared* here in the manifest;
+ *  the pane chrome (PillTab) renders them; a click calls
+ *  emitPanelMenu(panelId, item.id) (src/panel-menu.ts). The panel *handles*
+ *  items by subscribing: onPanelMenu(props.api.id, (itemId) => ...).
+ *  `children` render as an inline group headed by `label`. */
+export interface PanelMenuItem {
+  id: string;
+  label: string;
+  /** Display-only hint, e.g. "⌘S". The panel owns the actual keybinding. */
+  shortcut?: string;
+  disabled?: boolean;
+  children?: PanelMenuItem[];
+}
+
+/**
+ * Declared controls. A panel *declares* its panes (PanelPane[], registered
+ * in src/chrome/panes); the host (src/PanelPanes.tsx) renders them as a
+ * Dockview Paneview inside a vertical Splitview above the panel's content.
+ * Each cell binds to a panel param of the same name.
+ */
+export interface PaneCell {
+  type: "segmented" | "toggle" | "swatch" | "stepper" | "dial" | "select" | "action" | "text" | "menu";
+  /** Panel param this cell reads and writes (value cells). */
+  param?: string;
+  /** action / text: the id sent to emitPanelMenu(panelId, action) on click. */
+  action?: string;
+  /** action: the glyph on the button. */
+  icon?: string;
+  /** text: key of text the panel publishes via publishText(panelId, key, …). */
+  textFrom?: string;
+  label: string;
+  tooltip?: string;
+  /** Kept for declarations that still carry it; the Paneview ignores it. */
+  span?: [number, number];
+  /** segmented / swatch choices. Option values are strings; numeric params
+   *  are matched by String(value) and written back as numbers when the
+   *  option value is numeric-looking and the current value is a number. */
+  options?: { value: string; label?: string; icon?: string; color?: string }[];
+  /** select: key of options published at runtime via publishOptions(panelId,
+   *  key, ...) (src/chrome/runtime-options.ts). Static `options` still work. */
+  optionsFrom?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+}
+
+export interface PanelPane {
+  id: string;
+  /** "pane": a foldable Paneview pane of cells. "action": a button in the
+   *  group's header actions (emits emitPanelMenu(panelId, id)). */
+  kind: "pane" | "action";
+  icon: string;
+  label: string;
+  tooltip?: string;
+  /** Panes only. */
+  body?: { layout: "grid" | "stack"; cells: PaneCell[] };
+  /** Panes only: tabs with the same label are bundled under a Dockview tab
+   *  group (a chip in the tab bar that collapses/expands them together). */
+  tabGroup?: string;
+}
+
 export interface PanelManifest<P extends Record<string, any> = Record<string, any>> {
   // ─── identity ────────────────────────────────────────────────
 
@@ -131,6 +192,16 @@ export interface PanelManifest<P extends Record<string, any> = Record<string, an
 
   /** Title shown in the tab. Defaults to `id` if omitted. */
   title?: string;
+
+  /** `true`: the panel renders its own inline toolbar row inside its content
+   *  (hidden by CSS when the panel also declares panes). */
+  toolbar?: boolean;
+
+  /** Declared panes (and header-action buttons). See PanelPane. Up to 4. */
+  panes?: PanelPane[];
+
+  /** Panel-specific items for the ≡ menu in the header actions. See PanelMenuItem. */
+  menu?: PanelMenuItem[];
 
   /** The React component itself. */
   component: ComponentType<IDockviewPanelProps<P>>;

@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
+import { getJson, onJsonChange } from "../data/json-bus";
 import {
   areGraphsConnected,
   setGraphsConnected,
   onGraphsConnectionChange,
   getActiveDocumentId,
   onActiveDocumentIdChange,
-  getJson,
-  onJsonChange,
   getSelectedNode,
   onNodeSelectionBroadcast,
-} from "../data/json-bus";
+} from "../osc/channels";
 import { getDocStats } from "../data/json-utils/docStats";
 import "./StatusBarPanel.css";
 
@@ -55,6 +54,10 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
       setActiveDocId(id);
       updateStats(id);
     });
+    // The active id may have changed between the first render and this
+    // subscription (e.g. json-edit reopening its last document on launch).
+    const current = getActiveDocumentId();
+    if (current !== activeDocId) setActiveDocId(current);
 
     const unsubJson = onJsonChange(activeDocId, () => {
       updateStats(activeDocId);
@@ -85,10 +88,12 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
           title={connected ? "Click to decouple views" : "Click to coordinate views"}
         >
           <span className="status-indicator-dot" />
-          {connected ? "COORDINATED LINK ACTIVE" : "LINK DECOUPLED"}
+          <span className="status-link-long">{connected ? "COORDINATED LINK ACTIVE" : "LINK DECOUPLED"}</span>
+          <span className="status-link-short">{connected ? "linked" : "decoupled"}</span>
         </button>
         <span className="status-doc-badge" title="Active Editor Target">
-          DOC: {activeDocId}
+          <span className="status-doc-label">DOC: </span>
+          <span className="status-doc-value">{activeDocId}</span>
         </span>
       </div>
 
@@ -103,10 +108,10 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
 
       <div className="status-bar-right">
         <div className="status-stats">
-          <span>Nodes:</span>
+          <span className="status-stats-label">Nodes:</span>
           <span className="status-stats-val">{stats.nodes}</span>
           <span className="status-stats-divider">|</span>
-          <span>Edges:</span>
+          <span className="status-stats-label">Edges:</span>
           <span className="status-stats-val">{stats.edges}</span>
         </div>
         <button

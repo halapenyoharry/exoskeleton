@@ -1,3 +1,4 @@
+import { graphLibrary } from "../../fixtures/graphs";
 import type { PanelManifest } from "../../panel-manifest";
 import JsonEditPanel, {
   jsonEditDefaults,
@@ -12,6 +13,24 @@ const manifest: PanelManifest<JsonEditParams> = {
   description:
     "CodeMirror 6 JSON editor. Publishes parsed JSON to the json-bus (default channel 'default'); JSON-visualizer panels subscribe to render.",
 
+
+  // pill ☰ menu; handled in JsonEditPanel via onPanelMenu
+  menu: [
+    { id: "new", label: "New document" },
+    { id: "open", label: "Open file…", shortcut: "⌘O" },
+    {
+      id: "library",
+      label: "Library",
+      children: graphLibrary.map((e) => ({ id: `library:${e.id}`, label: e.title })),
+    },
+    { id: "save", label: "Download", shortcut: "⌘S" },
+    { id: "saveAs", label: "Save As…", shortcut: "⌘⌥S" },
+    { id: "copy", label: "Copy JSON" },
+    { id: "format", label: "Format JSON" },
+    { id: "rename", label: "Rename…" },
+    { id: "delete", label: "Delete document" },
+  ],
+
   // chrome
   accent: "#59b8ff",
   glyph: "{}",
@@ -20,8 +39,9 @@ const manifest: PanelManifest<JsonEditParams> = {
   capabilities: [],
   optionalCapabilities: ["fs"],
 
-  // layout — anchors the empty grid on first launch; visualizer panels
-  // position themselves "right" or "within" relative to this id.
+  // layout — json-edit is the DOCUMENT, not a grid pane: it lives in the left
+  // edge group ("document-edge", persistence/document-edge.ts), which every
+  // layout build/restore ensures. It has no `defaultLayout` on purpose.
   paramsDefault: jsonEditDefaults,
 
   npmDependencies: {

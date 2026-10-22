@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import * as d3 from "d3";
 import {
   getActiveDocumentId,
   onActiveDocumentIdChange,
   areGraphsConnected,
   onGraphsConnectionChange,
-} from "../../data/json-bus";
+} from "../../osc/channels";
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats } from "../../data/json-utils/docStats";
+import { onPanelMenu } from "../../panel-menu";
 import { useElementSize } from "../../useElementSize";
 import {
   jsonToHierarchy,
@@ -422,10 +423,17 @@ export default function JsonCirclesPanel(
     params.panZoomMax,
   ]);
 
+  useEffect(
+    () =>
+      onPanelMenu(props.api.id, (id) => {
+        if (id === "reset") resetRef.current();
+      }),
+    [props.api.id],
+  );
+
   return (
     <>
       <div className="panel-header json-circles-header">
-        <span>json-circles</span>
         <div className="json-circles-controls">
           <label title="Toggle [N] prefix on array items">
             <input

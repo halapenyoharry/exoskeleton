@@ -1,0 +1,145 @@
+<mxfile host="app.diagrams.net" type="device">
+<diagram id="pane-chrome" name="Pane chrome blueprint">
+<mxGraphModel grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" background="#0a0e27">
+<root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+<mxCell id="a0" value="A · COLLAPSED (default)" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
+        <mxGeometry x="40" y="60" width="300" height="20" as="geometry"/>
+      </mxCell>
+<mxCell id="a1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1">
+        <mxGeometry x="40" y="90" width="420" height="300" as="geometry"/>
+      </mxCell>
+<mxCell id="a2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=none;opacity=35;" vertex="1" parent="1">
+        <mxGeometry x="40" y="90" width="420" height="60" as="geometry"/>
+      </mxCell>
+<mxCell id="a2n" value="scrim: slight darkening + slight blur under the title area&#10;(two GLOBAL settings, not per pane; no lines)" style="text;html=1;align=left;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
+        <mxGeometry x="200" y="100" width="260" height="40" as="geometry"/>
+      </mxCell>
+<mxCell id="a3" value="△  ◆ editor            +  ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;fontColor=#18ffff;fontFamily=Menlo;fontSize=12;align=left;spacingLeft=12;" vertex="1" parent="1">
+        <mxGeometry x="52" y="100" width="150" height="32" as="geometry"/>
+      </mxCell>
+<mxCell id="a4" value="pane content (full height, top to bottom)" style="text;html=1;align=center;fontColor=#3a4a6a;fontSize=11;fontFamily=Menlo" vertex="1" parent="1">
+        <mxGeometry x="40" y="230" width="420" height="20" as="geometry"/>
+      </mxCell>
+<mxCell id="a5" value="△ opens the drawer (B/C)&#10;◆ glyph + accent = identity&#10;title = drag handle&#10;+ = add a sibling pane here&#10;× = close this pane" style="text;html=1;align=left;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
+        <mxGeometry x="52" y="300" width="300" height="80" as="geometry"/>
+      </mxCell>
+<mxCell id="a6" value="DECIDE: corner — left (drawn) or right (said)? Proposal: left, global setting." style="text;html=1;align=left;fontColor=#ff4d8d;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
+        <mxGeometry x="40" y="395" width="420" height="20" as="geometry"/>
+      </mxCell>
+<mxCell id="d0" value="D · GROUP WITH 2+ PANES (proposal: a row of title pills, no tab strip)" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
+        <mxGeometry x="40" y="440" width="600" height="20" as="geometry"/>
+      </mxCell>
+<mxCell id="d1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1">
+        <mxGeometry x="40" y="470" width="560" height="220" as="geometry"/>
+      </mxCell>
+<mxCell id="d2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=none;opacity=35;" vertex="1" parent="1">
+        <mxGeometry x="40" y="470" width="560" height="52" as="geometry"/>
+      </mxCell>
+<mxCell id="d3" value="△ ◆ editor  ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;fontColor=#18ffff;fontFamily=Menlo;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="52" y="480" width="120" height="30" as="geometry"/>
+      </mxCell>
+<mxCell id="d4" value="△ ⌖ 3D-Inspect  ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#ffd166;strokeWidth=1;fontColor=#ffd166;fontFamily=Menlo;fontSize=11;opacity=70" vertex="1" parent="1">
+        <mxGeometry x="180" y="480" width="150" height="30" as="geometry"/>
+      </mxCell>
+<mxCell id="d5" value="+   ⤴   ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#8896a0;strokeWidth=1;fontColor=#8896a0;fontFamily=Menlo;fontSize=12" vertex="1" parent="1"><mxGeometry x="488" y="480" width="100" height="30" as="geometry"/></mxCell>
+<mxCell id="d5n" value="GROUP CONTROLS, upper right of the group: + new tab here · ⤴ pop out · × close group. Not in the pills." style="text;html=1;align=right;verticalAlign=top;fontColor=#8896a0;fontSize=9;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="300" y="514" width="288" height="30" as="geometry"/></mxCell>
+<mxCell id="d6" value="pills = △ title ×  (no +). Active pane solid, others outline. Click to switch, drag to move. Narrow group: pills collapse to glyphs." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
+        <mxGeometry x="52" y="548" width="536" height="30" as="geometry"/>
+      </mxCell>
+<mxCell id="d7" value="DECIDE: a lone pane is also a group — does its pill keep the + (as drawn in A), or does + always sit in the group controls top-right, even for one pane? Proposal: always top-right, so the rule has no exceptions." style="text;html=1;align=left;fontColor=#ff4d8d;fontSize=10;fontFamily=Menlo" vertex="1" parent="1">
+        <mxGeometry x="40" y="695" width="560" height="20" as="geometry"/>
+      </mxCell>
+<mxCell id="e0" value="E · PANE SETTINGS zone (contents)" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
+        <mxGeometry x="660" y="440" width="400" height="20" as="geometry"/>
+      </mxCell>
+<mxCell id="e1" value="⤢ maximize / restore&#10;⤴ pop out (desktop only)&#10;⇄ move to… (touch has no drag)&#10;🔗 follow active document / pin to a document&#10;◆ accent color&#10;▭ show compact controls" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1;fontColor=#8896a0;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=6" vertex="1" parent="1">
+        <mxGeometry x="660" y="470" width="300" height="120" as="geometry"/>
+      </mxCell>
+<mxCell id="e2" value="= what the pill ☰ shows below the rule today.&#10;Pane-scoped, not component-scoped." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
+        <mxGeometry x="970" y="470" width="200" height="40" as="geometry"/>
+      </mxCell>
+<mxCell id="f0" value="F · SAME SHAPE, THREE SCALES" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
+        <mxGeometry x="1140" y="440" width="400" height="20" as="geometry"/>
+      </mxCell>
+<mxCell id="f1" value="APP  ⊞ → floating menu pane&#10;sections · about" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#8896a0;fontColor=#8896a0;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+        <mxGeometry x="1140" y="470" width="400" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="f2" value="PANE  △ → drawer&#10;strip of 4 (tab|button) · grid or stack body · ⚙ · about" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;fontColor=#18ffff;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+        <mxGeometry x="1160" y="524" width="360" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="f3" value="CELL  one grid cell (1×1 … 3×1) → one visual control" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#ffd166;fontColor=#ffd166;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+        <mxGeometry x="1180" y="578" width="320" height="34" as="geometry"/>
+      </mxCell>
+<mxCell id="f4" value="one contract (title · sections · about), three sizes. The manifest declares menu, strip, settings, about; the host draws them." style="text;html=1;align=left;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1">
+        <mxGeometry x="1140" y="622" width="400" height="40" as="geometry"/>
+      </mxCell>
+<mxCell id="g0" value="G · WHAT A PANEL DECLARES (manifest), WHAT THE HOST DRAWS" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1">
+        <mxGeometry x="40" y="740" width="700" height="20" as="geometry"/>
+      </mxCell>
+<mxCell id="g2" value="host rules (fixed, not per panel):&#10;· grid unit 52px, gap 8; cells span 1×1, 2×1, 2×2, 3×1; below 240px pane width the pill is glyph-only&#10;· drawer overlays content; resizable; orientation per pane, remembered&#10;· scrim darkening + blur are global settings&#10;· cell types are the only vocabulary: segmented · toggle · swatch · dial · stepper (no free text)&#10;· every control has a tooltip in plain words" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#3a4a6a;fontColor=#8896a0;fontFamily=Menlo;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=6" vertex="1" parent="1">
+        <mxGeometry x="620" y="770" width="560" height="150" as="geometry"/>
+      </mxCell>
+<mxCell id="b0" value="B · EXPANDED — drawer (header strip of 4 positions; body = active tab)" style="text;html=1;align=left;verticalAlign=top;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="520" y="60" width="560" height="20" as="geometry"/></mxCell>
+<mxCell id="b1" value="" style="rounded=1;arcSize=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;fontColor=#3a4a6a;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="520" y="90" width="560" height="300" as="geometry"/></mxCell>
+<mxCell id="b2" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="532" y="100" width="300" height="282" as="geometry"/></mxCell>
+<mxCell id="b3" value="▽  ◆ editor         📌  +  ×" style="text;html=1;align=left;verticalAlign=top;fontColor=#18ffff;fontSize=12;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="536" y="104" width="290" height="24" as="geometry"/></mxCell>
+<mxCell id="b3n" value="📌 = pin? (keep drawer open) — or pop-out? YOU TELL ME. Only shown while open." style="text;html=1;align=left;verticalAlign=top;fontColor=#ff4d8d;fontSize=9;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="840" y="104" width="290" height="40" as="geometry"/></mxCell>
+<mxCell id="b4" value="1" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=#18ffff;strokeColor=#18ffff;strokeWidth=1;fontColor=#0a0e27;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="544" y="134" width="56" height="26" as="geometry"/></mxCell>
+<mxCell id="b5" value="2" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="606" y="134" width="56" height="26" as="geometry"/></mxCell>
+<mxCell id="b6" value="⚙" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="668" y="134" width="56" height="26" as="geometry"/></mxCell>
+<mxCell id="b7" value="⇅" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#8896a0;strokeWidth=1;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="730" y="134" width="56" height="26" as="geometry"/></mxCell>
+<mxCell id="b4n" value="1 2 3 4 = fixed positions. Each is a TAB (opens a body) or a BUTTON (acts). Here: 1,2 = tabs; 3 = ⚙ pane settings tab; 4 = orientation BUTTON. Active tab is solid and joins its body." style="text;html=1;align=left;verticalAlign=top;fontColor=#8896a0;fontSize=9;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="840" y="134" width="290" height="80" as="geometry"/></mxCell>
+<mxCell id="b8" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;strokeWidth=1;" vertex="1" parent="1"><mxGeometry x="544" y="166" width="242" height="200" as="geometry"/></mxCell>
+<mxCell id="b9" value="2×2" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="552" y="174" width="112" height="112" as="geometry"/></mxCell>
+<mxCell id="b10" value="1×1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="672" y="174" width="52" height="52" as="geometry"/></mxCell>
+<mxCell id="b11" value="1×1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="732" y="174" width="46" height="52" as="geometry"/></mxCell>
+<mxCell id="b12" value="2×1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="672" y="234" width="106" height="52" as="geometry"/></mxCell>
+<mxCell id="b13" value="" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;fontColor=#3a4a6a;fontSize=10;fontFamily=Menlo;dashed=1;" vertex="1" parent="1"><mxGeometry x="552" y="294" width="52" height="52" as="geometry"/></mxCell>
+<mxCell id="b14" value="" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3a4a6a;strokeWidth=1;fontColor=#3a4a6a;fontSize=10;fontFamily=Menlo;dashed=1;" vertex="1" parent="1"><mxGeometry x="612" y="294" width="52" height="52" as="geometry"/></mxCell>
+<mxCell id="b15" value="3×1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="672" y="294" width="106" height="52" as="geometry"/></mxCell>
+<mxCell id="b8n" value="BODY, variant 1: CARD GRID. Fixed grid unit (proposal 52px); a control takes 1×1, 2×1, 2×2 or 3×1 cells. Empty cells dashed. Visual controls only: segmented · toggle · swatch · dial · stepper." style="text;html=1;align=left;verticalAlign=top;fontColor=#8896a0;fontSize=9;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="840" y="220" width="290" height="90" as="geometry"/></mxCell>
+<mxCell id="b16" value="pane content continues underneath (drawer overlays; resizable)" style="text;html=1;align=center;verticalAlign=top;fontColor=#3a4a6a;fontSize=9;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="520" y="392" width="560" height="16" as="geometry"/></mxCell>
+<mxCell id="b17" value="DECIDE: grid vs stack — per tab by the panel author, or a user toggle? · 4 positions fixed or max 4?" style="text;html=1;align=left;verticalAlign=top;fontColor=#ff4d8d;fontSize=10;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="520" y="410" width="560" height="16" as="geometry"/></mxCell>
+<mxCell id="c0" value="C · SAME DRAWER, body variant 2: STACK OF ROWS" style="text;html=1;align=left;verticalAlign=top;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="1140" y="60" width="420" height="20" as="geometry"/></mxCell>
+<mxCell id="c1" value="" style="rounded=1;arcSize=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;fontColor=#3a4a6a;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1140" y="90" width="420" height="300" as="geometry"/></mxCell>
+<mxCell id="c2" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1152" y="100" width="250" height="282" as="geometry"/></mxCell>
+<mxCell id="c3" value="▽  ◆ editor      📌  +  ×" style="text;html=1;align=left;verticalAlign=top;fontColor=#18ffff;fontSize=12;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="1156" y="104" width="240" height="24" as="geometry"/></mxCell>
+<mxCell id="c4" value="1" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1164" y="134" width="48" height="26" as="geometry"/></mxCell>
+<mxCell id="c5" value="2" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=#18ffff;strokeColor=#18ffff;strokeWidth=1;fontColor=#0a0e27;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1218" y="134" width="48" height="26" as="geometry"/></mxCell>
+<mxCell id="c6" value="⚙" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1272" y="134" width="48" height="26" as="geometry"/></mxCell>
+<mxCell id="c7" value="⇅" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#8896a0;strokeWidth=1;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1326" y="134" width="48" height="26" as="geometry"/></mxCell>
+<mxCell id="c8" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1164" y="166" width="210" height="200" as="geometry"/></mxCell>
+<mxCell id="c90" value="row — one control or one setting, full width" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1172" y="174" width="194" height="40" as="geometry"/></mxCell>
+<mxCell id="c91" value="row — one control or one setting, full width" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1172" y="222" width="194" height="40" as="geometry"/></mxCell>
+<mxCell id="c92" value="row — one control or one setting, full width" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1172" y="270" width="194" height="40" as="geometry"/></mxCell>
+<mxCell id="c93" value="row — one control or one setting, full width" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#8896a0;fontSize=9;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="1172" y="318" width="194" height="40" as="geometry"/></mxCell>
+<mxCell id="c8n" value="rows: full-width, fixed height, scroll if many. Good for settings (⚙ tab) and for lists. Same primitives as the grid." style="text;html=1;align=left;verticalAlign=top;fontColor=#8896a0;fontSize=9;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="1410" y="170" width="145" height="120" as="geometry"/></mxCell>
+<mxCell id="c10" value="pane content underneath" style="text;html=1;align=center;verticalAlign=top;fontColor=#3a4a6a;fontSize=9;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="1140" y="392" width="420" height="16" as="geometry"/></mxCell>
+<mxCell id="g1" value="manifest {&#10;  id, title, glyph, accent&#10;  menu:  [ …items… ]  → ≡ (or a button position)&#10;  strip: [ up to 4 × { kind: tab | button, icon, tooltip,&#10;                       body?: { layout: grid | stack, cells: [ {type, param, span} ] } } ]&#10;  settings: { followActive, pinned, … } → the ⚙ tab (host-provided)&#10;  about: { description, docs } → inside ⚙, bottom&#10;}" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#3a4a6a;strokeWidth=1;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;align=left;spacingLeft=10;verticalAlign=top;spacingTop=6;" vertex="1" parent="1"><mxGeometry x="40" y="770" width="560" height="150" as="geometry"/></mxCell>
+<mxCell id="h0" value="H · THREE CHROME KINDS (a pane declares any combination)" style="text;html=1;align=left;fontColor=#18ffff;fontSize=13;fontStyle=1;fontFamily=Menlo" vertex="1" parent="1"><mxGeometry x="40" y="960" width="560" height="20" as="geometry"/></mxCell>
+<mxCell id="h1b" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1"><mxGeometry x="40" y="1000" width="300" height="200" as="geometry"/></mxCell>
+<mxCell id="h1p" value="≡  {} json-edit  ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#59b8ff;strokeWidth=1.5;fontColor=#59b8ff;fontSize=12;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="50" y="1008" width="170" height="32" as="geometry"/></mxCell>
+<mxCell id="h1t" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#060a16;strokeColor=none;opacity=80;" vertex="1" parent="1"><mxGeometry x="41" y="1046" width="298" height="28" as="geometry"/></mxCell>
+<mxCell id="h1d0" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#59b8ff;strokeWidth=1;" vertex="1" parent="1"><mxGeometry x="52" y="1049" width="22" height="22" as="geometry"/></mxCell>
+<mxCell id="h1d1" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#59b8ff;strokeWidth=1;" vertex="1" parent="1"><mxGeometry x="80" y="1049" width="22" height="22" as="geometry"/></mxCell>
+<mxCell id="h1d2" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#59b8ff;strokeWidth=1;" vertex="1" parent="1"><mxGeometry x="108" y="1049" width="22" height="22" as="geometry"/></mxCell>
+<mxCell id="h1d3" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#59b8ff;strokeWidth=1;" vertex="1" parent="1"><mxGeometry x="136" y="1049" width="22" height="22" as="geometry"/></mxCell>
+<mxCell id="h1n" value="MENU + TOOLBAR&#10;≡ opens a dropdown (New, Open…, Save, Library…).&#10;Slim row of round icon buttons sits in flow under the pill. For editors." style="text;html=1;align=left;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1"><mxGeometry x="40" y="1206" width="300" height="60" as="geometry"/></mxCell>
+<mxCell id="h2b" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1"><mxGeometry x="380" y="1000" width="300" height="200" as="geometry"/></mxCell>
+<mxCell id="h2p" value="△  ⌖ 3D-Inspect  📌  ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#ff9f43;strokeWidth=1.5;fontColor=#ff9f43;fontSize=12;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="390" y="1008" width="200" height="32" as="geometry"/></mxCell>
+<mxCell id="h2d" value="strip + grid" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#ff9f43;strokeWidth=1;fontColor=#ff9f43;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="381" y="1120" width="298" height="79" as="geometry"/></mxCell>
+<mxCell id="h2n" value="CONTROL PANEL&#10;△ opens the drawer (tabs, buttons, grid or stack, ⚙). For viewers." style="text;html=1;align=left;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1"><mxGeometry x="380" y="1206" width="300" height="60" as="geometry"/></mxCell>
+<mxCell id="h3b" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f1433;strokeColor=#1f2a4d;strokeWidth=1;" vertex="1" parent="1"><mxGeometry x="720" y="1000" width="300" height="200" as="geometry"/></mxCell>
+<mxCell id="h3p" value="≡  △  ◆ editor  ×" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#0a0e27;strokeColor=#18ffff;strokeWidth=1.5;fontColor=#18ffff;fontSize=12;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="730" y="1008" width="190" height="32" as="geometry"/></mxCell>
+<mxCell id="h3t" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#060a16;strokeColor=none;opacity=80;" vertex="1" parent="1"><mxGeometry x="721" y="1046" width="298" height="28" as="geometry"/></mxCell>
+<mxCell id="h3d0" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;strokeWidth=1;" vertex="1" parent="1"><mxGeometry x="732" y="1049" width="22" height="22" as="geometry"/></mxCell>
+<mxCell id="h3d1" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;strokeWidth=1;" vertex="1" parent="1"><mxGeometry x="760" y="1049" width="22" height="22" as="geometry"/></mxCell>
+<mxCell id="h3d2" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#18ffff;strokeWidth=1;" vertex="1" parent="1"><mxGeometry x="788" y="1049" width="22" height="22" as="geometry"/></mxCell>
+<mxCell id="h3w" value="drawer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#121a3d;strokeColor=#18ffff;strokeWidth=1;fontColor=#18ffff;fontSize=10;fontFamily=Menlo;" vertex="1" parent="1"><mxGeometry x="721" y="1140" width="298" height="59" as="geometry"/></mxCell>
+<mxCell id="h3n" value="ALL THREE&#10;Each icon appears in the pill only if that kind is declared." style="text;html=1;align=left;fontColor=#8896a0;fontSize=10;fontFamily=Menlo;verticalAlign=top" vertex="1" parent="1"><mxGeometry x="720" y="1206" width="300" height="60" as="geometry"/></mxCell>
+</root>
+</mxGraphModel>
+</diagram>
+</mxfile>

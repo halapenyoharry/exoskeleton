@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
+import { onPanelMenu } from "../../panel-menu";
 import * as d3 from "d3";
 import {
   getActiveDocumentId,
@@ -10,7 +11,7 @@ import {
   onNodeSelectionBroadcast,
   broadcastNodeFocus,
   onNodeFocusBroadcast,
-} from "../../data/json-bus";
+} from "../../osc/channels";
 import {
   type DetectedGraph,
   type GraphNode,
@@ -161,6 +162,13 @@ export default function JsonGraphPanel(
     unknown
   > | null>(null);
   const resetRef = useRef<() => void>(() => {});
+
+  // Header-action "fit" dispatches to the hidden toolbar's action.
+  const menuRef = useRef<(id: string) => void>(() => {});
+  menuRef.current = (id) => {
+    if (id === "fit") resetRef.current();
+  };
+  useEffect(() => onPanelMenu(props.api.id, (id) => menuRef.current(id)), [props.api.id]);
 
   const destroyGraph = useCallback(() => {
     if (simulationRef.current) {
@@ -452,7 +460,6 @@ export default function JsonGraphPanel(
   return (
     <>
       <div className="panel-header json-graph-header">
-        <span>json-graph</span>
         <div className="json-graph-controls">
           <label title="Freeze the physics simulation">
             <input

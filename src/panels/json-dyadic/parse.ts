@@ -117,13 +117,17 @@ export function parseTopology(input: unknown): ParsedTopology {
     // convention now encodes the *category* (c/sc/i/r), not just the
     // fact-of-reification, so a `sc:` id with `kind: "hyperedge"` is
     // perfectly legal and was previously flagged as suspicious noise.
+    // `edge-as-node` (a reified arity-2 edge that another edge points at)
+    // is deliberately NOT a reification here: something addresses it, so
+    // it keeps a tile. Its category still reaches the layer via
+    // resolveLayerCategory, which reads edge-as-node endpoints.
     const kindIsReified =
       node.kind === "hyperedge" ||
       (typeof node.kind !== "string" && isReificationId(node.id));
     if (kindIsReified) {
       reificationsById.set(node.id, node);
     } else {
-      // Narrow to RenderableNode — i.e., kind: "node".
+      // Narrow to RenderableNode — i.e., kind: "node" | "edge-as-node".
       nodesById.set(node.id, node as RenderableNode);
     }
   }
@@ -174,6 +178,7 @@ export function parseTopology(input: unknown): ParsedTopology {
       layer,
       reifications,
       bucket.dyadic,
+      nodesById,
       warnings,
     );
     const linkCount =
@@ -223,6 +228,7 @@ function resolveLayerCategory(
   layerName: string,
   reifications: ReifiedRelation[],
   dyadicLinks: TopoLink[],
+  nodesById: Map<string, RenderableNode>,
   warnings: string[],
 ): EdgeCategory {
   // 1. If layer has reifications, use their i2t:edge_category.
@@ -244,10 +250,21 @@ function resolveLayerCategory(
       return [...categories][0];
     }
   }
-  // 2. Mode of attrs.i2t:edge_category across dyadic links.
+  // 2. Mode of attrs.i2t:edge_category across dyadic links. A link with no
+  //    category of its own may be an incidence link of a reified arity-2
+  //    edge (kind "edge-as-node"); the edge's category lives on that row.
   const counts = new Map<EdgeCategory, number>();
   for (const link of dyadicLinks) {
-    const c = link.attrs?.["i2t:edge_category"];
+    let c = link.attrs?.["i2t:edge_category"];
+    if (!c) {
+      for (const id of [link.source, link.target]) {
+        const n = nodesById.get(id);
+        if (n?.kind === "edge-as-node") {
+          c = n.attrs?.["i2t:edge_category"];
+          if (c) break;
+        }
+      }
+    }
     if (c) counts.set(c, (counts.get(c) ?? 0) + 1);
   }
   if (counts.size > 0) {

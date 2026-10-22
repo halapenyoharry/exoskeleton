@@ -6,6 +6,7 @@ import JsonGraph3DPanel, {
 
 const manifest: PanelManifest<JsonGraph3DParams> = {
   id: "json-graph3d",
+  toolbar: true,
   title: "3d",
   component: JsonGraph3DPanel,
   description:

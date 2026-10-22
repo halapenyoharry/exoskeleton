@@ -6,6 +6,7 @@ import JsonGraphPanel, {
 
 const manifest: PanelManifest<JsonGraphParams> = {
   id: "json-graph",
+  toolbar: true,
   title: "graph",
   component: JsonGraphPanel,
   description:

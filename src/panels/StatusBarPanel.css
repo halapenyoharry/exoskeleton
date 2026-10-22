@@ -194,3 +194,86 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 16px rgba(0, 229, 255, 0.45);
   }
 }
+
+/* Narrow viewports: one non-wrapping row. Labels hidden, values kept. */
+.status-link-short,
+.status-doc-label,
+.status-stats-label {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .status-bar-container {
+    padding: 0 8px;
+    gap: 8px;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .status-bar-left,
+  .status-bar-center,
+  .status-bar-right {
+    gap: 8px;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+
+  .status-link-long {
+    display: none;
+  }
+
+  .status-link-short {
+    display: inline;
+  }
+
+  .status-bar-link-btn {
+    padding: 3px 8px;
+    flex-shrink: 0;
+  }
+
+  .status-doc-badge {
+    display: inline-block;
+    max-width: 96px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  .status-doc-label {
+    display: none;
+  }
+
+  .status-doc-value {
+    display: inline;
+  }
+
+  .status-selection {
+    max-width: 120px;
+  }
+
+  .status-selection-label {
+    display: none;
+  }
+
+  .status-stats {
+    gap: 4px;
+  }
+
+  .status-stats-label {
+    display: none;
+  }
+
+  .status-stats-divider {
+    font-size: 0;
+  }
+
+  .status-stats-divider::before {
+    content: "\00b7";
+    font-size: 0.8rem;
+  }
+}

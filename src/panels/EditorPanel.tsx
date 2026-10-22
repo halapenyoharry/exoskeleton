@@ -1,7 +1,15 @@
-import { useEffect, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
-import { open, save } from "@tauri-apps/plugin-dialog";
-import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import { useEffect, useRef, useState } from "react";
+import type { IDockviewPanelProps } from "dockview-react";
+import {
+  errorText,
+  fileNameFor,
+  inTauri,
+  openTextFiles,
+  readTextFileAt,
+  saveTextFile,
+} from "../utils/file-io";
+import { onPanelMenu } from "../panel-menu";
+import { useFlash } from "../utils/useFlash";
 import "./EditorPanel.css";
 
 // TODO: replace this textarea with @marktext/muya for live-preview markdown.
@@ -19,20 +27,21 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
   const [path, setPath] = useState<string | null>(null);
   const [text, setText] = useState("# untitled\n\nstart writing.\n");
   const [dirty, setDirty] = useState(false);
+  const { flash, show, clear } = useFlash();
 
   // Reopen the persisted file on mount. If it's gone (moved/deleted),
   // fall back to the untitled buffer and drop the stale param.
   useEffect(() => {
     const initial = props.params?.filePath;
-    if (!initial) return;
-    readTextFile(initial)
+    if (!initial || !inTauri()) return;
+    readTextFileAt(initial)
       .then((content) => {
         setPath(initial);
         setText(content);
         setDirty(false);
       })
       .catch((e) => {
-        console.warn(`[exoskeleton] editor: couldn't reopen ${initial}:`, e);
+        show("error", `Couldn't reopen ${initial}: ${errorText(e)}`);
         props.api.updateParameters({ filePath: undefined });
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -44,44 +53,90 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
   }
 
   async function openFile() {
-    const picked = await open({
-      multiple: false,
-      directory: false,
-      filters: [{ name: "Markdown", extensions: ["md", "markdown", "txt"] }],
-    });
-    if (!picked || typeof picked !== "string") return;
-    const content = await readTextFile(picked);
-    rememberPath(picked);
-    setText(content);
-    setDirty(false);
+    try {
+      const [file] = await openTextFiles([
+        { name: "Markdown", extensions: ["md", "markdown", "txt"] },
+      ]);
+      if (!file) return;
+      if (file.path) rememberPath(file.path);
+      else setPath(file.name);
+      setText(file.text);
+      setDirty(false);
+      show("ok", `Opened ${file.name}`);
+    } catch (err) {
+      show("error", errorText(err));
+    }
   }
 
-  async function saveFile() {
-    let target = path;
-    if (!target) {
-      const picked = await save({
-        filters: [{ name: "Markdown", extensions: ["md"] }],
-      });
-      if (!picked) return;
-      target = picked;
-      rememberPath(picked);
+  async function saveFile(asNew = false) {
+    try {
+      const result = await saveTextFile(
+        text,
+        fileNameFor(path?.split(/[/\\]/).pop() ?? "untitled", "md"),
+        [{ name: "Markdown", extensions: ["md"] }],
+        inTauri() && !asNew ? path : null,
+      );
+      if (!result) return;
+      if (result.method === "dialog") rememberPath(result.path);
+      setDirty(false);
+      show("ok", result.method === "dialog" ? `Saved to ${result.path}` : `Downloaded ${result.path}`);
+    } catch (err) {
+      show("error", errorText(err));
     }
-    await writeTextFile(target, text);
-    setDirty(false);
   }
+
+  // Menu + toolbar items. Latest handlers via ref so state is never stale.
+  const newFile = () => {
+    setPath(null);
+    setText("");
+    setDirty(false);
+    props.api.updateParameters({ filePath: undefined });
+  };
+  const actions = {
+    openFile,
+    newFile,
+    saveFile: () => { if (!dirty && path) return; return saveFile(); },
+    saveAs: () => saveFile(true),
+  };
+  const actionsRef = useRef(actions);
+  actionsRef.current = actions;
+  useEffect(
+    () =>
+      onPanelMenu(props.api.id, (id) => {
+        if (id === "open") void actionsRef.current.openFile();
+        else if (id === "save") void actionsRef.current.saveFile();
+        else if (id === "saveAs" || id === "download") void actionsRef.current.saveAs();
+        else if (id === "new") actionsRef.current.newFile();
+      }),
+    [props.api.id],
+  );
 
   // Pure content — the host wraps this in PanelRoot via exoPanel().
   return (
     <>
-      <div className="panel-header">editor</div>
+      {/* Inline buttons; hidden by CSS when the host renders the slim toolbar. */}
       <div className="panel-toolbar">
         <button onClick={openFile}>open</button>
-        <button onClick={saveFile} disabled={!dirty && !!path}>
+        <button onClick={() => void saveFile()} disabled={!dirty && !!path}>
           save
         </button>
+      </div>
+      {/* Status line lives in the content, not the toolbar, so it stays
+          visible when the toolbar is replaced by header actions. */}
+      <div className="editor-status">
         <span style={{ flex: 1, color: "#4a6a78", fontStyle: dirty ? "italic" : "normal" }}>
           {path ?? "untitled"}{dirty ? " •" : ""}
         </span>
+        {flash && (
+          <span
+            onClick={clear}
+            title="Click to dismiss"
+            style={{ cursor: "pointer", color: flash.kind === "error" ? "#ff6b6b" : "#7ee2a8" }}
+          >
+            {flash.kind === "error" ? "⚠ " : "✓ "}
+            {flash.text}
+          </span>
+        )}
       </div>
       <textarea
         className="editor-textarea"

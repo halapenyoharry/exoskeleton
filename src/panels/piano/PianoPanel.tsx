@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
 import { sendOsc } from "../../osc";
 import "./PianoPanel.css";
 
@@ -104,7 +104,6 @@ export default function PianoPanel(_props: IDockviewPanelProps<PianoParams>) {
 
   return (
     <>
-      <div className="panel-header">piano</div>
       <div className="piano-body">
         <div className="piano-hint">
           click + hold a key — sends OSC{" "}

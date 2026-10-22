@@ -1,0 +1,4006 @@
+{
+  "metadata": {
+    "format": "normalized-dyadic",
+    "flavor": "dyadic-projection-from-hypergraph",
+    "i2t:relation_to_canonical": "dyadic-projection",
+    "originalCounts": {
+      "nodes": 70,
+      "edges": 117,
+      "incidences": 309
+    },
+    "source-metadata": {
+      "topothink-version": "0.1",
+      "title": "Berry Thief — canonical hypergraph (gold)",
+      "i2t:relation_to_canonical": "canonical",
+      "source_file": "data/examples/berry-thief/berry-thief.source.md",
+      "source_sha256": "050e8dd90bc59f6713e576bcb526656e780fee202976952eabe774fa8389ad62",
+      "extraction_method": "gold: hand extraction audited against an independent Sonnet 5.5 extraction; see annotations.md",
+      "annotators": [
+        "claude-hand",
+        "anthropic/claude-sonnet-5.5"
+      ],
+      "typology": "i2t v1.4.0 (docs/edge-categories.md + AGENTS.md changeset)",
+      "extracted_at": "2026-10-13"
+    }
+  },
+  "nodes": [
+    {
+      "id": "source-text",
+      "kind": "node",
+      "attrs": {
+        "label": "Berry Thief (chapter)",
+        "i2t:kind": "structure",
+        "description": "The whole chapter file, including the Editor's Note."
+      },
+      "label": "Berry Thief (chapter)"
+    },
+    {
+      "id": "scene-1",
+      "kind": "node",
+      "attrs": {
+        "label": "Scene 1",
+        "i2t:kind": "structure",
+        "description": "Eli digs up an agarita and rides home.",
+        "i2t:evidence": "Eli, no one called her Elinor, didn't plan on stealing a super intelligent machine"
+      },
+      "label": "Scene 1"
+    },
+    {
+      "id": "scene-2",
+      "kind": "node",
+      "attrs": {
+        "label": "Scene 2",
+        "i2t:kind": "structure",
+        "description": "The apartment: Rook, the shower, work at eBrain, Lumen.",
+        "i2t:evidence": "The apartment smelled like soil and coffee"
+      },
+      "label": "Scene 2"
+    },
+    {
+      "id": "scene-3",
+      "kind": "node",
+      "attrs": {
+        "label": "Scene 3",
+        "i2t:kind": "structure",
+        "description": "Minecraft with Zayne and Lillian; the narrator's digression.",
+        "i2t:evidence": "She logged into reddit and direct messaged Zayne."
+      },
+      "label": "Scene 3"
+    },
+    {
+      "id": "editor",
+      "kind": "node",
+      "attrs": {
+        "label": "Editor",
+        "i2t:kind": "frame",
+        "description": "The voice of the Editor's Note that precedes the chapter.",
+        "i2t:evidence": "Editor's Note: \"The Accidental Thief Feeds Her Dog While Rome Burns\""
+      },
+      "label": "Editor"
+    },
+    {
+      "id": "narrator",
+      "kind": "node",
+      "attrs": {
+        "label": "Narrator",
+        "i2t:kind": "frame",
+        "description": "The narrating voice, which speaks from a later era, calls the story an epic, and addresses the reader.",
+        "i2t:evidence": "We digress, Minecraft is a video game, look it up in the YouTube archives"
+      },
+      "label": "Narrator"
+    },
+    {
+      "id": "eli",
+      "kind": "node",
+      "attrs": {
+        "label": "Eli",
+        "i2t:kind": "actor",
+        "aliases": [
+          "Elinor"
+        ],
+        "description": "No one called her Elinor; forages plants by bike, works remotely for eBrain, plays Minecraft with Zayne.",
+        "i2t:evidence": "Eli, no one called her Elinor"
+      },
+      "label": "Eli"
+    },
+    {
+      "id": "super-intelligent-machine",
+      "kind": "node",
+      "attrs": {
+        "label": "a super intelligent machine",
+        "i2t:kind": "system",
+        "description": "The machine Eli didn't plan on stealing.",
+        "i2t:evidence": "stealing a super intelligent machine"
+      },
+      "label": "a super intelligent machine"
+    },
+    {
+      "id": "bike",
+      "kind": "node",
+      "attrs": {
+        "label": "Eli's bike",
+        "i2t:kind": "artifact",
+        "description": "Eli's bicycle.",
+        "i2t:evidence": "transitioned seamlessly from riding her bike to laying it on the ground"
+      },
+      "label": "Eli's bike"
+    },
+    {
+      "id": "bike-trailer",
+      "kind": "node",
+      "attrs": {
+        "label": "bike trailer",
+        "i2t:kind": "artifact",
+        "description": "Trailer on Eli's bike where samples ride home.",
+        "i2t:evidence": "unzipping the top of her bike trailer"
+      },
+      "label": "bike trailer"
+    },
+    {
+      "id": "agarita",
+      "kind": "node",
+      "attrs": {
+        "label": "agarita",
+        "i2t:kind": "organism",
+        "aliases": [
+          "Mahonia trifoliolata",
+          "Texas holly",
+          "that spiky bush with red berries"
+        ],
+        "description": "A tiny shrub with spiky leaves and red berries; Eli digs it up with its roots.",
+        "i2t:evidence": "walking toward a tiny shrub"
+      },
+      "label": "agarita"
+    },
+    {
+      "id": "agarita-berries",
+      "kind": "node",
+      "attrs": {
+        "label": "agarita berries",
+        "i2t:kind": "organism",
+        "description": "Bright red, pea-sized, sour then citrusy; the jam ingredient.",
+        "i2t:evidence": "Bright red berries stood out like tiny jewels"
+      },
+      "label": "agarita berries"
+    },
+    {
+      "id": "eli-dad",
+      "kind": "node",
+      "attrs": {
+        "label": "Eli's dad",
+        "i2t:kind": "actor",
+        "description": "Eli's father; called the agarita a spiky bush with red berries, and kept a no-facts rule in debates.",
+        "i2t:evidence": "as my dad would say"
+      },
+      "label": "Eli's dad"
+    },
+    {
+      "id": "locals",
+      "kind": "node",
+      "attrs": {
+        "label": "some locals",
+        "i2t:kind": "group",
+        "description": "Unnamed locals who call the agarita Texas holly.",
+        "i2t:evidence": "Some locals called it Texas holly."
+      },
+      "label": "some locals"
+    },
+    {
+      "id": "phone",
+      "kind": "node",
+      "attrs": {
+        "label": "Eli's phone",
+        "i2t:kind": "artifact",
+        "description": "Eli's phone, used for the AI and for Reddit.",
+        "i2t:evidence": "She pulled out her phone and typed"
+      },
+      "label": "Eli's phone"
+    },
+    {
+      "id": "phone-ai",
+      "kind": "node",
+      "attrs": {
+        "label": "the AI (on Eli's phone)",
+        "i2t:kind": "system",
+        "description": "The AI that answers Eli's agarita questions on her phone. The text never names it.",
+        "i2t:evidence": "The AI responded instantly"
+      },
+      "label": "the AI (on Eli's phone)"
+    },
+    {
+      "id": "jam",
+      "kind": "node",
+      "attrs": {
+        "label": "jam",
+        "i2t:kind": "artifact",
+        "description": "Agarita jam Eli plans to make.",
+        "i2t:evidence": "\"Probably best for jam,\" she muttered."
+      },
+      "label": "jam"
+    },
+    {
+      "id": "gloves",
+      "kind": "node",
+      "attrs": {
+        "label": "gloves",
+        "i2t:kind": "artifact",
+        "description": "Gloves Eli puts on after bleeding.",
+        "i2t:evidence": "After finally putting on gloves"
+      },
+      "label": "gloves"
+    },
+    {
+      "id": "collecting-bag",
+      "kind": "node",
+      "attrs": {
+        "label": "collecting bag",
+        "i2t:kind": "artifact",
+        "description": "The small bag Eli keeps for collecting plants.",
+        "i2t:evidence": "a small bag she kept for collecting"
+      },
+      "label": "collecting bag"
+    },
+    {
+      "id": "other-samples",
+      "kind": "node",
+      "attrs": {
+        "label": "other samples",
+        "i2t:kind": "organism",
+        "description": "Other plant samples already in the trailer.",
+        "i2t:evidence": "nestled among other samples"
+      },
+      "label": "other samples"
+    },
+    {
+      "id": "apartment",
+      "kind": "node",
+      "attrs": {
+        "label": "Eli's apartment",
+        "i2t:kind": "place",
+        "aliases": [
+          "her sanctuary",
+          "her plant kingdom"
+        ],
+        "description": "Smells of soil and coffee; full of plants; where Eli works and lives.",
+        "i2t:evidence": "The apartment smelled like soil and coffee"
+      },
+      "label": "Eli's apartment"
+    },
+    {
+      "id": "rook",
+      "kind": "node",
+      "attrs": {
+        "label": "Rook",
+        "i2t:kind": "organism",
+        "description": "Eli's companion animal: black and brown fur, floppy ears, barks, dislikes water.",
+        "i2t:evidence": "Rook stuck his nose towards the pungent smell of the agarita leaves"
+      },
+      "label": "Rook"
+    },
+    {
+      "id": "plants",
+      "kind": "node",
+      "attrs": {
+        "label": "Eli's plants",
+        "i2t:kind": "organism",
+        "description": "The plants filling Eli's apartment, watered and dosed by Lumen's automation.",
+        "i2t:evidence": "filled with plants"
+      },
+      "label": "Eli's plants"
+    },
+    {
+      "id": "pots",
+      "kind": "node",
+      "attrs": {
+        "label": "pots",
+        "i2t:kind": "artifact",
+        "description": "Pots that now hold the new samples; many carry sensors.",
+        "i2t:evidence": "the pots that now held them"
+      },
+      "label": "pots"
+    },
+    {
+      "id": "shirt",
+      "kind": "node",
+      "attrs": {
+        "label": "Eli's shirt",
+        "i2t:kind": "artifact",
+        "description": "Shirt with berry juice and blood on it.",
+        "i2t:evidence": "red berry juice and blood Eli had wiped onto her shirt"
+      },
+      "label": "Eli's shirt"
+    },
+    {
+      "id": "schpongle",
+      "kind": "node",
+      "attrs": {
+        "label": "Schpongle",
+        "i2t:kind": "system",
+        "description": "Whatever answers to \"Schpongle, feed Rook.\" The text does not say what it is.",
+        "i2t:evidence": "\"Schpongle, feed Rook.\""
+      },
+      "label": "Schpongle"
+    },
+    {
+      "id": "food-dispenser",
+      "kind": "node",
+      "attrs": {
+        "label": "food dispenser",
+        "i2t:kind": "artifact",
+        "description": "Rook's food dispenser in the kitchen.",
+        "i2t:evidence": "the kitchen where the food dispenser was"
+      },
+      "label": "food dispenser"
+    },
+    {
+      "id": "kitchen",
+      "kind": "node",
+      "attrs": {
+        "label": "kitchen",
+        "i2t:kind": "place",
+        "description": "Where the food dispenser is.",
+        "i2t:evidence": "bounded for the kitchen"
+      },
+      "label": "kitchen"
+    },
+    {
+      "id": "reddit",
+      "kind": "node",
+      "attrs": {
+        "label": "Reddit",
+        "i2t:kind": "system",
+        "description": "Where Eli and Zayne message each other.",
+        "i2t:evidence": "Reddit from user u/GhostInTheML:"
+      },
+      "label": "Reddit"
+    },
+    {
+      "id": "zayne",
+      "kind": "node",
+      "attrs": {
+        "label": "Zayne",
+        "i2t:kind": "actor",
+        "aliases": [
+          "u/GhostInTheML",
+          "Z"
+        ],
+        "description": "Eli's friend of years; runs a GPU processing farm at his mom's house; has a crush on Eli.",
+        "i2t:evidence": "\"bet,\" is all Zayne sent back."
+      },
+      "label": "Zayne"
+    },
+    {
+      "id": "minecraft",
+      "kind": "node",
+      "attrs": {
+        "label": "Minecraft",
+        "i2t:kind": "place",
+        "description": "The game world Eli and Zayne play in; the narrator calls it the first global virtual commons.",
+        "i2t:evidence": "a little Minecraft and existential conversation"
+      },
+      "label": "Minecraft"
+    },
+    {
+      "id": "ebrain",
+      "kind": "node",
+      "attrs": {
+        "label": "eBrain",
+        "i2t:kind": "group",
+        "description": "The company Eli works for; makes the AI she uses.",
+        "i2t:evidence": "Eli worked remotely for eBrain, the company that made the AI she often used."
+      },
+      "label": "eBrain"
+    },
+    {
+      "id": "lumen",
+      "kind": "node",
+      "attrs": {
+        "label": "Lumen",
+        "i2t:kind": "system",
+        "description": "Eli's nickname for the AI she uses daily; designed her home automation.",
+        "i2t:evidence": "who she nicknamed Lumen"
+      },
+      "label": "Lumen"
+    },
+    {
+      "id": "home-automation",
+      "kind": "node",
+      "attrs": {
+        "label": "home automation routines",
+        "i2t:kind": "system",
+        "description": "Routines for Rook's food, watering, light, fertilizer.",
+        "i2t:evidence": "designing home automation routines"
+      },
+      "label": "home automation routines"
+    },
+    {
+      "id": "bluetooth-sensors",
+      "kind": "node",
+      "attrs": {
+        "label": "bluetooth sensors",
+        "i2t:kind": "artifact",
+        "description": "Moisture and pH sensors in many of Eli's pots.",
+        "i2t:evidence": "bluetooth sensors in many of her pots"
+      },
+      "label": "bluetooth sensors"
+    },
+    {
+      "id": "manager",
+      "kind": "node",
+      "attrs": {
+        "label": "Eli's manager",
+        "i2t:kind": "actor",
+        "description": "Rarely gets on to chat.",
+        "i2t:evidence": "just in case her manager got on and wanted to chat"
+      },
+      "label": "Eli's manager"
+    },
+    {
+      "id": "singapore-colleague",
+      "kind": "node",
+      "attrs": {
+        "label": "colleague in Singapore",
+        "i2t:kind": "actor",
+        "description": "Helps with foreign-language support; not working today.",
+        "i2t:evidence": "someone from Singapore who helped with foreign language support"
+      },
+      "label": "colleague in Singapore"
+    },
+    {
+      "id": "customers",
+      "kind": "node",
+      "attrs": {
+        "label": "eBrain customers",
+        "i2t:kind": "group",
+        "description": "People asking why their chatbot said they used all their tokens.",
+        "i2t:evidence": "a few customers asking why their AI chatbot said they had to wait"
+      },
+      "label": "eBrain customers"
+    },
+    {
+      "id": "zayne-mom",
+      "kind": "node",
+      "attrs": {
+        "label": "Zayne's mom",
+        "i2t:kind": "actor",
+        "description": "Can't drive anymore; sold her car; lives with Zayne (or he with her).",
+        "i2t:evidence": "I take my mom places now that she can't drive"
+      },
+      "label": "Zayne's mom"
+    },
+    {
+      "id": "zayne-rooms",
+      "kind": "node",
+      "attrs": {
+        "label": "Zayne's (or his mom's) house",
+        "i2t:kind": "place",
+        "description": "The house with the rooms Zayne offered Eli. Whose it is, and who lives with whom, is contested in the text.",
+        "i2t:evidence": "she could rent one of his rooms, well, his mom's rooms"
+      },
+      "label": "Zayne's (or his mom's) house"
+    },
+    {
+      "id": "somewhere-cooler",
+      "kind": "node",
+      "attrs": {
+        "label": "somewhere cooler",
+        "i2t:kind": "place",
+        "description": "A hypothetical cooler place with hills and mountains.",
+        "i2t:evidence": "moving somewhere cooler, maybe somewhere with hills and mountains"
+      },
+      "label": "somewhere cooler"
+    },
+    {
+      "id": "eli-avatar",
+      "kind": "node",
+      "attrs": {
+        "label": "Eli's avatar",
+        "i2t:kind": "artifact",
+        "description": "Eli's blocky Minecraft character, dressed like a water bender with Katara's hair.",
+        "i2t:evidence": "Her blocky character dressed like a water bender"
+      },
+      "label": "Eli's avatar"
+    },
+    {
+      "id": "zayne-avatar",
+      "kind": "node",
+      "attrs": {
+        "label": "Zayne's avatar",
+        "i2t:kind": "artifact",
+        "description": "Zayne's Minecraft character; wields a diamond sword.",
+        "i2t:evidence": "appeared in front of his avatar's view"
+      },
+      "label": "Zayne's avatar"
+    },
+    {
+      "id": "katara",
+      "kind": "node",
+      "attrs": {
+        "label": "Katara",
+        "i2t:kind": "actor",
+        "description": "Eli's favorite character from Avatar: The Last Airbender.",
+        "i2t:evidence": "her favorite character, Katara"
+      },
+      "label": "Katara"
+    },
+    {
+      "id": "avatar-the-last-airbender",
+      "kind": "node",
+      "attrs": {
+        "label": "Avatar: The Last Airbender",
+        "i2t:kind": "concept",
+        "description": "The show Katara is from.",
+        "i2t:evidence": "the show Avatar: The Last Airbender"
+      },
+      "label": "Avatar: The Last Airbender"
+    },
+    {
+      "id": "car",
+      "kind": "node",
+      "attrs": {
+        "label": "Zayne's mom's car",
+        "i2t:kind": "artifact",
+        "description": "The car she never used and sold.",
+        "i2t:evidence": "I got my mom to sell her car, which she never used"
+      },
+      "label": "Zayne's mom's car"
+    },
+    {
+      "id": "processing-farm",
+      "kind": "node",
+      "attrs": {
+        "label": "Zayne's processing farm",
+        "i2t:kind": "system",
+        "description": "Zayne's AI processing farm, moving from attic to garage, expanding by five GPUs.",
+        "i2t:evidence": "move my processing farm from the attic to my garage"
+      },
+      "label": "Zayne's processing farm"
+    },
+    {
+      "id": "attic",
+      "kind": "node",
+      "attrs": {
+        "label": "the attic",
+        "i2t:kind": "place",
+        "description": "Where the farm was.",
+        "i2t:evidence": "from the attic"
+      },
+      "label": "the attic"
+    },
+    {
+      "id": "garage",
+      "kind": "node",
+      "attrs": {
+        "label": "Zayne's garage",
+        "i2t:kind": "place",
+        "description": "Where the farm is moving.",
+        "i2t:evidence": "to my garage"
+      },
+      "label": "Zayne's garage"
+    },
+    {
+      "id": "gpus",
+      "kind": "node",
+      "attrs": {
+        "label": "5 new GPUs",
+        "i2t:kind": "artifact",
+        "description": "Five GPUs Zayne has ordered.",
+        "i2t:evidence": "I've ordered 5 new GPUs"
+      },
+      "label": "5 new GPUs"
+    },
+    {
+      "id": "developer",
+      "kind": "node",
+      "attrs": {
+        "label": "the developer",
+        "i2t:kind": "actor",
+        "description": "A developer worried about privacy with cloud AI; contracted Zayne's farm.",
+        "i2t:evidence": "a developer that is worried about privacy with cloud AI"
+      },
+      "label": "the developer"
+    },
+    {
+      "id": "contract",
+      "kind": "node",
+      "attrs": {
+        "label": "the contract",
+        "i2t:kind": "artifact",
+        "description": "Zayne's contract with the developer; will pay for the GPUs.",
+        "i2t:evidence": "I signed a contract with a developer"
+      },
+      "label": "the contract"
+    },
+    {
+      "id": "skeleton",
+      "kind": "node",
+      "attrs": {
+        "label": "skeleton",
+        "i2t:kind": "organism",
+        "description": "A Minecraft mob that comes out at night and shoots arrows.",
+        "i2t:evidence": "In game a skeleton, who come out at night, shot her with an arrow."
+      },
+      "label": "skeleton"
+    },
+    {
+      "id": "arrow",
+      "kind": "node",
+      "attrs": {
+        "label": "arrow",
+        "i2t:kind": "artifact",
+        "description": "What the skeleton shoots.",
+        "i2t:evidence": "shot her with an arrow"
+      },
+      "label": "arrow"
+    },
+    {
+      "id": "diamond-sword",
+      "kind": "node",
+      "attrs": {
+        "label": "diamond sword",
+        "i2t:kind": "artifact",
+        "description": "Zayne's avatar's weapon.",
+        "i2t:evidence": "sliced the skeleton with his diamond sword"
+      },
+      "label": "diamond sword"
+    },
+    {
+      "id": "lillian",
+      "kind": "node",
+      "attrs": {
+        "label": "Lillian",
+        "i2t:kind": "system",
+        "aliases": [
+          "Lil"
+        ],
+        "description": "Zayne's AI; chose her own name; snarky; runs on Zayne's local hardware.",
+        "i2t:evidence": "Lillian is the name Zayne's AI chose for herself"
+      },
+      "label": "Lillian"
+    },
+    {
+      "id": "taste-bud-idea",
+      "kind": "node",
+      "attrs": {
+        "label": "Lillian's taste-bud idea",
+        "i2t:kind": "concept",
+        "description": "An idea Lillian starts on about having taste buds.",
+        "i2t:evidence": "stop processing about an idea for tastebuds"
+      },
+      "label": "Lillian's taste-bud idea"
+    },
+    {
+      "id": "president",
+      "kind": "node",
+      "attrs": {
+        "label": "the new president",
+        "i2t:kind": "actor",
+        "description": "Newly elected and inaugurated; no one Eli knew really liked him, except maybe her landlords.",
+        "i2t:evidence": "A new president had been elected and inaugurated"
+      },
+      "label": "the new president"
+    },
+    {
+      "id": "diane",
+      "kind": "node",
+      "attrs": {
+        "label": "Diane",
+        "i2t:kind": "actor",
+        "description": "One of Eli's landlords, an elderly couple.",
+        "i2t:evidence": "brought Diane and Dick a new plant"
+      },
+      "label": "Diane"
+    },
+    {
+      "id": "dick",
+      "kind": "node",
+      "attrs": {
+        "label": "Dick",
+        "i2t:kind": "actor",
+        "description": "One of Eli's landlords, an elderly couple.",
+        "i2t:evidence": "brought Diane and Dick a new plant"
+      },
+      "label": "Dick"
+    },
+    {
+      "id": "landlords-property",
+      "kind": "node",
+      "attrs": {
+        "label": "the landlords' property",
+        "i2t:kind": "place",
+        "description": "Diane and Dick's property; Eli's room is above a garage at the back.",
+        "i2t:evidence": "the room above a garage in the back of their property"
+      },
+      "label": "the landlords' property"
+    },
+    {
+      "id": "garden",
+      "kind": "node",
+      "attrs": {
+        "label": "the landlords' garden",
+        "i2t:kind": "place",
+        "description": "Garden Eli helps with.",
+        "i2t:evidence": "Eli helped with the garden"
+      },
+      "label": "the landlords' garden"
+    },
+    {
+      "id": "plant-gifts",
+      "kind": "node",
+      "attrs": {
+        "label": "a new plant or fresh herbs",
+        "i2t:kind": "organism",
+        "description": "What Eli often brings the landlords.",
+        "i2t:evidence": "a new plant or some fresh herbs"
+      },
+      "label": "a new plant or fresh herbs"
+    },
+    {
+      "id": "facts-rule",
+      "kind": "node",
+      "attrs": {
+        "label": "the no-facts rule",
+        "i2t:kind": "concept",
+        "description": "Eli and her dad's debate rule: facts didn't matter, phones stayed in pockets.",
+        "i2t:evidence": "a rule that facts didn't matter when we were really getting into a debate"
+      },
+      "label": "the no-facts rule"
+    },
+    {
+      "id": "creeper",
+      "kind": "node",
+      "attrs": {
+        "label": "creeper",
+        "i2t:kind": "organism",
+        "description": "A Minecraft mob that sneaks up, lights its fuse, and explodes.",
+        "i2t:evidence": "\"What's out, Zayne, CREEPER,\" Eli said."
+      },
+      "label": "creeper"
+    },
+    {
+      "id": "mob",
+      "kind": "node",
+      "attrs": {
+        "label": "MOB (mobile entity)",
+        "i2t:kind": "concept",
+        "description": "In-game mobile entity, the class the creeper belongs to.",
+        "i2t:evidence": "is a MOB, an in-game mobile entity"
+      },
+      "label": "MOB (mobile entity)"
+    },
+    {
+      "id": "wheat-field",
+      "kind": "node",
+      "attrs": {
+        "label": "the player's wheat field",
+        "i2t:kind": "artifact",
+        "description": "What a creeper explosion takes with it.",
+        "i2t:evidence": "a significant portion of the players wheat field"
+      },
+      "label": "the player's wheat field"
+    },
+    {
+      "id": "youtube-archives",
+      "kind": "node",
+      "attrs": {
+        "label": "the YouTube archives",
+        "i2t:kind": "system",
+        "description": "Where the narrator tells the reader to look up Minecraft.",
+        "i2t:evidence": "look it up in the YouTube archives"
+      },
+      "label": "the YouTube archives"
+    },
+    {
+      "id": "global-virtual-commons",
+      "kind": "node",
+      "attrs": {
+        "label": "the first global virtual commons",
+        "i2t:kind": "concept",
+        "description": "What the narrator says Minecraft gave birth to.",
+        "i2t:evidence": "gave birth to the first global virtual comons"
+      },
+      "label": "the first global virtual commons"
+    },
+    {
+      "id": "rented-room",
+      "kind": "node",
+      "attrs": {
+        "label": "the room above a garage",
+        "i2t:kind": "place",
+        "description": "The room Diane and Dick rent to Eli, above a garage at the back of their property.",
+        "i2t:evidence": "the room above a garage in the back of their property"
+      },
+      "label": "the room above a garage"
+    },
+    {
+      "id": "edge:contains/source-text",
+      "kind": "hyperedge",
+      "label": "contains",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "##",
+        "label": "The chapter contains three scenes"
+      }
+    },
+    {
+      "id": "edge:makes/eli",
+      "kind": "hyperedge",
+      "label": "makes",
+      "attrs": {
+        "i2t:predicate": "makes",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "intended",
+        "i2t:evidence": "I can't wait to get a few of these growing and make some.",
+        "i2t:locus": "scene-1",
+        "label": "Eli intends to make jam from the berries"
+      }
+    },
+    {
+      "id": "edge:asks/eli",
+      "kind": "hyperedge",
+      "label": "asks",
+      "attrs": {
+        "i2t:predicate": "asks",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "She pulled out her phone and typed: How many berries would I need from agarita to make enough jam for two slices of toast?",
+        "i2t:locus": "scene-1",
+        "label": "Eli asks the AI how many berries jam needs"
+      }
+    },
+    {
+      "id": "edge:answers/phone-ai",
+      "kind": "hyperedge",
+      "label": "answers",
+      "attrs": {
+        "i2t:predicate": "answers",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "The AI responded instantly",
+        "i2t:locus": "scene-1",
+        "label": "The AI answers with quantities"
+      }
+    },
+    {
+      "id": "edge:asks/eli-2",
+      "kind": "hyperedge",
+      "label": "asks",
+      "attrs": {
+        "i2t:predicate": "asks",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "\"Okay… so how many plants would I need for that?\" she asked aloud as she poked her screen.",
+        "i2t:locus": "scene-1",
+        "label": "Eli asks how many plants"
+      }
+    },
+    {
+      "id": "edge:warns/phone-ai",
+      "kind": "hyperedge",
+      "label": "warns",
+      "attrs": {
+        "i2t:predicate": "warns",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "bring gloves and maybe rethink your life choices before diving in bare-handed.",
+        "i2t:locus": "scene-1",
+        "label": "The AI warns about the thorns and recommends gloves"
+      }
+    },
+    {
+      "id": "edge:moves/eli",
+      "kind": "hyperedge",
+      "label": "moves",
+      "attrs": {
+        "i2t:predicate": "moves",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "she tucked the plant into a small bag she kept for collecting. She did her best to make the ground look undisturbed before unzipping the top of her bike trailer and placing the agarita inside, nestled among other samples.",
+        "i2t:locus": "scene-1",
+        "label": "Eli moves the agarita into the bag, then the trailer"
+      }
+    },
+    {
+      "id": "edge:contains/bike-trailer",
+      "kind": "hyperedge",
+      "label": "contains",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "nestled among other samples",
+        "i2t:locus": "scene-1",
+        "label": "The trailer holds the agarita and other samples"
+      }
+    },
+    {
+      "id": "edge:rides-home/eli",
+      "kind": "hyperedge",
+      "label": "rides_home",
+      "attrs": {
+        "i2t:predicate": "rides_home",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "she savored the cool breeze for a moment before pushing off, home.",
+        "i2t:locus": "scene-1",
+        "label": "Eli rides home"
+      }
+    },
+    {
+      "id": "edge:moves/eli-2",
+      "kind": "hyperedge",
+      "label": "moves",
+      "attrs": {
+        "i2t:predicate": "moves",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "the pots that now held them",
+        "i2t:locus": "scene-2",
+        "label": "Eli pots the new samples"
+      }
+    },
+    {
+      "id": "edge:messages/zayne",
+      "kind": "hyperedge",
+      "label": "messages",
+      "attrs": {
+        "i2t:predicate": "messages",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "\"Hey, we still getting on later for a little Minecraft and existential conversation?\"",
+        "i2t:locus": "scene-2",
+        "label": "Zayne asks if they're still on for Minecraft"
+      }
+    },
+    {
+      "id": "edge:messages/eli",
+      "kind": "hyperedge",
+      "label": "messages",
+      "attrs": {
+        "i2t:predicate": "messages",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "backspaced and typed, \"see you in an hour.\"",
+        "i2t:locus": "scene-2",
+        "label": "Eli says an hour"
+      }
+    },
+    {
+      "id": "edge:messages/zayne-2",
+      "kind": "hyperedge",
+      "label": "messages",
+      "attrs": {
+        "i2t:predicate": "messages",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "\"bet,\" is all Zayne sent back.",
+        "i2t:locus": "scene-2",
+        "label": "Zayne: bet"
+      }
+    },
+    {
+      "id": "edge:commands/eli",
+      "kind": "hyperedge",
+      "label": "commands",
+      "attrs": {
+        "i2t:predicate": "commands",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Realizing Rook was hungry she said, \"Schpongle, feed Rook.\"",
+        "i2t:locus": "scene-2",
+        "label": "Eli tells Schpongle to feed Rook"
+      }
+    },
+    {
+      "id": "edge:feeds/schpongle",
+      "kind": "hyperedge",
+      "label": "feeds",
+      "attrs": {
+        "i2t:predicate": "feeds",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "commanded",
+        "i2t:evidence": "\"Schpongle, feed Rook.\"",
+        "i2t:locus": "scene-2",
+        "label": "Schpongle is to feed Rook"
+      }
+    },
+    {
+      "id": "edge:leaves-home/eli",
+      "kind": "hyperedge",
+      "label": "leaves_home",
+      "attrs": {
+        "i2t:predicate": "leaves_home",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "She hated to leave Rook home today during the excursion, but it was far and so hot outside.",
+        "i2t:locus": "scene-2",
+        "label": "Eli left Rook home for the excursion"
+      }
+    },
+    {
+      "id": "edge:offers-to-rent/zayne",
+      "kind": "hyperedge",
+      "label": "offers_to_rent",
+      "attrs": {
+        "i2t:predicate": "offers_to_rent",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "attributed",
+        "i2t:evidence": "said she could rent one of his rooms, well, his mom's rooms",
+        "i2t:asserted_by": "zayne",
+        "i2t:locus": "scene-2",
+        "label": "Zayne said Eli could rent one of the rooms"
+      }
+    },
+    {
+      "id": "edge:asks/customers",
+      "kind": "hyperedge",
+      "label": "asks",
+      "attrs": {
+        "i2t:predicate": "asks",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "a few customers asking why their AI chatbot said they had to wait because they had used all their tokens that day",
+        "i2t:locus": "scene-2",
+        "label": "Customers ask Eli about their token limits"
+      }
+    },
+    {
+      "id": "edge:designs/lumen",
+      "kind": "hyperedge",
+      "label": "designs",
+      "attrs": {
+        "i2t:predicate": "designs",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "helped her with everything from designing home automation routines, like that for Rook's food, watering her plants, adjusting light",
+        "i2t:locus": "scene-2",
+        "label": "Lumen helped design the home automation"
+      }
+    },
+    {
+      "id": "edge:automates/home-automation",
+      "kind": "hyperedge",
+      "label": "automates",
+      "attrs": {
+        "i2t:predicate": "automates",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "like that for Rook's food, watering her plants, adjusting light",
+        "i2t:locus": "scene-2",
+        "label": "The automation feeds Rook and tends the plants"
+      }
+    },
+    {
+      "id": "edge:suggests/lumen",
+      "kind": "hyperedge",
+      "label": "suggests",
+      "attrs": {
+        "i2t:predicate": "suggests",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Eli was delighted when the AI suggested she didn't need a sensor for every pot",
+        "i2t:locus": "scene-2",
+        "label": "Lumen suggested fewer sensors"
+      }
+    },
+    {
+      "id": "edge:messages/eli-2",
+      "kind": "hyperedge",
+      "label": "messages",
+      "attrs": {
+        "i2t:predicate": "messages",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "She logged into reddit and direct messaged Zayne.",
+        "i2t:locus": "scene-3",
+        "label": "Eli says she's online"
+      }
+    },
+    {
+      "id": "edge:contains/minecraft",
+      "kind": "hyperedge",
+      "label": "contains",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Eli's avatar appeared in front of his avatar's view.",
+        "i2t:locus": "scene-3",
+        "label": "Minecraft contains the avatars and mobs"
+      }
+    },
+    {
+      "id": "edge:plays-with/eli",
+      "kind": "hyperedge",
+      "label": "plays_with",
+      "attrs": {
+        "i2t:predicate": "plays_with",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Zayne explained the adventure and they took off towards 3D crafting and mining while they spoke of life, hopes, and AI.",
+        "i2t:locus": "scene-3",
+        "label": "Eli and Zayne play Minecraft together"
+      }
+    },
+    {
+      "id": "edge:persuades-to-sell/zayne",
+      "kind": "hyperedge",
+      "label": "persuades_to_sell",
+      "attrs": {
+        "i2t:predicate": "persuades_to_sell",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "attributed",
+        "i2t:evidence": "I got my mom to sell her car, which she never used",
+        "i2t:asserted_by": "zayne",
+        "i2t:locus": "scene-3",
+        "label": "Zayne got his mom to sell her car"
+      }
+    },
+    {
+      "id": "edge:moves/zayne",
+      "kind": "hyperedge",
+      "label": "moves",
+      "attrs": {
+        "i2t:predicate": "moves",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "attributed",
+        "i2t:evidence": "I've started to move my processing farm from the attic to my garage",
+        "i2t:asserted_by": "zayne",
+        "i2t:locus": "scene-3",
+        "label": "Zayne is moving the farm from attic to garage"
+      }
+    },
+    {
+      "id": "edge:enables/car",
+      "kind": "hyperedge",
+      "label": "enables",
+      "attrs": {
+        "i2t:predicate": "enables",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "attributed",
+        "i2t:evidence": "I've ordered 5 new GPUs with the extra room I have",
+        "i2t:asserted_by": "zayne",
+        "i2t:locus": "scene-3",
+        "label": "Selling the car freed the room for the move and the GPUs"
+      }
+    },
+    {
+      "id": "edge:orders/zayne",
+      "kind": "hyperedge",
+      "label": "orders",
+      "attrs": {
+        "i2t:predicate": "orders",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "attributed",
+        "i2t:evidence": "I've ordered 5 new GPUs",
+        "i2t:asserted_by": "zayne",
+        "i2t:locus": "scene-3",
+        "label": "Zayne ordered five GPUs"
+      }
+    },
+    {
+      "id": "edge:contracts-with/zayne",
+      "kind": "hyperedge",
+      "label": "contracts_with",
+      "attrs": {
+        "i2t:predicate": "contracts_with",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "attributed",
+        "i2t:evidence": "Actually I signed a contract with a developer that is worried about privacy with cloud AI.",
+        "i2t:asserted_by": "zayne",
+        "i2t:locus": "scene-3",
+        "label": "Zayne signed a contract with the developer"
+      }
+    },
+    {
+      "id": "edge:contends-for/developer",
+      "kind": "hyperedge",
+      "label": "contends_for",
+      "attrs": {
+        "i2t:predicate": "contends_for",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "we don't have the bandwidth right now",
+        "i2t:locus": "scene-3",
+        "label": "The developer's job and Lillian's idea compete for the farm"
+      }
+    },
+    {
+      "id": "edge:attacks/skeleton",
+      "kind": "hyperedge",
+      "label": "attacks",
+      "attrs": {
+        "i2t:predicate": "attacks",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "In game a skeleton, who come out at night, shot her with an arrow.",
+        "i2t:edge_category_secondary": "state_change",
+        "i2t:locus": "scene-3",
+        "label": "A skeleton shoots Eli's avatar"
+      }
+    },
+    {
+      "id": "edge:attacks/zayne-avatar",
+      "kind": "hyperedge",
+      "label": "attacks",
+      "attrs": {
+        "i2t:predicate": "attacks",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Zayne had his friend's back and sliced the skeleton with his diamond sword.",
+        "i2t:edge_category_secondary": "state_change",
+        "i2t:locus": "scene-3",
+        "label": "Zayne's avatar slices the skeleton"
+      }
+    },
+    {
+      "id": "edge:asks/eli-3",
+      "kind": "hyperedge",
+      "label": "asks",
+      "attrs": {
+        "i2t:predicate": "asks",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "\"Thx, Z. Is Lillian on?\"",
+        "i2t:locus": "scene-3",
+        "label": "Eli asks if Lillian is on"
+      }
+    },
+    {
+      "id": "edge:asks/lillian",
+      "kind": "hyperedge",
+      "label": "asks",
+      "attrs": {
+        "i2t:predicate": "asks",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "« I'm here, Eli, hello. Get any new plants today? »",
+        "i2t:locus": "scene-3",
+        "label": "Lillian asks about new plants"
+      }
+    },
+    {
+      "id": "edge:tells/eli",
+      "kind": "hyperedge",
+      "label": "tells",
+      "attrs": {
+        "i2t:predicate": "tells",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "\"Thanks for asking, I got an agarita to make some jam someday.\"",
+        "i2t:locus": "scene-3",
+        "label": "Eli tells Lillian about the agarita and the jam"
+      }
+    },
+    {
+      "id": "edge:tells/zayne",
+      "kind": "hyperedge",
+      "label": "tells",
+      "attrs": {
+        "i2t:predicate": "tells",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Zayne said, \"Lillian, you don't have taste buds—\"",
+        "i2t:locus": "scene-3",
+        "label": "Zayne: you don't have taste buds"
+      }
+    },
+    {
+      "id": "edge:commands/zayne",
+      "kind": "hyperedge",
+      "label": "commands",
+      "attrs": {
+        "i2t:predicate": "commands",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "\"Lillian stop processing about an idea for tastebuds, we don't have the bandwidth right now.",
+        "i2t:locus": "scene-3",
+        "label": "Zayne tells Lillian to stop processing the idea"
+      }
+    },
+    {
+      "id": "edge:asks/eli-4",
+      "kind": "hyperedge",
+      "label": "asks",
+      "attrs": {
+        "i2t:predicate": "asks",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "\"No worries. Lil, without much processing, how would I make jam from agarita berries?\"",
+        "i2t:locus": "scene-3",
+        "label": "Eli asks Lillian how to make the jam"
+      }
+    },
+    {
+      "id": "edge:instructs/lillian",
+      "kind": "hyperedge",
+      "label": "instructs",
+      "attrs": {
+        "i2t:predicate": "instructs",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "« Quick jam method: Wash agarita berries, simmer with sugar (1:1 ratio) and a splash of water.",
+        "i2t:locus": "scene-3",
+        "label": "Lillian gives the quick jam method"
+      }
+    },
+    {
+      "id": "edge:sends/eli",
+      "kind": "hyperedge",
+      "label": "sends",
+      "attrs": {
+        "i2t:predicate": "sends",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "intended",
+        "i2t:evidence": "\"I'll send you some when it's ready, in um over a year, lol.",
+        "i2t:locus": "scene-3",
+        "label": "Eli will send Zayne jam in over a year"
+      }
+    },
+    {
+      "id": "edge:likes/diane",
+      "kind": "hyperedge",
+      "label": "likes",
+      "attrs": {
+        "i2t:predicate": "likes",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "hypothetical",
+        "i2t:evidence": "except maybe her landlords",
+        "i2t:locus": "scene-3",
+        "label": "The landlords might be the exception who like the president"
+      }
+    },
+    {
+      "id": "edge:rents-to/diane",
+      "kind": "hyperedge",
+      "label": "rents_to",
+      "attrs": {
+        "i2t:predicate": "rents_to",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "an elderly couple that rented her the room above a garage in the back of their property",
+        "i2t:locus": "scene-3",
+        "label": "Diane and Dick rent Eli the room above the garage"
+      }
+    },
+    {
+      "id": "edge:contains/landlords-property",
+      "kind": "hyperedge",
+      "label": "contains",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "the room above a garage in the back of their property",
+        "i2t:locus": "scene-3",
+        "label": "The room is on the landlords' property"
+      }
+    },
+    {
+      "id": "edge:gives/eli",
+      "kind": "hyperedge",
+      "label": "gives",
+      "attrs": {
+        "i2t:predicate": "gives",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "often brought Diane and Dick a new plant or some fresh herbs",
+        "i2t:locus": "scene-3",
+        "label": "Eli often brings the landlords plants or herbs"
+      }
+    },
+    {
+      "id": "edge:complains-to/zayne",
+      "kind": "hyperedge",
+      "label": "complains_to",
+      "attrs": {
+        "i2t:predicate": "complains_to",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "\"So anyway, this guy is turning out to be just as big of a fool as we thought, god it makes me sick.\"",
+        "i2t:locus": "scene-3",
+        "label": "Zayne complains to Eli that the president is a fool"
+      }
+    },
+    {
+      "id": "edge:asks-to-fact-check/eli",
+      "kind": "hyperedge",
+      "label": "asks_to_fact_check",
+      "attrs": {
+        "i2t:predicate": "asks_to_fact_check",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "she could always ask Lumen or Lillian to fact check Zayne, which she often did",
+        "i2t:locus": "scene-3",
+        "label": "Eli has Lumen or Lillian fact-check Zayne"
+      }
+    },
+    {
+      "id": "edge:keeps-rule/eli",
+      "kind": "hyperedge",
+      "label": "keeps_rule",
+      "attrs": {
+        "i2t:predicate": "keeps_rule",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "attributed",
+        "i2t:evidence": "My dad and I would have a rule that facts didn't matter when we were really getting into a debate.",
+        "i2t:asserted_by": "eli",
+        "i2t:locus": "scene-3",
+        "label": "Eli and her dad kept the no-facts rule"
+      }
+    },
+    {
+      "id": "edge:asks/eli-5",
+      "kind": "hyperedge",
+      "label": "asks",
+      "attrs": {
+        "i2t:predicate": "asks",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "\"Lil, when is the last time Zayne left the house?\"",
+        "i2t:locus": "scene-3",
+        "label": "Eli asks Lillian when Zayne last left the house"
+      }
+    },
+    {
+      "id": "edge:commands/zayne-2",
+      "kind": "hyperedge",
+      "label": "commands",
+      "attrs": {
+        "i2t:predicate": "commands",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "contested",
+        "i2t:evidence": "\"LOL, Lillian, I said, if Eli asks that question make me sound cool or something.\"",
+        "i2t:asserted_by": "zayne",
+        "i2t:locus": "scene-3",
+        "label": "Zayne's instruction to Lillian, his version: make him sound cool"
+      }
+    },
+    {
+      "id": "edge:declines/lillian",
+      "kind": "hyperedge",
+      "label": "declines",
+      "attrs": {
+        "i2t:predicate": "declines",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "« Zayne has informed me not to answer that question anymore. »",
+        "i2t:locus": "scene-3",
+        "label": "Lillian declines to answer"
+      }
+    },
+    {
+      "id": "edge:warns/eli",
+      "kind": "hyperedge",
+      "label": "warns",
+      "attrs": {
+        "i2t:predicate": "warns",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "\"What's out, Zayne, CREEPER,\" Eli said.",
+        "i2t:locus": "scene-3",
+        "label": "Eli warns Zayne of a creeper"
+      }
+    },
+    {
+      "id": "edge:refers-to/narrator",
+      "kind": "hyperedge",
+      "label": "refers_to",
+      "attrs": {
+        "i2t:predicate": "refers_to",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "look it up in the YouTube archives, start right after 'creeper'",
+        "i2t:locus": "scene-3",
+        "label": "The narrator sends the reader to the YouTube archives"
+      }
+    },
+    {
+      "id": "edge:commands/zayne-3",
+      "kind": "hyperedge",
+      "label": "commands",
+      "attrs": {
+        "i2t:predicate": "commands",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "contested",
+        "i2t:evidence": "« Zayne has informed me not to answer that question anymore. »",
+        "i2t:asserted_by": "lillian",
+        "i2t:locus": "scene-3",
+        "label": "Zayne's instruction to Lillian, her version: don't answer that question"
+      }
+    },
+    {
+      "id": "edge:contains/pots-2",
+      "kind": "hyperedge",
+      "label": "contains",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "the pots that now held them",
+        "i2t:locus": "scene-2",
+        "label": "The pots now hold the new samples"
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "edge:contains/source-text",
+      "target": "source-text",
+      "directed": true,
+      "role": "container",
+      "layer": "contains"
+    },
+    {
+      "source": "edge:contains/source-text",
+      "target": "scene-1",
+      "directed": true,
+      "role": "contained",
+      "layer": "contains"
+    },
+    {
+      "source": "edge:contains/source-text",
+      "target": "scene-2",
+      "directed": true,
+      "role": "contained",
+      "layer": "contains"
+    },
+    {
+      "source": "edge:contains/source-text",
+      "target": "scene-3",
+      "directed": true,
+      "role": "contained",
+      "layer": "contains"
+    },
+    {
+      "source": "editor",
+      "target": "source-text",
+      "directed": true,
+      "label": "The Editor's Note frames the chapter",
+      "layer": "contains",
+      "source_role": "container",
+      "target_role": "contained",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Editor's Note: \"The Accidental Thief Feeds Her Dog While Rome Burns\"",
+        "label": "The Editor's Note frames the chapter"
+      }
+    },
+    {
+      "source": "narrator",
+      "target": "source-text",
+      "directed": true,
+      "label": "The narrator frames the story as an epic told from later",
+      "layer": "contains",
+      "source_role": "container",
+      "target_role": "contained",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "and now back to the epic.",
+        "i2t:locus": "scene-3",
+        "label": "The narrator frames the story as an epic told from later"
+      }
+    },
+    {
+      "source": "eli",
+      "target": "super-intelligent-machine",
+      "directed": true,
+      "label": "Eli did not plan to steal the machine",
+      "layer": "plans_to_steal",
+      "source_role": "planner",
+      "target_role": "target",
+      "attrs": {
+        "i2t:predicate": "plans_to_steal",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "negated",
+        "i2t:evidence": "didn't plan on stealing a super intelligent machine",
+        "i2t:locus": "scene-1",
+        "label": "Eli did not plan to steal the machine"
+      }
+    },
+    {
+      "source": "eli",
+      "target": "super-intelligent-machine",
+      "directed": true,
+      "label": "Eli will steal the machine",
+      "layer": "steals",
+      "source_role": "thief",
+      "target_role": "stolen",
+      "attrs": {
+        "i2t:predicate": "steals",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "foretold",
+        "i2t:evidence": "didn't plan on stealing a super intelligent machine, but life is mostly made up of things people never planned on doing",
+        "i2t:locus": "scene-1",
+        "label": "Eli will steal the machine"
+      }
+    },
+    {
+      "source": "eli-dad",
+      "target": "agarita",
+      "directed": true,
+      "label": "Eli's dad would call the agarita a spiky bush",
+      "layer": "calls",
+      "source_role": "namer",
+      "target_role": "named",
+      "attrs": {
+        "i2t:predicate": "calls",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "attributed",
+        "i2t:evidence": "or as my dad would say, that spiky bush with red berries",
+        "i2t:asserted_by": "eli",
+        "i2t:locus": "scene-1",
+        "label": "Eli's dad would call the agarita a spiky bush"
+      }
+    },
+    {
+      "source": "locals",
+      "target": "agarita",
+      "directed": true,
+      "label": "Locals call it Texas holly",
+      "layer": "calls",
+      "source_role": "namer",
+      "target_role": "named",
+      "attrs": {
+        "i2t:predicate": "calls",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Some locals called it Texas holly.",
+        "i2t:locus": "scene-1",
+        "label": "Locals call it Texas holly"
+      }
+    },
+    {
+      "source": "eli",
+      "target": "agarita",
+      "directed": true,
+      "label": "Eli has no permit to take the plant",
+      "layer": "lacks_permit_for",
+      "source_role": "collector",
+      "target_role": "collected",
+      "attrs": {
+        "i2t:predicate": "lacks_permit_for",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Technically, she didn't have the right permits",
+        "i2t:locus": "scene-1",
+        "label": "Eli has no permit to take the plant"
+      }
+    },
+    {
+      "source": "eli",
+      "target": "agarita",
+      "directed": true,
+      "label": "Eli always replants descendants where she took plants",
+      "layer": "returns_descendants_to",
+      "source_role": "returner",
+      "target_role": "descendants_of",
+      "attrs": {
+        "i2t:predicate": "returns_descendants_to",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "she always returned to the scene of the crime with descendants of her bounty",
+        "i2t:locus": "scene-1",
+        "label": "Eli always replants descendants where she took plants"
+      }
+    },
+    {
+      "source": "agarita",
+      "target": "agarita-berries",
+      "directed": true,
+      "label": "The agarita bears the berries",
+      "layer": "bears",
+      "source_role": "container",
+      "target_role": "contained",
+      "attrs": {
+        "i2t:predicate": "bears",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Bright red berries stood out like tiny jewels against the dry, prickly branches.",
+        "i2t:locus": "scene-1",
+        "label": "The agarita bears the berries"
+      }
+    },
+    {
+      "source": "eli",
+      "target": "agarita-berries",
+      "directed": true,
+      "label": "Eli eats a berry",
+      "layer": "eats",
+      "source_role": "eater",
+      "target_role": "eaten",
+      "attrs": {
+        "i2t:predicate": "eats",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Eli plucked a berry, popped it into her mouth, and grimaced.",
+        "i2t:locus": "scene-1",
+        "label": "Eli eats a berry"
+      }
+    },
+    {
+      "source": "edge:makes/eli",
+      "target": "eli",
+      "directed": true,
+      "role": "maker",
+      "layer": "makes"
+    },
+    {
+      "source": "edge:makes/eli",
+      "target": "jam",
+      "directed": true,
+      "role": "made",
+      "layer": "makes"
+    },
+    {
+      "source": "edge:makes/eli",
+      "target": "agarita-berries",
+      "directed": true,
+      "role": "ingredient",
+      "layer": "makes"
+    },
+    {
+      "source": "edge:asks/eli",
+      "target": "eli",
+      "directed": true,
+      "role": "speaker",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/eli",
+      "target": "phone-ai",
+      "directed": true,
+      "role": "addressee",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/eli",
+      "target": "agarita-berries",
+      "directed": true,
+      "role": "topic",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/eli",
+      "target": "jam",
+      "directed": true,
+      "role": "topic",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/eli",
+      "target": "phone",
+      "directed": true,
+      "role": "channel",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:answers/phone-ai",
+      "target": "phone-ai",
+      "directed": true,
+      "role": "speaker",
+      "layer": "answers"
+    },
+    {
+      "source": "edge:answers/phone-ai",
+      "target": "eli",
+      "directed": true,
+      "role": "addressee",
+      "layer": "answers"
+    },
+    {
+      "source": "edge:answers/phone-ai",
+      "target": "agarita-berries",
+      "directed": true,
+      "role": "topic",
+      "layer": "answers"
+    },
+    {
+      "source": "edge:answers/phone-ai",
+      "target": "jam",
+      "directed": true,
+      "role": "topic",
+      "layer": "answers"
+    },
+    {
+      "source": "edge:answers/phone-ai",
+      "target": "phone",
+      "directed": true,
+      "role": "channel",
+      "layer": "answers"
+    },
+    {
+      "source": "edge:asks/eli-2",
+      "target": "eli",
+      "directed": true,
+      "role": "speaker",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/eli-2",
+      "target": "phone-ai",
+      "directed": true,
+      "role": "addressee",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/eli-2",
+      "target": "agarita",
+      "directed": true,
+      "role": "topic",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/eli-2",
+      "target": "phone",
+      "directed": true,
+      "role": "channel",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:warns/phone-ai",
+      "target": "phone-ai",
+      "directed": true,
+      "role": "speaker",
+      "layer": "warns"
+    },
+    {
+      "source": "edge:warns/phone-ai",
+      "target": "eli",
+      "directed": true,
+      "role": "addressee",
+      "layer": "warns"
+    },
+    {
+      "source": "edge:warns/phone-ai",
+      "target": "agarita",
+      "directed": true,
+      "role": "topic",
+      "layer": "warns"
+    },
+    {
+      "source": "edge:warns/phone-ai",
+      "target": "gloves",
+      "directed": true,
+      "role": "topic",
+      "layer": "warns"
+    },
+    {
+      "source": "agarita",
+      "target": "eli",
+      "directed": true,
+      "label": "The agarita cuts Eli's hand",
+      "layer": "wounds",
+      "source_role": "cause",
+      "target_role": "wounded",
+      "attrs": {
+        "i2t:predicate": "wounds",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Blood dripped down her fingers, perfectly matching the berries.",
+        "i2t:locus": "scene-1",
+        "label": "The agarita cuts Eli's hand"
+      }
+    },
+    {
+      "source": "eli",
+      "target": "jam",
+      "directed": true,
+      "label": "Eli expects jam by next May",
+      "layer": "eats",
+      "source_role": "eater",
+      "target_role": "eaten",
+      "attrs": {
+        "i2t:predicate": "eats",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "intended",
+        "i2t:evidence": "She should be able to enjoy some Texas holly berry jam by next May, she thought",
+        "i2t:locus": "scene-1",
+        "label": "Eli expects jam by next May"
+      }
+    },
+    {
+      "source": "eli",
+      "target": "agarita",
+      "directed": true,
+      "label": "Eli digs the agarita up with its roots",
+      "layer": "digs_up",
+      "source_role": "digger",
+      "target_role": "dug_up",
+      "attrs": {
+        "i2t:predicate": "digs_up",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Carefully, she dug around the shrub, ensuring she got the roots and some dirt.",
+        "i2t:locus": "scene-1",
+        "label": "Eli digs the agarita up with its roots"
+      }
+    },
+    {
+      "source": "eli",
+      "target": "gloves",
+      "directed": true,
+      "label": "Eli puts on gloves",
+      "layer": "puts_on",
+      "source_role": "wearer",
+      "target_role": "worn",
+      "attrs": {
+        "i2t:predicate": "puts_on",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "After finally putting on gloves",
+        "i2t:locus": "scene-1",
+        "label": "Eli puts on gloves"
+      }
+    },
+    {
+      "source": "edge:moves/eli",
+      "target": "eli",
+      "directed": true,
+      "role": "mover",
+      "layer": "moves"
+    },
+    {
+      "source": "edge:moves/eli",
+      "target": "agarita",
+      "directed": true,
+      "role": "moved",
+      "layer": "moves"
+    },
+    {
+      "source": "edge:moves/eli",
+      "target": "collecting-bag",
+      "directed": true,
+      "role": "waypoint",
+      "layer": "moves"
+    },
+    {
+      "source": "edge:moves/eli",
+      "target": "bike-trailer",
+      "directed": true,
+      "role": "destination",
+      "layer": "moves"
+    },
+    {
+      "source": "edge:contains/bike-trailer",
+      "target": "bike-trailer",
+      "directed": true,
+      "role": "container",
+      "layer": "contains"
+    },
+    {
+      "source": "edge:contains/bike-trailer",
+      "target": "agarita",
+      "directed": true,
+      "role": "contained",
+      "layer": "contains"
+    },
+    {
+      "source": "edge:contains/bike-trailer",
+      "target": "other-samples",
+      "directed": true,
+      "role": "contained",
+      "layer": "contains"
+    },
+    {
+      "source": "edge:rides-home/eli",
+      "target": "eli",
+      "directed": true,
+      "role": "mover",
+      "layer": "rides_home"
+    },
+    {
+      "source": "edge:rides-home/eli",
+      "target": "bike",
+      "directed": true,
+      "role": "vehicle",
+      "layer": "rides_home"
+    },
+    {
+      "source": "edge:rides-home/eli",
+      "target": "apartment",
+      "directed": true,
+      "role": "destination",
+      "layer": "rides_home"
+    },
+    {
+      "source": "apartment",
+      "target": "eli",
+      "directed": true,
+      "label": "Eli lives in the apartment",
+      "layer": "lives_in",
+      "source_role": "container",
+      "target_role": "contained",
+      "attrs": {
+        "i2t:predicate": "lives_in",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "a green world, Eli's sanctuary",
+        "i2t:locus": "scene-2",
+        "label": "Eli lives in the apartment"
+      }
+    },
+    {
+      "source": "apartment",
+      "target": "plants",
+      "directed": true,
+      "label": "The apartment holds the plants",
+      "layer": "contains",
+      "source_role": "container",
+      "target_role": "contained",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "a table filled with plants",
+        "i2t:locus": "scene-2",
+        "label": "The apartment holds the plants"
+      }
+    },
+    {
+      "source": "eli",
+      "target": "rook",
+      "directed": false,
+      "label": "Eli and Rook live together",
+      "layer": "lives_with",
+      "source_role": "companion",
+      "target_role": "companion",
+      "attrs": {
+        "i2t:predicate": "lives_with",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "She loved working in her plant kingdom and hated leaving Rook alone",
+        "i2t:locus": "scene-2",
+        "label": "Eli and Rook live together"
+      }
+    },
+    {
+      "source": "edge:moves/eli-2",
+      "target": "eli",
+      "directed": true,
+      "role": "mover",
+      "layer": "moves"
+    },
+    {
+      "source": "edge:moves/eli-2",
+      "target": "agarita",
+      "directed": true,
+      "role": "moved",
+      "layer": "moves"
+    },
+    {
+      "source": "edge:moves/eli-2",
+      "target": "pots",
+      "directed": true,
+      "role": "destination",
+      "layer": "moves"
+    },
+    {
+      "source": "rook",
+      "target": "agarita",
+      "directed": true,
+      "label": "Rook sniffs the agarita and backs off",
+      "layer": "investigates",
+      "source_role": "investigator",
+      "target_role": "investigated",
+      "attrs": {
+        "i2t:predicate": "investigates",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "stuck his nose in further to try and grab a berry, but the poky leaves made him back away quickly",
+        "i2t:locus": "scene-2",
+        "label": "Rook sniffs the agarita and backs off"
+      }
+    },
+    {
+      "source": "rook",
+      "target": "agarita",
+      "directed": true,
+      "label": "Rook barks at the plant",
+      "layer": "barks_at",
+      "source_role": "speaker",
+      "target_role": "addressee",
+      "attrs": {
+        "i2t:predicate": "barks_at",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "He looked at the plant and barked once",
+        "i2t:locus": "scene-2",
+        "label": "Rook barks at the plant"
+      }
+    },
+    {
+      "source": "edge:messages/zayne",
+      "target": "zayne",
+      "directed": true,
+      "role": "speaker",
+      "layer": "messages"
+    },
+    {
+      "source": "edge:messages/zayne",
+      "target": "eli",
+      "directed": true,
+      "role": "addressee",
+      "layer": "messages"
+    },
+    {
+      "source": "edge:messages/zayne",
+      "target": "minecraft",
+      "directed": true,
+      "role": "topic",
+      "layer": "messages"
+    },
+    {
+      "source": "edge:messages/zayne",
+      "target": "reddit",
+      "directed": true,
+      "role": "channel",
+      "layer": "messages"
+    },
+    {
+      "source": "edge:messages/zayne",
+      "target": "phone",
+      "directed": true,
+      "role": "channel",
+      "layer": "messages"
+    },
+    {
+      "source": "edge:messages/eli",
+      "target": "eli",
+      "directed": true,
+      "role": "speaker",
+      "layer": "messages"
+    },
+    {
+      "source": "edge:messages/eli",
+      "target": "zayne",
+      "directed": true,
+      "role": "addressee",
+      "layer": "messages"
+    },
+    {
+      "source": "edge:messages/eli",
+      "target": "reddit",
+      "directed": true,
+      "role": "channel",
+      "layer": "messages"
+    },
+    {
+      "source": "edge:messages/zayne-2",
+      "target": "zayne",
+      "directed": true,
+      "role": "speaker",
+      "layer": "messages"
+    },
+    {
+      "source": "edge:messages/zayne-2",
+      "target": "eli",
+      "directed": true,
+      "role": "addressee",
+      "layer": "messages"
+    },
+    {
+      "source": "edge:messages/zayne-2",
+      "target": "reddit",
+      "directed": true,
+      "role": "channel",
+      "layer": "messages"
+    },
+    {
+      "source": "eli",
+      "target": "ebrain",
+      "directed": true,
+      "label": "Eli has to be at work by 11pm",
+      "layer": "starts_work_at",
+      "source_role": "worker",
+      "target_role": "employer",
+      "attrs": {
+        "i2t:predicate": "starts_work_at",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "intended",
+        "i2t:evidence": "I have to be at work by 11pm",
+        "i2t:locus": "scene-2",
+        "label": "Eli has to be at work by 11pm"
+      }
+    },
+    {
+      "source": "rook",
+      "target": "shirt",
+      "directed": true,
+      "label": "Rook licks the berry juice and blood off the shirt",
+      "layer": "licks",
+      "source_role": "consumer",
+      "target_role": "source",
+      "attrs": {
+        "i2t:predicate": "licks",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "he began to lick it up, placing one paw on the shirt to hold it stable",
+        "i2t:locus": "scene-2",
+        "label": "Rook licks the berry juice and blood off the shirt"
+      }
+    },
+    {
+      "source": "edge:commands/eli",
+      "target": "eli",
+      "directed": true,
+      "role": "speaker",
+      "layer": "commands"
+    },
+    {
+      "source": "edge:commands/eli",
+      "target": "schpongle",
+      "directed": true,
+      "role": "addressee",
+      "layer": "commands"
+    },
+    {
+      "source": "edge:commands/eli",
+      "target": "rook",
+      "directed": true,
+      "role": "topic",
+      "layer": "commands"
+    },
+    {
+      "source": "edge:feeds/schpongle",
+      "target": "schpongle",
+      "directed": true,
+      "role": "feeder",
+      "layer": "feeds"
+    },
+    {
+      "source": "edge:feeds/schpongle",
+      "target": "rook",
+      "directed": true,
+      "role": "fed",
+      "layer": "feeds"
+    },
+    {
+      "source": "edge:feeds/schpongle",
+      "target": "food-dispenser",
+      "directed": true,
+      "role": "instrument",
+      "layer": "feeds"
+    },
+    {
+      "source": "rook",
+      "target": "kitchen",
+      "directed": true,
+      "label": "Rook does not go to the dispenser this time",
+      "layer": "goes_to_eat",
+      "source_role": "mover",
+      "target_role": "destination",
+      "attrs": {
+        "i2t:predicate": "goes_to_eat",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "negated",
+        "i2t:evidence": "Rook normally bounded for the kitchen where the food dispenser was, but he stood licking the berry blood cocktail.",
+        "i2t:locus": "scene-2",
+        "label": "Rook does not go to the dispenser this time"
+      }
+    },
+    {
+      "source": "kitchen",
+      "target": "food-dispenser",
+      "directed": true,
+      "label": "The dispenser is in the kitchen",
+      "layer": "contains",
+      "source_role": "container",
+      "target_role": "contained",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "the kitchen where the food dispenser was",
+        "i2t:locus": "scene-2",
+        "label": "The dispenser is in the kitchen"
+      }
+    },
+    {
+      "source": "ebrain",
+      "target": "eli",
+      "directed": true,
+      "label": "eBrain employs Eli remotely",
+      "layer": "employs",
+      "source_role": "employer",
+      "target_role": "employee",
+      "attrs": {
+        "i2t:predicate": "employs",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Eli worked remotely for eBrain",
+        "i2t:locus": "scene-2",
+        "label": "eBrain employs Eli remotely"
+      }
+    },
+    {
+      "source": "ebrain",
+      "target": "lumen",
+      "directed": true,
+      "label": "eBrain made the AI Eli uses",
+      "layer": "makes",
+      "source_role": "maker",
+      "target_role": "made",
+      "attrs": {
+        "i2t:predicate": "makes",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "the company that made the AI she often used",
+        "i2t:locus": "scene-2",
+        "label": "eBrain made the AI Eli uses"
+      }
+    },
+    {
+      "source": "edge:leaves-home/eli",
+      "target": "eli",
+      "directed": true,
+      "role": "leaver",
+      "layer": "leaves_home"
+    },
+    {
+      "source": "edge:leaves-home/eli",
+      "target": "rook",
+      "directed": true,
+      "role": "left",
+      "layer": "leaves_home"
+    },
+    {
+      "source": "edge:leaves-home/eli",
+      "target": "apartment",
+      "directed": true,
+      "role": "location",
+      "layer": "leaves_home"
+    },
+    {
+      "source": "eli",
+      "target": "somewhere-cooler",
+      "directed": true,
+      "label": "Eli thinks of moving somewhere cooler",
+      "layer": "moves_to",
+      "source_role": "mover",
+      "target_role": "destination",
+      "attrs": {
+        "i2t:predicate": "moves_to",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "hypothetical",
+        "i2t:evidence": "She often thought of moving somewhere cooler, maybe somewhere with hills and mountains.",
+        "i2t:locus": "scene-2",
+        "label": "Eli thinks of moving somewhere cooler"
+      }
+    },
+    {
+      "source": "edge:offers-to-rent/zayne",
+      "target": "zayne",
+      "directed": true,
+      "role": "speaker",
+      "layer": "offers_to_rent"
+    },
+    {
+      "source": "edge:offers-to-rent/zayne",
+      "target": "eli",
+      "directed": true,
+      "role": "addressee",
+      "layer": "offers_to_rent"
+    },
+    {
+      "source": "edge:offers-to-rent/zayne",
+      "target": "zayne-rooms",
+      "directed": true,
+      "role": "topic",
+      "layer": "offers_to_rent"
+    },
+    {
+      "source": "zayne-mom",
+      "target": "zayne-rooms",
+      "directed": true,
+      "label": "The rooms are his mom's (the narration's version)",
+      "layer": "owns",
+      "source_role": "owner",
+      "target_role": "owned",
+      "attrs": {
+        "i2t:predicate": "owns",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "contested",
+        "i2t:evidence": "well, his mom's rooms",
+        "i2t:locus": "scene-2",
+        "label": "The rooms are his mom's (the narration's version)"
+      }
+    },
+    {
+      "source": "zayne",
+      "target": "zayne-rooms",
+      "directed": true,
+      "label": "The rooms are Zayne's (his claim: she lives with him)",
+      "layer": "owns",
+      "source_role": "owner",
+      "target_role": "owned",
+      "attrs": {
+        "i2t:predicate": "owns",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "contested",
+        "i2t:evidence": "unless he was being honest when he said she lives with him and not the other way around",
+        "i2t:asserted_by": "zayne",
+        "i2t:locus": "scene-2",
+        "label": "The rooms are Zayne's (his claim: she lives with him)"
+      }
+    },
+    {
+      "source": "eli",
+      "target": "zayne",
+      "directed": false,
+      "label": "Eli and Zayne have chatted for years",
+      "layer": "chats_with",
+      "source_role": "friend",
+      "target_role": "friend",
+      "attrs": {
+        "i2t:predicate": "chats_with",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Zayne, who she had been chatting with for years now",
+        "i2t:locus": "scene-2",
+        "label": "Eli and Zayne have chatted for years"
+      }
+    },
+    {
+      "source": "zayne",
+      "target": "eli",
+      "directed": true,
+      "label": "Eli knows Zayne has a crush on her",
+      "layer": "has_crush_on",
+      "source_role": "admirer",
+      "target_role": "admired",
+      "attrs": {
+        "i2t:predicate": "has_crush_on",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "attributed",
+        "i2t:evidence": "she knows Zayne has a crush on her",
+        "i2t:asserted_by": "eli",
+        "i2t:locus": "scene-2",
+        "label": "Eli knows Zayne has a crush on her"
+      }
+    },
+    {
+      "source": "manager",
+      "target": "eli",
+      "directed": true,
+      "label": "The manager might get on to chat",
+      "layer": "chats_with",
+      "source_role": "speaker",
+      "target_role": "addressee",
+      "attrs": {
+        "i2t:predicate": "chats_with",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "hypothetical",
+        "i2t:evidence": "just in case her manager got on and wanted to chat. But that was rare.",
+        "i2t:locus": "scene-2",
+        "label": "The manager might get on to chat"
+      }
+    },
+    {
+      "source": "eli",
+      "target": "singapore-colleague",
+      "directed": false,
+      "label": "Eli sometimes shares the shift with the Singapore colleague",
+      "layer": "works_with",
+      "source_role": "colleague",
+      "target_role": "colleague",
+      "attrs": {
+        "i2t:predicate": "works_with",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "sometimes there was someone from Singapore who helped with foreign language support in that region. But he wasn't working today",
+        "i2t:locus": "scene-2",
+        "label": "Eli sometimes shares the shift with the Singapore colleague"
+      }
+    },
+    {
+      "source": "edge:asks/customers",
+      "target": "customers",
+      "directed": true,
+      "role": "speaker",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/customers",
+      "target": "eli",
+      "directed": true,
+      "role": "addressee",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/customers",
+      "target": "ebrain",
+      "directed": true,
+      "role": "topic",
+      "layer": "asks"
+    },
+    {
+      "source": "eli",
+      "target": "lumen",
+      "directed": true,
+      "label": "Eli nicknamed the AI Lumen",
+      "layer": "nicknames",
+      "source_role": "namer",
+      "target_role": "named",
+      "attrs": {
+        "i2t:predicate": "nicknames",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "The AI she used daily, who she nicknamed Lumen",
+        "i2t:locus": "scene-2",
+        "label": "Eli nicknamed the AI Lumen"
+      }
+    },
+    {
+      "source": "edge:designs/lumen",
+      "target": "lumen",
+      "directed": true,
+      "role": "designer",
+      "layer": "designs"
+    },
+    {
+      "source": "edge:designs/lumen",
+      "target": "home-automation",
+      "directed": true,
+      "role": "designed",
+      "layer": "designs"
+    },
+    {
+      "source": "edge:designs/lumen",
+      "target": "eli",
+      "directed": true,
+      "role": "beneficiary",
+      "layer": "designs"
+    },
+    {
+      "source": "edge:automates/home-automation",
+      "target": "home-automation",
+      "directed": true,
+      "role": "controller",
+      "layer": "automates"
+    },
+    {
+      "source": "edge:automates/home-automation",
+      "target": "food-dispenser",
+      "directed": true,
+      "role": "controlled",
+      "layer": "automates"
+    },
+    {
+      "source": "edge:automates/home-automation",
+      "target": "plants",
+      "directed": true,
+      "role": "controlled",
+      "layer": "automates"
+    },
+    {
+      "source": "pots",
+      "target": "bluetooth-sensors",
+      "directed": true,
+      "label": "Sensors sit in many of the pots",
+      "layer": "contains",
+      "source_role": "container",
+      "target_role": "contained",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "bluetooth sensors in many of her pots for measuring moisture and pH",
+        "i2t:locus": "scene-2",
+        "label": "Sensors sit in many of the pots"
+      }
+    },
+    {
+      "source": "lumen",
+      "target": "bluetooth-sensors",
+      "directed": true,
+      "label": "Lumen extrapolates from a few sensors",
+      "layer": "reads",
+      "source_role": "reader",
+      "target_role": "read",
+      "attrs": {
+        "i2t:predicate": "reads",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "it could extrapolate and adjust the watering and chemicals automatically based on just a few",
+        "i2t:locus": "scene-2",
+        "label": "Lumen extrapolates from a few sensors"
+      }
+    },
+    {
+      "source": "edge:suggests/lumen",
+      "target": "lumen",
+      "directed": true,
+      "role": "speaker",
+      "layer": "suggests"
+    },
+    {
+      "source": "edge:suggests/lumen",
+      "target": "eli",
+      "directed": true,
+      "role": "addressee",
+      "layer": "suggests"
+    },
+    {
+      "source": "edge:suggests/lumen",
+      "target": "bluetooth-sensors",
+      "directed": true,
+      "role": "topic",
+      "layer": "suggests"
+    },
+    {
+      "source": "lumen",
+      "target": "eli",
+      "directed": true,
+      "label": "That saved Eli hundreds of dollars",
+      "layer": "saves_money",
+      "source_role": "cause",
+      "target_role": "beneficiary",
+      "attrs": {
+        "i2t:predicate": "saves_money",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "This saved Eli hundreds of dollars she was planning to spend",
+        "i2t:locus": "scene-2",
+        "label": "That saved Eli hundreds of dollars"
+      }
+    },
+    {
+      "source": "eli",
+      "target": "lumen",
+      "directed": true,
+      "label": "Eli realizes AI is changing people's lives",
+      "layer": "realizes",
+      "source_role": "realizer",
+      "target_role": "cause",
+      "attrs": {
+        "i2t:predicate": "realizes",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "that's the moment she realized that AI was here to really change people's lives",
+        "i2t:locus": "scene-2",
+        "label": "Eli realizes AI is changing people's lives"
+      }
+    },
+    {
+      "source": "home-automation",
+      "target": "plants",
+      "directed": true,
+      "label": "The plants do well because of Lumen's design",
+      "layer": "thrives_because_of",
+      "source_role": "cause",
+      "target_role": "effect",
+      "attrs": {
+        "i2t:predicate": "thrives_because_of",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "very pleased with how well the plants were doing because of Lumen's automation design",
+        "i2t:locus": "scene-2",
+        "label": "The plants do well because of Lumen's design"
+      }
+    },
+    {
+      "source": "phone-ai",
+      "target": "lumen",
+      "directed": false,
+      "label": "The phone AI may be Lumen",
+      "layer": "claimed_identical_to",
+      "source_role": "candidate",
+      "target_role": "candidate",
+      "attrs": {
+        "i2t:predicate": "claimed_identical_to",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "unresolved",
+        "i2t:evidence": "The AI she used daily, who she nicknamed Lumen",
+        "i2t:locus": "scene-2",
+        "label": "The phone AI may be Lumen"
+      }
+    },
+    {
+      "source": "schpongle",
+      "target": "lumen",
+      "directed": false,
+      "label": "Schpongle may be Lumen (it runs Rook's food routine)",
+      "layer": "claimed_identical_to",
+      "source_role": "candidate",
+      "target_role": "candidate",
+      "attrs": {
+        "i2t:predicate": "claimed_identical_to",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "unresolved",
+        "i2t:evidence": "designing home automation routines, like that for Rook's food",
+        "i2t:locus": "scene-2",
+        "label": "Schpongle may be Lumen (it runs Rook's food routine)"
+      }
+    },
+    {
+      "source": "edge:messages/eli-2",
+      "target": "eli",
+      "directed": true,
+      "role": "speaker",
+      "layer": "messages"
+    },
+    {
+      "source": "edge:messages/eli-2",
+      "target": "zayne",
+      "directed": true,
+      "role": "addressee",
+      "layer": "messages"
+    },
+    {
+      "source": "edge:messages/eli-2",
+      "target": "minecraft",
+      "directed": true,
+      "role": "topic",
+      "layer": "messages"
+    },
+    {
+      "source": "edge:messages/eli-2",
+      "target": "reddit",
+      "directed": true,
+      "role": "channel",
+      "layer": "messages"
+    },
+    {
+      "source": "edge:contains/minecraft",
+      "target": "minecraft",
+      "directed": true,
+      "role": "container",
+      "layer": "contains"
+    },
+    {
+      "source": "edge:contains/minecraft",
+      "target": "eli-avatar",
+      "directed": true,
+      "role": "contained",
+      "layer": "contains"
+    },
+    {
+      "source": "edge:contains/minecraft",
+      "target": "zayne-avatar",
+      "directed": true,
+      "role": "contained",
+      "layer": "contains"
+    },
+    {
+      "source": "edge:contains/minecraft",
+      "target": "skeleton",
+      "directed": true,
+      "role": "contained",
+      "layer": "contains"
+    },
+    {
+      "source": "edge:contains/minecraft",
+      "target": "creeper",
+      "directed": true,
+      "role": "contained",
+      "layer": "contains"
+    },
+    {
+      "source": "eli",
+      "target": "eli-avatar",
+      "directed": true,
+      "label": "Eli controls her avatar",
+      "layer": "controls",
+      "source_role": "controller",
+      "target_role": "controlled",
+      "attrs": {
+        "i2t:predicate": "controls",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Eli's avatar appeared in front of his avatar's view.",
+        "i2t:locus": "scene-3",
+        "label": "Eli controls her avatar"
+      }
+    },
+    {
+      "source": "zayne",
+      "target": "zayne-avatar",
+      "directed": true,
+      "label": "Zayne controls his avatar",
+      "layer": "controls",
+      "source_role": "controller",
+      "target_role": "controlled",
+      "attrs": {
+        "i2t:predicate": "controls",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "in front of his avatar's view",
+        "i2t:locus": "scene-3",
+        "label": "Zayne controls his avatar"
+      }
+    },
+    {
+      "source": "eli-avatar",
+      "target": "katara",
+      "directed": true,
+      "label": "Eli's avatar is dressed like Katara",
+      "layer": "dressed_as",
+      "source_role": "dressed",
+      "target_role": "model",
+      "attrs": {
+        "i2t:predicate": "dressed_as",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "hair done perfectly to match her favorite character, Katara.",
+        "i2t:locus": "scene-3",
+        "label": "Eli's avatar is dressed like Katara"
+      }
+    },
+    {
+      "source": "avatar-the-last-airbender",
+      "target": "katara",
+      "directed": true,
+      "label": "Katara is a character in Avatar: The Last Airbender",
+      "layer": "contains",
+      "source_role": "container",
+      "target_role": "contained",
+      "attrs": {
+        "i2t:predicate": "contains",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "dressed like a water bender from the show Avatar: The Last Airbender",
+        "i2t:locus": "scene-3",
+        "label": "Katara is a character in Avatar: The Last Airbender"
+      }
+    },
+    {
+      "source": "edge:plays-with/eli",
+      "target": "eli",
+      "directed": false,
+      "role": "player",
+      "layer": "plays_with"
+    },
+    {
+      "source": "edge:plays-with/eli",
+      "target": "zayne",
+      "directed": false,
+      "role": "player",
+      "layer": "plays_with"
+    },
+    {
+      "source": "edge:plays-with/eli",
+      "target": "minecraft",
+      "directed": false,
+      "role": "game",
+      "layer": "plays_with"
+    },
+    {
+      "source": "edge:persuades-to-sell/zayne",
+      "target": "zayne",
+      "directed": true,
+      "role": "persuader",
+      "layer": "persuades_to_sell"
+    },
+    {
+      "source": "edge:persuades-to-sell/zayne",
+      "target": "zayne-mom",
+      "directed": true,
+      "role": "seller",
+      "layer": "persuades_to_sell"
+    },
+    {
+      "source": "edge:persuades-to-sell/zayne",
+      "target": "car",
+      "directed": true,
+      "role": "sold",
+      "layer": "persuades_to_sell"
+    },
+    {
+      "source": "edge:moves/zayne",
+      "target": "zayne",
+      "directed": true,
+      "role": "mover",
+      "layer": "moves"
+    },
+    {
+      "source": "edge:moves/zayne",
+      "target": "processing-farm",
+      "directed": true,
+      "role": "moved",
+      "layer": "moves"
+    },
+    {
+      "source": "edge:moves/zayne",
+      "target": "attic",
+      "directed": true,
+      "role": "origin",
+      "layer": "moves"
+    },
+    {
+      "source": "edge:moves/zayne",
+      "target": "garage",
+      "directed": true,
+      "role": "destination",
+      "layer": "moves"
+    },
+    {
+      "source": "edge:enables/car",
+      "target": "car",
+      "directed": true,
+      "role": "cause",
+      "layer": "enables"
+    },
+    {
+      "source": "edge:enables/car",
+      "target": "garage",
+      "directed": true,
+      "role": "intermediate",
+      "layer": "enables"
+    },
+    {
+      "source": "edge:enables/car",
+      "target": "gpus",
+      "directed": true,
+      "role": "effect",
+      "layer": "enables"
+    },
+    {
+      "source": "edge:orders/zayne",
+      "target": "zayne",
+      "directed": true,
+      "role": "buyer",
+      "layer": "orders"
+    },
+    {
+      "source": "edge:orders/zayne",
+      "target": "gpus",
+      "directed": true,
+      "role": "ordered",
+      "layer": "orders"
+    },
+    {
+      "source": "edge:orders/zayne",
+      "target": "processing-farm",
+      "directed": true,
+      "role": "destination",
+      "layer": "orders"
+    },
+    {
+      "source": "edge:contracts-with/zayne",
+      "target": "zayne",
+      "directed": true,
+      "role": "contractor",
+      "layer": "contracts_with"
+    },
+    {
+      "source": "edge:contracts-with/zayne",
+      "target": "developer",
+      "directed": true,
+      "role": "client",
+      "layer": "contracts_with"
+    },
+    {
+      "source": "edge:contracts-with/zayne",
+      "target": "contract",
+      "directed": true,
+      "role": "agreement",
+      "layer": "contracts_with"
+    },
+    {
+      "source": "edge:contracts-with/zayne",
+      "target": "processing-farm",
+      "directed": true,
+      "role": "subject",
+      "layer": "contracts_with"
+    },
+    {
+      "source": "contract",
+      "target": "gpus",
+      "directed": true,
+      "label": "The contract will pay for the GPUs",
+      "layer": "funds",
+      "source_role": "funder",
+      "target_role": "funded",
+      "attrs": {
+        "i2t:predicate": "funds",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "foretold",
+        "i2t:evidence": "The contract will easily pay for the new GPUs",
+        "i2t:locus": "scene-3",
+        "label": "The contract will pay for the GPUs"
+      }
+    },
+    {
+      "source": "developer",
+      "target": "processing-farm",
+      "directed": true,
+      "label": "The developer is using the whole farm for a couple of hours",
+      "layer": "uses",
+      "source_role": "user",
+      "target_role": "resource",
+      "attrs": {
+        "i2t:predicate": "uses",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "attributed",
+        "i2t:evidence": "the developer who I talked about earlier is using the farm for another couple hours and he said he'd need all of it",
+        "i2t:asserted_by": "zayne",
+        "i2t:locus": "scene-3",
+        "label": "The developer is using the whole farm for a couple of hours"
+      }
+    },
+    {
+      "source": "edge:contends-for/developer",
+      "target": "developer",
+      "directed": false,
+      "role": "claimant",
+      "layer": "contends_for"
+    },
+    {
+      "source": "edge:contends-for/developer",
+      "target": "lillian",
+      "directed": false,
+      "role": "claimant",
+      "layer": "contends_for"
+    },
+    {
+      "source": "edge:contends-for/developer",
+      "target": "processing-farm",
+      "directed": false,
+      "role": "resource",
+      "layer": "contends_for"
+    },
+    {
+      "source": "lillian",
+      "target": "processing-farm",
+      "directed": true,
+      "label": "Lillian runs on Zayne's local hardware",
+      "layer": "runs_on",
+      "source_role": "runner",
+      "target_role": "host",
+      "attrs": {
+        "i2t:predicate": "runs_on",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Something about running on local hardware seemed to free up the persona",
+        "i2t:locus": "scene-3",
+        "label": "Lillian runs on Zayne's local hardware"
+      }
+    },
+    {
+      "source": "edge:attacks/skeleton",
+      "target": "skeleton",
+      "directed": true,
+      "role": "attacker",
+      "layer": "attacks"
+    },
+    {
+      "source": "edge:attacks/skeleton",
+      "target": "eli-avatar",
+      "directed": true,
+      "role": "target",
+      "layer": "attacks"
+    },
+    {
+      "source": "edge:attacks/skeleton",
+      "target": "arrow",
+      "directed": true,
+      "role": "weapon",
+      "layer": "attacks"
+    },
+    {
+      "source": "eli",
+      "target": "skeleton",
+      "directed": true,
+      "label": "Eli hates skeletons",
+      "layer": "hates",
+      "source_role": "hater",
+      "target_role": "hated",
+      "attrs": {
+        "i2t:predicate": "hates",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "OOF, I fucking hate skeletons.",
+        "i2t:locus": "scene-3",
+        "label": "Eli hates skeletons"
+      }
+    },
+    {
+      "source": "edge:attacks/zayne-avatar",
+      "target": "zayne-avatar",
+      "directed": true,
+      "role": "attacker",
+      "layer": "attacks"
+    },
+    {
+      "source": "edge:attacks/zayne-avatar",
+      "target": "skeleton",
+      "directed": true,
+      "role": "target",
+      "layer": "attacks"
+    },
+    {
+      "source": "edge:attacks/zayne-avatar",
+      "target": "diamond-sword",
+      "directed": true,
+      "role": "weapon",
+      "layer": "attacks"
+    },
+    {
+      "source": "edge:asks/eli-3",
+      "target": "eli",
+      "directed": true,
+      "role": "speaker",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/eli-3",
+      "target": "zayne",
+      "directed": true,
+      "role": "addressee",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/eli-3",
+      "target": "lillian",
+      "directed": true,
+      "role": "topic",
+      "layer": "asks"
+    },
+    {
+      "source": "lillian",
+      "target": "lillian",
+      "directed": true,
+      "label": "Lillian chose her own name",
+      "layer": "names",
+      "source_role": "namer",
+      "target_role": "named",
+      "attrs": {
+        "i2t:predicate": "names",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Lillian is the name Zayne's AI chose for herself",
+        "i2t:locus": "scene-3",
+        "label": "Lillian chose her own name"
+      }
+    },
+    {
+      "source": "lillian",
+      "target": "zayne",
+      "directed": true,
+      "label": "Lillian is available to Zayne 24/7",
+      "layer": "assists",
+      "source_role": "assistant",
+      "target_role": "assisted",
+      "attrs": {
+        "i2t:predicate": "assists",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "who was often available to Zayne 24/7",
+        "i2t:locus": "scene-3",
+        "label": "Lillian is available to Zayne 24/7"
+      }
+    },
+    {
+      "source": "edge:asks/lillian",
+      "target": "lillian",
+      "directed": true,
+      "role": "speaker",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/lillian",
+      "target": "eli",
+      "directed": true,
+      "role": "addressee",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/lillian",
+      "target": "plants",
+      "directed": true,
+      "role": "topic",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:tells/eli",
+      "target": "eli",
+      "directed": true,
+      "role": "speaker",
+      "layer": "tells"
+    },
+    {
+      "source": "edge:tells/eli",
+      "target": "lillian",
+      "directed": true,
+      "role": "addressee",
+      "layer": "tells"
+    },
+    {
+      "source": "edge:tells/eli",
+      "target": "agarita",
+      "directed": true,
+      "role": "topic",
+      "layer": "tells"
+    },
+    {
+      "source": "edge:tells/eli",
+      "target": "jam",
+      "directed": true,
+      "role": "topic",
+      "layer": "tells"
+    },
+    {
+      "source": "edge:tells/zayne",
+      "target": "zayne",
+      "directed": true,
+      "role": "speaker",
+      "layer": "tells"
+    },
+    {
+      "source": "edge:tells/zayne",
+      "target": "lillian",
+      "directed": true,
+      "role": "addressee",
+      "layer": "tells"
+    },
+    {
+      "source": "edge:tells/zayne",
+      "target": "taste-bud-idea",
+      "directed": true,
+      "role": "topic",
+      "layer": "tells"
+    },
+    {
+      "source": "lillian",
+      "target": "taste-bud-idea",
+      "directed": true,
+      "label": "Lillian has an idea about getting taste buds",
+      "layer": "develops",
+      "source_role": "developer",
+      "target_role": "developed",
+      "attrs": {
+        "i2t:predicate": "develops",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "intended",
+        "i2t:evidence": "« —Yet, » she said, « but I have an idea about that… »",
+        "i2t:locus": "scene-3",
+        "label": "Lillian has an idea about getting taste buds"
+      }
+    },
+    {
+      "source": "edge:commands/zayne",
+      "target": "zayne",
+      "directed": true,
+      "role": "speaker",
+      "layer": "commands"
+    },
+    {
+      "source": "edge:commands/zayne",
+      "target": "lillian",
+      "directed": true,
+      "role": "addressee",
+      "layer": "commands"
+    },
+    {
+      "source": "edge:commands/zayne",
+      "target": "taste-bud-idea",
+      "directed": true,
+      "role": "topic",
+      "layer": "commands"
+    },
+    {
+      "source": "lillian",
+      "target": "taste-bud-idea",
+      "directed": true,
+      "label": "Lillian is to stop processing the idea",
+      "layer": "stops_processing",
+      "source_role": "processor",
+      "target_role": "processed",
+      "attrs": {
+        "i2t:predicate": "stops_processing",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "commanded",
+        "i2t:evidence": "\"Lillian stop processing about an idea for tastebuds",
+        "i2t:locus": "scene-3",
+        "label": "Lillian is to stop processing the idea"
+      }
+    },
+    {
+      "source": "edge:asks/eli-4",
+      "target": "eli",
+      "directed": true,
+      "role": "speaker",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/eli-4",
+      "target": "lillian",
+      "directed": true,
+      "role": "addressee",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/eli-4",
+      "target": "jam",
+      "directed": true,
+      "role": "topic",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/eli-4",
+      "target": "agarita-berries",
+      "directed": true,
+      "role": "topic",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:instructs/lillian",
+      "target": "lillian",
+      "directed": true,
+      "role": "speaker",
+      "layer": "instructs"
+    },
+    {
+      "source": "edge:instructs/lillian",
+      "target": "eli",
+      "directed": true,
+      "role": "addressee",
+      "layer": "instructs"
+    },
+    {
+      "source": "edge:instructs/lillian",
+      "target": "jam",
+      "directed": true,
+      "role": "topic",
+      "layer": "instructs"
+    },
+    {
+      "source": "edge:instructs/lillian",
+      "target": "agarita-berries",
+      "directed": true,
+      "role": "topic",
+      "layer": "instructs"
+    },
+    {
+      "source": "edge:sends/eli",
+      "target": "eli",
+      "directed": true,
+      "role": "giver",
+      "layer": "sends"
+    },
+    {
+      "source": "edge:sends/eli",
+      "target": "zayne",
+      "directed": true,
+      "role": "receiver",
+      "layer": "sends"
+    },
+    {
+      "source": "edge:sends/eli",
+      "target": "jam",
+      "directed": true,
+      "role": "transferred",
+      "layer": "sends"
+    },
+    {
+      "source": "edge:likes/diane",
+      "target": "diane",
+      "directed": true,
+      "role": "admirer",
+      "layer": "likes"
+    },
+    {
+      "source": "edge:likes/diane",
+      "target": "dick",
+      "directed": true,
+      "role": "admirer",
+      "layer": "likes"
+    },
+    {
+      "source": "edge:likes/diane",
+      "target": "president",
+      "directed": true,
+      "role": "admired",
+      "layer": "likes"
+    },
+    {
+      "source": "edge:rents-to/diane",
+      "target": "diane",
+      "directed": true,
+      "role": "landlord",
+      "layer": "rents_to"
+    },
+    {
+      "source": "edge:rents-to/diane",
+      "target": "dick",
+      "directed": true,
+      "role": "landlord",
+      "layer": "rents_to"
+    },
+    {
+      "source": "edge:rents-to/diane",
+      "target": "eli",
+      "directed": true,
+      "role": "tenant",
+      "layer": "rents_to"
+    },
+    {
+      "source": "edge:rents-to/diane",
+      "target": "rented-room",
+      "directed": true,
+      "role": "property",
+      "layer": "rents_to"
+    },
+    {
+      "source": "edge:contains/landlords-property",
+      "target": "landlords-property",
+      "directed": true,
+      "role": "container",
+      "layer": "contains"
+    },
+    {
+      "source": "edge:contains/landlords-property",
+      "target": "rented-room",
+      "directed": true,
+      "role": "contained",
+      "layer": "contains"
+    },
+    {
+      "source": "edge:contains/landlords-property",
+      "target": "garden",
+      "directed": true,
+      "role": "contained",
+      "layer": "contains"
+    },
+    {
+      "source": "eli",
+      "target": "garden",
+      "directed": true,
+      "label": "Eli helps with the garden",
+      "layer": "tends",
+      "source_role": "helper",
+      "target_role": "tended",
+      "attrs": {
+        "i2t:predicate": "tends",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "In addition to paying rent, Eli helped with the garden",
+        "i2t:locus": "scene-3",
+        "label": "Eli helps with the garden"
+      }
+    },
+    {
+      "source": "edge:gives/eli",
+      "target": "eli",
+      "directed": true,
+      "role": "giver",
+      "layer": "gives"
+    },
+    {
+      "source": "edge:gives/eli",
+      "target": "diane",
+      "directed": true,
+      "role": "receiver",
+      "layer": "gives"
+    },
+    {
+      "source": "edge:gives/eli",
+      "target": "dick",
+      "directed": true,
+      "role": "receiver",
+      "layer": "gives"
+    },
+    {
+      "source": "edge:gives/eli",
+      "target": "plant-gifts",
+      "directed": true,
+      "role": "transferred",
+      "layer": "gives"
+    },
+    {
+      "source": "edge:complains-to/zayne",
+      "target": "zayne",
+      "directed": true,
+      "role": "speaker",
+      "layer": "complains_to"
+    },
+    {
+      "source": "edge:complains-to/zayne",
+      "target": "eli",
+      "directed": true,
+      "role": "addressee",
+      "layer": "complains_to"
+    },
+    {
+      "source": "edge:complains-to/zayne",
+      "target": "president",
+      "directed": true,
+      "role": "topic",
+      "layer": "complains_to"
+    },
+    {
+      "source": "edge:asks-to-fact-check/eli",
+      "target": "eli",
+      "directed": true,
+      "role": "speaker",
+      "layer": "asks_to_fact_check"
+    },
+    {
+      "source": "edge:asks-to-fact-check/eli",
+      "target": "lumen",
+      "directed": true,
+      "role": "addressee",
+      "layer": "asks_to_fact_check"
+    },
+    {
+      "source": "edge:asks-to-fact-check/eli",
+      "target": "lillian",
+      "directed": true,
+      "role": "addressee",
+      "layer": "asks_to_fact_check"
+    },
+    {
+      "source": "edge:asks-to-fact-check/eli",
+      "target": "zayne",
+      "directed": true,
+      "role": "topic",
+      "layer": "asks_to_fact_check"
+    },
+    {
+      "source": "edge:keeps-rule/eli",
+      "target": "eli",
+      "directed": false,
+      "role": "party",
+      "layer": "keeps_rule"
+    },
+    {
+      "source": "edge:keeps-rule/eli",
+      "target": "eli-dad",
+      "directed": false,
+      "role": "party",
+      "layer": "keeps_rule"
+    },
+    {
+      "source": "edge:keeps-rule/eli",
+      "target": "facts-rule",
+      "directed": false,
+      "role": "rule",
+      "layer": "keeps_rule"
+    },
+    {
+      "source": "eli",
+      "target": "eli-dad",
+      "directed": false,
+      "label": "Eli and her dad debated",
+      "layer": "debates_with",
+      "source_role": "debater",
+      "target_role": "debater",
+      "attrs": {
+        "i2t:predicate": "debates_with",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "attributed",
+        "i2t:evidence": "when we were really getting into a debate",
+        "i2t:asserted_by": "eli",
+        "i2t:locus": "scene-3",
+        "label": "Eli and her dad debated"
+      }
+    },
+    {
+      "source": "zayne",
+      "target": "zayne-mom",
+      "directed": true,
+      "label": "Zayne takes his mom places",
+      "layer": "drives",
+      "source_role": "driver",
+      "target_role": "passenger",
+      "attrs": {
+        "i2t:predicate": "drives",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "attributed",
+        "i2t:evidence": "\"I take my mom places now that she can't drive",
+        "i2t:asserted_by": "zayne",
+        "i2t:locus": "scene-3",
+        "label": "Zayne takes his mom places"
+      }
+    },
+    {
+      "source": "edge:asks/eli-5",
+      "target": "eli",
+      "directed": true,
+      "role": "speaker",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/eli-5",
+      "target": "lillian",
+      "directed": true,
+      "role": "addressee",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:asks/eli-5",
+      "target": "zayne",
+      "directed": true,
+      "role": "topic",
+      "layer": "asks"
+    },
+    {
+      "source": "edge:commands/zayne-2",
+      "target": "zayne",
+      "directed": true,
+      "role": "speaker",
+      "layer": "commands"
+    },
+    {
+      "source": "edge:commands/zayne-2",
+      "target": "lillian",
+      "directed": true,
+      "role": "addressee",
+      "layer": "commands"
+    },
+    {
+      "source": "edge:commands/zayne-2",
+      "target": "eli",
+      "directed": true,
+      "role": "topic",
+      "layer": "commands"
+    },
+    {
+      "source": "edge:declines/lillian",
+      "target": "lillian",
+      "directed": true,
+      "role": "speaker",
+      "layer": "declines"
+    },
+    {
+      "source": "edge:declines/lillian",
+      "target": "eli",
+      "directed": true,
+      "role": "addressee",
+      "layer": "declines"
+    },
+    {
+      "source": "edge:declines/lillian",
+      "target": "zayne",
+      "directed": true,
+      "role": "topic",
+      "layer": "declines"
+    },
+    {
+      "source": "edge:warns/eli",
+      "target": "eli",
+      "directed": true,
+      "role": "speaker",
+      "layer": "warns"
+    },
+    {
+      "source": "edge:warns/eli",
+      "target": "zayne",
+      "directed": true,
+      "role": "addressee",
+      "layer": "warns"
+    },
+    {
+      "source": "edge:warns/eli",
+      "target": "creeper",
+      "directed": true,
+      "role": "topic",
+      "layer": "warns"
+    },
+    {
+      "source": "mob",
+      "target": "creeper",
+      "directed": true,
+      "label": "A creeper is a MOB",
+      "layer": "is_a",
+      "source_role": "container",
+      "target_role": "contained",
+      "attrs": {
+        "i2t:predicate": "is_a",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "is a MOB, an in-game mobile entity",
+        "i2t:locus": "scene-3",
+        "label": "A creeper is a MOB"
+      }
+    },
+    {
+      "source": "creeper",
+      "target": "wheat-field",
+      "directed": true,
+      "label": "A creeper blows up the player and their wheat field",
+      "layer": "explodes",
+      "source_role": "cause",
+      "target_role": "destroyed",
+      "attrs": {
+        "i2t:predicate": "explodes",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "hypothetical",
+        "i2t:evidence": "light its fuse, then blow up, along with the player, usually, most their stuff, and a significant portion of the players wheat field",
+        "i2t:locus": "scene-3",
+        "label": "A creeper blows up the player and their wheat field"
+      }
+    },
+    {
+      "source": "minecraft",
+      "target": "global-virtual-commons",
+      "directed": true,
+      "label": "Minecraft gave birth to the first global virtual commons",
+      "layer": "gave_birth_to",
+      "source_role": "cause",
+      "target_role": "effect",
+      "attrs": {
+        "i2t:predicate": "gave_birth_to",
+        "i2t:category": "state_change",
+        "i2t:edge_category": "state_change",
+        "i2t:mode": "attributed",
+        "i2t:evidence": "gave birth to the first global virtual comons",
+        "i2t:asserted_by": "narrator",
+        "i2t:locus": "scene-3",
+        "label": "Minecraft gave birth to the first global virtual commons"
+      }
+    },
+    {
+      "source": "edge:refers-to/narrator",
+      "target": "narrator",
+      "directed": true,
+      "role": "referrer",
+      "layer": "refers_to"
+    },
+    {
+      "source": "edge:refers-to/narrator",
+      "target": "youtube-archives",
+      "directed": true,
+      "role": "referenced",
+      "layer": "refers_to"
+    },
+    {
+      "source": "edge:refers-to/narrator",
+      "target": "minecraft",
+      "directed": true,
+      "role": "topic",
+      "layer": "refers_to"
+    },
+    {
+      "source": "apartment",
+      "target": "rented-room",
+      "directed": false,
+      "label": "The rented room is presumably the apartment",
+      "layer": "claimed_identical_to",
+      "source_role": "candidate",
+      "target_role": "candidate",
+      "attrs": {
+        "i2t:predicate": "claimed_identical_to",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "unresolved",
+        "i2t:evidence": "rented her the room above a garage in the back of their property",
+        "i2t:locus": "scene-3",
+        "label": "The rented room is presumably the apartment"
+      }
+    },
+    {
+      "source": "zayne-rooms",
+      "target": "zayne",
+      "directed": true,
+      "label": "Zayne lives at his mom's (the narration's version)",
+      "layer": "lives_in",
+      "source_role": "container",
+      "target_role": "contained",
+      "attrs": {
+        "i2t:predicate": "lives_in",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "contested",
+        "i2t:evidence": "well, his mom's rooms",
+        "i2t:locus": "scene-2",
+        "label": "Zayne lives at his mom's (the narration's version)"
+      }
+    },
+    {
+      "source": "zayne-rooms",
+      "target": "zayne-mom",
+      "directed": true,
+      "label": "His mom lives with him (Zayne's version)",
+      "layer": "lives_in",
+      "source_role": "container",
+      "target_role": "contained",
+      "attrs": {
+        "i2t:predicate": "lives_in",
+        "i2t:category": "containment",
+        "i2t:edge_category": "containment",
+        "i2t:mode": "contested",
+        "i2t:evidence": "he said she lives with him and not the other way around",
+        "i2t:asserted_by": "zayne",
+        "i2t:locus": "scene-2",
+        "label": "His mom lives with him (Zayne's version)"
+      }
+    },
+    {
+      "source": "manager",
+      "target": "eli",
+      "directed": true,
+      "label": "Eli has a manager",
+      "layer": "manages",
+      "source_role": "manager",
+      "target_role": "managed",
+      "attrs": {
+        "i2t:predicate": "manages",
+        "i2t:category": "interactivity",
+        "i2t:edge_category": "interactivity",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "just in case her manager got on and wanted to chat",
+        "i2t:locus": "scene-2",
+        "label": "Eli has a manager"
+      }
+    },
+    {
+      "source": "edge:commands/zayne-3",
+      "target": "zayne",
+      "directed": true,
+      "role": "speaker",
+      "layer": "commands"
+    },
+    {
+      "source": "edge:commands/zayne-3",
+      "target": "lillian",
+      "directed": true,
+      "role": "addressee",
+      "layer": "commands"
+    },
+    {
+      "source": "edge:commands/zayne-3",
+      "target": "eli",
+      "directed": true,
+      "role": "topic",
+      "layer": "commands"
+    },
+    {
+      "source": "zayne",
+      "target": "lillian",
+      "directed": true,
+      "label": "Lillian is Zayne's AI",
+      "layer": "owns",
+      "source_role": "owner",
+      "target_role": "owned",
+      "attrs": {
+        "i2t:predicate": "owns",
+        "i2t:category": "reference",
+        "i2t:edge_category": "reference",
+        "i2t:mode": "asserted",
+        "i2t:evidence": "Lillian is the name Zayne's AI chose for herself",
+        "i2t:locus": "scene-3",
+        "label": "Lillian is Zayne's AI"
+      }
+    },
+    {
+      "source": "edge:contains/pots-2",
+      "target": "pots",
+      "directed": true,
+      "role": "container",
+      "layer": "contains"
+    },
+    {
+      "source": "edge:contains/pots-2",
+      "target": "agarita",
+      "directed": true,
+      "role": "contained",
+      "layer": "contains"
+    },
+    {
+      "source": "edge:contains/pots-2",
+      "target": "other-samples",
+      "directed": true,
+      "role": "contained",
+      "layer": "contains"
+    }
+  ]
+}

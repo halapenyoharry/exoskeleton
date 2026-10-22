@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
+import { onPanelMenu } from "../../panel-menu";
 import cytoscape from "cytoscape";
 import type { Core, ElementDefinition, LayoutOptions } from "cytoscape";
 import fcose from "cytoscape-fcose";
@@ -12,7 +13,7 @@ import {
   onNodeSelectionBroadcast,
   broadcastNodeFocus,
   onNodeFocusBroadcast,
-} from "../../data/json-bus";
+} from "../../osc/channels";
 import { type DetectedGraph } from "../../data/json-utils/graphDetect";
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats, getDetectedGraph } from "../../data/json-utils/docStats";
@@ -487,10 +488,16 @@ export default function JsonCytoscapePanel(
     cyRef.current?.fit(undefined, params.fitPadding);
   };
 
+  // Header-action "fit" dispatches to the hidden toolbar's action.
+  const menuRef = useRef<(id: string) => void>(() => {});
+  menuRef.current = (id) => {
+    if (id === "fit") resetView();
+  };
+  useEffect(() => onPanelMenu(props.api.id, (id) => menuRef.current(id)), [props.api.id]);
+
   return (
     <>
       <div className="panel-header json-cytoscape-header">
-        <span>json-cytoscape</span>
         <div className="json-cytoscape-controls">
           <select
             value={params.layout}

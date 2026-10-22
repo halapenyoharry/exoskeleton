@@ -34,10 +34,17 @@ export interface TopoAttrs {
  *     names the relation. `attrs.i2t:edge_category` drives visual idiom.
  *     These NEVER flow into the node-drawing code path; they become the
  *     region/field/flow that holds their participants.
+ *
+ *   - `kind: "edge-as-node"` — a reified arity-2 edge (i2t spec S4): an
+ *     edge that is ALSO a node because another edge points at it. It stays
+ *     a tile, since something addresses it, but it is still a relation:
+ *     its attrs carry the edge's `i2t:predicate` / `i2t:edge_category`
+ *     (adapter guarantee since 2026-10-17), and its own incidence links,
+ *     which carry no attrs, take their category from it (see parse.ts).
  */
 export interface TopoNode {
   id: string;
-  kind: "node" | "hyperedge";
+  kind: "node" | "hyperedge" | "edge-as-node";
   label?: string;
   attrs?: TopoAttrs;
 }
@@ -74,6 +81,7 @@ export interface TopoDocument {
 }
 
 // Narrow type used by the node-rendering function. The parser only ever
-// passes nodes with kind:"node" through this gate, so a c: reification
-// cannot be drawn as a tile even if a future caller forgets the rule.
-export type RenderableNode = TopoNode & { kind: "node" };
+// passes nodes with kind:"node" (or "edge-as-node", which is addressable
+// and so earns a tile) through this gate, so a c: reification cannot be
+// drawn as a tile even if a future caller forgets the rule.
+export type RenderableNode = TopoNode & { kind: "node" | "edge-as-node" };

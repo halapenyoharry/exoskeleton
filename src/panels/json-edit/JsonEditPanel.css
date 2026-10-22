@@ -19,14 +19,53 @@
   width: 100%;
 }
 
-.json-edit-doc-id {
-  font-weight: normal;
-  opacity: 0.6;
+.json-edit-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* Document picker: the bus is the document library. */
+.json-edit-doc-picker,
+.json-edit-rename {
+  text-transform: none;
+  letter-spacing: normal;
+  background: rgba(10, 14, 38, 0.6);
+  color: #c5d1e6;
+  border: 1px solid rgba(89, 184, 255, 0.35);
+  border-radius: 4px;
+  font-family: inherit;
   font-size: 0.85em;
+  padding: 1px 4px;
+  max-width: 260px;
+  min-width: 0;
+}
+
+.json-edit-flash {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: normal;
+  font-size: 0.8em;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.json-edit-flash--ok,
+.json-edit-flash--info {
+  color: #7ee2a8;
+}
+
+.json-edit-flash--error {
+  color: #ff6b6b;
+  white-space: normal;
 }
 
 .json-edit-parse-error {
-  margin-left: 8px;
   color: #ff6b6b;
   font-weight: normal;
   font-size: 0.85em;
@@ -73,7 +112,7 @@
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  min-width: 130px;
+  min-width: 170px;
 }
 
 .json-edit-dropdown-item {
@@ -98,14 +137,75 @@
   box-shadow: inset 0 0 4px rgba(0, 229, 255, 0.2);
 }
 
-.json-edit-filepath-indicator {
-  font-size: 0.75em;
-  color: #8c9cb3;
-  font-style: italic;
-  margin-left: 8px;
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.json-edit-dropdown-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: rgba(0, 229, 255, 0.2);
 }
 
+.json-edit-dropdown-item--danger,
+.json-edit-dropdown-item--danger:hover {
+  color: #ff6b6b;
+}
+
+
+.json-edit-library-item {
+  padding-left: 24px;
+  min-height: 32px;
+  align-items: center;
+}
+
+.json-edit-library-tag {
+  font-size: 0.65rem;
+  opacity: 0.7;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 8px;
+  padding: 1px 6px;
+}
+
+.json-edit-doc-label {
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
+.json-edit-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 10px;
+  min-width: 0;
+  flex-shrink: 0;
+}
+.json-edit-doc-menu {
+  position: absolute;
+  top: 0;
+  z-index: 20;
+  margin: 0;
+  padding: 3px;
+  list-style: none;
+  max-height: 60%;
+  overflow-y: auto;
+  min-width: 140px;
+  max-width: 260px;
+  background: rgba(10, 14, 38, 0.96);
+  border: 1px solid rgba(89, 184, 255, 0.45);
+  border-radius: 6px;
+}
+.json-edit-doc-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 4px 8px;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: #c5d1e6;
+  font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.json-edit-doc-menu button:hover { background: rgba(89, 184, 255, 0.18); }
+.json-edit-doc-menu button.is-current { color: #59b8ff; }

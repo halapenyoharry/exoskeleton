@@ -22,22 +22,26 @@ Full stack details and caveats live in [README.md](README.md). Don't duplicate t
 
 ## How to run
 
+**v2.0.0-beta is web-only.** Run the Vite dev server; it listens on port 1420 on all interfaces (LAN and Tailscale), so verify in a browser at http://localhost:1420 or http://<this machine's IP>:1420.
+
 ```
 npm install
-npm run tauri dev
+npm run dev
 ```
 
-First Rust build is 5–15 min; subsequent runs are fast.
+The Tauri desktop shell (`npm run tauri dev`, first Rust build 5–15 min) is **not tested for this version**: on Harold's Mac it crashed the window server, and fixing that is deferred. Do not launch it to verify changes. The next integration after the web build is an Obsidian plugin (not yet designed).
 
 ## Current shape
 
-Sixteen panels via Dockview, registered in [src/App.tsx](src/App.tsx)'s `components` map; 14 are in the default-layout registry ([src/persistence/default-layout.ts](src/persistence/default-layout.ts)), while `settings` (Cmd+B, left edge group) and `status-bar` (bottom edge group) are added imperatively. The founding three:
+Seventeen panels via Dockview, registered in [src/App.tsx](src/App.tsx)'s `components` map; 15 are in the default-layout registry ([src/persistence/default-layout.ts](src/persistence/default-layout.ts)), while `settings` (Cmd+B, left edge group) and `status-bar` (bottom edge group) are added imperatively. The founding three:
 
 - **editor** (cyan) — [src/panels/EditorPanel.tsx](src/panels/EditorPanel.tsx) — textarea + Tauri fs/dialog; persists its open file path in params
 - **terminal** (amber) — [src/panels/TerminalPanel.tsx](src/panels/TerminalPanel.tsx) — xterm wired to a real PTY
 - **webview** (mint) — [src/panels/LanWebview.tsx](src/panels/LanWebview.tsx) — iframe with URL bar, defaults to `https://dockview.dev` (the layout library's docs). Named `LanWebview` to label what it's *for* — LAN HTTP services and similar iframe-friendly surfaces. The panel id `webview` (and the mint color identity) are kept because they describe the panel's *role*, not its implementation.
 
-The rest: `tempo-clock`, `piano`, `scope` (OSC instruments), and the JSON suite — `json-edit` (CodeMirror 6) feeding seven viewers (`json-tree`, `json-graph`, `json-cytoscape`, `json-graph3d`, `json-circles`, `json-mass`, `json-dyadic`) over the in-process json-bus. Every panel has a manifest declaring `capabilities` / `optionalCapabilities` / `companions` (see [docs/panel-capability-map.md](docs/panel-capability-map.md)).
+The rest: `tempo-clock`, `piano`, `scope` (OSC instruments), and the JSON suite — `json-edit` (CodeMirror 6) feeding eight viewers (`json-tree`, `json-graph`, `json-cytoscape`, `json-graph3d`, `json-circles`, `json-mass`, `json-dyadic`, `json-attention`) over the in-process json-bus. Every panel has a manifest declaring `capabilities` / `optionalCapabilities` / `companions` (see [docs/panel-capability-map.md](docs/panel-capability-map.md)).
+
+**The document edge.** `json-edit` is not a grid pane: it is the document that is plugged in, and it lives in a left Dockview edge group (`document-edge`, [src/persistence/document-edge.ts](src/persistence/document-edge.ts)) that every layout build/restore ensures. Collapse/expand with ⌘J, ⊞ menu → Document, or by clicking the collapsed strip (a vertical tab: `{}` + the document title); open/collapsed state and size persist with the workspace (desktop grid and phone deck each keep their own). On a phone (≤600px, web) it is a full-width sheet over the grid that starts collapsed (a 44px strip) and closes first on the back gesture. Settings (⌘B) moved to the right edge. Presets never put `json-edit` in the grid; `migrateSavedLayout` moves a `json-edit` found in a saved grid onto the edge. Extra `json-edit-xxxx` clones in the grid are allowed.
 
 ## Where to look first
 
@@ -51,7 +55,8 @@ Read these in order at the start of a session:
 
 These are the type-level contracts that library panels and other tooling depend on. Adding fields is fine; renaming or removing without a heads-up will break every library component.
 
-- **[src/panel-manifest.ts](src/panel-manifest.ts)** — `PanelManifest<P>` is the integration contract every library panel satisfies. Agents installing a panel from `~/Projects/exoskeleton-component-library/` read a manifest and perform the App.tsx / ColoredTab / App.css / default-layout / capabilities / Cargo / package.json edits implied by its fields. The library's top-level README documents the install protocol.
+- **[src/panel-manifest.ts](src/panel-manifest.ts)** — `PanelManifest<P>` is the integration contract every panel satisfies.
+  > **Note on `exoskeleton-component-library`:** The separate `~/Projects/exoskeleton-component-library/` repository was abandoned. All active panel development happens directly within `src/panels/` in this repository (`/Users/harold/Projects/exoskeleton`). Do not confuse the two or divert work to the component library.
 
 ## Don't touch without asking
 

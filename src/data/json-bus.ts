@@ -1,23 +1,36 @@
 // Exoskeleton's json-bus: in-process snapshot state for cross-panel JSON
-// documents. The shape mirrors src/osc/index.ts (subscription set, snapshot
-// iteration to allow mid-dispatch unsubscribe) but the semantics are
-// different: this is current-value-with-subscription, not an event stream.
+// documents. One job — holding the document.
 //
-// OSC is for ephemeral events (clock ticks, MIDI notes) — fire-and-forget,
-// late subscribers miss prior events. json-bus is for documents — a viewer
-// panel that mounts AFTER the editor has set a value should see that value
-// on its first render via getJson(id), then react to subsequent edits via
-// onJsonChange(id, handler). That two-step matches the React useState +
+// This module used to also carry selection, focus, the active-document id and
+// the graphs-connected flag. Those were event-shaped and all four fit in OSC
+// args, so they moved to src/osc/channels/ (issue #4). The document is the one
+// payload that stayed, and the rule says why:
+//
+//   If it fits in an OSC arg and is cheap to send, send it as OSC.
+//   If something needs to know the last value, retain the address.
+//
+// A parsed document fits only as {type:"string", value: JSON.stringify(doc)},
+// which is not cheap — it reintroduces serialization on every keystroke, the
+// exact cost in-process dispatch avoids by passing an object reference. So it
+// keeps its own holder here. Widening OscArg with an object case was the other
+// option and is worse: it stops being OSC, and that arg would silently fail to
+// cross the UDP bridge.
+//
+// A viewer panel that mounts AFTER the editor has set a value should see that
+// value on its first render via getJson(id), then react to subsequent edits
+// via onJsonChange(id, handler). That two-step matches the React useState +
 // useEffect idiom.
 //
 // Documents are keyed by id so multiple JSON documents can coexist
-// (e.g. editor A → viewers A; editor B → viewers B). Pick an id convention
-// that fits your panel pair — "default" is fine for a single-document app.
+// (e.g. editor A → viewers A; editor B → viewers B). The bus doubles as the
+// in-app document library: each id carries a title and timestamps, panels
+// can list, retitle, and delete documents, and json-bus-persist.ts keeps
+// them across reloads.
 //
 // Scope: in-process only. Same React tree, same JS heap. If a panel opens
 // in a separate Tauri WebviewWindow (popout group via addPopoutGroup), this
-// bus does not reach it — Tauri events become the right answer for that
-// case. See docs/AGENTS-FAQ.md for the full reasoning.
+// bus does not reach it, and — unlike the channels that moved to OSC — it
+// has no path to ever reaching it. See docs/AGENTS-FAQ.md.
 
 export type JsonValue =
   | null
@@ -34,15 +47,186 @@ interface Subscription {
   handler: Handler;
 }
 
+/**
+ * What the bus knows about a document besides its value. The bus is also
+ * the in-app document library: every id is a named document that panels can
+ * list, switch between, rename, and delete.
+ */
+export interface DocMeta {
+  /** Human name shown in pickers. Defaults to the id. */
+  title: string;
+  /** Who produced it, e.g. "topology-extract" or "file: notes.json". */
+  source?: string;
+  /** Disk path it was opened from or saved to (desktop app only). */
+  path?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DocEntry {
+  id: string;
+  meta: DocMeta;
+}
+
+/** Storage-facing change feed (see json-bus-persist.ts). */
+export type StoreEvent =
+  | { type: "set"; id: string; value: JsonValue; meta: DocMeta }
+  | { type: "delete"; id: string };
+
 const values = new Map<string, JsonValue>();
+const metas = new Map<string, DocMeta>();
 const subscriptions: Set<Subscription> = new Set();
+const listListeners: Set<() => void> = new Set();
+const storeListeners: Set<(e: StoreEvent) => void> = new Set();
 
 export function getJson(id: string): JsonValue | undefined {
   return values.get(id);
 }
 
-export function setJson(id: string, value: JsonValue): void {
+export function setJson(
+  id: string,
+  value: JsonValue,
+  meta?: { title?: string; source?: string; path?: string },
+): void {
+  const now = new Date().toISOString();
+  const prev = metas.get(id);
+  const next: DocMeta = {
+    title: meta?.title ?? prev?.title ?? id,
+    source: meta?.source ?? prev?.source,
+    path: meta?.path ?? prev?.path,
+    createdAt: prev?.createdAt ?? now,
+    updatedAt: now,
+  };
+  const listChanged =
+    !prev || prev.title !== next.title || prev.source !== next.source;
   values.set(id, value);
+  metas.set(id, next);
+  dispatch(id, value);
+  emitStore({ type: "set", id, value, meta: next });
+  if (listChanged) emitList();
+}
+
+export function onJsonChange(id: string, handler: Handler): () => void {
+  const sub: Subscription = { id, handler };
+  subscriptions.add(sub);
+  return () => {
+    subscriptions.delete(sub);
+  };
+}
+
+// ── Document library ────────────────────────────────────────────────
+
+export function getJsonMeta(id: string): DocMeta | undefined {
+  return metas.get(id);
+}
+
+/** Every document on the bus, most recently updated first. */
+export function listJson(): DocEntry[] {
+  return [...metas.entries()]
+    .map(([id, meta]) => ({ id, meta }))
+    .sort((a, b) => b.meta.updatedAt.localeCompare(a.meta.updatedAt));
+}
+
+/** Update a document's title or path. The id stays stable for subscribers. */
+export function updateJsonMeta(
+  id: string,
+  patch: { title?: string; path?: string },
+): void {
+  const prev = metas.get(id);
+  const value = values.get(id);
+  if (!prev || value === undefined) return;
+  const next = { ...prev, ...patch };
+  metas.set(id, next);
+  emitStore({ type: "set", id, value, meta: next });
+  emitList();
+}
+
+export function deleteJson(id: string): boolean {
+  const existed = values.delete(id);
+  metas.delete(id);
+  if (existed) {
+    emitStore({ type: "delete", id });
+    emitList();
+  }
+  return existed;
+}
+
+/** Fires when documents are added, removed, or retitled. */
+export function onJsonListChange(listener: () => void): () => void {
+  listListeners.add(listener);
+  return () => {
+    listListeners.delete(listener);
+  };
+}
+
+/** An id derived from `base` that no document uses yet. */
+export function uniqueJsonId(base: string): string {
+  const stem =
+    base
+      .toLowerCase()
+      .replace(/\.json$/, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60) || "doc";
+  if (!values.has(stem)) return stem;
+  for (let k = 2; ; k++) {
+    const id = `${stem}-${k}`;
+    if (!values.has(id)) return id;
+  }
+}
+
+// ── Storage hooks ───────────────────────────────────────────────────
+
+/** Subscribe to every write and delete, for persistence. */
+export function onJsonStore(listener: (e: StoreEvent) => void): () => void {
+  storeListeners.add(listener);
+  return () => {
+    storeListeners.delete(listener);
+  };
+}
+
+/**
+ * Load documents from storage. Documents already on the bus win (a panel
+ * may have published before storage finished loading). Does not echo back
+ * to storage.
+ */
+export function hydrateJson(
+  entries: { id: string; value: JsonValue; meta: DocMeta }[],
+): void {
+  let added = false;
+  for (const e of entries) {
+    if (values.has(e.id)) continue;
+    values.set(e.id, e.value);
+    metas.set(e.id, e.meta);
+    dispatch(e.id, e.value);
+    added = true;
+  }
+  if (added) emitList();
+}
+
+/**
+ * Publish editor text that was restored from some other source (panel state,
+ * a late storage hydrate) when the bus has no equal value for `id`, so
+ * viewers following the document can read it. Returns true if it published.
+ * Empty or unparseable text is left alone.
+ */
+export function publishRestoredText(id: string, text: string): boolean {
+  if (text.trim() === "") return false;
+  let parsed: JsonValue;
+  try {
+    parsed = JSON.parse(text) as JsonValue;
+  } catch {
+    return false;
+  }
+  const current = values.get(id);
+  if (current !== undefined && JSON.stringify(current) === JSON.stringify(parsed)) {
+    return false;
+  }
+  setJson(id, parsed);
+  return true;
+}
+
+function dispatch(id: string, value: JsonValue): void {
   // Snapshot — handlers may unsubscribe mid-dispatch.
   for (const sub of [...subscriptions]) {
     if (sub.id === id) {
@@ -55,126 +239,22 @@ export function setJson(id: string, value: JsonValue): void {
   }
 }
 
-export function onJsonChange(id: string, handler: Handler): () => void {
-  const sub: Subscription = { id, handler };
-  subscriptions.add(sub);
-  return () => {
-    subscriptions.delete(sub);
-  };
-}
-
-// --- Active Document Coordination ---
-let activeDocumentId = "default";
-const activeDocListeners = new Set<(id: string) => void>();
-
-export function getActiveDocumentId(): string {
-  return activeDocumentId;
-}
-
-export function setActiveDocumentId(id: string): void {
-  if (activeDocumentId === id) return;
-  activeDocumentId = id;
-  for (const listener of activeDocListeners) {
+function emitList(): void {
+  for (const l of [...listListeners]) {
     try {
-      listener(id);
+      l();
     } catch (e) {
-      console.error("[json-bus] active document listener threw:", e);
+      console.error("[json-bus] list listener threw:", e);
     }
   }
 }
 
-export function onActiveDocumentIdChange(listener: (id: string) => void): () => void {
-  activeDocListeners.add(listener);
-  return () => {
-    activeDocListeners.delete(listener);
-  };
-}
-
-// --- Connection / Decouple Coordination ---
-let graphsConnected = true; // Default to connected
-const connectionListeners = new Set<(connected: boolean) => void>();
-
-export function areGraphsConnected(): boolean {
-  return graphsConnected;
-}
-
-export function setGraphsConnected(connected: boolean): void {
-  if (graphsConnected === connected) return;
-  graphsConnected = connected;
-  for (const listener of connectionListeners) {
+function emitStore(e: StoreEvent): void {
+  for (const l of [...storeListeners]) {
     try {
-      listener(connected);
-    } catch (e) {
-      console.error("[json-bus] connection listener threw:", e);
+      l(e);
+    } catch (err) {
+      console.error("[json-bus] store listener threw:", err);
     }
   }
 }
-
-export function onGraphsConnectionChange(listener: (connected: boolean) => void): () => void {
-  connectionListeners.add(listener);
-  return () => {
-    connectionListeners.delete(listener);
-  };
-}
-
-// --- Selection Synchronization ---
-export interface SelectionEvent {
-  documentId: string;
-  nodeId: string | null;
-  sourcePanelId: string;
-  label?: string;
-}
-type SelectionHandler = (event: SelectionEvent) => void;
-const selectionListeners = new Set<SelectionHandler>();
-let currentSelectedNode: { nodeId: string | null; label?: string } = { nodeId: null };
-
-export function getSelectedNode() {
-  return currentSelectedNode;
-}
-
-export function broadcastNodeSelection(documentId: string, nodeId: string | null, sourcePanelId: string, label?: string): void {
-  currentSelectedNode = { nodeId, label };
-  const event: SelectionEvent = { documentId, nodeId, sourcePanelId, label };
-  for (const listener of selectionListeners) {
-    try {
-      listener(event);
-    } catch (e) {
-      console.error("[json-bus] selection listener threw:", e);
-    }
-  }
-}
-
-export function onNodeSelectionBroadcast(handler: SelectionHandler): () => void {
-  selectionListeners.add(handler);
-  return () => {
-    selectionListeners.delete(handler);
-  };
-}
-
-// --- Focus / Zoom Synchronization ---
-export interface FocusEvent {
-  documentId: string;
-  nodeId: string;
-  sourcePanelId: string;
-}
-type FocusHandler = (event: FocusEvent) => void;
-const focusListeners = new Set<FocusHandler>();
-
-export function broadcastNodeFocus(documentId: string, nodeId: string, sourcePanelId: string): void {
-  const event: FocusEvent = { documentId, nodeId, sourcePanelId };
-  for (const listener of focusListeners) {
-    try {
-      listener(event);
-    } catch (e) {
-      console.error("[json-bus] focus listener threw:", e);
-    }
-  }
-}
-
-export function onNodeFocusBroadcast(handler: FocusHandler): () => void {
-  focusListeners.add(handler);
-  return () => {
-    focusListeners.delete(handler);
-  };
-}
-

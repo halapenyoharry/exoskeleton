@@ -180,3 +180,42 @@ test("parseTopology against a topology file (synthetic fixture or EXO_TOPOLOGY_D
     assert.ok(categories.has("reference"), "missing reference layer");
   }
 });
+
+test("an edge-as-node (reified arity-2 edge) stays a tile and lends its category to its incidence links", () => {
+  const result = parseTopology({
+    nodes: [
+      { id: "x", kind: "node", attrs: { label: "X" } },
+      { id: "y", kind: "node", attrs: { label: "Y" } },
+      { id: "src", kind: "node", attrs: { label: "Source" } },
+      {
+        id: "edge:x-builds-y",
+        kind: "edge-as-node",
+        attrs: {
+          "schema:name": "x-builds-y (reified)",
+          "i2t:reified": true,
+          "i2t:predicate": "builds",
+          "i2t:edge_category": "state_change",
+        },
+      },
+    ],
+    links: [
+      { source: "x", target: "edge:x-builds-y", role: "source", layer: "builds" },
+      { source: "edge:x-builds-y", target: "y", role: "target", layer: "builds" },
+      {
+        source: "src",
+        target: "edge:x-builds-y",
+        label: "grounds",
+        layer: "grounds",
+        attrs: { "i2t:predicate": "grounds", "i2t:edge_category": "reference" },
+      },
+    ],
+  });
+  // Addressable, so it keeps a tile; it is not a region-driving reification.
+  assert.ok(result.nodesById.has("edge:x-builds-y"));
+  assert.ok(!result.reificationsById.has("edge:x-builds-y"));
+  // Its incidence links carry no attrs; the layer's category comes from the row.
+  assert.strictEqual(result.layers.get("builds")?.primaryCategory, "state_change");
+  // The edge that points at it keeps its own category.
+  assert.strictEqual(result.layers.get("grounds")?.primaryCategory, "reference");
+  assert.ok(!result.warnings.some((w) => w.includes('"builds"')));
+});

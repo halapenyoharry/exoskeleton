@@ -1,5 +1,10 @@
-import { Component, type ComponentType, type CSSProperties, type ErrorInfo, type ReactNode } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import { Component, useEffect, useState, type ComponentType, type CSSProperties, type ErrorInfo, type ReactNode } from "react";
+import type { IDockviewPanelProps } from "dockview-react";
+import { resolveComponentKey } from "./ColoredTab";
+import { PanelPanes } from "./PanelPanes";
+import { DOCUMENT_EDGE_ID } from "./persistence/document-edge";
+import "./chrome/panes";
+import { getPanes } from "./chrome/panes-registry";
 
 interface PanelErrorBoundaryProps {
   panelTitle: string;
@@ -115,25 +120,25 @@ export class PanelErrorBoundary extends Component<
  * the root element. App.css's `.panel-pad::before` reads that variable
  * to paint the 3px stripe at the top of the panel. Pass any valid CSS
  * color, typically a `var()` reference (e.g. `"var(--accent-editor)"`).
- *
- * The optional `className` is appended to the base `panel-pad` class —
- * useful when a panel needs its own root-level styling hook (e.g.
- * `.my-panel-root`) without recreating the positioning recipe.
  */
 export function PanelRoot({
   accent,
   className,
   children,
   style,
+  hasPanes,
 }: {
   accent?: string;
   className?: string;
   children: ReactNode;
   style?: CSSProperties;
+  /** true when the panel declares panes (its inline toolbar is hidden by CSS). */
+  hasPanes?: boolean;
 }) {
   return (
     <div
       className={className ? `panel-pad ${className}` : "panel-pad"}
+      data-has-panes={hasPanes ? "true" : undefined}
       style={{ "--panel-accent": accent ?? "transparent", ...style } as CSSProperties}
     >
       {children}
@@ -144,24 +149,52 @@ export function PanelRoot({
 /**
  * Registration helper: takes a pure panel component and produces a
  * wrapped version to put in the Dockview `components` map. The wrapper
- * forwards all props transparently and wraps the component in a
- * `PanelErrorBoundary` so any throwing panel is isolated from the rest
- * of the grid.
+ * forwards all props transparently, wraps the component in a
+ * `PanelErrorBoundary`, and — when the panel declares panes — hosts it
+ * inside a Splitview whose top cell is the Paneview of those panes.
  */
 export function exoPanel<P extends Record<string, any>>(
   Component: ComponentType<IDockviewPanelProps<P>>,
   accent?: string,
 ) {
   return function Wrapped(props: IDockviewPanelProps<P>) {
-    const title = props.api.title ?? props.api.id;
+    const componentKey = resolveComponentKey(props.api.id) ?? props.api.id;
+    const panes = getPanes(componentKey);
+    const hasPanes = !!panes && panes.some((p) => p.kind === "pane");
+    // In the document edge (vertical tab strip on the left) the title also
+    // reads at the top of the content; follow group moves and renames.
+    const [inEdge, setInEdge] = useState(() => props.api.group.id === DOCUMENT_EDGE_ID);
+    const [title, setTitle] = useState(() => props.api.title ?? props.api.id);
+    useEffect(() => {
+      const d1 = props.api.onDidGroupChange(() => setInEdge(props.api.group.id === DOCUMENT_EDGE_ID));
+      const d2 = props.api.onDidTitleChange((e) => setTitle(e.title));
+      return () => {
+        d1.dispose();
+        d2.dispose();
+      };
+    }, [props.api]);
+    const content = <Component {...props} />;
     return (
       <PanelErrorBoundary
         panelTitle={title}
         accent={accent}
         onClose={() => props.api.close()}
       >
-        <PanelRoot accent={accent}>
-          <Component {...props} />
+        <PanelRoot accent={accent} hasPanes={hasPanes}>
+          {hasPanes || inEdge ? (
+            <PanelPanes
+              panelId={props.api.id}
+              api={props.api}
+              containerApi={props.containerApi}
+              panes={panes ?? []}
+              titlePane={inEdge ? title : undefined}
+              settingsPane={hasPanes}
+            >
+              {content}
+            </PanelPanes>
+          ) : (
+            content
+          )}
         </PanelRoot>
       </PanelErrorBoundary>
     );

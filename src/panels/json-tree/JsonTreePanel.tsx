@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { IDockviewPanelProps } from "dockview";
+import type { IDockviewPanelProps } from "dockview-react";
+import { onPanelMenu } from "../../panel-menu";
 import * as d3 from "d3";
+import {
+  getActiveDocumentId,
+  onActiveDocumentIdChange,
+  areGraphsConnected,
+  onGraphsConnectionChange,
+} from "../../osc/channels";
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats } from "../../data/json-utils/docStats";
 import { useElementSize } from "../../useElementSize";
@@ -36,6 +43,12 @@ export interface JsonTreeParams {
   explodePrimitives: boolean;
   /** Node-count above which the perf warning fires. */
   nodeThreshold: number;
+  /** Fit the laid-out tree to the viewport on draw / doc change / reset. */
+  fitOnLoad: boolean;
+  /** Padding (px) around the fitted bounds. */
+  fitPadding: number;
+  /** Maximum zoom scale applied by fit. */
+  fitMaxScale: number;
 }
 
 export const jsonTreeDefaults: JsonTreeParams = {
@@ -50,6 +63,9 @@ export const jsonTreeDefaults: JsonTreeParams = {
   showArrayIndices: true,
   explodePrimitives: false,
   nodeThreshold: 10000,
+  fitOnLoad: true,
+  fitPadding: 40,
+  fitMaxScale: 1.5,
 };
 
 const EMPTY_TREE: HierarchyNode = { name: "Waiting for JSON…" };
@@ -70,7 +86,20 @@ export default function JsonTreePanel(
   };
 
   // Subscribe to json-bus (visibility-aware: hidden tabs buffer, not render).
-  const doc = useJsonDoc(props.api, params.documentId);
+  const [activeDocId, setActiveDocId] = useState(params.documentId);
+  const [connected, setConnected] = useState(areGraphsConnected());
+  useEffect(() => onGraphsConnectionChange(setConnected), []);
+  useEffect(() => {
+    if (!connected) {
+      setActiveDocId(params.documentId);
+      return;
+    }
+    setActiveDocId(getActiveDocumentId());
+    return onActiveDocumentIdChange((id) => {
+      setActiveDocId(id);
+    });
+  }, [connected, params.documentId]);
+  const doc = useJsonDoc(props.api, activeDocId);
 
   // Container + debounced resize observer.
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -101,6 +130,13 @@ export default function JsonTreePanel(
   // D3 rendering.
   const svgRef = useRef<SVGSVGElement | null>(null);
   const resetRef = useRef<() => void>(() => {});
+
+  // Header-action "reset" dispatches to the hidden toolbar's action.
+  const menuRef = useRef<(id: string) => void>(() => {});
+  menuRef.current = (id) => {
+    if (id === "reset") resetRef.current();
+  };
+  useEffect(() => onPanelMenu(props.api.id, (id) => menuRef.current(id)), [props.api.id]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -154,7 +190,7 @@ export default function JsonTreePanel(
 
     const zoom = d3
       .zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.1, 4])
+      .scaleExtent([0.01, 4])
       .on("zoom", (event) => {
         g.attr("transform", event.transform);
       });
@@ -272,13 +308,35 @@ export default function JsonTreePanel(
           : height / 2 - (x0 + x1) / 2,
       )
       .scale(1);
-    svg.call(zoom.transform as never, defaultTransform);
 
+    const fitTransform = () => {
+      const bounds = g.node()?.getBBox();
+      if (!bounds || bounds.width === 0 || bounds.height === 0) return null;
+      const cx = bounds.x + bounds.width / 2;
+      const cy = bounds.y + bounds.height / 2;
+      const scale = Math.max(
+        0.01,
+        Math.min(
+          width / (bounds.width + params.fitPadding),
+          height / (bounds.height + params.fitPadding),
+          params.fitMaxScale,
+        ),
+      );
+      return d3.zoomIdentity
+        .translate(width / 2, height / 2)
+        .scale(scale)
+        .translate(-cx, -cy);
+    };
+
+    const initial = params.fitOnLoad ? (fitTransform() ?? defaultTransform) : defaultTransform;
+    svg.call(zoom.transform as never, initial);
+
+    // reset = fit.
     resetRef.current = () => {
       svg
         .transition()
         .duration(500)
-        .call(zoom.transform as never, defaultTransform);
+        .call(zoom.transform as never, fitTransform() ?? defaultTransform);
     };
 
     return () => {
@@ -306,7 +364,6 @@ export default function JsonTreePanel(
   return (
     <>
       <div className="panel-header json-tree-header">
-        <span>json-tree</span>
         <div className="json-tree-controls">
           <select
             value={params.layout}

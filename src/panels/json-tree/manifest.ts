@@ -7,6 +7,7 @@ import JsonTreePanel, {
 const manifest: PanelManifest<JsonTreeParams> = {
   // identity
   id: "json-tree",
+  toolbar: true,
   title: "tree",
   component: JsonTreePanel,
   description:
@@ -23,7 +24,7 @@ const manifest: PanelManifest<JsonTreeParams> = {
 
   // layout — splits right of the editor on first launch; sibling viewer
   // panels (graph, cyto, 3d, circles, mass) tab into this group.
-  defaultLayout: { direction: "right", reference: "json-edit" },
+  defaultLayout: { direction: "right", reference: "terminal" },
   paramsDefault: jsonTreeDefaults,
 
   npmDependencies: {

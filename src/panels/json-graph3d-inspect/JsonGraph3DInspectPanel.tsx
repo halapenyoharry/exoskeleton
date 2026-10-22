@@ -1,0 +1,968 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { IDockviewPanelProps } from "dockview-react";
+import { onPanelMenu } from "../../panel-menu";
+import ForceGraph3D from "react-force-graph-3d";
+import type { ForceGraphMethods } from "react-force-graph-3d";
+import SpriteText from "three-spritetext";
+import * as THREE from "three";
+import { ConvexGeometry } from "three/addons/geometries/ConvexGeometry.js";
+import {
+  getActiveDocumentId,
+  onActiveDocumentIdChange,
+  areGraphsConnected,
+  onGraphsConnectionChange,
+  broadcastNodeSelection,
+  onNodeSelectionBroadcast,
+  broadcastNodeFocus,
+  onNodeFocusBroadcast,
+} from "../../osc/channels";
+import type { DetectedGraph, GraphNode } from "../../data/json-utils/graphDetect";
+import { useJsonDoc } from "../../data/useJsonDoc";
+import { getDocStats, getDetectedGraph } from "../../data/json-utils/docStats";
+import { useElementSize } from "../../useElementSize";
+import { buildLayerVisibility } from "../../data/json-utils/layers";
+import type { EdgeCategory } from "../json-dyadic/types";
+import { CATEGORY_ORDER, CATEGORY_TOKENS } from "../json-dyadic/categories";
+import {
+  CATEGORY_WIDTH,
+  containmentGroups,
+  degreeMap,
+  isRelationRow,
+  linkColor,
+  linkInlineText,
+  nodeColor,
+  resolveLinkCategory,
+  slug,
+  type ColorOverrides,
+  type ContainmentGroup,
+  type EdgeColorBy,
+} from "./inspect-model";
+import { makeTextPlane, orientAlong, type TextPlane } from "./text-plane";
+import { Segmented, Toggle, Toolbar, ToolbarGroup } from "../../components/toolbar/Toolbar";
+import "./JsonGraph3DInspectPanel.css";
+
+export type InspectLabelMode = "always" | "hover" | "never";
+export type NodeSizeBy = "degree" | "uniform";
+export type HullMode = "ellipsoid" | "convex";
+export type EdgeLabelOrientation = "along" | "billboard";
+export type HyperedgeLabel = "predicate" | "id" | "dot";
+
+export interface JsonGraph3DInspectParams {
+  documentId: string;
+  dimensions: 2 | 3;
+  freezeLayout: boolean;
+  layerVisibility: Record<string, boolean>;
+  backgroundColor: string;
+
+  // Node text
+  labelMaxWords: number;
+  fontFace: string;
+  fontWeight: string;
+  fontResolution: number;
+  strokeWidth: number;
+  strokeColor: string;
+  nodeSizeBy: NodeSizeBy;
+  nodeTextHeightMin: number;
+  nodeTextHeightMax: number;
+  /** Exponent on degree/maxDegree. 1 = linear; <1 lifts the small end,
+   *  >1 pushes everything but the hubs down (hubs stand out more). */
+  nodeSizeExponent: number;
+  hyperedgeTextScale: number;
+  /** How a relation row (kind: "hyperedge" or "edge-as-node") is drawn: its predicate
+   *  as text, its raw id, or a small junction dot. */
+  hyperedgeLabel: HyperedgeLabel;
+  nodeDefaultColor: string;
+  selectedColor: string;
+
+  // Edges
+  edgeLabels: InspectLabelMode;
+  edgeLabelTextHeight: number;
+  /** "along": label lies on the edge, ----- label ---->, hinged billboard.
+   *  "billboard": always faces the viewer (the json-graph3d behaviour). */
+  edgeLabelOrientation: EdgeLabelOrientation;
+  edgeColorBy: EdgeColorBy;
+  colorOverrides: ColorOverrides;
+  linkWidth: number;
+  linkOpacity: number;
+  arrowLength: number;
+  curvature: number;
+  showContainmentLinks: boolean;
+  particles: boolean;
+  particleCount: number;
+  particleSpeed: number;
+
+  // Containment hulls
+  hulls: boolean;
+  hullMode: HullMode;
+  hullOpacity: number;
+  hullPadding: number;
+  hullRebuildEveryTicks: number;
+
+  // Misc
+  showLegend: boolean;
+  tooltipMaxAttrs: number;
+  tooltipValueMaxLen: number;
+  fitDuration: number;
+  fitPadding: number;
+  fitDelayMs: number;
+  cooldownTicks: number;
+  nodeThreshold: number;
+}
+
+export const jsonGraph3DInspectDefaults: JsonGraph3DInspectParams = {
+  documentId: "default",
+  dimensions: 3,
+  freezeLayout: false,
+  layerVisibility: {},
+  backgroundColor: "#0a0e26",
+
+  labelMaxWords: 5,
+  // Sans, heavy, with a dark stroke: the brief is "readable from the
+  // chair with glasses on", not "pretty up close".
+  fontFace: "system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif",
+  fontWeight: "700",
+  fontResolution: 120,
+  strokeWidth: 0.08,
+  strokeColor: "#05071a",
+  nodeSizeBy: "degree",
+  nodeTextHeightMin: 3.5,
+  nodeTextHeightMax: 16,
+  nodeSizeExponent: 1.4,
+  hyperedgeTextScale: 0.6,
+  hyperedgeLabel: "predicate",
+  nodeDefaultColor: "#dff6ff",
+  selectedColor: "#ff007f",
+
+  edgeLabels: "always",
+  edgeLabelTextHeight: 2.6,
+  edgeLabelOrientation: "along",
+  edgeColorBy: "category",
+  colorOverrides: {},
+  linkWidth: 0.8,
+  linkOpacity: 0.55,
+  arrowLength: 3.5,
+  curvature: 0.25,
+  showContainmentLinks: false,
+  particles: false,
+  particleCount: 2,
+  particleSpeed: 0.006,
+
+  hulls: true,
+  hullMode: "ellipsoid",
+  hullOpacity: 0.12,
+  hullPadding: 8,
+  hullRebuildEveryTicks: 2,
+
+  showLegend: false,
+  tooltipMaxAttrs: 12,
+  tooltipValueMaxLen: 80,
+  fitDuration: 600,
+  fitPadding: 60,
+  fitDelayMs: 800,
+  cooldownTicks: 200,
+  nodeThreshold: 5000,
+};
+
+interface FGLink {
+  source: string;
+  target: string;
+  text: string;
+  category?: EdgeCategory;
+  color: string;
+  width: number;
+  curvature: number;
+  rotation: number;
+  directed: boolean;
+  layer?: string;
+  label?: string;
+  role?: string;
+  attrs?: Record<string, unknown>;
+}
+
+interface FGNode {
+  id: string;
+  name: string;
+  kind?: GraphNode["kind"];
+  attrs?: Record<string, unknown>;
+  degree: number;
+  color: string;
+  x?: number;
+  y?: number;
+  z?: number;
+  fx?: number;
+  fy?: number;
+  fz?: number;
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function attrsToHtml(
+  attrs: Record<string, unknown> | undefined,
+  header: string,
+  maxAttrs: number,
+  maxLen: number,
+): string {
+  if (!attrs) return escapeHtml(header);
+  const rows = Object.entries(attrs)
+    .filter(([, v]) => v !== null && v !== undefined && v !== "")
+    .slice(0, maxAttrs)
+    .map(([k, v]) => {
+      const val = typeof v === "object" ? JSON.stringify(v) : String(v);
+      const truncated =
+        val.length > maxLen ? val.slice(0, maxLen - 3) + "..." : val;
+      return `<div><span style="opacity:0.6">${escapeHtml(k)}</span>: ${escapeHtml(truncated)}</div>`;
+    })
+    .join("");
+  return `<div><strong>${escapeHtml(header)}</strong>${rows}</div>`;
+}
+
+/** Fan out multi-edges between the same pair so each one is visible. */
+function fanOut(links: FGLink[], baseCurvature: number): void {
+  const groups = new Map<string, number[]>();
+  links.forEach((l, i) => {
+    const key = l.source < l.target ? `${l.source}|${l.target}` : `${l.target}|${l.source}`;
+    const arr = groups.get(key) ?? [];
+    arr.push(i);
+    groups.set(key, arr);
+  });
+  for (const indices of groups.values()) {
+    const n = indices.length;
+    indices.forEach((idx, i) => {
+      links[idx].curvature = n === 1 ? 0 : baseCurvature;
+      links[idx].rotation = n === 1 ? 0 : (i / n) * Math.PI * 2;
+    });
+  }
+}
+
+/** One live hull: the mesh in the scene plus the group it tracks. */
+interface HullHandle {
+  group: ContainmentGroup;
+  mesh: THREE.Mesh;
+  material: THREE.MeshBasicMaterial;
+}
+
+export default function JsonGraph3DInspectPanel(
+  props: IDockviewPanelProps<JsonGraph3DInspectParams>,
+) {
+  const params: JsonGraph3DInspectParams = {
+    ...jsonGraph3DInspectDefaults,
+    ...(props.params ?? {}),
+  };
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
+
+  const updateParam = <K extends keyof JsonGraph3DInspectParams>(
+    key: K,
+    value: JsonGraph3DInspectParams[K],
+  ) => {
+    props.api.updateParameters({ ...params, [key]: value });
+  };
+
+  const [activeDocId, setActiveDocId] = useState(params.documentId);
+  const [connected, setConnected] = useState(areGraphsConnected());
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  useEffect(() => onGraphsConnectionChange(setConnected), []);
+
+  useEffect(() => {
+    if (!connected) {
+      setActiveDocId(params.documentId);
+      return;
+    }
+    setActiveDocId(getActiveDocumentId());
+    return onActiveDocumentIdChange(setActiveDocId);
+  }, [connected, params.documentId]);
+
+  const doc = useJsonDoc(props.api, activeDocId);
+
+  const [bypassPerf, setBypassPerf] = useState(false);
+  const stats = doc === undefined ? null : getDocStats(doc);
+  const isGraph = stats?.isGraph ?? false;
+  const nodeCount = stats?.graphNodeCount ?? 0;
+  const perfBlocked = nodeCount > params.nodeThreshold && !bypassPerf;
+
+  const graph = useMemo<DetectedGraph | null>(() => {
+    if (doc === undefined || perfBlocked) return null;
+    return getDetectedGraph(doc);
+  }, [doc, perfBlocked]);
+
+  useEffect(() => {
+    const next = buildLayerVisibility(graph, params.layerVisibility);
+    if (JSON.stringify(next) !== JSON.stringify(params.layerVisibility)) {
+      updateParam("layerVisibility", next);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [graph]);
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const size = useElementSize(containerRef);
+  const prevFreezeRef = useRef(false);
+  const fgRef = useRef<ForceGraphMethods<FGNode, FGLink> | undefined>(undefined);
+
+  // Everything color/size-shaped is computed once per (graph, scheme) so
+  // the accessor functions handed to the renderer stay cheap and stable.
+  const overridesKey = JSON.stringify(params.colorOverrides);
+  const model = useMemo(() => {
+    if (!graph) {
+      return {
+        data: { nodes: [] as FGNode[], links: [] as FGLink[] },
+        groups: [] as ContainmentGroup[],
+        nodesById: new Map<string, FGNode>(),
+        maxDegree: 1,
+      };
+    }
+    const byId = new Map<string, GraphNode>(graph.nodes.map((n) => [n.id, n]));
+    const degrees = degreeMap(graph);
+    let maxDegree = 1;
+    for (const d of degrees.values()) maxDegree = Math.max(maxDegree, d);
+    const nodes: FGNode[] = graph.nodes.map((n) => ({
+      id: n.id,
+      name: n.label || n.id,
+      kind: n.kind,
+      attrs: n.attrs,
+      degree: degrees.get(n.id) ?? 0,
+      color: nodeColor(n, params.colorOverrides, params.nodeDefaultColor),
+    }));
+    const links: FGLink[] = graph.links.map((l) => {
+      const category = resolveLinkCategory(l, byId);
+      return {
+        source: l.source,
+        target: l.target,
+        text: linkInlineText(l),
+        category,
+        color: linkColor(l, category, params.edgeColorBy, params.colorOverrides),
+        width: params.linkWidth * (category ? CATEGORY_WIDTH[category] : 1),
+        curvature: 0,
+        rotation: 0,
+        directed: l.directed !== false,
+        layer: l.layer,
+        label: l.label,
+        role: l.role,
+        attrs: l.attrs,
+      };
+    });
+    fanOut(links, params.curvature);
+    return {
+      data: { nodes, links },
+      groups: containmentGroups(graph, byId),
+      nodesById: new Map(nodes.map((n) => [n.id, n])),
+      maxDegree,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [graph, overridesKey, params.edgeColorBy, params.linkWidth, params.curvature, params.nodeDefaultColor]);
+
+  const { data, groups, nodesById, maxDegree } = model;
+
+  // --- Node sprites -------------------------------------------------------
+  // Sprites are kept in a map so selection can recolor one sprite instead
+  // of rebuilding all of them. The accessor identity only changes when a
+  // text-shaping param changes (styleKey), which is when a rebuild is
+  // actually needed.
+  const spritesRef = useRef(new Map<string, SpriteText>());
+  const styleKey = [
+    params.labelMaxWords,
+    params.fontFace,
+    params.fontWeight,
+    params.fontResolution,
+    params.strokeWidth,
+    params.strokeColor,
+    params.nodeSizeBy,
+    params.nodeTextHeightMin,
+    params.nodeTextHeightMax,
+    params.nodeSizeExponent,
+    params.hyperedgeTextScale,
+    params.hyperedgeLabel,
+    maxDegree,
+  ].join("|");
+
+  const nodeThreeObject = useCallback(
+    (n: FGNode) => {
+      const p = paramsRef.current;
+      const isHyper = isRelationRow(n.kind);
+      if (isHyper && p.hyperedgeLabel === "dot") {
+        const dot = new THREE.Mesh(
+          new THREE.SphereGeometry(p.nodeTextHeightMin * 0.35, 10, 8),
+          new THREE.MeshBasicMaterial({ color: new THREE.Color(n.color) }),
+        );
+        spritesRef.current.delete(n.id);
+        return dot as unknown as THREE.Object3D;
+      }
+      let text = n.name;
+      if (isHyper && p.hyperedgeLabel === "predicate") {
+        const pred = n.attrs?.["i2t:predicate"];
+        if (typeof pred === "string" && pred) text = pred;
+      }
+      const sprite = new SpriteText(slug(text, p.labelMaxWords));
+      const t =
+        p.nodeSizeBy === "degree"
+          ? Math.pow(n.degree / Math.max(1, maxDegree), p.nodeSizeExponent)
+          : 0.5;
+      let height = p.nodeTextHeightMin + t * (p.nodeTextHeightMax - p.nodeTextHeightMin);
+      if (isHyper) height *= p.hyperedgeTextScale;
+      sprite.textHeight = height;
+      sprite.fontFace = p.fontFace;
+      sprite.fontWeight = p.fontWeight;
+      sprite.fontSize = p.fontResolution;
+      sprite.strokeWidth = p.strokeWidth;
+      sprite.strokeColor = p.strokeColor;
+      sprite.color = n.id === selectedNodeId ? p.selectedColor : n.color;
+      spritesRef.current.set(n.id, sprite);
+      return sprite as unknown as THREE.Object3D;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [styleKey],
+  );
+
+  // Selection: recolor in place.
+  const prevSelectedRef = useRef<string | null>(null);
+  useEffect(() => {
+    const p = paramsRef.current;
+    const prev = prevSelectedRef.current;
+    if (prev && prev !== selectedNodeId) {
+      const s = spritesRef.current.get(prev);
+      const n = nodesById.get(prev);
+      if (s && n) s.color = n.color;
+    }
+    if (selectedNodeId) {
+      const s = spritesRef.current.get(selectedNodeId);
+      if (s) s.color = p.selectedColor;
+    }
+    prevSelectedRef.current = selectedNodeId;
+  }, [selectedNodeId, nodesById]);
+
+  // --- Edge labels ----------------------------------------------------------
+  // "along" labels are orientable planes (text-plane.ts) hinged on the
+  // edge; "billboard" labels are SpriteText like json-graph3d. The plane
+  // objects are tracked so their textures get disposed on rebuild.
+  const showEdgeLabels = params.edgeLabels === "always";
+  const tooltipsEnabled = params.edgeLabels !== "never";
+  const edgeStyleKey = `${params.edgeLabelTextHeight}|${params.edgeLabelOrientation}|${params.fontFace}|${params.strokeWidth}|${params.strokeColor}|${params.fontResolution}`;
+  const planesRef = useRef(new Set<TextPlane>());
+  useEffect(() => {
+    const planes = planesRef.current;
+    return () => {
+      for (const pl of planes) pl.dispose();
+      planes.clear();
+    };
+  }, [edgeStyleKey, data]);
+
+  const linkThreeObject = useCallback(
+    (l: FGLink) => {
+      const p = paramsRef.current;
+      if (p.edgeLabelOrientation === "along") {
+        const plane = makeTextPlane(l.text, {
+          textHeight: p.edgeLabelTextHeight,
+          color: l.color,
+          fontFace: p.fontFace,
+          fontWeight: "600",
+          resolution: p.fontResolution,
+          strokeWidth: p.strokeWidth,
+          strokeColor: p.strokeColor,
+          padding: 0.15,
+        });
+        planesRef.current.add(plane);
+        // The loop below re-orients planes toward the camera between
+        // engine ticks; it needs the link to find the endpoints.
+        plane.mesh.userData.link = l;
+        return plane.mesh as unknown as THREE.Object3D;
+      }
+      const sprite = new SpriteText(l.text);
+      sprite.color = l.color;
+      sprite.textHeight = p.edgeLabelTextHeight;
+      sprite.fontFace = p.fontFace;
+      sprite.fontWeight = "600";
+      sprite.fontSize = p.fontResolution;
+      sprite.strokeWidth = p.strokeWidth;
+      sprite.strokeColor = p.strokeColor;
+      sprite.backgroundColor = "rgba(10, 14, 38, 0.55)";
+      sprite.padding = 1;
+      sprite.borderRadius = 1.5;
+      return sprite as unknown as THREE.Object3D;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [edgeStyleKey],
+  );
+  const _start = useRef(new THREE.Vector3()).current;
+  const _end = useRef(new THREE.Vector3()).current;
+
+  /** Re-hinge every along-edge label toward the current camera. After the
+   *  sim cools, linkPositionUpdate stops firing, but the user keeps
+   *  orbiting — without this the labels drift edge-on or mirrored. */
+  const reorientEdgeLabels = useCallback(() => {
+    const fg = fgRef.current;
+    if (!fg || paramsRef.current.edgeLabelOrientation !== "along") return;
+    const camera = fg.camera();
+    for (const pl of planesRef.current) {
+      const m = pl.mesh;
+      if (!m.visible || !m.parent) continue;
+      const l = m.userData.link as { source: unknown; target: unknown } | undefined;
+      if (!l) continue;
+      const s = l.source as { x?: number; y?: number; z?: number };
+      const t = l.target as { x?: number; y?: number; z?: number };
+      if (typeof s !== "object" || typeof t !== "object" || s.x === undefined || t.x === undefined) continue;
+      _start.set(s.x, s.y ?? 0, s.z ?? 0);
+      _end.set(t.x, t.y ?? 0, t.z ?? 0);
+      orientAlong(m, _start, _end, camera);
+    }
+  }, [_start, _end]);
+
+  // --- Containment hulls --------------------------------------------------
+  // Hulls are refit from a rAF loop owned by this panel, NOT from engine
+  // ticks: the force sim cools down and stops ticking, and anything that
+  // rebuilt the meshes after that (a resize, a param change) left them
+  // invisible until the next reheat. The loop is cheap (a dozen groups)
+  // and makes the hulls independent of simulation state. Meshes also skip
+  // frustum culling and depth testing so a zoomed-in camera or a sprite
+  // writing depth can never hide a background blob.
+  const hullsRef = useRef<HullHandle[]>([]);
+  const tickRef = useRef(0);
+  const [graphReady, setGraphReady] = useState(0);
+
+  useEffect(() => {
+    const fg = fgRef.current;
+    if (!fg || perfBlocked) return;
+    const scene = fg.scene();
+    const handles: HullHandle[] = [];
+    if (params.hulls) {
+      for (const group of groups) {
+        const container = group.containerId ? nodesById.get(group.containerId) : undefined;
+        const color = new THREE.Color(container?.color ?? CATEGORY_TOKENS.containment.color);
+        const material = new THREE.MeshBasicMaterial({
+          color,
+          transparent: true,
+          opacity: params.hullOpacity,
+          depthWrite: false,
+          depthTest: false,
+          side: THREE.DoubleSide,
+        });
+        const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 18), material);
+        mesh.visible = false;
+        mesh.frustumCulled = false;
+        mesh.renderOrder = -1;
+        scene.add(mesh);
+        handles.push({ group, mesh, material });
+      }
+    }
+    hullsRef.current = handles;
+    tickRef.current = 0;
+    return () => {
+      for (const h of handles) {
+        scene.remove(h.mesh);
+        h.mesh.geometry.dispose();
+        h.material.dispose();
+      }
+      hullsRef.current = [];
+    };
+  }, [groups, nodesById, params.hulls, params.hullOpacity, params.hullMode, perfBlocked, graphReady]);
+
+  const updateHulls = useCallback(() => {
+    const p = paramsRef.current;
+    const handles = hullsRef.current;
+    if (handles.length === 0) return;
+    tickRef.current += 1;
+    if (tickRef.current % Math.max(1, p.hullRebuildEveryTicks) !== 0) return;
+    const pad = p.hullPadding;
+    for (const h of handles) {
+      const pts: THREE.Vector3[] = [];
+      for (const id of h.group.participantIds) {
+        const n = nodesById.get(id);
+        if (n && n.x !== undefined && n.y !== undefined) {
+          pts.push(new THREE.Vector3(n.x, n.y, n.z ?? 0));
+        }
+      }
+      if (pts.length === 0) {
+        h.mesh.visible = false;
+        continue;
+      }
+      h.mesh.visible = true;
+      const convexOk = p.hullMode === "convex" && pts.length >= 4 && p.dimensions === 3;
+      if (convexOk) {
+        // Pad each point outward from the centroid so the hull clears the
+        // labels, then let ConvexGeometry do the wrapping.
+        const c = pts.reduce((a, v) => a.add(v), new THREE.Vector3()).multiplyScalar(1 / pts.length);
+        const padded: THREE.Vector3[] = [];
+        for (const v of pts) {
+          const dir = v.clone().sub(c);
+          if (dir.lengthSq() < 1e-6) dir.set(1, 0, 0);
+          dir.normalize();
+          // Six jittered copies per point give the hull some roundness
+          // instead of a hard polytope through label centers.
+          for (const o of [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]) {
+            padded.push(v.clone().add(new THREE.Vector3(o[0], o[1], o[2]).multiplyScalar(pad)));
+          }
+          padded.push(v.clone().add(dir.multiplyScalar(pad * 1.4)));
+        }
+        try {
+          const geom = new ConvexGeometry(padded);
+          h.mesh.geometry.dispose();
+          h.mesh.geometry = geom;
+          h.mesh.position.set(0, 0, 0);
+          h.mesh.scale.set(1, 1, 1);
+          continue;
+        } catch {
+          // Degenerate (coplanar) input — fall through to the ellipsoid.
+        }
+      }
+      if (!(h.mesh.geometry instanceof THREE.SphereGeometry)) {
+        h.mesh.geometry.dispose();
+        h.mesh.geometry = new THREE.SphereGeometry(1, 28, 18);
+      }
+      const min = new THREE.Vector3(Infinity, Infinity, Infinity);
+      const max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
+      for (const v of pts) {
+        min.min(v);
+        max.max(v);
+      }
+      const center = min.clone().add(max).multiplyScalar(0.5);
+      const radii = max.clone().sub(min).multiplyScalar(0.5).addScalar(pad);
+      if (p.dimensions === 2) radii.z = pad * 0.25;
+      h.mesh.position.copy(center);
+      h.mesh.scale.copy(radii);
+    }
+  }, [nodesById]);
+
+  // The refit loop. Runs while the panel is mounted and a graph is shown;
+  // first frame also flips the "graph is live" flag so the hull effect
+  // above can attach to a scene that now exists (fgRef is unset on the
+  // very first render, when that effect first runs).
+  useEffect(() => {
+    if (!isGraph || perfBlocked) return;
+    let raf = 0;
+    let announced = false;
+    const loop = () => {
+      if (!announced && fgRef.current) {
+        announced = true;
+        setGraphReady((v) => v + 1);
+      }
+      updateHulls();
+      reorientEdgeLabels();
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [isGraph, perfBlocked, updateHulls, reorientEdgeLabels]);
+
+  // --- Camera / freeze / sync ---------------------------------------------
+  useEffect(() => {
+    if (!fgRef.current || perfBlocked) return;
+    const t = setTimeout(
+      () => fgRef.current?.zoomToFit(params.fitDuration, params.fitPadding),
+      params.fitDelayMs,
+    );
+    return () => clearTimeout(t);
+  }, [data, perfBlocked, params.fitDuration, params.fitPadding, params.fitDelayMs]);
+
+  useEffect(() => {
+    if (perfBlocked) return;
+    if (params.freezeLayout) {
+      for (const n of data.nodes) {
+        n.fx = n.x;
+        n.fy = n.y;
+        n.fz = n.z;
+      }
+    } else {
+      for (const n of data.nodes) {
+        n.fx = undefined;
+        n.fy = undefined;
+        n.fz = undefined;
+      }
+      // Reheat only when freeze is released. Reheating on every data swap
+      // flips the library's engineRunning on before its (deferred) update has
+      // built `layout`, so layoutTick reads `undefined.tick`.
+      if (prevFreezeRef.current) fgRef.current?.d3ReheatSimulation();
+    }
+    prevFreezeRef.current = params.freezeLayout;
+  }, [params.freezeLayout, data, perfBlocked]);
+
+  useEffect(() => {
+    const unsubSelection = onNodeSelectionBroadcast((event) => {
+      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) return;
+      setSelectedNodeId(event.nodeId);
+    });
+    const unsubFocus = onNodeFocusBroadcast((event) => {
+      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) return;
+      const target = nodesById.get(event.nodeId);
+      if (target && target.x !== undefined && target.y !== undefined && fgRef.current) {
+        const { x, y } = target;
+        const z = target.z ?? 0;
+        const distRatio = 1 + 80 / Math.max(1e-6, Math.hypot(x, y, z));
+        fgRef.current.cameraPosition(
+          { x: x * distRatio, y: y * distRatio, z: z * distRatio },
+          { x, y, z },
+          1000,
+        );
+      }
+    });
+    return () => {
+      unsubSelection();
+      unsubFocus();
+    };
+  }, [activeDocId, nodesById, props.api.id]);
+
+  const resetView = () => fgRef.current?.zoomToFit(params.fitDuration, params.fitPadding);
+
+  // Header-action "fit" dispatches to the hidden toolbar's action.
+  const menuRef = useRef<(id: string) => void>(() => {});
+  menuRef.current = (id) => {
+    if (id === "fit") resetView();
+  };
+  useEffect(() => onPanelMenu(props.api.id, (id) => menuRef.current(id)), [props.api.id]);
+
+  const linkVisible = (l: FGLink) => {
+    if (l.layer && params.layerVisibility[l.layer] === false) return false;
+    if (l.category === "containment" && !params.showContainmentLinks) return false;
+    return true;
+  };
+
+  return (
+    <>
+      <div className="panel-header json-graph3d-inspect-header">
+        <Toolbar className="json-graph3d-inspect-controls" label="3D-Inspect view controls">
+          <ToolbarGroup label="view" title="Lay the graph out flat or in depth">
+            <Segmented<2 | 3>
+              label="Layout dimensions"
+              value={params.dimensions}
+              onChange={(v) => updateParam("dimensions", v)}
+              options={[
+                { value: 2, label: "2D", title: "Lay the graph out flat on one plane" },
+                { value: 3, label: "3D", title: "Lay the graph out in depth; drag to orbit" },
+              ]}
+            />
+          </ToolbarGroup>
+
+          <ToolbarGroup label="edge labels" title="When the text on a connection is shown">
+            <Segmented<InspectLabelMode>
+              label="Edge label visibility"
+              value={params.edgeLabels}
+              onChange={(v) => updateParam("edgeLabels", v)}
+              options={[
+                { value: "always", label: "always", title: "Show the text on every connection" },
+                { value: "hover", label: "hover", title: "Show a connection's text only while the pointer is over it" },
+                { value: "never", label: "never", title: "Hide all text on connections" },
+              ]}
+            />
+            <Segmented<EdgeLabelOrientation>
+              label="Edge label orientation"
+              value={params.edgeLabelOrientation}
+              onChange={(v) => updateParam("edgeLabelOrientation", v)}
+              options={[
+                { value: "along", label: "along", icon: "⟶", title: "Lay the text along the line of the connection" },
+                { value: "billboard", label: "face", icon: "◱", title: "Turn the text to always face you" },
+              ]}
+            />
+          </ToolbarGroup>
+
+          <ToolbarGroup label="node size" title="What decides how big a node's name is drawn">
+            <Segmented<NodeSizeBy>
+              label="Node size"
+              value={params.nodeSizeBy}
+              onChange={(v) => updateParam("nodeSizeBy", v)}
+              options={[
+                { value: "uniform", label: "same", icon: "●", title: "Every node is drawn the same size" },
+                { value: "degree", label: "by links", icon: "⬤", title: "Bigger nodes have more connections" },
+              ]}
+            />
+          </ToolbarGroup>
+
+          <ToolbarGroup label="edge color" title="What decides the color of a connection">
+            <Segmented<EdgeColorBy>
+              label="Edge color"
+              value={params.edgeColorBy}
+              onChange={(v) => updateParam("edgeColorBy", v)}
+              options={[
+                {
+                  value: "category",
+                  label: "category",
+                  icon: (
+                    <span className="json-graph3d-inspect-cat-dots">
+                      {CATEGORY_ORDER.map((c) => (
+                        <span
+                          key={c}
+                          style={{ background: params.colorOverrides[`category:${c}`] ?? CATEGORY_TOKENS[c].color }}
+                        />
+                      ))}
+                    </span>
+                  ),
+                  title: "Color each connection by its kind: containment, state change, interactivity, reference",
+                },
+                { value: "layer", label: "layer", title: "Color each connection by the layer it belongs to" },
+                { value: "predicate", label: "verb", title: "Color each connection by its predicate (the verb that links the two nodes)" },
+              ]}
+            />
+          </ToolbarGroup>
+
+          <ToolbarGroup label="containment" title="How groups of contained nodes are drawn">
+            <Toggle
+              label="hulls"
+              checked={params.hulls}
+              onChange={(v) => updateParam("hulls", v)}
+              title="Draw a see-through shell around each group of nodes that belong together"
+            />
+            <Segmented<HullMode>
+              label="Hull shape"
+              value={params.hullMode}
+              onChange={(v) => updateParam("hullMode", v)}
+              disabled={!params.hulls}
+              options={[
+                { value: "ellipsoid", label: "blob", icon: "◯", title: "Round, soft shell around the group" },
+                { value: "convex", label: "convex", icon: "⬡", title: "Tight shell that hugs the outermost nodes" },
+              ]}
+            />
+            <Toggle
+              label="lines"
+              checked={params.showContainmentLinks}
+              onChange={(v) => updateParam("showContainmentLinks", v)}
+              title="Also draw the lines from a container to each thing inside it (off by default: the shell already shows this)"
+            />
+          </ToolbarGroup>
+
+          <ToolbarGroup label="relations" title="How a relation that joins several nodes is drawn">
+            <Segmented<HyperedgeLabel>
+              label="Relation node style"
+              value={params.hyperedgeLabel}
+              onChange={(v) => updateParam("hyperedgeLabel", v)}
+              options={[
+                { value: "predicate", label: "verb", title: "Show the relation's verb as text" },
+                { value: "dot", label: "dot", icon: "•", title: "Show the relation as a small junction dot" },
+                { value: "id", label: "id", title: "Show the relation's raw id" },
+              ]}
+            />
+          </ToolbarGroup>
+
+          <ToolbarGroup label="layout" title="Physics and overlays">
+            <Toggle
+              label="freeze"
+              checked={params.freezeLayout}
+              onChange={(v) => updateParam("freezeLayout", v)}
+              title="Stop the nodes from moving; turn off to let them settle again"
+            />
+            <Toggle
+              label="legend"
+              checked={params.showLegend}
+              onChange={(v) => updateParam("showLegend", v)}
+              title="Show the color key for connection kinds in the corner"
+            />
+            <button onClick={resetView} title="Zoom and center so the whole graph fits in view" className="json-graph3d-inspect-reset-btn">
+              ⤢
+            </button>
+          </ToolbarGroup>
+        </Toolbar>
+      </div>
+      <div className="panel-body json-graph3d-inspect-body" ref={containerRef}>
+        {!isGraph && (
+          <div className="json-graph3d-inspect-empty">
+            {doc === undefined ? "Waiting for JSON…" : "No graph structure detected in this JSON."}
+          </div>
+        )}
+        {isGraph && perfBlocked && (
+          <div className="json-graph3d-inspect-perf-warning">
+            <p>
+              <strong>{nodeCount.toLocaleString()}</strong> nodes detected (threshold{" "}
+              {params.nodeThreshold.toLocaleString()}). Text sprites per node are heavy.
+            </p>
+            <button onClick={() => setBypassPerf(true)}>Render anyway</button>
+          </div>
+        )}
+        {isGraph && !perfBlocked && params.showLegend && (
+          <div className="json-graph3d-inspect-legend">
+            {CATEGORY_ORDER.map((c) => (
+              <span key={c} style={{ color: params.colorOverrides[`category:${c}`] ?? CATEGORY_TOKENS[c].color }}>
+                {c === "containment" ? "◌" : "—"} {CATEGORY_TOKENS[c].label}
+              </span>
+            ))}
+          </div>
+        )}
+        {isGraph && !perfBlocked && size.width > 0 && size.height > 0 && (
+          <ForceGraph3D<FGNode, FGLink>
+            key={activeDocId}
+            ref={fgRef}
+            graphData={data}
+            width={size.width}
+            height={size.height}
+            numDimensions={params.dimensions}
+            backgroundColor={params.backgroundColor}
+            showNavInfo={false}
+            nodeThreeObject={nodeThreeObject}
+            nodeThreeObjectExtend={false}
+            nodeVal={(n) => 1 + (params.nodeSizeBy === "degree" ? n.degree : 0)}
+            onNodeHover={(node) => {
+              if (areGraphsConnected()) {
+                broadcastNodeSelection(activeDocId, node ? node.id : null, props.api.id, node ? node.name : undefined);
+              }
+              setSelectedNodeId(node ? node.id : null);
+            }}
+            onNodeClick={(node) => {
+              if (node && areGraphsConnected()) broadcastNodeFocus(activeDocId, node.id, props.api.id);
+            }}
+            nodeLabel={(n) =>
+              attrsToHtml(n.attrs, n.name, params.tooltipMaxAttrs, params.tooltipValueMaxLen)
+            }
+            linkColor={(l) => l.color}
+            linkOpacity={params.linkOpacity}
+            linkWidth={(l) => l.width}
+            linkVisibility={linkVisible}
+            linkCurvature={(l) => l.curvature}
+            linkCurveRotation={(l) => l.rotation}
+            linkDirectionalArrowLength={(l) =>
+              l.directed && l.category !== "containment" ? params.arrowLength : 0
+            }
+            linkDirectionalArrowRelPos={1}
+            linkDirectionalArrowColor={(l) => l.color}
+            linkDirectionalParticles={(l) =>
+              params.particles && !params.freezeLayout && linkVisible(l) && l.category === "state_change"
+                ? params.particleCount
+                : 0
+            }
+            linkDirectionalParticleSpeed={params.particleSpeed}
+            linkDirectionalParticleColor={(l) => l.color}
+            linkLabel={
+              tooltipsEnabled
+                ? (l) =>
+                    attrsToHtml(
+                      l.attrs,
+                      [l.label, l.role ? `(${l.role})` : ""].filter(Boolean).join(" ") || l.text,
+                      params.tooltipMaxAttrs,
+                      params.tooltipValueMaxLen,
+                    )
+                : () => ""
+            }
+            linkThreeObjectExtend={showEdgeLabels}
+            linkThreeObject={showEdgeLabels ? linkThreeObject : undefined}
+            linkPositionUpdate={
+              showEdgeLabels
+                ? (obj, { start, end }, link) => {
+                    const l = link as unknown as FGLink;
+                    const o = obj as unknown as THREE.Object3D;
+                    if (!linkVisible(l) || l.text.length === 0) {
+                      o.visible = false;
+                      return;
+                    }
+                    o.visible = true;
+                    if (paramsRef.current.edgeLabelOrientation === "along" && fgRef.current) {
+                      _start.set(start.x, start.y, start.z);
+                      _end.set(end.x, end.y, end.z);
+                      orientAlong(o, _start, _end, fgRef.current.camera());
+                    } else {
+                      o.position.set(
+                        start.x + (end.x - start.x) / 2,
+                        start.y + (end.y - start.y) / 2,
+                        start.z + (end.z - start.z) / 2,
+                      );
+                    }
+                  }
+                : undefined
+            }
+            cooldownTicks={params.cooldownTicks}
+            warmupTicks={0}
+          />
+        )}
+      </div>
+    </>
+  );
+}
