@@ -22,12 +22,14 @@ Full stack details and caveats live in [README.md](README.md). Don't duplicate t
 
 ## How to run
 
+**v2.0.0-beta is web-only.** Run the Vite dev server; it listens on port 1420 on all interfaces (LAN and Tailscale), so verify in a browser at http://localhost:1420 or http://<this machine's IP>:1420.
+
 ```
 npm install
-npm run tauri dev
+npm run dev
 ```
 
-First Rust build is 5–15 min; subsequent runs are fast.
+The Tauri desktop shell (`npm run tauri dev`, first Rust build 5–15 min) is **not tested for this version**: on Harold's Mac it crashed the window server, and fixing that is deferred. Do not launch it to verify changes. The next integration after the web build is an Obsidian plugin (not yet designed).
 
 ## Current shape
 

@@ -107,7 +107,9 @@ export default defineConfig(async () => ({
   server: {
     port: 1420,
     strictPort: true,
-    host: host || false,
+    // Serve on all interfaces by default so the page is reachable over LAN and Tailscale
+    // (Harold, 2026-10-22). TAURI_DEV_HOST still wins when Tauri sets it.
+    host: host || true,
     hmr: host
       ? {
           protocol: "ws",

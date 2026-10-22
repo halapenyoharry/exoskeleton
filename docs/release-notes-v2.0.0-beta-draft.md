@@ -1,6 +1,6 @@
-# Exoskeleton v1.1.0 — Dockview 8, the document edge, and a web build
+# Exoskeleton v2.0.0-beta — Dockview 8, the document edge, and a web build
 
-Since v1.0.0 (2026-07-29) the app went from a desktop-only Tauri workspace to a web-first one that also builds for Tauri: it ships to exo-skeleton.org as a PWA, works on a phone, and keeps the desktop grid intact. The JSON document moved out of the grid into a left edge group that also holds Settings and the menu, and every panel's controls are now rendered with Dockview primitives (Paneview panes, a nested Dockview for control tabs, header actions) instead of custom chrome. Seven panels were added: text-viewer, topology-extract, json-graph3d-inspect, json-attention, and the five-panel procedural-visuals suite (control, manifold, balls, fountain, recursive). A bundled library of twelve graph documents, including two books, ships with the app. Dockview was upgraded from 6.0.5 to 8.6.0 and the package version now reads 1.1.0 (it was still 0.1.0 under the v1.0.0 tag).
+Since v1.0.0 (2026-07-29) the app went from a desktop-only Tauri workspace to a web-first one that also builds for Tauri: it ships to exo-skeleton.org as a PWA, works on a phone, and keeps the desktop grid intact. The JSON document moved out of the grid into a left edge group that also holds Settings and the menu, and every panel's controls are now rendered with Dockview primitives (Paneview panes, a nested Dockview for control tabs, header actions) instead of custom chrome. Seven panels were added: text-viewer, topology-extract, json-graph3d-inspect, json-attention, and the five-panel procedural-visuals suite (control, manifold, balls, fountain, recursive). A bundled library of twelve graph documents, including two books, ships with the app. Dockview was upgraded from 6.0.5 to 8.6.0 and the package version now reads 2.0.0-beta (it was still 0.1.0 under the v1.0.0 tag).
 
 ## Highlights
 
@@ -79,7 +79,7 @@ Since v1.0.0 (2026-07-29) the app went from a desktop-only Tauri workspace to a 
 - Deck mode left the status-bar header visible after restoring the grid (ab242b5).
 - Reified `edge-as-node` rows drew as category-less entities in 3D-Inspect and json-dyadic (ddb51be).
 - Unmount promise rejections in the OSC panels; animation state scoped per instance (b91ec7a).
-- Package, lockfile, `tauri.conf.json` and `Cargo.toml` versions were 0.1.0 under the v1.0.0 tag; now 1.1.0 (f39e967).
+- Package, lockfile, `tauri.conf.json` and `Cargo.toml` versions were 0.1.0 under the v1.0.0 tag; now 2.0.0-beta (f39e967 and the release commit).
 
 ## Breaking or migration notes
 

@@ -1,6 +1,6 @@
 [package]
 name = "exoskeleton"
-version = "1.1.0"
+version = "2.0.0-beta"
 description = "Exoskeleton — integrated workspace (terminal, web viewport, markdown editor)"
 authors = ["Harold Tajchman <halapenyoharry@gmail.com>"]
 license = "AGPL-3.0-or-later"
