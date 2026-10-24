@@ -331,33 +331,31 @@ State is always a delta on top of schema. Forking the schema (adding a panel) do
 | [src-tauri/Cargo.toml](src-tauri/Cargo.toml) | what system powers the app has |
 | `~/Library/Application Support/dev.harold.exoskeleton/exoskeleton.json` | the current user state on disk |
 
-### The side-grid
+### The document edge (left) and Settings & Menu
 
-Beyond the main grid, Exoskeleton has a **side-grid** — a separate Dockview instance that lives on the left side of the window. Toggleable with **⌘B** (or **Ctrl+B**). Hidden by default.
+Beyond the main grid, Exoskeleton places the document being worked on, the Settings pane, and the Exo-skeleton menu in a **left edge group**. Toggleable with **⌘J** (for the document), **⌘B** (for settings), or by clicking the collapsed vertical strip.
 
-The side-grid is where *controls* live — things that operate *on* the workspace rather than being content of it. Today it holds one panel: a raw JSON editor showing the current app state. Tomorrow it can hold themes, command palettes, debug logs, anything you'd typically put in a sidebar.
+The document (`json-edit`) is not a grid pane — it is the document plugged into the workspace. On desktop, it opens alongside the grid; on phones (≤600px), it acts as a full-width sheet over the grid. Settings and the Menu are tabs grouped alongside it in this same left edge.
 
-The main grid and the side-grid are **peers**: two independent Dockview instances in the same window. They have their own state, their own drag-and-drop scope (you can't drag a tab across the boundary), and their own visibility. They share the same persistence file under separate keys.
-
-The side-grid lives in [src/sidegrid/](src/sidegrid/) — `SideGrid.tsx` is the mini-Dockview wrapper, `SettingsPanel.tsx` is the JSON editor inside it.
+The edge group's state (open/collapsed size and active tab) persists as part of the grid layout. `migrateSavedLayout` automatically moves any legacy settings side-grid or grid-placed `json-edit` into the edge group.
 
 ### Chrome customization
 
-Dockview has five places where you can replace the default rendering:
+Exoskeleton uses Dockview 8.6 primitives for its panel chrome and controls, rather than custom wrappers.
 
-| Slot | What it controls | Where in this codebase |
+| Slot / Component | What it controls | Where in this codebase |
 | --- | --- | --- |
-| `defaultTabComponent` | What a tab looks like | [ColoredTab.tsx](src/ColoredTab.tsx) — glyph + accent color via CSS variable |
-| `watermarkComponent` | What's shown when the grid is empty | [Watermark.tsx](src/Watermark.tsx) for main, [SideGridWatermark.tsx](src/sidegrid/SideGridWatermark.tsx) for side |
-| `prefixHeaderActionsComponent` | The bar *before* the tabs | [HeaderActions.tsx](src/HeaderActions.tsx) — a glowing accent dot |
-| `leftHeaderActionsComponent` | The bar *after* the tabs, on the left | [HeaderActions.tsx](src/HeaderActions.tsx) — `+` button that adds a tab of the same kind |
-| `rightHeaderActionsComponent` | The bar on the right of the header | [HeaderActions.tsx](src/HeaderActions.tsx) — `⤴` popout + `⨯` close-group |
+| `ColoredTab` | The default tab (glyph + accent stripe) | [src/ColoredTab.tsx](src/ColoredTab.tsx) |
+| `Watermark` | What's shown when the workspace is empty | [src/Watermark.tsx](src/Watermark.tsx) |
+| `LeftHeaderActions` | The ≡ menu and action buttons (e.g. fit/reset), and a "Show controls" button (placeholder pending the owner's naming) | [src/HeaderActions.tsx](src/HeaderActions.tsx) |
+| `RightHeaderActions` | The bar on the right of the header (`+`, `⤴`, `⨯`) | [src/HeaderActions.tsx](src/HeaderActions.tsx) |
+| `PanelPanes` | The declared controls area above a panel's content | [src/PanelPanes.tsx](src/PanelPanes.tsx) |
 
-There's no single `headerComponent` slot in Dockview. A fully custom header is built by composing the four slots above with custom `tabComponents`.
+**Controls as Panes**: Rather than custom pull-down drawers or toolbars, panels declare their controls via `manifest.panes`. `PanelPanes.tsx` renders them using a vertical Dockview `Splitview`. The top cell is a `Paneview` containing a "Controls" pane (placeholder pending the owner's naming), whose body is a nested locked Dockview instance displaying one tab per declared control set. The nested Dockview includes a "Pane" tab (placeholder pending the owner's naming) for window/move/follow/accent/about settings. Control sets for `json-edit` and `editor` are "Document" and "File" (placeholders pending the owner's naming), respectively.
 
 ### Persistence
 
-State is saved automatically. Every time a panel is dragged/closed/resized, the active panel changes, a panel's parameters change, or the side-grid visibility flips, Exoskeleton debounces 400ms and writes to:
+State is saved automatically. Every time a panel is dragged/closed/resized, the active panel changes, a panel's parameters change, or the edge group visibility flips, Exoskeleton debounces 400ms and writes to:
 
 ```
 ~/Library/Application Support/dev.harold.exoskeleton/exoskeleton.json
