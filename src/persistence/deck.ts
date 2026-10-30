@@ -6,8 +6,8 @@
 
 import type { SerializedDockview } from "dockview-react";
 
-/** Deck mode applies at or below this width (web runtime only). */
-export const DECK_QUERY = "(max-width: 600px)";
+/** Phone mode applies on narrow viewports or coarse-pointer screens held sideways (web runtime only). */
+export const DECK_QUERY = "(max-width: 600px), (pointer: coarse) and (max-height: 500px)";
 
 /** Panels that live in edge groups / transient UI; never part of the deck's tab set. */
 const NON_DECK_IDS = new Set(["status-bar", "settings", "menu"]);

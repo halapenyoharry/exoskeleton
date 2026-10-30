@@ -38,6 +38,7 @@ import {
   applyWorkspaceState,
   buildDefaultLayout,
   buildPreset,
+  ensureStatusBar,
   migrateLayout,
   migrateSavedLayout,
   repairLayout,
@@ -302,13 +303,8 @@ export default function App() {
   /** The status bar is restored by fromJSON with a visible header; (re)hide it,
    *  or mount it if the saved grid lacked one. */
   function ensureStatusBarChrome(api: DockviewApi) {
-    const sb = api.getPanel("status-bar");
-    if (!sb) {
-      mountStatusBar(api);
-      return;
-    }
-    sb.group.header.hidden = true;
-    setIsStatusBarVisible(true);
+    ensureStatusBar(api);
+    setIsStatusBarVisible(!!api.getPanel("status-bar"));
   }
 
   /** Width crossed the threshold: swap grid <-> deck, never flattening the grid. */
@@ -420,26 +416,8 @@ export default function App() {
   }
 
   function mountStatusBar(api: DockviewApi) {
-    let bottom = api.getEdgeGroup("bottom");
-    if (!bottom) {
-      bottom = api.addEdgeGroup("bottom", {
-        id: "status-bar-group",
-        initialSize: 40,
-        minimumSize: 40,
-      });
-    }
-    let panel = api.getPanel("status-bar");
-    if (!panel) {
-      panel = api.addPanel({
-        id: "status-bar",
-        component: "status-bar-panel",
-        position: { referenceGroup: bottom.id },
-      });
-    }
-    if (panel) {
-      panel.group.header.hidden = true;
-    }
-    setIsStatusBarVisible(true);
+    ensureStatusBar(api);
+    setIsStatusBarVisible(!!api.getPanel("status-bar"));
   }
 
   // Cmd+B: the settings tab in the document edge (left). Open it, or
@@ -608,9 +586,11 @@ export default function App() {
           event.api.removeEdgeGroup("bottom");
         }
       }
+      if (deckModeRef.current) {
+        hideStatusBarInDeck(event.api);
+        collapseDeck(event.api);
+      }
       setIsStatusBarVisible(!!event.api.getPanel("status-bar"));
-
-      if (deckModeRef.current) collapseDeck(event.api);
       save();
     });
     event.api.onDidActivePanelChange((e) => {
@@ -780,7 +760,7 @@ export default function App() {
       if (!api) return;
       if (
         window.confirm(
-          `Reset layout to default (${presets.find((p) => p.id === defaultPresetId())?.name ?? "Minimal"})? Any unsaved panel position changes will be cleared.`,
+          `Reset layout to default (${presets.find((p) => p.id === defaultPresetId())?.name ?? "Blank Canvas"})? Any unsaved panel position changes will be cleared.`,
         )
       ) {
         api.clear();
@@ -799,7 +779,10 @@ export default function App() {
           appStateRef.current = clean;
           setAppState(clean);
           applyWs(api, clean.workspaces[ws.id], clean.version);
+        } else {
+          ensureStatusBarChrome(api);
         }
+        closeMenu();
       }
     },
     closeMenu,

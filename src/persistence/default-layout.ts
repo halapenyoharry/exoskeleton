@@ -12,16 +12,28 @@ import type {
 // This is the SCHEMA's idea of "what panels exist and how they're arranged."
 // State (the JSON saved between sessions) is a delta on top of this.
 
-import { defaultPresetId, isWebRuntime, presets, resolvePresetPanelIds } from "./presets.ts";
+import {
+   hostHasCapabilities,
+  type CapabilityId,
+} from "../panel-manifest.ts";
+import {
+  defaultPresetId,
+  isWebRuntime,
+  presets,
+  resolvePresetPanelIds,
+  resolvePresetPlacements,
+  shouldSeedPresetDocument,
+} from "./presets.ts";
 import { CURRENT_VERSION } from "./storage.ts";
 import {
   DOCUMENT_PANEL_ID,
   ensureDocumentEdge,
+  ensureEdgeTabs,
   isPhoneWidth,
   migrateEdgeLayout,
   openDocument,
   precreateEdgeGroups,
-  ensureEdgeTabs,
+  syncDocumentEdgeHeader,
 } from "./document-edge.ts";
 
 export const DEFAULT_WEBVIEW_URL = "https://dockview.dev";
@@ -32,10 +44,11 @@ export const DEFAULT_WEBVIEW_URL = "https://dockview.dev";
  *  `companions` names panel ids that should exist for this panel to be
  *  useful (e.g. the json viewers read from json-edit via the json-bus);
  *  every add path creates missing companions alongside. Mirrors
- *  PanelManifest.companions. */
+ *  PanelManifest.companions and PanelManifest.capabilities. */
 export type RegistryEntry = AddPanelOptions & {
   introducedAt: number;
   companions?: string[];
+  capabilities?: CapabilityId[];
   autoAdd?: boolean;
 };
 
@@ -50,6 +63,7 @@ export const panelRegistry: RegistryEntry[] = [
     component: "editor",
     title: "editor",
     introducedAt: 1,
+    capabilities: ["fs"],
   },
   {
     id: "webview",
@@ -65,6 +79,7 @@ export const panelRegistry: RegistryEntry[] = [
     title: "terminal",
     position: { referencePanel: "editor", direction: "below" },
     introducedAt: 1,
+    capabilities: ["pty"],
   },
   {
     id: "text-viewer",
@@ -85,14 +100,14 @@ export const panelRegistry: RegistryEntry[] = [
     id: "piano",
     component: "piano",
     title: "piano",
-    position: { referencePanel: "terminal", direction: "within" },
+    position: { referencePanel: "tempo-clock", direction: "within" },
     introducedAt: 4,
   },
   {
     id: "scope",
     component: "scope",
     title: "scope",
-    position: { referencePanel: "terminal", direction: "within" },
+    position: { referencePanel: "tempo-clock", direction: "within" },
     introducedAt: 4,
   },
   // v5 — JSON visualizer suite. The six viewer panels group into one tab
@@ -114,7 +129,7 @@ export const panelRegistry: RegistryEntry[] = [
     id: "json-tree",
     component: "json-tree",
     title: "tree",
-    position: { referencePanel: "terminal", direction: "right" },
+    position: { referencePanel: "tempo-clock", direction: "right" },
     introducedAt: 5,
     companions: ["json-edit"],
   },
@@ -185,7 +200,7 @@ export const panelRegistry: RegistryEntry[] = [
   // v9 — topology-extract: ingestion furnace for the info2topo pipeline.
   // Takes source text, runs AI extraction, and pushes normalized-dyadic
   // topology JSON to the json-bus where json-dyadic and other viewers
-  // consume it. Not in the minimal preset; appears in json-lab.
+  // consume it. Appears in json-lab.
   {
     id: "topology-extract",
     component: "topology-extract",
@@ -201,6 +216,7 @@ export const panelRegistry: RegistryEntry[] = [
     title: "proc-control",
     position: { referencePanel: "editor", direction: "below" },
     introducedAt: 10,
+    capabilities: ["persistence"],
   },
   {
     id: "procedural-visuals-manifold",
@@ -209,6 +225,7 @@ export const panelRegistry: RegistryEntry[] = [
     position: { referencePanel: "procedural-visuals-control", direction: "right" },
     introducedAt: 10,
     companions: ["procedural-visuals-control"],
+    capabilities: ["persistence"],
   },
   {
     id: "procedural-visuals-balls",
@@ -217,6 +234,7 @@ export const panelRegistry: RegistryEntry[] = [
     position: { referencePanel: "procedural-visuals-manifold", direction: "within" },
     introducedAt: 10,
     companions: ["procedural-visuals-control"],
+    capabilities: ["persistence"],
   },
   {
     id: "procedural-visuals-fountain",
@@ -225,6 +243,7 @@ export const panelRegistry: RegistryEntry[] = [
     position: { referencePanel: "procedural-visuals-manifold", direction: "within" },
     introducedAt: 10,
     companions: ["procedural-visuals-control"],
+    capabilities: ["persistence"],
   },
   {
     id: "procedural-visuals-recursive",
@@ -233,6 +252,7 @@ export const panelRegistry: RegistryEntry[] = [
     position: { referencePanel: "procedural-visuals-manifold", direction: "within" },
     introducedAt: 10,
     companions: ["procedural-visuals-control"],
+    capabilities: ["persistence"],
   },
   // v8 — json-attention: a Rapier 2D rigid-body field where mass is earned
   // from connection and a token of attention walks the edges. The only
@@ -283,6 +303,15 @@ export function getRegistryEntry(id: string): RegistryEntry | undefined {
   return panelRegistry.find((e) => e.id === id);
 }
 
+/** True when the current host runtime provides the panel's required capabilities. */
+export function isPanelSupported(
+  idOrEntry: string | RegistryEntry,
+  web: boolean = isWebRuntime(),
+): boolean {
+  const entry = typeof idOrEntry === "string" ? getRegistryEntry(idOrEntry) : idOrEntry;
+  return hostHasCapabilities(entry?.capabilities, web);
+}
+
 /** Panels that legitimately live in an edge group. Anything else found in
  *  one is treated as misplaced by `repairLayout`. (status-bar → bottom,
  *  settings → the Cmd+B side-grid on the right, json-edit → the document edge
@@ -312,6 +341,7 @@ export function addRegistryPanel(
   entry: RegistryEntry,
   extraParams?: Record<string, unknown>,
   customPosition?: AddPanelPositionOptions,
+  initialSize?: { width?: number; height?: number },
 ): IDockviewPanel | undefined {
   const existing = api.getPanel(entry.id);
   if (existing) return existing;
@@ -327,6 +357,8 @@ export function addRegistryPanel(
   const {
     introducedAt: _i,
     companions: _c,
+    capabilities: _cap,
+    autoAdd: _auto,
     position: registryPosition,
     floating: _f,
     ...base
@@ -338,12 +370,34 @@ export function addRegistryPanel(
   let position = customPosition ?? registryPosition;
   // A reference panel that lives in an edge group (the document, settings)
   // counts as missing: Dockview would otherwise add the new panel INTO the edge.
-  const referenceMissing =
-    position &&
+  let referenceMissing =
+    !!position &&
     "referencePanel" in position &&
     typeof position.referencePanel === "string" &&
     api.getPanel(position.referencePanel)?.api.location.type !== "grid" &&
     api.getPanel(position.referencePanel)?.api.location.type !== "floating";
+  // When a panel wants to share a group (`within`) with a reference panel that
+  // was skipped (e.g. `tempo-clock` referencing `terminal` on the web), inherit
+  // that reference panel's own grid position so the group still forms in place.
+  if (
+    referenceMissing &&
+    position &&
+    "referencePanel" in position &&
+    typeof position.referencePanel === "string" &&
+    position.direction === "within"
+  ) {
+    const refPos = getRegistryEntry(position.referencePanel)?.position;
+    if (
+      refPos &&
+      "referencePanel" in refPos &&
+      typeof refPos.referencePanel === "string" &&
+      (api.getPanel(refPos.referencePanel)?.api.location.type === "grid" ||
+        api.getPanel(refPos.referencePanel)?.api.location.type === "floating")
+    ) {
+      position = refPos;
+      referenceMissing = false;
+    }
+  }
   if (!position || referenceMissing) {
     const anchor = mainGridAnchor(api);
     position = anchor
@@ -355,6 +409,8 @@ export function addRegistryPanel(
     return api.addPanel({
       ...base,
       position,
+      ...(initialSize?.width !== undefined ? { initialWidth: initialSize.width } : {}),
+      ...(initialSize?.height !== undefined ? { initialHeight: initialSize.height } : {}),
       params: extraParams ? { ...base.params, ...extraParams } : base.params,
     });
   } catch (e) {
@@ -368,7 +424,7 @@ export function addRegistryPanel(
 export function ensureCompanions(api: DockviewApi, id: string) {
   for (const cid of getRegistryEntry(id)?.companions ?? []) {
     const centry = getRegistryEntry(cid);
-    if (centry) addRegistryPanel(api, centry);
+    if (centry && isPanelSupported(centry)) addRegistryPanel(api, centry);
   }
 }
 
@@ -386,49 +442,106 @@ export function addOrFocusPanel(api: DockviewApi, id: string) {
     existing.api.setActive();
   } else {
     const entry = getRegistryEntry(id);
-    if (entry) addRegistryPanel(api, entry);
+    if (entry && isPanelSupported(entry)) addRegistryPanel(api, entry);
   }
   ensureCompanions(api, id);
 }
 
 /** Build a specific layout preset on the given Dockview grid.
- *  Iterates panelRegistry in registry order and calls addRegistryPanel for entries
- *  whose ID is in the resolved preset panel IDs. */
+ *  Picks the platform layout ("phone" vs "desktop") from presets.ts when
+ *  present, or falls back to adding the preset's panelIds in registry order.
+ *  Panels whose required capabilities the host lacks are skipped. */
 export function buildPreset(api: DockviewApi, presetId: string) {
-  // Browser-only arrangements (ported from exo-skeleton.org). Desktop keeps
-  // the registry positions below.
-  if (isWebRuntime() && buildWebPreset(api, presetId, webPresetNarrow())) {
+  const platform = isPhoneWidth() ? "phone" : "desktop";
+  const supportedIds = panelRegistry.filter((e) => isPanelSupported(e)).map((e) => e.id);
+  const placements = resolvePresetPlacements(presetId, platform, supportedIds);
+  if (placements) {
+    const sized: { panel: IDockviewPanel; size: number; horizontal: boolean }[] = [];
+    for (const p of placements) {
+      if (p.id === DOCUMENT_PANEL_ID || !isPanelSupported(p.id)) continue;
+      const entry = getRegistryEntry(p.id);
+      if (!entry) continue;
+      const direction = p.direction ?? "right";
+      const position: AddPanelPositionOptions = p.reference
+        ? { referencePanel: p.reference, direction }
+        : { direction: direction === "within" ? "right" : direction };
+      const horizontal =
+        direction === "left" ||
+        (direction === "right" && Boolean(p.reference));
+      const initialSize =
+        p.size !== undefined
+          ? horizontal
+            ? { width: p.size }
+            : { height: p.size }
+          : undefined;
+      const panel = addRegistryPanel(api, entry, undefined, position, initialSize);
+      if (panel && p.size !== undefined) {
+        sized.push({ panel, size: p.size, horizontal });
+      }
+    }
+    for (const { panel, size, horizontal } of sized) {
+      try {
+        panel.group.api.setSize(horizontal ? { width: size } : { height: size });
+      } catch {
+        /* ignore if group cannot be resized */
+      }
+    }
     finishPreset(api, presetId);
     return;
   }
-  const targetIds = new Set(
-    resolvePresetPanelIds(
-      presetId,
-      panelRegistry.map((e) => e.id),
-    ),
-  );
+
+  const targetIds = new Set(resolvePresetPanelIds(presetId, supportedIds));
   for (const entry of panelRegistry) {
     // The document is not a grid pane (see finishPreset).
-    if (targetIds.has(entry.id) && entry.id !== DOCUMENT_PANEL_ID) {
+    if (targetIds.has(entry.id) && entry.id !== DOCUMENT_PANEL_ID && isPanelSupported(entry)) {
       addRegistryPanel(api, entry);
     }
   }
   finishPreset(api, presetId);
 }
 
-/** Every preset ends the same way: the left edge holds the document (open
- *  when the preset is about JSON and we are not on a phone), and the JSON
- *  Lab seeds chapter one of Elinor Jones. */
-function finishPreset(api: DockviewApi, presetId: string) {
-  const phone = isPhoneWidth();
-  const open = !phone && presets.find((p) => p.id === presetId)?.documentOpen === true;
-  ensureDocumentEdge(api, { phone, open });
-  seedPresetDocument(presetId);
+/** Ensure the bottom edge group and status-bar panel exist with its group header hidden. */
+export function ensureStatusBar(api: DockviewApi): IDockviewPanel | undefined {
+  let bottom = api.getEdgeGroup("bottom");
+  if (!bottom) {
+    bottom = api.addEdgeGroup("bottom", {
+      id: "status-bar-group",
+      initialSize: 40,
+      minimumSize: 40,
+    });
+  }
+  let panel = api.getPanel("status-bar");
+  if (!panel) {
+    panel = api.addPanel({
+      id: "status-bar",
+      component: "status-bar-panel",
+      position: { referenceGroup: bottom.id },
+    });
+  }
+  if (panel) {
+    panel.group.header.hidden = true;
+  }
+  bottom.expand();
+  return panel;
 }
 
-/** Phones (under 600px) get the stacked web arrangements. Read at apply time. */
-function webPresetNarrow(): boolean {
-  return typeof window !== "undefined" && window.innerWidth < 600;
+/** Every preset ends the same way: the left edge holds the document +
+ *  Settings + Exo-skeleton tabs (open when the preset is about JSON and we
+ *  are not on a phone), the status bar is restored at the bottom, and
+ *  JSON Lab / Everything seed chapter one of Elinor Jones. */
+function finishPreset(api: DockviewApi, presetId: string) {
+  const prev = api.activePanel;
+  const phone = isPhoneWidth();
+  const open = !phone && presets.find((p) => p.id === presetId)?.documentOpen === true;
+  const doc = ensureDocumentEdge(api, { phone, open });
+  ensureEdgeTabs(api);
+  syncDocumentEdgeHeader(api);
+  doc?.api.setActive();
+  ensureStatusBar(api);
+  if (prev && api.getPanel(prev.id)) {
+    prev.api.setActive();
+  }
+  seedPresetDocument(presetId);
 }
 
 /** True when a bus value is worth drawing (not absent, null, "", {} or []). */
@@ -439,11 +552,11 @@ function hasContent(v: unknown): boolean {
   return true;
 }
 
-/** The JSON Lab opens drawing something: if the active document is empty,
- *  load chapter one of The Epic of Elinor Jones ("Berry Thief"). Never
+/** JSON Lab and Everything open drawing something: if the active document is
+ *  empty, load chapter one of The Epic of Elinor Jones ("Berry Thief"). Never
  *  overwrites an existing document. */
 function seedPresetDocument(presetId: string) {
-  if (presetId !== "json-lab" || typeof window === "undefined") return;
+  if (!shouldSeedPresetDocument(presetId) || typeof window === "undefined") return;
   void (async () => {
     try {
       const [{ getJson }, { getActiveDocumentId }, { openLibraryDocument }] = await Promise.all([
@@ -454,57 +567,13 @@ function seedPresetDocument(presetId: string) {
       if (hasContent(getJson(getActiveDocumentId()))) return;
       await openLibraryDocument("berry-thief");
     } catch (e) {
-      console.warn("[exoskeleton] could not seed the JSON Lab document:", e);
+      console.warn("[exoskeleton] could not seed the preset document:", e);
     }
   })();
 }
 
-type Step = [id: string, position: AddPanelPositionOptions];
-
-function buildSteps(api: DockviewApi, steps: Step[]) {
-  for (const [id, position] of steps) {
-    const entry = getRegistryEntry(id);
-    if (entry) addRegistryPanel(api, entry, undefined, position);
-  }
-}
-
-/** Web-only preset arrangements. Returns true when it handled the preset. */
-export function buildWebPreset(api: DockviewApi, presetId: string, narrow = false): boolean {
-  if (presetId === "av-lab") {
-    // piano | scope | tempo-clock
-    buildSteps(api, [
-      ["piano", { direction: "right" }],
-      ["scope", { referencePanel: "piano", direction: "right" }],
-      ["tempo-clock", { referencePanel: "scope", direction: "right" }],
-    ]);
-    return true;
-  }
-  if (presetId === "json-lab" && narrow) {
-    // Phone: the document is the left-edge sheet; viewers 2 per row:
-    // tree | graph over graph3d | cytoscape.
-    buildSteps(api, [
-      ["json-tree", { direction: "right" }],
-      ["json-graph", { referencePanel: "json-tree", direction: "right" }],
-      ["json-graph3d", { referencePanel: "json-tree", direction: "below" }],
-      ["json-cytoscape", { referencePanel: "json-graph", direction: "below" }],
-    ]);
-    return true;
-  }
-  if (presetId === "json-lab") {
-    // The document is the left edge; 2x2 grid: tree | graph over graph3d | cytoscape
-    buildSteps(api, [
-      ["json-tree", { direction: "right" }],
-      ["json-graph", { referencePanel: "json-tree", direction: "right" }],
-      ["json-graph3d", { referencePanel: "json-tree", direction: "below" }],
-      ["json-cytoscape", { referencePanel: "json-graph", direction: "below" }],
-    ]);
-    return true;
-  }
-  return false;
-}
-
-/** Build the default layout (called when no saved state exists). Desktop:
- *  "minimal". Browser: "blank" (empty grid + preset picker). */
+/** Build the default layout (called when no saved state exists). Default:
+ *  "blank" (empty grid + preset picker). */
 export function buildDefaultLayout(api: DockviewApi) {
   buildPreset(api, defaultPresetId());
 }

@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert";
 import type { SerializedDockview } from "dockview-react";
 import {
+  DECK_QUERY,
   buildDeckLayout,
   layoutPanelOrder,
   layoutActivePanel,
@@ -125,4 +126,8 @@ test("deck/reconcile outputs never carry a maximizedNode", () => {
   assert.equal((deck.grid as unknown as { maximizedNode?: unknown }).maximizedNode, undefined);
   const back = reconcileLayouts(g, deck);
   assert.equal((back.grid as unknown as { maximizedNode?: unknown }).maximizedNode, undefined);
+});
+
+test("DECK_QUERY covers both narrow viewports and coarse-pointer phones held sideways", () => {
+  assert.strictEqual(DECK_QUERY, "(max-width: 600px), (pointer: coarse) and (max-height: 500px)");
 });
