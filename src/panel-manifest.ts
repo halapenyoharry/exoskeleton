@@ -82,6 +82,23 @@ export type CapabilityId =
   | "persistence"
   | "tts.engine";
 
+/** Capabilities that only the Tauri desktop shell can provide. */
+export const TAURI_ONLY_CAPABILITIES: ReadonlySet<CapabilityId> = new Set<CapabilityId>([
+  "pty",
+  "osc.udp",
+  "iframe.permissive",
+]);
+
+/** True when the host runtime (web browser vs Tauri shell) provides every
+ *  required capability in `capabilities`. */
+export function hostHasCapabilities(
+  capabilities: readonly CapabilityId[] | undefined,
+  web: boolean,
+): boolean {
+  if (!capabilities || capabilities.length === 0 || !web) return true;
+  return capabilities.every((c) => !TAURI_ONLY_CAPABILITIES.has(c));
+}
+
 /** Where to position the panel in the default first-launch layout.
  *  Mirrors Dockview's `addPanel` position option. */
 export interface PanelLayoutPosition {

@@ -1,10 +1,10 @@
-import { panelRegistry } from "./persistence/default-layout";
+import { isPanelSupported, panelRegistry } from "./persistence/default-layout";
 import { panelAccent, panelGlyph } from "./ColoredTab";
 import "./PanelPicker.css";
 
 /**
- * Shared component picker: one button per panelRegistry entry, tinted with
- * the panel's accent. Used by the Watermark (empty grid) and BlankPanel
+ * Shared component picker: one button per supported panelRegistry entry, tinted
+ * with the panel's accent. Used by the Watermark (empty grid) and BlankPanel
  * (the header "+"). The caller decides what "choose" means.
  */
 export default function PanelPicker({
@@ -16,7 +16,7 @@ export default function PanelPicker({
 }) {
   return (
     <div className={`panel-picker panel-picker--${variant}`}>
-      {panelRegistry.map((entry) => (
+      {panelRegistry.filter((entry) => isPanelSupported(entry)).map((entry) => (
         <button
           key={entry.id}
           className="panel-picker-btn watermark-btn"
