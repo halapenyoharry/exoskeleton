@@ -17,8 +17,11 @@
   display: flex;
   flex-direction: column;
   min-width: 160px;
-  max-height: calc(100vh - 80px);
+  /* Fit the visible space below the trigger button (vh fallback, then dvh). */
+  max-height: calc(100vh - var(--exo-menu-top, 44px) - 8px);
+  max-height: calc(100dvh - var(--exo-menu-top, 44px) - 8px - env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 4px;
   border-radius: 8px;
   background: rgba(20, 22, 28, 0.96);
@@ -41,6 +44,10 @@
 .exo-menu button:disabled { opacity: 0.4; cursor: default; }
 .exo-menu__rule { width: 100%; border: 0; border-top: 1px solid rgba(255,255,255,0.15); margin: 4px 0; }
 .exo-menu__heading { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; opacity: .6; padding: 6px 10px 2px; }
+.exo-phone .exo-menu__heading,
+body:has(.exo-phone) .exo-menu__heading { font-size: 12px; }
+.exo-phone .exo-menu__popout,
+body:has(.exo-phone) .exo-menu__popout { display: none; }
 .exo-menu__group { display: flex; flex-direction: column; }
 .exo-menu button.exo-menu__sub { padding-left: 20px; }
 .exo-menu__kbd { float: right; margin-left: 16px; opacity: .55; }

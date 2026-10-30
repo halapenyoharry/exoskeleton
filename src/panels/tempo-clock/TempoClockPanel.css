@@ -11,8 +11,10 @@
 
 .tempo-clock-controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .tempo-clock-play {
@@ -24,6 +26,7 @@
   padding: 6px 12px;
   cursor: pointer;
   letter-spacing: 0.05em;
+  flex-shrink: 0;
 }
 
 .tempo-clock-play:hover {
@@ -31,7 +34,9 @@
 }
 
 .tempo-clock-bpm {
-  flex: 1;
+  flex: 1 1 36px;
+  min-width: 0;
+  width: 0;
   background: #0d1326;
   border: 1px solid color-mix(in srgb, var(--panel-accent, transparent) 30%, transparent);
   color: #c5e8ee;
@@ -58,6 +63,10 @@
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.exo-phone .tempo-clock-bpm-label {
+  font-size: 12px;
 }
 
 .tempo-clock-beat {

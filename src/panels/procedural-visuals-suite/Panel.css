@@ -124,7 +124,7 @@
 /* Instrument Rack */
 .instrument-rack {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: 0.85rem;
   padding: 0.85rem;
 }
@@ -390,4 +390,10 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
+}
+
+.exo-phone .slider-meta,
+.exo-phone .toggle-chip-btn,
+.exo-phone .bang-action-btn {
+  font-size: 12px;
 }

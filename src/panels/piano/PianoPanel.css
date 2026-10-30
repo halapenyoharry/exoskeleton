@@ -14,6 +14,7 @@
   font-size: 11px;
   color: #4a6a78;
   letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
 }
 .piano-hint code {
   background: #0a0e27;
@@ -41,12 +42,19 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-bottom: 6px;
+  padding: 0 0 6px 0;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
   transition: background 60ms ease-out;
 }
 
+/* White keys are exact sevenths with no horizontal padding so black keys align at any width. */
 .piano-key--white {
-  flex: 1;
+  flex: 1 1 calc(100% / 7);
+  width: calc(100% / 7);
+  min-width: 0;
+  padding: 0 0 6px 0;
   background: #e8e8e8;
   color: #555;
   border: none;
@@ -85,4 +93,10 @@
   font-size: 10px;
   letter-spacing: 0.05em;
   pointer-events: none;
+}
+
+.exo-phone .piano-hint,
+.exo-phone .piano-hint code,
+.exo-phone .piano-key__label {
+  font-size: 12px;
 }
