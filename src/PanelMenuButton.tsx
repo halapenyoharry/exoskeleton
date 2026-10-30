@@ -50,15 +50,19 @@ export function PanelMenuButton({ panelId, api, containerApi, structural, classN
     const close = () => setMenu(null);
     backClosers.add(close);
     const doc = rootRef.current?.ownerDocument ?? document;
+    const win = doc.defaultView ?? window;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenu(null);
     const onDown = (e: Event) => {
       if (!(e.target as Element).closest?.(".exo-menu, .exo-menu-btn")) setMenu(null);
     };
     doc.addEventListener("keydown", onKey);
     doc.addEventListener("pointerdown", onDown, true);
+    // Tapping an iframe (webview) moves focus out of the main window without firing pointerdown here.
+    win.addEventListener("blur", close);
     return () => {
       doc.removeEventListener("keydown", onKey);
       doc.removeEventListener("pointerdown", onDown, true);
+      win.removeEventListener("blur", close);
       backClosers.delete(close);
     };
   }, [menu]);
@@ -74,7 +78,14 @@ export function PanelMenuButton({ panelId, api, containerApi, structural, classN
     setMenu({ x: r.left, y: r.bottom + 4 });
   };
   const group = api.group;
-  const otherGroups = containerApi.groups.filter((g) => g.id !== group.id);
+  const inEdgeGroup = Boolean(structural || group?.api?.location?.type === "edge");
+  const isPhone = Boolean(
+    rootRef.current?.closest(".exo-phone") ??
+      (rootRef.current?.ownerDocument ?? document).querySelector(".exo-phone"),
+  );
+  const otherGroups = containerApi.groups.filter(
+    (g) => g.id !== group.id && g.api.location.type === "grid",
+  );
   const renderItem = (item: PanelMenuItem, nested = false): React.ReactNode =>
     item.children ? (
       <div key={item.id} className="exo-menu__group">
@@ -110,9 +121,13 @@ export function PanelMenuButton({ panelId, api, containerApi, structural, classN
       </button>
       {menu &&
         createPortal(
-          <div className="exo-menu" role="menu" style={{ left: menu.x, top: menu.y }}>
+          <div
+            className="exo-menu"
+            role="menu"
+            style={{ left: menu.x, top: menu.y, ["--exo-menu-top" as string]: `${menu.y}px` }}
+          >
             {(items ?? []).map((item) => renderItem(item))}
-            {!structural && (
+            {!inEdgeGroup && (
               <>
                 {items && <hr className="exo-menu__rule" />}
                 <button
@@ -121,9 +136,15 @@ export function PanelMenuButton({ panelId, api, containerApi, structural, classN
                 >
                   {group.api.isMaximized() ? "Restore" : "Maximize"}
                 </button>
-                <button role="menuitem" onClick={act(() => void containerApi.addPopoutGroup(group))}>
-                  Pop out
-                </button>
+                {!isPhone && (
+                  <button
+                    role="menuitem"
+                    className="exo-menu__popout"
+                    onClick={act(() => void containerApi.addPopoutGroup(group))}
+                  >
+                    Pop out
+                  </button>
+                )}
                 <button role="menuitem" aria-expanded={moveOpen} onClick={() => setMoveOpen(!moveOpen)}>
                   Move to… {moveOpen ? "▾" : "▸"}
                 </button>

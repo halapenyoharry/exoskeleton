@@ -6,3 +6,7 @@
   border: none;
   background: #ffffff;
 }
+
+.panel-pad:has(.webview-frame) .panel-toolbar input {
+  min-width: 0;
+}

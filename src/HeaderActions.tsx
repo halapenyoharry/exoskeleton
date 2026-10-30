@@ -39,7 +39,7 @@ export function LeftHeaderActions(props: IDockviewHeaderActionsProps) {
   const panes = getPanes(key);
   const showMenu = !!getPanelMenu(key) && !panelHasMenuCell(panes);
   const paneActions = (panes ?? []).filter((p) => p.kind === "action");
-  const isDocEdge = props.group.id === DOCUMENT_EDGE_ID;
+  const isDocEdge = props.group.id === DOCUMENT_EDGE_ID || props.group.api.location.type === "edge";
   const panesVis = getPanesVisibility(id);
   const showRestore = !!panesVis && !panesVis.visible;
   if (!showMenu && paneActions.length === 0 && !showRestore) return null;
@@ -125,21 +125,41 @@ export function RightHeaderActions(props: IDockviewHeaderActionsProps) {
   return (
     <div className="header-actions header-actions--right">
       {maximized && (
-        <button className="header-btn header-btn--all" title="show all panes again" onClick={() => props.group.api.exitMaximized()}>
-          ⤡ all
+        <button
+          type="button"
+          className="header-btn header-btn--all"
+          aria-label="show all panes again"
+          title="show all panes again"
+          onClick={() => props.group.api.exitMaximized()}
+        >
+          ⤡
         </button>
       )}
       <button
+        type="button"
         className="header-btn"
+        aria-label="new blank tab (pick a component) — alt-click: duplicate this tab's type"
         title="new blank tab (pick a component) — alt-click: duplicate this tab's type"
         onClick={(e) => (e.altKey ? cloneTab() : addBlank())}
       >
         +
       </button>
-      <button className="header-btn header-btn--popout" title="pop out this group into its own window" onClick={popoutGroup}>
+      <button
+        type="button"
+        className="header-btn header-btn--popout"
+        aria-label="pop out this group into its own window"
+        title="pop out this group into its own window"
+        onClick={popoutGroup}
+      >
         ⤴
       </button>
-      <button className="header-btn header-btn--danger" title="close all panels in this group" onClick={closeGroup}>
+      <button
+        type="button"
+        className="header-btn header-btn--danger"
+        aria-label="close all panels in this group"
+        title="close all panels in this group"
+        onClick={closeGroup}
+      >
         ⨯
       </button>
     </div>

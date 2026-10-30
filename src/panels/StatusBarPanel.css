@@ -157,11 +157,11 @@
 /* Floating Summoner Button */
 .status-bar-summoner-btn {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  right: calc(12px + env(safe-area-inset-right, 0px));
   z-index: 9999;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: rgba(10, 14, 38, 0.85);
   backdrop-filter: blur(10px);
@@ -195,31 +195,154 @@
   }
 }
 
-/* Narrow viewports: one non-wrapping row. Labels hidden, values kept. */
+/* Narrow viewports / phone mode: one non-wrapping row, no horizontal scroll,
+   stats hidden so everything fits at 320px with a long doc name, ✕ always
+   visible at right (>=40x40), other controls >=36px tall. */
 .status-link-short,
 .status-doc-label,
 .status-stats-label {
   display: none;
 }
 
+.exo-phone .status-bar-container {
+  padding: 0 4px 0 8px;
+  gap: 6px;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 12px;
+}
+
+.exo-phone .status-bar-left {
+  gap: 6px;
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.exo-phone .status-bar-center {
+  gap: 6px;
+  flex: 1 1 0;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.exo-phone .status-bar-right {
+  gap: 4px;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  margin-left: auto;
+}
+
+.exo-phone .status-link-long {
+  display: none;
+}
+
+.exo-phone .status-link-short {
+  display: inline;
+}
+
+.exo-phone .status-bar-link-btn {
+  min-height: 36px;
+  padding: 4px 8px;
+  font-size: 12px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.exo-phone .status-doc-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 2px 6px;
+  font-size: 12px;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 96px;
+  overflow: hidden;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.exo-phone .status-doc-label {
+  display: none;
+}
+
+.exo-phone .status-doc-value {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exo-phone .status-selection {
+  min-height: 36px;
+  padding: 4px 8px;
+  font-size: 12px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.exo-phone .status-selection-label {
+  display: none;
+}
+
+.exo-phone .status-selection-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exo-phone .status-stats {
+  display: none;
+}
+
+.exo-phone .status-bar-close-btn {
+  min-width: 40px;
+  min-height: 40px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
 @media (max-width: 600px) {
   .status-bar-container {
-    padding: 0 8px;
-    gap: 8px;
-    justify-content: flex-start;
+    padding: 0 4px 0 8px;
+    gap: 6px;
+    justify-content: space-between;
     flex-wrap: nowrap;
     white-space: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: hidden;
+    font-size: 12px;
   }
 
-  .status-bar-left,
-  .status-bar-center,
-  .status-bar-right {
-    gap: 8px;
-    flex-shrink: 0;
+  .status-bar-left {
+    gap: 6px;
+    flex: 0 1 auto;
     flex-wrap: nowrap;
     min-width: 0;
+    overflow: hidden;
+  }
+
+  .status-bar-center {
+    gap: 6px;
+    flex: 1 1 0;
+    flex-wrap: nowrap;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .status-bar-right {
+    gap: 4px;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    margin-left: auto;
   }
 
   .status-link-long {
@@ -231,17 +354,25 @@
   }
 
   .status-bar-link-btn {
-    padding: 3px 8px;
+    min-height: 36px;
+    padding: 4px 8px;
+    font-size: 12px;
     flex-shrink: 0;
+    box-sizing: border-box;
   }
 
   .status-doc-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 2px 6px;
+    font-size: 12px;
+    flex: 0 1 auto;
+    min-width: 0;
     max-width: 96px;
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
-    vertical-align: middle;
+    box-sizing: border-box;
   }
 
   .status-doc-label {
@@ -249,31 +380,42 @@
   }
 
   .status-doc-value {
-    display: inline;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .status-selection {
-    max-width: 120px;
+    min-height: 36px;
+    padding: 4px 8px;
+    font-size: 12px;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .status-selection-label {
     display: none;
   }
 
-  .status-stats {
-    gap: 4px;
+  .status-selection-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  .status-stats-label {
+  .status-stats {
     display: none;
   }
 
-  .status-stats-divider {
-    font-size: 0;
-  }
-
-  .status-stats-divider::before {
-    content: "\00b7";
-    font-size: 0.8rem;
+  .status-bar-close-btn {
+    min-width: 40px;
+    min-height: 40px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    flex-shrink: 0;
+    font-size: 16px;
   }
 }

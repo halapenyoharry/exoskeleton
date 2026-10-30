@@ -2,18 +2,17 @@
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 0 6px;
-  font-size: 11px;
+  padding: 0;
+  gap: 0;
+  font-size: 12px;
   color: #ffffff;
 }
 
-.header-actions--prefix {
-  padding-left: 10px;
-  padding-right: 2px;
-}
-
-.header-actions--right {
-  padding-right: 8px;
+.header-actions--prefix,
+.header-actions--right,
+.header-actions--left {
+  padding: 0;
+  gap: 0;
 }
 
 .header-dot {
@@ -25,12 +24,25 @@
   box-shadow: 0 0 6px currentColor;
 }
 
-.header-btn {
+/* Every header action button shares one square size equal to the tab strip height. */
+.header-btn,
+.header-actions .header-btn {
+  box-sizing: border-box;
+  width: var(--dv-tabs-and-actions-container-height, 35px);
+  height: var(--dv-tabs-and-actions-container-height, 35px);
+  min-width: var(--dv-tabs-and-actions-container-height, 35px);
+  min-height: var(--dv-tabs-and-actions-container-height, 35px);
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   background: transparent;
   border: none;
+  border-radius: 0;
   color: inherit;
   cursor: pointer;
-  padding: 2px 8px;
   font-size: 16px;
   line-height: 1;
   opacity: 1;
@@ -47,23 +59,20 @@
 }
 
 .header-btn--all {
-  font-size: 13px;
   white-space: nowrap;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 12px;
-  padding: 2px 8px;
-  margin-right: 4px;
 }
 
-/* Phones: pop-out is desktop-only; the cluster collapses to + and x. */
+/* Phones: pop-out is desktop-only. */
 .exo-phone .header-btn--popout {
   display: none;
 }
 
-/* Left header actions (after the tabs): ≡ menu, declared header actions,
-   pane action buttons. Sized by the theme's tab-strip height. */
-.header-actions--left { padding-left: 4px; gap: 2px; }
-.header-btn--icon { font-size: 14px; padding: 2px 6px; opacity: 0.85; }
+/* Deck ("One pane at a time"): all panels share one group, so hide close-group. */
+.exo-deck .header-btn--danger {
+  display: none;
+}
+
+.header-btn--icon { opacity: 0.85; }
 .header-btn--icon:hover { opacity: 1; }
 .header-btn--chip {
   font-size: 12px;

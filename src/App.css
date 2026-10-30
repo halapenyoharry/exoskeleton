@@ -348,6 +348,13 @@
   text-overflow: ellipsis;
 }
 @media (pointer: coarse) {
+  /* Prevent iOS Safari auto-zoom when focusing form controls; leave CodeMirror (.cm-content) untouched. */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
   .panel-pad .panel-header button,
   .panel-pad .panel-header select,
   .panel-pad .panel-header label,
@@ -358,6 +365,25 @@
   .panel-pad .panel-toolbar input {
     min-height: 36px;
   }
+}
+
+/* Keep Dockview's tab overflow dropdown within the visible viewport and scrollable. */
+.dv-tabs-overflow-container,
+.dv-popover-anchor .dv-tabs-overflow-dropdown-default {
+  max-height: calc(100vh - 56px);
+  max-height: calc(100dvh - 56px - env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Phone mode: raise 10–11px text to at least 12px. */
+.exo-phone .panel-header,
+.exo-phone .panel-toolbar,
+.exo-phone .workspace-menu-title,
+.exo-phone .workspace-action-btn,
+.exo-phone .workspace-indicator,
+.exo-phone .editor-status {
+  font-size: 12px;
 }
 
 .panel-pad .panel-header [class$="-controls"] {
