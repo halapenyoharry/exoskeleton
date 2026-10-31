@@ -2,6 +2,19 @@
 
 Exoskeleton v2.0.0-beta was driven at phone size in a headless browser to find the obvious problems before Harold went looking for them by hand. This is the consolidated list, most severe first. The three worker reports it was built from, with every measurement, are in [research/phone-audit-2026-10-27/](research/phone-audit-2026-10-27/).
 
+## Status, 2026-10-31
+
+Harold's decisions on 2026-10-30, and what was done (merged into `just-dockview`, verified in the phone harness at iPhone 15, iPhone 15 landscape, iPhone SE and desktop 1440x900):
+
+- **Left edge tabs always visible, never closable, on every platform.** The collapsed strip shows the names (JSON Edit, Settings, Exo-skeleton) on phones as on desktop, 26 px wide instead of 35, with readable contrast. The tabs have no ×: tapping the active tab folds the edge (Dockview's own behavior), tapping another tab opens it. The active tab is white with its accent as a bar. On a phone, tapping the empty part of the strip opens it too. (Items 1 and 8.)
+- **Settings was not blank, it showed `{}`.** It read the saved workspace once, before the first save existed. It now re-reads whenever it is shown.
+- **A preferred layout per preset per platform.** Presets declare `phone` and `desktop` layouts in presets.ts. Phone: JSON Lab is text-viewer over 3D-Inspect (a stand-in until the textual graph exists), AV Lab and Procedural Lab are stacked, Everything is every panel as tabs in one group. Desktop layouts are unchanged. (Item 3.)
+- **A phone held sideways stays in phone mode** (`(max-width: 600px), (pointer: coarse) and (max-height: 500px)`). (Item 14.)
+- **Minimal is removed;** the default is the empty grid everywhere. On the web, panels that need the desktop app (terminal) are left out of presets and the panel picker. (Item 5.)
+- **Header buttons share one square size,** the height of the tab strip (35 px). Close-group is hidden in One pane at a time. (Item 6.)
+- **Plain bugs fixed:** presets and Reset layout keep the left edge tabs and the status bar (item 2); a folded Controls header is tappable (item 4); Settings and Exo-skeleton have no empty Controls and edge panels have no Pane tab (items 9, 16); Exo-skeleton > Document shows JSON Edit (item 10); the panel menu fits the screen, has no Pop out on phones, never offers the edge as a Move to target, and closes on a tap in a webview (items 11, 13); the status bar fits phone widths and its restore button respects safe areas (item 7); inputs are 16 px on touch screens (item 12); the tab overflow list stays on screen (item 15); piano keys, the BPM field and procedural controls fit narrow panels; phone text is at least 12 px in the changed files.
+- **Not done:** the tree viewer still shrinks a large tree to a thin line (a viewer design question, and it is no longer in the phone JSON Lab); the empty-grid list still gives no hint that it scrolls (shorter now without Minimal); real iOS Safari not yet checked.
+
 ## How it was tested
 
 - Build: `just-dockview` at d7708e4, the same code that is live on exo-skeleton.org, served by the Vite dev server on port 1420.

@@ -41,7 +41,7 @@ A running Exoskeleton gives you:
 
 - **Dockable Workspace Grid**: Drag, dock, tab, split, resize, and pop out panels into separate OS windows.
 - **Workspaces (Schema v8)**: Create, rename, delete, switch between multiple named workspaces, export/import standalone `.exo.json` workspace documents, and open independent workspaces in separate OS windows.
-- **Layout Presets**: Instantly switch or reset to curated workspace layouts (**Minimal**, **JSON Lab**, **AV Lab**, **Everything**).
+- **Layout Presets**: Instantly switch to curated workspace layouts (**JSON Lab**, **AV Lab**, **Procedural Lab**, **Everything**), each with its own arrangement for phones and for desktops.
 - **Seventeen Built-in Panels**:
   - **Editor**: Markdown text editor with native file save/open.
   - **Terminal**: Real-shell terminal powered by xterm.js + `tauri-plugin-pty` with shell auto-resolution.
@@ -110,10 +110,10 @@ chmod +x Exoskeleton_*.AppImage
 
 ## First run
 
-On first launch Exoskeleton opens with the **Minimal** preset: just the editor, terminal, and web viewport. The other thirteen panels aren't gone — they're one click away. Click the **⊞** button in the bottom floating toolbar to:
+On first launch Exoskeleton opens with an empty grid: the Watermark screen offers the layout presets as cards, and every panel as a button. On the left edge, the **JSON Edit**, **Settings** and **Exo-skeleton** tabs are always there; tap one to open it, tap it again to fold the edge back. The **Exo-skeleton** tab lets you:
 
 - add any panel from the full registry,
-- switch to a different preset (**JSON Lab**, **AV Lab**, **Everything**),
+- switch to a different preset (**JSON Lab**, **AV Lab**, **Procedural Lab**, **Everything**),
 - create, rename, or delete named workspaces,
 - export or import a workspace as a portable `.exo.json` file.
 
@@ -205,7 +205,7 @@ exoskeleton/
 │   ├── persistence/                 Save/load, workspace storage v8 & presets
 │   │   ├── storage.ts               AppStateV8 & Workspace schema definition
 │   │   ├── workspace-file.ts        .exo.json document export/import validation
-│   │   ├── presets.ts               Minimal, JSON Lab, AV Lab, Everything presets
+│   │   ├── presets.ts               JSON Lab, AV Lab, Procedural Lab, Everything; phone and desktop layouts
 │   │   ├── default-layout.ts        Default arrangement & applyWorkspaceState()
 │   │   └── tauri-storage.ts         Tauri store adapter
 │   └── utils/
