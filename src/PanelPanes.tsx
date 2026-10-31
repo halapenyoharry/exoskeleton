@@ -249,7 +249,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 /** The ⚙ "pane" section every panel gets: window, move, follow, accent, about. */
 function PaneSettings({ api, containerApi, params, write, about }: { api: DockviewPanelApi; containerApi: DockviewApi; params: Params; write: (x: Params) => void; about?: { description?: string; docs?: string } }) {
   const [maxed, setMaxed] = useState(() => api.group.api.isMaximized());
-  const others = containerApi.groups.filter((g) => g.id !== api.group.id);
+  const others = containerApi.groups.filter((g) => g.id !== api.group.id && g.api.location.type === "grid");
   const accent = typeof params.accent === "string" ? params.accent : ACCENTS[0];
   return (
     <div className="pp-stack">
@@ -258,7 +258,7 @@ function PaneSettings({ api, containerApi, params, write, about }: { api: Dockvi
           if (maxed) api.group.api.exitMaximized(); else api.group.api.maximize();
           setMaxed(!maxed);
         }}>{maxed ? "Restore" : "Maximize"}</button>
-        <button type="button" className="pp-btn" onClick={() => containerApi.addPopoutGroup(api.group)}>Pop out</button>
+        <button type="button" className="pp-btn pp-btn--popout" onClick={() => containerApi.addPopoutGroup(api.group)}>Pop out</button>
       </Row>
       <Row label="Move to…">
         {others.length === 0 && <span className="pp-dim">no other groups</span>}
@@ -297,6 +297,10 @@ interface Ctx {
   titlePane?: string;
   /** The "Pane" settings tab (window / move / follow / accent / about). */
   settingsPane: boolean;
+  /** True when the panel has at least one declared pane tab or the "Pane" tab. */
+  hasControls: boolean;
+  /** Report whether the Controls pane is folded so the Splitview sash won't block its header. */
+  setControlsFolded: (folded: boolean) => void;
   /** Edge-group panels: names only, Title Case, no glyphs. */
   plain: boolean;
   /** Stable object (a ref) shared by PanesCell (sizing) and the nested
@@ -462,22 +466,30 @@ function PanesCell(props: ISplitviewPanelProps) {
       });
     }
     // Default: folded in the grid, open in the left edge group (the title
-    // pane marks edge panels). A remembered state always wins.
-    const defaultOpen = !!ctx.titlePane;
-    const controls = e.api.addPanel({
-      id: CONTROLS_ID,
-      component: "controls",
-      title: CONTROLS_TITLE,
-      headerSize: PANE_HEADER,
-      minimumBodySize: 0,
-      isExpanded: expanded[CONTROLS_ID] ?? defaultOpen,
-      params: { paneId: CONTROLS_ID },
-    });
-    controls.api.onDidExpansionChange((ev) => {
-      const cur = (ctx.api.getParameters().panesExpanded as Record<string, boolean> | undefined) ?? {};
-      ctx.api.updateParameters({ panesExpanded: { ...cur, [CONTROLS_ID]: ev.isExpanded } });
-      fit();
-    });
+    // pane marks edge panels). A remembered state always wins. Edge panels
+    // with no declared panes have no Controls pane at all.
+    if (ctx.hasControls) {
+      const defaultOpen = !!ctx.titlePane;
+      const isExpanded = expanded[CONTROLS_ID] ?? defaultOpen;
+      ctx.setControlsFolded(!isExpanded);
+      const controls = e.api.addPanel({
+        id: CONTROLS_ID,
+        component: "controls",
+        title: CONTROLS_TITLE,
+        headerSize: PANE_HEADER,
+        minimumBodySize: 0,
+        isExpanded,
+        params: { paneId: CONTROLS_ID },
+      });
+      controls.api.onDidExpansionChange((ev) => {
+        const cur = (ctx.api.getParameters().panesExpanded as Record<string, boolean> | undefined) ?? {};
+        ctx.api.updateParameters({ panesExpanded: { ...cur, [CONTROLS_ID]: ev.isExpanded } });
+        ctx.setControlsFolded(!ev.isExpanded);
+        fit();
+      });
+    } else {
+      ctx.setControlsFolded(true);
+    }
     requestAnimationFrame(() => fit());
   };
 
@@ -528,15 +540,30 @@ export function PanelPanes({ panelId, api, containerApi, panes, titlePane, setti
   const unregisterRef = useRef<(() => void) | null>(null);
   useEffect(() => () => unregisterRef.current?.(), []);
   const bridge = useRef<{ nestedApi: DockviewApi | null; onChange: () => void }>({ nestedApi: null, onChange: () => {} }).current;
+  // Panels in an edge group never get the "Pane" tab, and only get a
+  // Controls section when they declare panes of their own (e.g. JSON Edit).
+  const inEdge = !!titlePane || api.location?.type === "edge";
+  const effectiveSettingsPane = settingsPane && !inEdge;
+  const hasControls = panes.some((p) => p.kind === "pane") || effectiveSettingsPane;
+  const [controlsFolded, setControlsFolded] = useState(() => {
+    if (!hasControls) return true;
+    const exp = (params.panesExpanded as Record<string, boolean> | undefined)?.[CONTROLS_ID];
+    return exp !== undefined ? !exp : !titlePane;
+  });
   const onReady = (e: SplitviewReadyEvent) => {
-    const top = e.api.addPanel({ id: "panes", component: "panes", minimumSize: PANE_HEADER, snap: true, size: PANE_HEADER * 2 + 35 + 60 });
+    const titleOnlySize = titlePane ? PANE_HEADER : 0;
+    const top = e.api.addPanel(
+      hasControls
+        ? { id: "panes", component: "panes", minimumSize: PANE_HEADER, snap: true, size: PANE_HEADER * 2 + 35 + 60 }
+        : { id: "panes", component: "panes", minimumSize: titleOnlySize, maximumSize: titleOnlySize, size: titleOnlySize },
+    );
     e.api.addPanel({ id: "content", component: "content", priority: LayoutPriority.High });
     // Snapped away → a restore button in the group's header actions.
     unregisterRef.current = registerPanesVisibility(panelId, {
       visible: top.api.isVisible,
       show: () => {
         top.api.setVisible(true);
-        top.api.setSize({ size: PANE_HEADER * 2 + 35 + 60 });
+        top.api.setSize({ size: hasControls ? PANE_HEADER * 2 + 35 + 60 : titleOnlySize });
       },
     });
     top.api.onDidVisibilityChange((ev) => setPanesVisible(panelId, ev.isVisible));
@@ -544,12 +571,23 @@ export function PanelPanes({ panelId, api, containerApi, panes, titlePane, setti
   return (
     <PanelPanesCtx.Provider
       value={{
-        panelId, api, containerApi, panes, titlePane, settingsPane, params, write, about, content: children,
-        plain: !!titlePane,
+        panelId,
+        api,
+        containerApi,
+        panes,
+        titlePane,
+        settingsPane: effectiveSettingsPane,
+        hasControls,
+        setControlsFolded,
+        params,
+        write,
+        about,
+        content: children,
+        plain: inEdge,
         bridge,
       }}
     >
-      <div className="pp-root">
+      <div className="pp-root" data-controls-folded={controlsFolded ? "true" : "false"}>
         <SplitviewReact className={themeGithubDark.className} orientation={Orientation.VERTICAL} components={components} onReady={onReady} />
       </div>
     </PanelPanesCtx.Provider>

@@ -65,6 +65,7 @@ import {
   ensureDocumentEdge,
   isDocumentOpen,
   isPhoneWidth,
+  openDocument,
   precreateEdgeGroups,
   setDocumentOpen,
   toggleDocument,
@@ -825,12 +826,13 @@ export default function App() {
     },
     toggleSettings: () => {
       toggleSettings();
-      closeMenu();
     },
     isDocumentOpen: () => !!mainApiRef.current && isDocumentOpen(mainApiRef.current),
     toggleDocument: () => {
-      toggleDocumentNow();
-      closeMenu();
+      const api = mainApiRef.current;
+      if (!api) return;
+      openDocument(api, isPhoneWidth());
+      save();
     },
   };
 

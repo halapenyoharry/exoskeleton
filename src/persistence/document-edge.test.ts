@@ -2,9 +2,14 @@ import { test } from "node:test";
 import assert from "node:assert";
 import type { SerializedDockview } from "dockview-react";
 import {
+  DOCUMENT_COLLAPSED_SIZE,
+  DOCUMENT_COLLAPSED_SIZE_PHONE,
   DOCUMENT_EDGE_ID,
   DOCUMENT_PANEL_ID,
+  documentEdgeOptions,
   migrateEdgeLayout,
+  openDocument,
+  toggleDocument,
 } from "./document-edge.ts";
 import { buildDeckLayout, edgeViewIds, layoutPanelOrder, reconcileLayouts } from "./deck.ts";
 
@@ -226,4 +231,57 @@ test("a legacy grid reconciled into a migrated deck still ends with one document
   const loaded = migrateSavedLayout(merged, 11);
   assert.ok(!gridIds(loaded).includes("json-edit"));
   assert.deepStrictEqual(edges(loaded).left.group.views, [DOCUMENT_PANEL_ID, "settings"]);
+});
+
+test("collapsed edge strip size is 26px on desktop and phone", () => {
+  assert.strictEqual(DOCUMENT_COLLAPSED_SIZE, 26);
+  assert.strictEqual(DOCUMENT_COLLAPSED_SIZE_PHONE, 26);
+  assert.strictEqual(documentEdgeOptions({ phone: false, collapsed: true }).collapsedSize, 26);
+  assert.strictEqual(documentEdgeOptions({ phone: true, collapsed: true }).collapsedSize, 26);
+});
+
+test("toggleDocument switches to json-edit and keeps edge expanded when menu/settings is active", () => {
+  let collapsed = false;
+  let activeId = "menu";
+  const docPanel = {
+    id: DOCUMENT_PANEL_ID,
+    api: {
+      location: { type: "edge" },
+      setActive: () => {
+        activeId = DOCUMENT_PANEL_ID;
+      },
+    },
+  };
+  const edge = {
+    id: DOCUMENT_EDGE_ID,
+    isCollapsed: () => collapsed,
+    expand: () => {
+      collapsed = false;
+    },
+    collapse: () => {
+      collapsed = true;
+    },
+  };
+  const fakeApi = {
+    get activePanel() {
+      return { id: activeId };
+    },
+    getPanel: (id: string) => (id === DOCUMENT_PANEL_ID ? docPanel : undefined),
+    getEdgeGroup: () => edge,
+  } as any;
+
+  // Menu is open in the expanded edge: toggleDocument switches to json-edit without collapsing
+  toggleDocument(fakeApi, true);
+  assert.strictEqual(collapsed, false);
+  assert.strictEqual(activeId, DOCUMENT_PANEL_ID);
+
+  // Now json-edit is active in the expanded edge: toggleDocument collapses
+  toggleDocument(fakeApi, true);
+  assert.strictEqual(collapsed, true);
+
+  // openDocument expands and activates json-edit
+  activeId = "menu";
+  openDocument(fakeApi, true);
+  assert.strictEqual(collapsed, false);
+  assert.strictEqual(activeId, DOCUMENT_PANEL_ID);
 });
