@@ -245,6 +245,12 @@ test("toggleDocument switches to json-edit and keeps edge expanded when menu/set
   let activeId = "menu";
   const docPanel = {
     id: DOCUMENT_PANEL_ID,
+    // toggleDocument reads the edge group's own active tab.
+    group: {
+      get activePanel() {
+        return { id: activeId };
+      },
+    },
     api: {
       location: { type: "edge" },
       setActive: () => {
