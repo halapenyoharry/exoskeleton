@@ -6,11 +6,11 @@ import "./DocumentEdge.css";
 
 // Dockview's default tab, customized without being replaced. The default
 // tab carries the drag-and-drop plumbing; we only pass a color, a glyph
-// CSS variable, and — for the document edge — a close override that
-// collapses the edge group instead of closing the panel. Everything the
-// tab used to carry besides its name (menu, controls, pin) now lives in
-// Dockview's header-actions slots (HeaderActions.tsx) and the panel's
-// Paneview (PanelPanes.tsx).
+// CSS variable, and — for the document edge — hideClose so its three tabs
+// cannot be closed (Dockview natively toggles the edge on active-tab click).
+// Everything the tab used to carry besides its name (menu, controls, pin)
+// now lives in Dockview's header-actions slots (HeaderActions.tsx) and the
+// panel's Paneview (PanelPanes.tsx).
 
 const accents: Record<string, string> = {
   blank: "var(--accent-settings)",
@@ -107,17 +107,42 @@ export default function ColoredTab(props: IDockviewPanelHeaderProps) {
   const wasActiveRef = useRef(false);
 
   // Document edge: tag the group root so DocumentEdge.css can style the
-  // collapsed strip (Dockview toggles .dv-edge-collapsed on it).
+  // collapsed strip (Dockview toggles .dv-edge-collapsed on it), expand on
+  // phone when tapping empty strip space below the tabs, and block Delete /
+  // Backspace from closing the edge tabs.
   useEffect(() => {
     if (!isDocEdge) return;
     const root = rootRef.current?.closest(".dv-groupview") as HTMLElement | null;
     if (!root) return;
     root.classList.add("exo-doc-edge");
-    return () => root.classList.remove("exo-doc-edge");
-  }, [isDocEdge]);
+    const onStripClick = (e: MouseEvent) => {
+      if (!root.closest(".exo-phone")) return;
+      if (!props.api.group.api.isCollapsed()) return;
+      const target = e.target as HTMLElement | null;
+      if (target?.closest(".dv-tab")) return;
+      props.api.group.api.expand();
+      props.api.group.activePanel?.api.setActive();
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Delete" && e.key !== "Backspace") return;
+      const target = e.target as HTMLElement | null;
+      if (target?.closest(".dv-tabs-container")) {
+        e.stopPropagation();
+      }
+    };
+    root.addEventListener("click", onStripClick);
+    root.addEventListener("keydown", onKeyDown, true);
+    return () => {
+      root.removeEventListener("click", onStripClick);
+      root.removeEventListener("keydown", onKeyDown, true);
+      if (!root.querySelector(".exo-tab--doc")) {
+        root.classList.remove("exo-doc-edge");
+      }
+    };
+  }, [isDocEdge, props.api]);
 
   function onClick() {
-    if (isDocEdge) return; // Dockview expands the collapsed strip on click
+    if (isDocEdge) return; // Dockview expands/collapses the edge on tab click
     if (!wasActiveRef.current) return;
     const el = rootRef.current;
     // Phone grid only: tap the active tab to maximize, tap again to restore.
@@ -139,7 +164,7 @@ export default function ColoredTab(props: IDockviewPanelHeaderProps) {
     >
       <DockviewDefaultTab
         {...props}
-        closeActionOverride={isDocEdge ? () => props.api.group.api.collapse() : undefined}
+        hideClose={isDocEdge}
       />
     </div>
   );

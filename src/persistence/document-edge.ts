@@ -28,10 +28,10 @@ const EDGE_TAB_TITLES: Record<EdgeTabId, string> = { settings: "Settings", menu:
 
 export const DOCUMENT_EDGE_SIZE = 360;
 export const DOCUMENT_EDGE_MIN = 280;
-export const DOCUMENT_COLLAPSED_SIZE = 40;
-export const DOCUMENT_COLLAPSED_SIZE_PHONE = 44;
+export const DOCUMENT_COLLAPSED_SIZE = 26;
+export const DOCUMENT_COLLAPSED_SIZE_PHONE = 26;
 
-/** Phone: web runtime and a viewport at or below DECK_QUERY. */
+/** Phone: web runtime and a viewport matching DECK_QUERY (`(max-width: 600px), (pointer: coarse) and (max-height: 500px)`). */
 export function isPhoneWidth(): boolean {
   return (
     isWebRuntime() &&
@@ -295,7 +295,10 @@ export function ensureDocumentEdge(
   const open = opts.open === true;
   const edge = api.getEdgeGroup(DOCUMENT_EDGE) ?? addDocumentEdge(api, { phone: opts.phone, collapsed: !open });
   const existing = api.getPanel(DOCUMENT_PANEL_ID);
-  if (existing) return existing;
+  if (existing) {
+    ensureEdgeTabs(api);
+    return existing;
+  }
   const prev = api.activePanel;
   try {
     const panel = api.addPanel({
@@ -305,6 +308,7 @@ export function ensureDocumentEdge(
       ...(opts.params ? { params: opts.params } : {}),
       position: { referenceGroup: edge.id },
     });
+    ensureEdgeTabs(api);
     if (open) edge.expand();
     else edge.collapse();
     if (prev && prev.id !== DOCUMENT_PANEL_ID) prev.api.setActive();
@@ -342,10 +346,14 @@ export function openDocument(api: DockviewApi, phone: boolean): void {
 
 export function toggleDocument(api: DockviewApi, phone: boolean): void {
   const panel = api.getPanel(DOCUMENT_PANEL_ID);
-  if (!panel || panel.api.location.type !== "edge") {
-    openDocument(api, phone);
-    return;
-  }
-  setDocumentOpen(api, !isDocumentOpen(api), phone);
-  if (isDocumentOpen(api)) panel.api.setActive();
+  const edge = api.getEdgeGroup(DOCUMENT_EDGE);
+  const showing =
+    !!panel &&
+    !!edge &&
+    !edge.isCollapsed() &&
+    panel.api.location.type === "edge" &&
+    // The edge group's own active tab, not the app's focused panel.
+    panel.group.activePanel?.id === DOCUMENT_PANEL_ID;
+  if (showing) setDocumentOpen(api, false, phone);
+  else openDocument(api, phone);
 }

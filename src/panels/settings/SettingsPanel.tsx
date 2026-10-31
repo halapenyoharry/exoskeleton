@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { IDockviewPanelProps } from "dockview-react";
 import { appStorage } from "../../persistence/app-storage";
 import "./SettingsPanel.css";
 
@@ -8,23 +9,54 @@ import "./SettingsPanel.css";
  *
  * Allows viewing, editing, and live-applying changes to layout and preferences.
  */
-export default function SettingsPanel() {
+export default function SettingsPanel(props: Partial<IDockviewPanelProps> = {}) {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
+  const dirtyRef = useRef(false);
 
-  async function loadFromDisk() {
+  const loadFromDisk = useCallback(async () => {
+    dirtyRef.current = false;
     const state = await appStorage.load();
     setText(JSON.stringify(state ?? {}, null, 2));
     setError(null);
     setDirty(false);
-  }
-
-  useEffect(() => {
-    loadFromDisk();
   }, []);
 
+  const loadIfClean = useCallback(async () => {
+    if (dirtyRef.current) return;
+    const state = await appStorage.load();
+    if (dirtyRef.current) return;
+    setText(JSON.stringify(state ?? {}, null, 2));
+    setError(null);
+    setDirty(false);
+  }, []);
+
+  // Re-read whenever the panel mounts, becomes visible, or becomes active
+  // (plus after App's 400ms debounced save settles), unless unsaved edits exist.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const sync = () => {
+      void loadIfClean();
+      clearTimeout(timer);
+      timer = setTimeout(() => void loadIfClean(), 450);
+    };
+    sync();
+    const d1 = props.api?.onDidVisibilityChange((ev) => {
+      if (ev.isVisible) sync();
+    });
+    const d2 = props.api?.onDidActiveChange((ev) => {
+      if (ev.isActive) sync();
+    });
+    return () => {
+      clearTimeout(timer);
+      d1?.dispose();
+      d2?.dispose();
+    };
+  }, [props.api, loadIfClean]);
+
   function onChange(next: string) {
+    dirtyRef.current = true;
     setText(next);
     setDirty(true);
     try {
@@ -39,6 +71,7 @@ export default function SettingsPanel() {
     try {
       const parsed = JSON.parse(text);
       await appStorage.save(parsed);
+      dirtyRef.current = false;
       setDirty(false);
       setError(null);
       window.dispatchEvent(
