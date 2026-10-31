@@ -106,6 +106,17 @@ export default function ColoredTab(props: IDockviewPanelHeaderProps) {
   // Phone tap-to-focus: was this tab already active when the press began?
   const wasActiveRef = useRef(false);
 
+  // Document edge: the active tab's accent bar is drawn on Dockview's tab
+  // element, which sits outside this wrapper, so hand it the accent too.
+  useEffect(() => {
+    if (!isDocEdge) return;
+    const tab = rootRef.current?.closest(".dv-tab") as HTMLElement | null;
+    tab?.style.setProperty("--tab-accent", accent);
+    return () => {
+      tab?.style.removeProperty("--tab-accent");
+    };
+  }, [isDocEdge, accent]);
+
   // Document edge: tag the group root so DocumentEdge.css can style the
   // collapsed strip (Dockview toggles .dv-edge-collapsed on it), expand on
   // phone when tapping empty strip space below the tabs, and block Delete /

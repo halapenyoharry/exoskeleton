@@ -37,8 +37,12 @@
 .dv-groupview.exo-doc-edge > .dv-tabs-and-actions-container .dv-tab.dv-inactive-tab {
   background: transparent;
 }
+/* The active tab is the brightest thing in the strip: some accents (Settings)
+   are grey, so the accent goes on a bar on the content side, the text is white.
+   The tabs container is turned 180deg, so an inset on the left shows on the right. */
 .dv-groupview.exo-doc-edge > .dv-tabs-and-actions-container .dv-tab.dv-active-tab {
-  background: #233356;
+  background: #2a3d66;
+  box-shadow: inset 3px 0 0 var(--tab-accent, #59b8ff);
 }
 .dv-groupview.exo-doc-edge > .dv-tabs-and-actions-container .dv-default-tab {
   justify-content: center;
@@ -50,12 +54,12 @@
   display: none;
 }
 
-/* High-contrast inactive tab names; active tab keeps its --tab-accent color. */
+/* High-contrast inactive tab names; the active tab is white (above). */
 .dv-groupview.exo-doc-edge > .dv-tabs-and-actions-container .dv-tab.dv-inactive-tab .exo-tab .dv-default-tab {
   color: #c5d4e6;
 }
 .dv-groupview.exo-doc-edge > .dv-tabs-and-actions-container .dv-tab.dv-active-tab .exo-tab .dv-default-tab {
-  color: var(--tab-accent, inherit);
+  color: #ffffff;
 }
 
 /* Edge tabs cannot be closed on any platform. */
