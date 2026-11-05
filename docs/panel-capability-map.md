@@ -1,6 +1,6 @@
 # Panel Capability Map
 
-What each of the 23 exoskeleton panels needs from its host — and therefore where it can run. A unit runs in any host that provides the capabilities it declares. Most declare nothing.
+What each of the 27 exoskeleton panels needs from its host — and therefore where it can run. A unit runs in any host that provides the capabilities it declares. Most declare nothing.
 
 ## How to read it
 
@@ -15,7 +15,7 @@ Capability color tells you where that power exists: **green** = every host has i
 ```mermaid
 flowchart LR
   subgraph PORTABLE["Universal — needs nothing — runs in EVERY host"]
-    U["9 units: the 8 JSON viewers<br/>(tree, mass, circles, graph, graph3d,<br/>graph3d-inspect, cytoscape, dyadic) + status-bar"]
+    U["13 units: the 9 JSON viewers<br/>(tree, mass, circles, graph, graph3d,<br/>graph3d-inspect, cytoscape, dyadic, attention)<br/>+ status-bar, text-viewer, blank, menu"]
     Proc["5 units: Procedural Visuals Suite<br/>(proc-control, manifold, balls,<br/>fountain, recursive)"]
     Speak["speak (planned)"]
   end
@@ -69,7 +69,7 @@ flowchart LR
 
 ## The takeaway
 
-One hard weld (`terminal` → `pty`), two glue-points (`editor` and `json-edit` need a filesystem adapter; `settings` needs persistence, which every host already has), and everything else free. All seven JSON viewers — including the new `json-dyadic` — plus the status bar are universal today. `topology-extract` degrades gracefully (loses file load/save off-Tauri but extraction via fetch still works). `speak` lands in the universal tier with its TTS engine behind a swappable request/response seam.
+One hard weld (`terminal` → `pty`), two glue-points (`editor` and `json-edit` need a filesystem adapter; `settings` needs persistence, which every host already has), and everything else free. All nine JSON viewers plus the status bar and text-viewer are universal today. `topology-extract` degrades gracefully (loses file load/save off-Tauri but extraction via fetch still works). `speak` lands in the universal tier with its TTS engine behind a swappable request/response seam.
 
 ## The declarable capability vocabulary
 
@@ -83,7 +83,7 @@ The right-hand column is the whole list a unit might declare in its manifest:
 | `fs` (read/write/dialog) | native on Tauri, adapter on web/vscode | editor (required), json-edit (optional), topology-extract (optional) |
 | `persistence` | every host | settings (required) |
 | `tts.engine` | swappable (local command or web API) | speak (planned) |
-| *(none)* | every host | the 7 viewers + status-bar |
+| *(none)* | every host | the 9 viewers + status-bar, text-viewer, blank, menu, procedural suite |
 
 ~~Concrete next step: add a `capabilities: string[]` field to `panel-manifest.ts` and fill it for all 16 — `[]` for the universal tier, `["pty"]` for terminal, and so on — so a host can refuse, at install time, anything it can't run.~~
 
