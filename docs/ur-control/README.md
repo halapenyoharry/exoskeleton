@@ -555,3 +555,34 @@ For Harold. Nothing above is final until these are answered.
 5. Whether ur-control sets the CSS in 3.1 or the viewport does.
 6. The default pivot policy per app (`pointer` for exoskeleton; post-pipe
    sites choose `art`).
+
+## 12. Prior art
+
+Checked 2026-11-06. Each of these has one or two of the three layers,
+bound to its own renderer or engine. None has all three renderer-agnostic
+with controllers included. Read them before designing a piece they already
+solved.
+
+| project | what it has | layer | bound to |
+| --- | --- | --- | --- |
+| mjolnir.js (vis.gl) | dependency-free event manager: mouse, touch, wheel, keyboard; pan, pinch, rotate, swipe recognizers; split out of deck.gl | 1 | nothing; no gamepad |
+| deck.gl `Controller` + `ViewState` + `View` | input to view state with pluggable projections (map, orbit, first person, orthographic); per-handler toggles and keyboard speeds | 2 (thin) + 3 (as a contract) | deck.gl views |
+| OpenSeadragon `gestureSettingsMouse/Touch/Pen/Unknown` | a gesture profile per pointer type; its own `MouseTracker` pointer abstraction | 2 (per device) | OpenSeadragon |
+| Cesium `ScreenSpaceCameraController` | `zoomEventTypes`, `rotateEventTypes`, `tiltEventTypes`, `translateEventTypes`: arrays of event type plus modifier, rebindable at runtime | 2 for the camera | Cesium |
+| three.js `ArcballControls.setMouseAction` | operation × button × modifier, with `unsetMouseAction` | 2 for the camera | three.js |
+| camera-controls (yomotsu) | `mouseButtons` and `touches` maps to an action enum | 2 for the camera | three.js |
+| OpenLayers interactions + conditions | composable interactions (DragPan, PinchZoom, KeyboardPan, DragRotate…) gated by condition functions, added and removed at runtime | 2 | OpenLayers |
+| MapLibre and Leaflet handlers | one enable/disable handler per gesture | 2 (toggles only) | their maps |
+| pixi-viewport plugins | drag, pinch, wheel, decelerate, follow, with `mouseButtons` and `keyToPress` options | 2 + 3 | PixiJS |
+| KAPLAY `buttons` | one action name bound to keyboard keys, a mouse button and a gamepad button at once; `setButton` at runtime | 2, device-complete | KAPLAY |
+| Excalibur `InputMapper` | several inputs to one command, keyboard and gamepad shown; pointer normalized to one event type | 2, device-complete | Excalibur |
+| `@gwenjs/input` | keyboard, mouse, gamepad, touch, gyroscope; action contexts; runtime rebinding | 1 + 2, device-complete | the GWEN engine |
+| Godot `InputMap`, Unity Input System, Unreal Enhanced Input | the model: actions, per-device bindings, processors, contexts, user rebinding | 1 + 2 | native engines |
+| SolidCraft navigation presets, ComfyUI Navigation Mode, Blender keymap presets | the user-facing shape: a named profile picked in settings | 2 (UX) | their apps |
+
+What to borrow: mjolnir.js for layer 1 pointer, touch, wheel and keyboard,
+if its maintenance holds up; deck.gl's `ViewState` split for the shape of
+section 3.3; OpenSeadragon's per-pointer-type profiles for section 7's
+`device` field; Cesium's event-type arrays for how a camera row reads;
+KAPLAY's `buttons` for how a device-complete row reads; Godot's InputMap for
+contexts and processors.
