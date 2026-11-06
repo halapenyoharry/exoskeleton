@@ -1,0 +1,33 @@
+{
+  "name": "gamepad-standard",
+  "extends": "base",
+  "devices": ["gamepad"],
+  "comment": "The W3C standard mapping. Left stick pans, right stick zooms (Y) and rotates (X), triggers zoom, d-pad walks the navigation cursor, south activates, east goes back, bumpers cycle profiles, start opens the menu. Glyphs come from the controller id.",
+  "thresholds": { "deadzone": 0.15, "curve": "squared", "digitalThreshold": 0.5, "repeatFirstMs": 350, "repeatMs": 80, "flickThreshold": 0.8 },
+  "rows": [
+    { "gesture": "stick.left", "action": "view.pan", "params": { "speed": 600, "invertY": false } },
+    { "gesture": "stick.right", "action": "view.zoom", "params": { "axis": "y", "speed": 1.0 } },
+    { "gesture": "stick.right", "action": "view.rotate", "params": { "axis": "x", "speed": 1.5 } },
+    { "gesture": "stick.right", "modifiers": { "button": 5 }, "action": "view.tilt", "params": { "axis": "y", "speed": 1.0 } },
+    { "gesture": "trigger.right", "action": "view.zoom", "params": { "sign": 1, "speed": 1.0 } },
+    { "gesture": "trigger.left", "action": "view.zoom", "params": { "sign": -1, "speed": 1.0 } },
+    { "gesture": "dpad.up", "action": "nav.up" },
+    { "gesture": "dpad.down", "action": "nav.down" },
+    { "gesture": "dpad.left", "action": "nav.left" },
+    { "gesture": "dpad.right", "action": "nav.right" },
+    { "gesture": "stick.flick.left", "action": "nav.prev" },
+    { "gesture": "stick.flick.right", "action": "nav.next" },
+    { "gesture": "button", "button": 0, "action": "nav.activate" },
+    { "gesture": "button.hold", "button": 0, "action": "node.openReader" },
+    { "gesture": "button", "button": 1, "action": "nav.back" },
+    { "gesture": "button", "button": 2, "action": "container.toggle" },
+    { "gesture": "button", "button": 3, "action": "view.flyTo" },
+    { "gesture": "button", "button": 4, "action": "profile.prev" },
+    { "gesture": "button", "button": 5, "action": "profile.next" },
+    { "gesture": "button", "button": 8, "action": "view.fit" },
+    { "gesture": "button", "button": 9, "action": "app.menu" },
+    { "gesture": "button", "button": 10, "action": "view.home" },
+    { "gesture": "button", "button": 11, "action": "view.follow" },
+    { "gesture": "button", "button": 16, "action": "none", "comment": "home is the OS's" }
+  ]
+}

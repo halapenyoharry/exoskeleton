@@ -1,0 +1,137 @@
+{
+  "comment": "The device catalogue of README.md section 5 in machine form: which gestures (section 6) each device family can produce. A gesture a profile binds that none of its devices produces is unreachable, and the converter says so. Entries ending in * match by prefix. Ambient devices are always present (the layer's own timer, the OSC bridge) and are not listed in a profile's devices.",
+  "devices": {
+    "mouse": {
+      "section": "5.1",
+      "produces": [
+        "tap",
+        "doubletap",
+        "longpress",
+        "drag",
+        "hover",
+        "wheel",
+        "wheel.h",
+        "button"
+      ]
+    },
+    "trackpad": {
+      "section": "5.2",
+      "produces": [
+        "tap",
+        "doubletap",
+        "longpress",
+        "drag",
+        "hover",
+        "wheel",
+        "wheel.h",
+        "twofinger.scroll",
+        "pinch",
+        "twist",
+        "twofinger.drag",
+        "threefinger.drag"
+      ]
+    },
+    "pen": {
+      "section": "5.3",
+      "produces": [
+        "tap",
+        "doubletap",
+        "longpress",
+        "drag",
+        "hover",
+        "button"
+      ]
+    },
+    "touch": {
+      "section": "5.4",
+      "produces": [
+        "tap",
+        "doubletap",
+        "longpress",
+        "drag",
+        "dwell",
+        "pinch",
+        "twist",
+        "twofinger.tap",
+        "twofinger.doubletap",
+        "twofinger.drag",
+        "threefinger.drag",
+        "swipe.*",
+        "edge.swipe.*",
+        "tilt.*"
+      ]
+    },
+    "crown": {
+      "section": "5.6",
+      "produces": [
+        "axis:crown"
+      ]
+    },
+    "keyboard": {
+      "section": "5.7",
+      "produces": [
+        "key",
+        "chord",
+        "key.hold",
+        "key.double"
+      ]
+    },
+    "gamepad": {
+      "section": "5.8",
+      "produces": [
+        "button",
+        "button.hold",
+        "button.double",
+        "dpad.*",
+        "stick.*",
+        "trigger.*",
+        "axis:*"
+      ]
+    },
+    "midi": {
+      "section": "5.9",
+      "produces": [
+        "cc:*",
+        "note:*",
+        "axis:*",
+        "button"
+      ]
+    },
+    "osc": {
+      "section": "5.9",
+      "ambient": true,
+      "produces": [
+        "osc:*"
+      ]
+    },
+    "timer": {
+      "section": "5.9",
+      "ambient": true,
+      "produces": [
+        "scan.tick"
+      ]
+    }
+  },
+  "core": {
+    "comment": "What every device-bearing profile must reach, by at least one producible row, for a person holding only those devices to use a viewport at all.",
+    "move": [
+      "view.pan",
+      "view.follow",
+      "view.flyTo"
+    ],
+    "zoom": [
+      "view.zoom",
+      "view.zoomInStep",
+      "view.zoomAtPoint"
+    ],
+    "activate": [
+      "nav.activate",
+      "node.select",
+      "node.openReader"
+    ],
+    "back": [
+      "nav.back",
+      "view.deselect"
+    ]
+  }
+}

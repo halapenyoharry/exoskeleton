@@ -1,0 +1,13 @@
+{
+  "name": "base",
+  "comment": "The parent of every profile. Rows every viewport answers regardless of device. Nothing here touches a pointer.",
+  "thresholds": { "doubleTapMs": 250, "doubleTapPx": 32, "longPressMs": 500, "longPressSlopPx": 8, "dragSlopPx": 5, "wheelStepMax": 0.32, "zoomStep": 1.25 },
+  "rows": [
+    { "gesture": "osc:/view/fit", "action": "view.fit" },
+    { "gesture": "osc:/view/home", "action": "view.home" },
+    { "gesture": "osc:/sync/toggle", "action": "sync.toggle" },
+    { "gesture": "osc:/nav/next", "action": "nav.next" },
+    { "gesture": "osc:/nav/prev", "action": "nav.prev" },
+    { "gesture": "osc:/nav/activate", "action": "nav.activate" }
+  ]
+}

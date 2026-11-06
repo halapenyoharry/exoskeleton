@@ -1,0 +1,49 @@
+{
+  "name": "trackpad",
+  "extends": "mouse",
+  "devices": [
+    "trackpad"
+  ],
+  "comment": "Two-finger scroll pans (not zooms), pinch zooms, Safari's rotate gesture rotates. No middle button exists, so its row is removed.",
+  "rows": [
+    {
+      "gesture": "twofinger.scroll",
+      "action": "view.pan",
+      "params": {
+        "invertNatural": true
+      }
+    },
+    {
+      "gesture": "pinch",
+      "action": "view.zoom"
+    },
+    {
+      "gesture": "wheel",
+      "modifiers": {
+        "ctrl": true
+      },
+      "action": "view.zoom",
+      "comment": "Chrome and Firefox deliver a pinch this way"
+    },
+    {
+      "gesture": "twist",
+      "action": "view.rotate"
+    },
+    {
+      "gesture": "drag",
+      "button": 1,
+      "action": "none"
+    },
+    {
+      "gesture": "button",
+      "button": 3,
+      "action": "none",
+      "comment": "no back button on a trackpad"
+    },
+    {
+      "gesture": "button",
+      "button": 4,
+      "action": "none"
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "name": "switch-scanning",
+  "extends": "base",
+  "devices": [
+    "keyboard",
+    "gamepad"
+  ],
+  "comment": "One or two accessibility switches. With one, the cursor scans on a timer and the switch activates. With two, the first steps and the second activates. A switch arrives as a key (often Space or Enter) or as a gamepad button. Moving is the camera following the cursor; zoom is a double press.",
+  "thresholds": {
+    "scanMs": 1200
+  },
+  "rows": [
+    {
+      "gesture": "scan.tick",
+      "action": "nav.next"
+    },
+    {
+      "gesture": "key",
+      "key": " ",
+      "action": "nav.activate"
+    },
+    {
+      "gesture": "key",
+      "key": "Enter",
+      "action": "nav.next",
+      "comment": "second switch, when present; stops the scan timer"
+    },
+    {
+      "gesture": "button",
+      "button": 0,
+      "action": "nav.activate"
+    },
+    {
+      "gesture": "button",
+      "button": 1,
+      "action": "nav.next"
+    },
+    {
+      "gesture": "button.hold",
+      "button": 0,
+      "action": "nav.back"
+    },
+    {
+      "gesture": "key.hold",
+      "key": " ",
+      "action": "nav.back"
+    },
+    {
+      "gesture": "button.hold",
+      "button": 1,
+      "action": "view.follow"
+    },
+    {
+      "gesture": "key.hold",
+      "key": "Enter",
+      "action": "view.follow"
+    },
+    {
+      "gesture": "button.double",
+      "button": 0,
+      "action": "view.zoomInStep"
+    },
+    {
+      "gesture": "button.double",
+      "button": 1,
+      "action": "view.zoomOutStep"
+    },
+    {
+      "gesture": "key.double",
+      "key": " ",
+      "action": "view.zoomInStep"
+    },
+    {
+      "gesture": "key.double",
+      "key": "Enter",
+      "action": "view.zoomOutStep"
+    }
+  ]
+}

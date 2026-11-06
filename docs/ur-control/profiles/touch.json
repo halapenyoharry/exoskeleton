@@ -1,0 +1,22 @@
+{
+  "name": "touch",
+  "extends": "base",
+  "devices": ["touch", "pen"],
+  "comment": "Tablets and touch laptops. One finger pans space or moves an item; two fingers pinch, twist and tap to zoom out; a pen hovers like a mouse.",
+  "rows": [
+    { "target": "space", "gesture": "tap", "action": "view.deselect" },
+    { "target": "space", "gesture": "doubletap", "action": "view.zoomAtPoint" },
+    { "target": "space", "gesture": "drag", "action": "view.pan" },
+    { "target": "node", "gesture": "tap", "action": "node.select" },
+    { "target": "node", "gesture": "doubletap", "action": "node.openReader" },
+    { "target": "node", "gesture": "drag", "action": "node.move" },
+    { "target": "node", "gesture": "hover", "device": "pen", "action": "select.hover" },
+    { "target": "container", "gesture": "tap", "action": "container.toggle" },
+    { "target": "container", "gesture": "doubletap", "action": "view.zoomAtPoint" },
+    { "target": "container", "gesture": "drag", "action": "node.move" },
+    { "gesture": "pinch", "action": "view.zoom" },
+    { "gesture": "twist", "action": "view.rotate" },
+    { "gesture": "twofinger.doubletap", "action": "view.zoomOutStep", "params": { "about": "point" } },
+    { "gesture": "twofinger.drag", "action": "view.pan" }
+  ]
+}

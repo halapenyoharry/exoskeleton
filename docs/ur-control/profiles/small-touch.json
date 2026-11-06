@@ -1,0 +1,61 @@
+{
+  "name": "small-touch",
+  "extends": "touch",
+  "devices": [
+    "touch",
+    "crown"
+  ],
+  "comment": "Watches, kiosks, car and embedded screens: one contact, no pinch, big targets. Zoom comes from a crown or bezel if there is one, else from a tap on space.",
+  "rows": [
+    {
+      "gesture": "pinch",
+      "action": "none"
+    },
+    {
+      "gesture": "twist",
+      "action": "none"
+    },
+    {
+      "gesture": "twofinger.doubletap",
+      "action": "none"
+    },
+    {
+      "gesture": "twofinger.drag",
+      "action": "none"
+    },
+    {
+      "target": "space",
+      "gesture": "tap",
+      "action": "view.zoomInStep"
+    },
+    {
+      "target": "space",
+      "gesture": "doubletap",
+      "action": "view.fit"
+    },
+    {
+      "target": "node",
+      "gesture": "tap",
+      "action": "nav.activate"
+    },
+    {
+      "target": "node",
+      "gesture": "doubletap",
+      "action": "none"
+    },
+    {
+      "gesture": "axis:crown",
+      "action": "view.zoom",
+      "params": {
+        "curve": "linear",
+        "speed": 0.5
+      }
+    },
+    {
+      "target": "space",
+      "gesture": "longpress",
+      "action": "nav.back",
+      "comment": "one contact, no pinch: a held finger on empty space is the way back"
+    }
+  ]
+}

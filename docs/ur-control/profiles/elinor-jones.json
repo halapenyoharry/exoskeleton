@@ -1,0 +1,13 @@
+{
+  "name": "elinor-jones",
+  "extends": "post-pipe-engine",
+  "comment": "The site example from docs/ACTIONS.md (Harold's note of 2026-10-04): double tap opens a container, double tap on space zooms a step, double tap on a card zooms until readable and then opens the reader; no resizing by accidental finger drags. Under post-pipe's rule 2, binding container.toggle here takes it off the single tap.",
+  "rows": [
+    { "target": "container", "gesture": "doubletap", "action": "container.toggle" },
+    { "target": "space", "gesture": "doubletap", "action": "view.zoomInStep" },
+    { "target": "node", "gesture": "doubletap", "action": "node.zoomToReadable" },
+    { "target": "node.readable", "gesture": "doubletap", "action": "node.openReader" },
+    { "target": "node", "gesture": "drag", "action": "node.move" },
+    { "target": "container", "gesture": "drag", "action": "node.move" }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "cad-blender",
+  "extends": "mouse",
+  "devices": ["mouse", "keyboard"],
+  "comment": "Blender-style: middle drag orbits or rotates, shift+middle pans, ctrl+middle zooms, wheel zooms, numpad period frames the selection, Home fits.",
+  "rows": [
+    { "gesture": "drag", "button": 1, "action": "view.rotate" },
+    { "gesture": "drag", "button": 1, "modifiers": { "shift": true }, "action": "view.pan" },
+    { "gesture": "drag", "button": 1, "modifiers": { "ctrl": true }, "action": "view.zoom", "params": { "axis": "y" } },
+    { "gesture": "wheel", "action": "view.zoom" },
+    { "gesture": "wheel", "modifiers": { "ctrl": true }, "action": "view.pan", "params": { "axis": "x" } },
+    { "gesture": "wheel", "modifiers": { "shift": true }, "action": "view.pan", "params": { "axis": "y" } },
+    { "gesture": "key", "code": "NumpadDecimal", "when": ["!typing"], "action": "view.flyTo" },
+    { "gesture": "key", "key": "Home", "when": ["!typing"], "action": "view.fit" }
+  ]
+}

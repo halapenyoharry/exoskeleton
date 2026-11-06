@@ -1,0 +1,24 @@
+{
+  "name": "mouse",
+  "extends": "base",
+  "devices": ["mouse"],
+  "comment": "A three-button mouse with a wheel. Left selects and drags, wheel zooms about the pointer, right is left to the app's menu.",
+  "rows": [
+    { "target": "space", "gesture": "tap", "action": "view.deselect" },
+    { "target": "space", "gesture": "doubletap", "action": "view.zoomAtPoint" },
+    { "target": "space", "gesture": "drag", "button": 0, "action": "view.pan" },
+    { "target": "node", "gesture": "tap", "action": "node.select" },
+    { "target": "node", "gesture": "doubletap", "action": "node.openReader" },
+    { "target": "node", "gesture": "drag", "button": 0, "action": "node.move" },
+    { "target": "node", "gesture": "drag", "button": 0, "region": "edge", "action": "node.resize" },
+    { "target": "node", "gesture": "hover", "action": "select.hover" },
+    { "target": "container", "gesture": "tap", "action": "container.toggle" },
+    { "target": "container", "gesture": "doubletap", "action": "view.zoomAtPoint" },
+    { "target": "container", "gesture": "drag", "button": 0, "action": "node.move" },
+    { "gesture": "wheel", "action": "view.zoom" },
+    { "gesture": "wheel", "modifiers": { "shift": true }, "action": "view.pan", "params": { "axis": "x" } },
+    { "gesture": "drag", "button": 1, "action": "view.pan" },
+    { "gesture": "button", "button": 3, "action": "nav.back" },
+    { "gesture": "button", "button": 4, "action": "nav.next" }
+  ]
+}
