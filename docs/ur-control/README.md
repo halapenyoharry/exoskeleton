@@ -404,6 +404,7 @@ profile; post-pipe's numbers are kept.
 | `edge.swipe.left|right` | phone | from the screen's edge; usually the OS's own |
 | `key` | keyboard, remote | `code` or `key`, modifiers, `repeat` |
 | `chord` | keyboard | several keys down together |
+| `key.double` | keyboard | the same key twice within `doubleTapMs`; the keyboard's `button.double` |
 | `key.hold` | keyboard | a held key as an axis of value 1 until `keyup` |
 | `button` / `button.hold` / `button.double` | gamepad, MIDI pad, switch | index or name |
 | `dpad.*` | gamepad | up, down, left, right; auto-repeat 350 ms then 80 ms |
@@ -446,8 +447,10 @@ invert, sign, axis, step), `comment`.
 
 Resolution, inherited from post-pipe and extended:
 
-1. A profile's rows go over its parent's. A row replaces the parent's rows
-   for the same gesture, target and device.
+1. A profile's rows go over its parent's. A row replaces the parent's row
+   with the same identity: gesture, target, device, the source specifier
+   (`key`, `code`, `keys`, `button`, `index`, `region`), `modifiers` and
+   `when`. Two keyboard rows on different keys are two rows.
 2. An action a profile binds is bound only where that profile binds it
    (post-pipe's second rule).
 3. More specific wins: a row with a `device` beats one without; a row with
@@ -470,6 +473,62 @@ Auto-selection on first run: `pointer: coarse` and width ≤ 600 → `phone`;
 `gamepad-standard` as an additional profile (profiles stack: a keyboard and a
 mouse are both live on a desktop); otherwise `mouse`, and `trackpad` when
 the first wheel event carries pixel deltas with momentum.
+
+### 7.1 The canonical form is a hypergraph
+
+Rows are what a hand edits. What the layer thinks in is a TopoThink
+hypergraph (`information2topology/hypergraph.topothink.spec.md`), and the
+rows are its projection. A row of up to six participants (device, target,
+gesture, action, modifiers, context) is one edge of arity six with named
+roles; a profile extending a profile is an edge; a profile holding a row is
+an edge; a device producing a gesture is an edge. Every row is reified, a
+node as well as an edge, so a later edge can say who set it and when.
+
+`tools/rows-to-hypergraph.mjs` is the adapter, both ways, with no
+dependencies:
+
+- `node docs/ur-control/tools/rows-to-hypergraph.mjs` reads `profiles/*.json`
+  and `catalogue.json` and writes `hypergraph/ur-control.hypergraph.topothink.json`
+  (every profile), `hypergraph/elinor-jones.hypergraph.topothink.json` (one
+  profile with its ancestors, as the readable example) and
+  `hypergraph/REPORT.md`.
+- `--check` also projects every profile back to rows and exits non-zero on
+  any loss. All fifteen templates round-trip lossless.
+
+Node kinds: `urc:device/*`, `urc:gesture/*`, `urc:target/*`, `urc:action/*`,
+`urc:context/*`, `urc:profile/*`, `urc:row/<profile>/<n>`. Edge predicates,
+each with its `i2t:category` from `docs/edge-categories.md`:
+
+| predicate | from → to | roles | category |
+| --- | --- | --- | --- |
+| `urc:binds` | the row itself (reified) | `gesture`, `action`, `target`?, `device`?, `when`* (with `urc:negated`) | interactivity: a gesture flows to an action |
+| `urc:extends` | child profile → parent | source, target | containment: a kind of |
+| `urc:has-row` | profile → row | source, target | containment: membership |
+| `urc:applies-to` | profile → device | source, target, `urc:order` | reference |
+| `urc:produces` | device → gesture | source, target, `urc:pattern` when from a prefix | interactivity: signals flow |
+
+Everything else a row carries (`key`, `code`, `button`, `modifiers`,
+`params`, `comment`, any key at all) rides on the row's edge as
+`urc:<key>`, so the inverse needs no list of known fields.
+
+`catalogue.json` is section 5 in machine form: which gestures each device
+family produces, with `*` for a prefix, and two ambient devices (`osc`, the
+layer's own `timer`) that every profile has without listing. It also names
+the four core needs: move, zoom, activate, back.
+
+Two checks only the hypergraph makes cheap, both run by the tool:
+
+1. **Unproducible row**: a row whose gesture no listed or ambient device
+   produces. Found on first run: the trackpad template inherited the mouse's
+   back and forward buttons.
+2. **Unreachable core need**: no producible row in the effective table
+   answers move, zoom, activate or back. Found on first run: the small-touch
+   template had no way back; the switch-scanning template could neither
+   move nor zoom. All three are fixed in the templates and the report is
+   clean.
+
+The hypergraph file is a document exoskeleton can open in its graph panels,
+under the very controls it describes.
 
 ## 8. Profile templates
 
@@ -494,6 +553,11 @@ write rows from memory.
 | `comfy-standard.json` | mouse | left selects, space or middle pans |
 | `post-pipe-engine.json` | touch + mouse | post-pipe's engine defaults, row for row |
 | `elinor-jones.json` | post-pipe-engine | the site example in `docs/ACTIONS.md` |
+
+Beside the templates: `catalogue.json` (devices and the gestures they
+produce), `tools/rows-to-hypergraph.mjs` (the adapter and the checks),
+`hypergraph/` (the generated canonical form and `REPORT.md`). Regenerate
+after editing any template; the report must stay clean.
 
 ## 9. Wiring an app: the checklist
 
@@ -555,6 +619,11 @@ For Harold. Nothing above is final until these are answered.
 5. Whether ur-control sets the CSS in 3.1 or the viewport does.
 6. The default pivot policy per app (`pointer` for exoskeleton; post-pipe
    sites choose `art`).
+7. Decided 2026-11-06: the canonical form is a TopoThink hypergraph and the
+   rows are its lossless projection (section 7.1). Still open within that:
+   whether a recorded session is written as incidences from the start, and
+   whether a profile's provenance (who set a row, when) is a `urc:set-by`
+   edge on the reified row or an attribute.
 
 ## 12. Prior art
 
