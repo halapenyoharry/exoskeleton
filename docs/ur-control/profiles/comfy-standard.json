@@ -2,7 +2,7 @@
   "name": "comfy-standard",
   "extends": "mouse",
   "devices": ["mouse", "keyboard", "trackpad"],
-  "comment": "ComfyUI's Standard navigation: left click selects and left drag on space is a marquee; space+drag or middle drag pans; wheel scrolls the canvas and ctrl+wheel zooms; pinch zooms. Its Legacy mode is mouse.json (left drag on space pans).",
+  "comment": "ComfyUI's Standard navigation: left click selects and left drag on space is a marquee; space+drag or middle drag pans; wheel scrolls the canvas and ctrl+wheel zooms; pinch zooms. Its Drag Navigation mode (the older default, left drag on space pans) is mouse.json.",
   "rows": [
     { "target": "space", "gesture": "drag", "button": 0, "action": "app.marquee" },
     { "target": "space", "gesture": "drag", "button": 0, "modifiers": { "space": true }, "action": "view.pan" },

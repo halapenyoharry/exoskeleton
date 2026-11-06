@@ -573,7 +573,7 @@ solved.
 | camera-controls (yomotsu) | `mouseButtons` and `touches` maps to an action enum | 2 for the camera | three.js |
 | OpenLayers interactions + conditions | composable interactions (DragPan, PinchZoom, KeyboardPan, DragRotate…) gated by condition functions, added and removed at runtime | 2 | OpenLayers |
 | MapLibre and Leaflet handlers | one enable/disable handler per gesture | 2 (toggles only) | their maps |
-| pixi-viewport plugins | drag, pinch, wheel, decelerate, follow, with `mouseButtons` and `keyToPress` options | 2 + 3 | PixiJS |
+| pixi-viewport (pixijs-userland) plugins | drag, pinch, wheel, decelerate, follow, with `mouseButtons` and `keyToPress` options | 2 + 3 | PixiJS |
 | KAPLAY `buttons` | one action name bound to keyboard keys, a mouse button and a gamepad button at once; `setButton` at runtime | 2, device-complete | KAPLAY |
 | Excalibur `InputMapper` | several inputs to one command, keyboard and gamepad shown; pointer normalized to one event type | 2, device-complete | Excalibur |
 | `@gwenjs/input` | keyboard, mouse, gamepad, touch, gyroscope; action contexts; runtime rebinding | 1 + 2, device-complete | the GWEN engine |
