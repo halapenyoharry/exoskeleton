@@ -267,6 +267,15 @@ export const panelRegistry: RegistryEntry[] = [
     introducedAt: 8,
     companions: ["json-edit"],
   },
+  // tldraw: the tldraw SDK's whiteboard, stock. Not auto-added: reach it via
+  // the ⊞ menu, the + picker, or the Everything preset. No position: it is
+  // added as a tab in the first grid group (or fills an empty grid).
+  {
+    id: "tldraw",
+    component: "tldraw",
+    title: "tldraw",
+    introducedAt: 11,
+  },
 ];
 
 /**
