@@ -1,0 +1,30 @@
+{
+  "name": "tv-remote",
+  "extends": "keyboard",
+  "devices": ["keyboard"],
+  "comment": "A TV or streaming remote arrives as keyboard events: arrows, Enter, Back, colour and media keys. No pointer, so arrows walk the cursor instead of panning; holding an arrow pans.",
+  "rows": [
+    { "gesture": "key.hold", "code": "ArrowLeft", "action": "none" },
+    { "gesture": "key.hold", "code": "ArrowRight", "action": "none" },
+    { "gesture": "key.hold", "code": "ArrowUp", "action": "none" },
+    { "gesture": "key.hold", "code": "ArrowDown", "action": "none" },
+    { "gesture": "key", "key": "ArrowLeft", "action": "nav.left" },
+    { "gesture": "key", "key": "ArrowRight", "action": "nav.right" },
+    { "gesture": "key", "key": "ArrowUp", "action": "nav.up" },
+    { "gesture": "key", "key": "ArrowDown", "action": "nav.down" },
+    { "gesture": "key", "key": "Enter", "action": "nav.activate" },
+    { "gesture": "key", "key": "Backspace", "action": "nav.back" },
+    { "gesture": "key", "key": "GoBack", "action": "nav.back" },
+    { "gesture": "key", "key": "BrowserBack", "action": "nav.back" },
+    { "gesture": "key", "key": "ChannelUp", "action": "view.zoomInStep" },
+    { "gesture": "key", "key": "ChannelDown", "action": "view.zoomOutStep" },
+    { "gesture": "key", "key": "MediaPlayPause", "action": "node.listen" },
+    { "gesture": "key", "key": "MediaStop", "action": "node.stopListening" },
+    { "gesture": "key", "key": "MediaTrackNext", "action": "nav.next" },
+    { "gesture": "key", "key": "MediaTrackPrevious", "action": "nav.prev" },
+    { "gesture": "key", "key": "ColorF0Red", "action": "view.fit" },
+    { "gesture": "key", "key": "ColorF1Green", "action": "view.home" },
+    { "gesture": "key", "key": "ColorF2Yellow", "action": "container.toggle" },
+    { "gesture": "key", "key": "ColorF3Blue", "action": "app.menu" }
+  ]
+}

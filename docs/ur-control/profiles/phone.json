@@ -1,0 +1,16 @@
+{
+  "name": "phone",
+  "extends": "touch",
+  "devices": ["touch"],
+  "comment": "One thumb on a small screen. Double tap on a card zooms until it is readable, then opens it; the phone's own back swipe is the app's back; no resize by accidental drags.",
+  "rows": [
+    { "target": "node", "gesture": "doubletap", "action": "node.zoomToReadable" },
+    { "target": "node.readable", "gesture": "doubletap", "action": "node.openReader" },
+    { "target": "node", "gesture": "longpress", "action": "app.itemMenu" },
+    { "target": "node", "gesture": "drag", "region": "edge", "action": "none" },
+    { "target": "space", "gesture": "doubletap", "action": "view.zoomInStep" },
+    { "gesture": "edge.swipe.right", "action": "nav.back" },
+    { "gesture": "swipe.left", "when": ["reader"], "action": "nav.next" },
+    { "gesture": "swipe.right", "when": ["reader"], "action": "nav.prev" }
+  ]
+}

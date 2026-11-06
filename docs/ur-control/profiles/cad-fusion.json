@@ -1,0 +1,13 @@
+{
+  "name": "cad-fusion",
+  "extends": "mouse",
+  "devices": ["mouse"],
+  "comment": "Fusion-style: middle drag pans, shift+middle orbits or rotates, wheel zooms about the pointer, left selects. Left drag on space is a marquee in CAD; here it is left to the app.",
+  "rows": [
+    { "target": "space", "gesture": "drag", "button": 0, "action": "app.marquee" },
+    { "gesture": "drag", "button": 1, "action": "view.pan" },
+    { "gesture": "drag", "button": 1, "modifiers": { "shift": true }, "action": "view.rotate" },
+    { "gesture": "wheel", "action": "view.zoom", "params": { "invert": true } },
+    { "gesture": "doubletap", "button": 1, "action": "view.fit" }
+  ]
+}
