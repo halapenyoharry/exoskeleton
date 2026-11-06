@@ -347,7 +347,7 @@ Standard mapping (`gamepad.mapping === "standard"`):
 | 4, 5 | left, right bumper | LB RB / L1 R1 / L R |
 | 6, 7 | left, right trigger (analog, 0..1) | LT RT / L2 R2 / ZL ZR |
 | 8, 9 | select, start | View Menu / Share Options / − + |
-| 10, 11 | left, right stick click | LS RS / L3 R3 / — |
+| 10, 11 | left, right stick click | LS RS / L3 R3 / none |
 | 12..15 | d-pad up, down, left, right | |
 | 16 | home | Xbox / PS / Home |
 
