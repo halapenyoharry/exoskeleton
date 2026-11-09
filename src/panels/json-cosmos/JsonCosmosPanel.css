@@ -1,0 +1,76 @@
+.json-cosmos-body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  background: #0a0e26;
+}
+
+.json-cosmos-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.json-cosmos-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7ddff5;
+  opacity: 0.6;
+}
+
+.json-cosmos-counts {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  z-index: 5;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: rgba(10, 14, 38, 0.78);
+  color: #9fb3ff;
+  font-size: 11px;
+  line-height: 1.4;
+  pointer-events: none;
+  user-select: none;
+}
+
+.json-cosmos-tooltip {
+  position: absolute;
+  z-index: 10;
+  background: rgba(10, 14, 38, 0.96);
+  border: 1px solid var(--accent-json-cosmos, #9fb3ff);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: #dce5e7;
+  pointer-events: none;
+  max-width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.json-cosmos-tooltip-title {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--accent-json-cosmos, #9fb3ff);
+  word-break: break-word;
+}
+
+.json-cosmos-tooltip-kind {
+  margin-bottom: 4px;
+  color: #7ddff5;
+  opacity: 0.8;
+  font-size: 10px;
+}
+
+.json-cosmos-tooltip-row {
+  margin-top: 2px;
+  word-break: break-word;
+}
+
+.json-cosmos-tooltip-key {
+  color: #7ddff5;
+}
