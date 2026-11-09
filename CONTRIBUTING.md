@@ -33,12 +33,13 @@ proper one.)*
 
 ## Practical notes
 
-- **Read [AGENTS.md](AGENTS.md) and [docs/AGENTS-FAQ.md](docs/AGENTS-FAQ.md)
+- **Read [AGENTS-template.md](AGENTS-template.md) and [docs/AGENTS-FAQ.md](docs/AGENTS-FAQ.md)
   first.** Most recurring design questions are already answered there, in
   test-case shape. Don't re-derive an answer that exists.
-- **Panels come from the component library.** New panels are usually developed
-  in `exoskeleton-component-library` against the `PanelManifest` contract in
-  [src/panel-manifest.ts](src/panel-manifest.ts) rather than added directly here.
+- **Panels are built here.** Each panel lives in `src/panels/<id>/` and satisfies
+  the `PanelManifest` contract in [src/panel-manifest.ts](src/panel-manifest.ts).
+  The separate `exoskeleton-component-library` repository is retired.
+  [AGENTS-template.md](AGENTS-template.md) lists the steps to add one.
 - **Don't break the invariants.** Several odd-looking constraints — never
   calling `addPanel` without a `position`, wrapping rather than replacing
   Dockview's default tab, keeping `dragDropEnabled: false` — each fix a real

@@ -24,3 +24,11 @@ _local/
 
 # local build options (see .env.example)
 .env.local
+
+# Agent context files are local-only (AGENTS-template.md is the public one)
+AGENTS.md
+AGENT.md
+CLAUDE.md
+DROIDZ.md
+DROID-LEAD.md
+GEMINI.md
