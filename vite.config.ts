@@ -38,7 +38,7 @@ function readBody(req: IncomingMessage): Promise<Buffer> {
 
 // Dev-server relay for Ollama. Ollama answers CORS only for its allowed
 // origins (localhost, tauri://, app://), so a page opened from another
-// machine at http://<ip>:1420 gets a 403 calling it directly. The page
+// machine at http://<ip>:3805 gets a 403 calling it directly. The page
 // calls /__ollama/<api path> with the Ollama base URL in the
 // x-exo-ollama-target header; this forwards the request without the Origin
 // header and streams the response back. Targets are limited to loopback,
@@ -105,7 +105,9 @@ export default defineConfig(async () => ({
   clearScreen: false,
   // 2. tauri expects a fixed port, fail if that port is not available
   server: {
-    port: 1420,
+    // 3805 reads as "exos" (Harold, 2026-11-09). 1420/1421 belong to post-pipe now.
+    // Registered in ~/Projects/localNetworkZ/services-registry.json.
+    port: 3805,
     strictPort: true,
     // Serve on all interfaces by default so the page is reachable over LAN and Tailscale
     // (Harold, 2026-10-22). TAURI_DEV_HOST still wins when Tauri sets it.
@@ -114,7 +116,7 @@ export default defineConfig(async () => ({
       ? {
           protocol: "ws",
           host,
-          port: 1421,
+          port: 3806,
         }
       : undefined,
     watch: {

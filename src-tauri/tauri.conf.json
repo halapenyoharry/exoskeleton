@@ -5,7 +5,7 @@
   "identifier": "dev.harold.exoskeleton",
   "build": {
     "beforeDevCommand": "npm run dev",
-    "devUrl": "http://localhost:1420",
+    "devUrl": "http://localhost:3805",
     "beforeBuildCommand": "npm run build",
     "frontendDist": "../dist"
   },

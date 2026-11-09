@@ -5,7 +5,7 @@
 //
 // Ollama from a browser: Ollama only answers CORS requests from its allowed
 // origins (localhost, tauri://, app://). A page loaded from the dev server
-// at http://<lan-or-tailscale-ip>:1420 is not one of them and gets a 403.
+// at http://<lan-or-tailscale-ip>:3805 is not one of them and gets a 403.
 // So in a dev-server browser tab, requests go through the dev server's
 // /__ollama relay (vite.config.ts), which forwards them without the Origin
 // header. The desktop app (tauri://localhost) calls Ollama directly.

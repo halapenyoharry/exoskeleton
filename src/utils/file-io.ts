@@ -10,7 +10,7 @@
 // A cancelled dialog or picker is not an error: save returns null and open
 // returns [].
 //
-// Why the browser branch matters: on http://<lan-or-tailscale-ip>:1420 the
+// Why the browser branch matters: on http://<lan-or-tailscale-ip>:3805 the
 // page is not a secure context, so navigator.clipboard is undefined, and the
 // Tauri plugins do not exist at all. Before this module, every one of those
 // actions failed silently.

@@ -22,7 +22,7 @@ Full stack details and caveats live in [README.md](README.md). Don't duplicate t
 
 ## How to run
 
-**v2.0.0-beta is web-only.** Run the Vite dev server; it listens on port 1420 on all interfaces (LAN and Tailscale), so verify in a browser at http://localhost:1420 or http://<this machine's IP>:1420.
+**v2.0.0-beta is web-only.** Run the Vite dev server; it listens on port 3805 on all interfaces (LAN and Tailscale), so verify in a browser at http://localhost:3805 or http://<this machine's IP>:3805.
 
 ```
 npm install

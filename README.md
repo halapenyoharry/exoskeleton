@@ -146,7 +146,7 @@ npm install
 npm run dev
 ```
 
-The dev server listens on **port 1420 on all interfaces**, so the page is reachable at `http://localhost:1420` and from other devices on your LAN or Tailscale at `http://<your-ip>:1420`. `npm run build` writes the static site to `dist/`.
+The dev server listens on **port 3805 on all interfaces**, so the page is reachable at `http://localhost:3805` and from other devices on your LAN or Tailscale at `http://<your-ip>:3805`. `npm run build` writes the static site to `dist/`.
 
 ### Run the Tauri desktop shell (untested in v2.0.0-beta)
 
