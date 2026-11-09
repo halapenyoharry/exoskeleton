@@ -276,6 +276,9 @@ export const panelRegistry: RegistryEntry[] = [
     title: "tldraw",
     introducedAt: 11,
   },
+  // json-cosmos: cosmos.gl GPU force graph for big documents. Not auto-added:
+  // reach it via the ⊞ menu, the + picker, or the Everything preset.
+  { id: "json-cosmos", component: "json-cosmos", title: "cosmos", introducedAt: 11, companions: ["json-edit"] },
 ];
 
 /**

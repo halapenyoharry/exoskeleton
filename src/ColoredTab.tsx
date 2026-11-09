@@ -39,6 +39,7 @@ const accents: Record<string, string> = {
   "procedural-visuals-manifold": "var(--accent-procedural-manifold)",
   "json-attention": "var(--accent-json-attention)",
   tldraw: "var(--accent-tldraw)",
+  "json-cosmos": "var(--accent-json-cosmos)",
 };
 
 const glyphs: Record<string, string> = {
@@ -68,6 +69,7 @@ const glyphs: Record<string, string> = {
   "procedural-visuals-manifold": '"◎"',
   "json-attention": '"◉"',
   tldraw: '"✎"',
+  "json-cosmos": '"⁂"',
 };
 
 /** Resolve a panel id to the component key the accent/glyph maps use.
