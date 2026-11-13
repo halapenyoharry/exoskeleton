@@ -38,3 +38,36 @@ export function buildNodeBlocks(doc: unknown): NodeBlock[] {
     };
   });
 }
+
+export type NodeBroadcastChannel = "selection" | "focus";
+
+/**
+ * Decide whether the text-viewer should follow an incoming cross-panel node
+ * broadcast.
+ *
+ * Across all five graph views (json-cytoscape, json-graph, json-graph3d,
+ * json-graph3d-inspect, json-cosmos), pointer hover fires
+ * `onNodeSelectionBroadcast` ("selection") and deliberate click or tap fires
+ * `onNodeFocusBroadcast` ("focus").
+ */
+export function shouldFollowNodeBroadcast(
+  channel: NodeBroadcastChannel,
+  scrollOnHover: boolean,
+): boolean {
+  if (channel === "focus") return true;
+  return scrollOnHover;
+}
+
+/**
+ * Decide whether an incoming cross-panel node broadcast should scroll the
+ * text-viewer to `nodeId`, given the `scrollOnHover` setting.
+ */
+export function shouldScrollOnBroadcast(
+  channel: NodeBroadcastChannel,
+  nodeId: string | null,
+  scrollOnHover: boolean,
+): boolean {
+  if (!nodeId) return false;
+  return shouldFollowNodeBroadcast(channel, scrollOnHover);
+}
+

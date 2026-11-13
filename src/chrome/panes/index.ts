@@ -10,3 +10,5 @@ import "./json-dyadic.panes.ts";
 import "./json-cosmos.panes.ts";
 import "./json-edit.panes.ts";
 import "./editor.panes.ts";
+import "./text-viewer.panes.ts";
+

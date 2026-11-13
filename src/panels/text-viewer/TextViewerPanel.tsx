@@ -1,7 +1,12 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import type { IDockviewPanelProps } from "dockview-react";
 import { useJsonDoc } from "../../data/useJsonDoc";
-import { buildNodeBlocks } from "./nodeBlocks";
+import {
+  buildNodeBlocks,
+  shouldFollowNodeBroadcast,
+  shouldScrollOnBroadcast,
+  type NodeBroadcastChannel,
+} from "./nodeBlocks";
 import ReactMarkdown from "react-markdown";
 import {
   broadcastNodeSelection,
@@ -17,12 +22,29 @@ import "./TextViewerPanel.css";
 
 export interface TextViewerParams {
   documentId: string;
+  scrollOnHover: boolean;
 }
 
+export const textViewerDefaults: TextViewerParams = {
+  documentId: "default",
+  scrollOnHover: true,
+};
+
 export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerParams>) {
-  const paramDocId = props.params?.documentId ?? "default";
+  const params: TextViewerParams = {
+    ...textViewerDefaults,
+    ...(props.params ?? {}),
+  };
+  const paramDocId = params.documentId;
   const [documentId, setDocumentId] = useState(paramDocId);
   const [connected, setConnected] = useState(areGraphsConnected());
+
+  // Reflect the default in the pane when the panel was created without scrollOnHover in params.
+  useEffect(() => {
+    if (props.params?.scrollOnHover === undefined) {
+      props.api.updateParameters({ scrollOnHover: textViewerDefaults.scrollOnHover });
+    }
+  }, [props.api, props.params?.scrollOnHover]);
 
   useEffect(() => onGraphsConnectionChange(setConnected), []);
 
@@ -42,11 +64,12 @@ export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerPar
 
   // Listen to cross-panel sync events
   useEffect(() => {
-    const handleNodeEvent = (nodeId: string | null) => {
+    const handleNodeEvent = (channel: NodeBroadcastChannel, nodeId: string | null) => {
       if (!areGraphsConnected() || getActiveDocumentId() !== documentId) return;
+      if (!shouldFollowNodeBroadcast(channel, params.scrollOnHover)) return;
       setSelectedNodeId(nodeId);
       
-      if (nodeId) {
+      if (shouldScrollOnBroadcast(channel, nodeId, params.scrollOnHover) && nodeId) {
         const el = nodeRefs.current.get(nodeId);
         if (el) {
           el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -56,18 +79,18 @@ export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerPar
 
     const unsubSelect = onNodeSelectionBroadcast((e) => {
       if (e.sourcePanelId === props.api.id) return;
-      handleNodeEvent(e.nodeId);
+      handleNodeEvent("selection", e.nodeId);
     });
     const unsubFocus = onNodeFocusBroadcast((e) => {
       if (e.sourcePanelId === props.api.id) return;
-      handleNodeEvent(e.nodeId);
+      handleNodeEvent("focus", e.nodeId);
     });
 
     return () => {
       unsubSelect();
       unsubFocus();
     };
-  }, [documentId, props.api.id]);
+  }, [documentId, props.api.id, params.scrollOnHover]);
 
   const handleNodeClick = (nodeId: string, label: string) => {
     setSelectedNodeId(nodeId);
