@@ -25,6 +25,7 @@ import {
   shouldSeedPresetDocument,
 } from "./presets.ts";
 import { CURRENT_VERSION } from "./storage.ts";
+import { leaves, pruneRoot, type GridNode, type LeafData } from "./deck.ts";
 import {
   DOCUMENT_PANEL_ID,
   ensureDocumentEdge,
@@ -267,19 +268,113 @@ export const panelRegistry: RegistryEntry[] = [
     introducedAt: 8,
     companions: ["json-edit"],
   },
-  // tldraw: the tldraw SDK's whiteboard, stock. Not auto-added: reach it via
-  // the ⊞ menu, the + picker, or the Everything preset. No position: it is
-  // added as a tab in the first grid group (or fills an empty grid).
-  {
-    id: "tldraw",
-    component: "tldraw",
-    title: "tldraw",
-    introducedAt: 11,
-  },
   // json-cosmos: cosmos.gl GPU force graph for big documents. Not auto-added:
   // reach it via the ⊞ menu, the + picker, or the Everything preset.
   { id: "json-cosmos", component: "json-cosmos", title: "cosmos", introducedAt: 11, companions: ["json-edit"] },
 ];
+
+/** Components mounted by the shell that are not in `panelRegistry`. */
+const SHELL_COMPONENTS = new Set(["blank", "menu", "settings", "status-bar-panel", "status-bar"]);
+
+/**
+ * Drop any panel from a serialized layout whose `contentComponent` (or legacy
+ * `view.content.id`) is no longer registered, pruning empty groups and keeping
+ * `activeView` and `activeGroup` valid so `fromJSON` never sees a removed
+ * component (which would throw and reset the whole workspace).
+ */
+export function dropUnknownPanels(
+  layout: SerializedDockview,
+  registry: RegistryEntry[] = panelRegistry,
+): SerializedDockview {
+  const known = new Set<string>(SHELL_COMPONENTS);
+  for (const entry of registry) known.add(entry.component);
+
+  const removed = new Set<string>();
+  for (const [id, raw] of Object.entries(layout.panels ?? {})) {
+    const p = raw as { contentComponent?: string; view?: { content?: { id?: string } } } | undefined;
+    const comp = p?.view?.content?.id ?? p?.contentComponent;
+    if (!comp || !known.has(comp)) removed.add(id);
+  }
+  if (removed.size === 0) return layout;
+
+  const panels = Object.fromEntries(
+    Object.entries(layout.panels ?? {}).filter(([id]) => !removed.has(id)),
+  );
+  let out: SerializedDockview = { ...layout, panels };
+
+  const rootNode = out.grid?.root as unknown as GridNode | undefined;
+  if (rootNode && leaves(rootNode).some((l: LeafData) => l.views.some((v) => removed.has(v)))) {
+    const nextGrid = pruneRoot(out, removed);
+    const { maximizedNode: _m, ...restGrid } = nextGrid as unknown as Record<string, unknown>;
+    out = { ...out, grid: restGrid as unknown as SerializedDockview["grid"] };
+  }
+
+  const stripGroups = <T extends { data?: { views: string[]; activeView?: string } }>(
+    groups: T[] | undefined,
+  ) =>
+    groups
+      ?.map((g) => {
+        if (!g.data || !g.data.views.some((v) => removed.has(v))) return g;
+        const views = g.data.views.filter((v) => !removed.has(v));
+        const activeView =
+          g.data.activeView && views.includes(g.data.activeView) ? g.data.activeView : views[0];
+        return { ...g, data: { ...g.data, views, activeView } };
+      })
+      .filter((g) => !g.data || g.data.views.length > 0);
+
+  if (out.floatingGroups) out = { ...out, floatingGroups: stripGroups(out.floatingGroups) };
+  if (out.popoutGroups) out = { ...out, popoutGroups: stripGroups(out.popoutGroups) };
+
+  if (out.edgeGroups) {
+    type EdgeGroupEntry = { group?: { id: string; views: string[]; activeView?: string }; [k: string]: unknown };
+    const nextEdges: Record<string, EdgeGroupEntry> = {};
+    let edgeChanged = false;
+    for (const [pos, entry] of Object.entries(out.edgeGroups as Record<string, EdgeGroupEntry | undefined>)) {
+      if (!entry) continue;
+      if (!entry.group || !entry.group.views.some((v) => removed.has(v))) {
+        nextEdges[pos] = entry;
+        continue;
+      }
+      edgeChanged = true;
+      const views = entry.group.views.filter((v) => !removed.has(v));
+      if (views.length === 0) continue;
+      const activeView =
+        entry.group.activeView && views.includes(entry.group.activeView)
+          ? entry.group.activeView
+          : views[0];
+      nextEdges[pos] = { ...entry, group: { ...entry.group, views, activeView } };
+    }
+    if (edgeChanged) {
+      out = { ...out };
+      if (Object.keys(nextEdges).length > 0) {
+        out.edgeGroups = nextEdges as unknown as SerializedDockview["edgeGroups"];
+      } else {
+        delete out.edgeGroups;
+      }
+    }
+  }
+
+  if (out.activeGroup) {
+    const gridIds = new Set(
+      leaves(out.grid?.root as unknown as GridNode | undefined).map((l: LeafData) => l.id),
+    );
+    const otherIds = new Set<string>([
+      ...(out.floatingGroups ?? []).map((g) => g.data?.id ?? ""),
+      ...(out.popoutGroups ?? []).map((g) => g.data?.id ?? ""),
+      ...Object.values((out.edgeGroups ?? {}) as Record<string, { group?: { id?: string } } | undefined>).map(
+        (e) => e?.group?.id ?? "",
+      ),
+    ]);
+    if (!gridIds.has(out.activeGroup) && !otherIds.has(out.activeGroup)) {
+      const first = [...gridIds][0];
+      out = { ...out };
+      if (first) out.activeGroup = first;
+      else delete out.activeGroup;
+    }
+  }
+
+  return out;
+}
 
 /**
  * Rewrite a saved layout JSON for schema-version bumps that need to mutate
@@ -305,9 +400,11 @@ export function migrateSavedLayout(
     .replace(/"wordWrap"\s*:\s*"on"/g, '"lineWrapping":true')
     .replace(/"wordWrap"\s*:\s*"off"/g, '"lineWrapping":false')
     .replace(/"minimap"\s*:\s*(true|false),?/g, "");
+  // Drop panels whose component was removed so fromJSON never throws.
+  const cleaned = dropUnknownPanels(JSON.parse(json) as SerializedDockview);
   // Document edge: json-edit in the grid moves to the left edge; the old
   // left-edge settings group moves to the right edge.
-  return migrateEdgeLayout(JSON.parse(json) as SerializedDockview, opts);
+  return migrateEdgeLayout(cleaned, opts);
 }
 
 /** Look up a registry entry by panel id (id === component for all entries). */

@@ -99,11 +99,6 @@ function ollamaRelay(): Plugin {
 export default defineConfig(async () => ({
   plugins: [react(), ollamaRelay()],
 
-  // @tldraw/assets imports its fonts, icons and translations with `?url`.
-  // Dev-mode dependency pre-bundling inlines the translation JSON instead of
-  // emitting URLs, which crashes the tldraw panel. The build is unaffected.
-  optimizeDeps: { exclude: ["@tldraw/assets"] },
-
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
   // 1. prevent Vite from obscuring rust errors

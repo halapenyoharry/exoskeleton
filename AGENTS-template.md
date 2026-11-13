@@ -10,7 +10,7 @@ A workspace you work inside: one window of docked panels (Dockview) for writing,
 
 - React 19 + TypeScript, built with Vite 7
 - Dockview 8 for panels, groups, tabs and edge groups
-- CodeMirror 6 (the JSON document), d3, Cytoscape.js, three.js, cosmos.gl (GPU graph), tldraw (whiteboard)
+- CodeMirror 6 (the JSON document), d3, Cytoscape.js, three.js, cosmos.gl (GPU graph)
 - Tauri 2 shell with `@xterm/xterm` + a PTY plugin for the terminal (desktop only)
 
 ## Run and check
@@ -45,12 +45,12 @@ Verify UI changes in a real browser, including a phone-sized viewport (about 400
 5. Optionally add a panes file, imported in `src/chrome/panes/index.ts`.
 6. Pin new npm dependencies to exact versions, and list them in the manifest's `npmDependencies`.
 
-The `tldraw` and `json-cosmos` panels are recent, complete examples.
+The `json-cosmos` panel is a recent, complete example.
 
 ## Conventions
 
 - **Add beside, don't replace.** A new way of seeing something becomes a new panel or option next to the existing ones. Don't silently change defaults or remove a view.
-- **No runtime calls to third-party hosts.** Bundle fonts, icons and other assets; for example, the tldraw panel serves tldraw's assets through `@tldraw/assets/imports.vite` instead of its CDN.
+- **No runtime calls to third-party hosts.** Bundle fonts, icons and other assets with the build instead of loading them from a CDN.
 - **GPU-heavy panels** pause and stop their render loop while their tab is hidden, and release their WebGL context on unmount.
 - **Keep the invariants** listed in [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/ship-plan.md](docs/ship-plan.md); each fixes a real bug.
 - **Use Dockview's own vocabulary** (panel, group, tab, edge group, sash, header actions). When something has no name there, describe it plainly and ask a maintainer before inventing one.
@@ -66,4 +66,4 @@ The `tldraw` and `json-cosmos` panels are recent, complete examples.
 
 ## Licenses
 
-Exoskeleton is AGPL-3.0-or-later. Third-party panels keep their own licenses: cosmos.gl is MIT, and tldraw is source-available (production deployments need a tldraw license key; see [src/panels/tldraw/README.md](src/panels/tldraw/README.md)).
+Exoskeleton is AGPL-3.0-or-later. Third-party panels keep their own licenses (for example, cosmos.gl is MIT).

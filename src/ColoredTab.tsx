@@ -38,7 +38,6 @@ const accents: Record<string, string> = {
   "procedural-visuals-recursive": "var(--accent-procedural-recursive)",
   "procedural-visuals-manifold": "var(--accent-procedural-manifold)",
   "json-attention": "var(--accent-json-attention)",
-  tldraw: "var(--accent-tldraw)",
   "json-cosmos": "var(--accent-json-cosmos)",
 };
 
@@ -68,7 +67,6 @@ const glyphs: Record<string, string> = {
   "procedural-visuals-recursive": '"▣"',
   "procedural-visuals-manifold": '"◎"',
   "json-attention": '"◉"',
-  tldraw: '"✎"',
   "json-cosmos": '"⁂"',
 };
 
