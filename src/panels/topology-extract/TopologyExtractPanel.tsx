@@ -516,6 +516,7 @@ export default function TopologyExtractPanel(props: IDockviewPanelProps<Topology
               </datalist>
             </label>
             <button
+              type="button"
               className="topo-extract-source-btn"
               onClick={() => void refreshOllamaModels()}
               title="List the models installed on this host"
@@ -546,6 +547,7 @@ export default function TopologyExtractPanel(props: IDockviewPanelProps<Topology
       {/* ── API key row ──────────────────────────────── */}
       {p.provider === "openrouter" && (
         <div className="topo-extract-key-row">
+          {/* biome-ignore lint/a11y/noLabelWithoutControl: visual caption beside input; panel may be mounted multiple times */}
           <label style={{ fontSize: 11, color: "#7e879b", whiteSpace: "nowrap" }}>API Key</label>
           <input
             className="topo-extract-key-input"
@@ -557,6 +559,7 @@ export default function TopologyExtractPanel(props: IDockviewPanelProps<Topology
             autoComplete="off"
           />
           <button
+            type="button"
             className="topo-extract-key-toggle"
             onClick={() => setShowKey(!showKey)}
             title={showKey ? "Hide key" : "Show key"}
@@ -640,13 +643,19 @@ export default function TopologyExtractPanel(props: IDockviewPanelProps<Topology
         />
         <div className="topo-extract-source-actions">
           <button
+            type="button"
             className="topo-extract-source-btn"
             onClick={handleLoadFile}
             disabled={extracting}
           >
             📂 Load File
           </button>
-          <button className="topo-extract-source-btn" onClick={handlePaste} disabled={extracting}>
+          <button
+            type="button"
+            className="topo-extract-source-btn"
+            onClick={handlePaste}
+            disabled={extracting}
+          >
             📋 From Clipboard
           </button>
           <span className="topo-extract-token-estimate">
@@ -659,6 +668,7 @@ export default function TopologyExtractPanel(props: IDockviewPanelProps<Topology
 
       {/* ── Advanced: prompt editor ──────────────────── */}
       <button
+        type="button"
         className="topo-extract-advanced-toggle"
         onClick={() => setShowAdvanced(!showAdvanced)}
       >
@@ -674,7 +684,11 @@ export default function TopologyExtractPanel(props: IDockviewPanelProps<Topology
             }
           />
           {p.systemPrompt !== "" && (
-            <button className="topo-extract-prompt-reset" onClick={() => set("systemPrompt", "")}>
+            <button
+              type="button"
+              className="topo-extract-prompt-reset"
+              onClick={() => set("systemPrompt", "")}
+            >
               ↺ Reset to default prompt
             </button>
           )}
@@ -684,6 +698,7 @@ export default function TopologyExtractPanel(props: IDockviewPanelProps<Topology
       {/* ── Extract trigger ──────────────────────────── */}
       <div className="topo-extract-trigger">
         <button
+          type="button"
           className={`topo-extract-btn ${extracting ? "topo-extract-btn--cancel" : ""}`}
           disabled={!canExtract && !extracting}
           onClick={handleExtract}
@@ -737,6 +752,7 @@ export default function TopologyExtractPanel(props: IDockviewPanelProps<Topology
             <details className="topo-extract-progress-log" open={extracting}>
               <summary>Pass log ({log.length})</summary>
               {log.map((line, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: append-only log lines may contain duplicate text
                 <div key={i} className={line.includes("✗") ? "topo-extract-log-error" : ""}>
                   {line}
                 </div>
@@ -813,6 +829,7 @@ export default function TopologyExtractPanel(props: IDockviewPanelProps<Topology
 
             <div className="topo-extract-result-actions">
               <button
+                type="button"
                 className="topo-extract-result-btn topo-extract-result-btn--primary"
                 onClick={handlePush}
                 title="Put this result in the document library and make it the active document"
@@ -820,6 +837,7 @@ export default function TopologyExtractPanel(props: IDockviewPanelProps<Topology
                 {pushedId ? "✓ In library — update" : "Add to library ▸"}
               </button>
               <button
+                type="button"
                 className="topo-extract-result-btn"
                 onClick={handleCopyJson}
                 title="Copy the JSON"
@@ -827,6 +845,7 @@ export default function TopologyExtractPanel(props: IDockviewPanelProps<Topology
                 Copy JSON
               </button>
               <button
+                type="button"
                 className="topo-extract-result-btn"
                 onClick={handleSaveJson}
                 title="Save the JSON to a file"
@@ -859,6 +878,7 @@ export default function TopologyExtractPanel(props: IDockviewPanelProps<Topology
           </div>
         )}
         {flash && (
+          // biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: transient status flash dismissed on click
           <div
             className={`topo-extract-flash topo-extract-flash--${flash.kind}`}
             onClick={clear}

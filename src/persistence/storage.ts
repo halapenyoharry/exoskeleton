@@ -34,6 +34,7 @@ import type { SerializedDockview } from "dockview-react";
 //       and containment hulls.
 export const CURRENT_VERSION = 11;
 
+// biome-ignore lint/suspicious/noEmptyInterface: reserved preferences contract
 export interface Preferences {
   // Empty for now; reserved for theme, tab-position, etc. when those land.
 }

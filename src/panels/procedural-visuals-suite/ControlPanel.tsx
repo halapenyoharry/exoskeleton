@@ -98,7 +98,11 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
     // Ping existing panels so they re-report availability
     sendOsc(getPingAddress(docId), []);
 
-    return () => cleanupFns.forEach((fn) => fn());
+    return () => {
+      cleanupFns.forEach((fn) => {
+        fn();
+      });
+    };
   }, [docId]);
 
   // Generic value change sender
@@ -182,6 +186,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
             <div className="visual-selector-row">
               {TOPO_SURFACES.map((s) => (
                 <button
+                  type="button"
                   key={s.id}
                   className={`visual-chip-btn ${manifoldState.surface === s.id ? "selected" : ""}`}
                   title={s.title}
@@ -196,6 +201,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
             <div className="visual-selector-row">
               {TOPO_SHADERS.map((s) => (
                 <button
+                  type="button"
                   key={s.id}
                   className={`visual-chip-btn ${manifoldState.shaderMode === s.id ? "selected" : ""}`}
                   title={s.title}
@@ -210,6 +216,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
             <div className="palette-chip-row">
               {TOPO_PALETTES.map((p) => (
                 <button
+                  type="button"
                   key={p.id}
                   className={`palette-chip ${manifoldState.colorPalette === p.id ? "selected" : ""}`}
                   style={{ background: p.gradient }}
@@ -238,6 +245,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
 
             <div className="module-actions-row">
               <button
+                type="button"
                 className={`toggle-chip-btn ${manifoldState.wireframe ? "active" : ""}`}
                 onClick={() =>
                   handleControlChange("manifold", "wireframe", !manifoldState.wireframe, "bool")
@@ -246,6 +254,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
                 Wireframe
               </button>
               <button
+                type="button"
                 className="bang-action-btn"
                 onClick={() => handleTrigger("manifold", "resetCamera")}
               >
@@ -311,6 +320,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
               />
             </div>
             <button
+              type="button"
               className="bang-action-btn"
               onClick={() => handleTrigger("bouncing-balls", "reset")}
             >
@@ -333,6 +343,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
             <div className="palette-chip-row">
               {FOUNTAIN_PALETTES.map((p) => (
                 <button
+                  type="button"
                   key={p.id}
                   className={`palette-chip ${fountainState.colorScheme === p.id ? "selected" : ""}`}
                   style={{ background: p.gradient }}
@@ -459,6 +470,7 @@ export default function ControlPanel(props: IDockviewPanelProps<ProceduralSuiteP
               </div>
             </div>
             <button
+              type="button"
               className="bang-action-btn"
               onClick={() => handleTrigger("recursive-subdivision", "new-seed")}
             >

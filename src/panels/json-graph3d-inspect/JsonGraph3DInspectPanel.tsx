@@ -406,9 +406,7 @@ export default function JsonGraph3DInspectPanel(
       }
       const sprite = new SpriteText(slug(text, p.labelMaxWords));
       const t =
-        p.nodeSizeBy === "degree"
-          ? Math.pow(n.degree / Math.max(1, maxDegree), p.nodeSizeExponent)
-          : 0.5;
+        p.nodeSizeBy === "degree" ? (n.degree / Math.max(1, maxDegree)) ** p.nodeSizeExponent : 0.5;
       let height = p.nodeTextHeightMin + t * (p.nodeTextHeightMax - p.nodeTextHeightMin);
       if (isHyper) height *= p.hyperedgeTextScale;
       sprite.textHeight = height;
@@ -935,6 +933,7 @@ export default function JsonGraph3DInspectPanel(
               title="Show the color key for connection kinds in the corner"
             />
             <button
+              type="button"
               onClick={resetView}
               title="Zoom and center so the whole graph fits in view"
               className="json-graph3d-inspect-reset-btn"
@@ -956,7 +955,9 @@ export default function JsonGraph3DInspectPanel(
               <strong>{nodeCount.toLocaleString()}</strong> nodes detected (threshold{" "}
               {params.nodeThreshold.toLocaleString()}). Text sprites per node are heavy.
             </p>
-            <button onClick={() => setBypassPerf(true)}>Render anyway</button>
+            <button type="button" onClick={() => setBypassPerf(true)}>
+              Render anyway
+            </button>
           </div>
         )}
         {isGraph && !perfBlocked && params.showLegend && (

@@ -19,7 +19,9 @@ export function closeBackClosers(): boolean {
   if (backClosers.size === 0) return false;
   const fns = [...backClosers];
   backClosers.clear();
-  fns.forEach((f) => f());
+  fns.forEach((f) => {
+    f();
+  });
   return true;
 }
 
@@ -102,6 +104,7 @@ export function PanelMenuButton({
       </div>
     ) : (
       <button
+        type="button"
         key={item.id}
         role="menuitem"
         className={nested ? "exo-menu__sub" : undefined}
@@ -139,6 +142,7 @@ export function PanelMenuButton({
               <>
                 {items && <hr className="exo-menu__rule" />}
                 <button
+                  type="button"
                   role="menuitem"
                   onClick={act(() =>
                     group.api.isMaximized() ? group.api.exitMaximized() : group.api.maximize(),
@@ -148,6 +152,7 @@ export function PanelMenuButton({
                 </button>
                 {!isPhone && (
                   <button
+                    type="button"
                     role="menuitem"
                     className="exo-menu__popout"
                     onClick={act(() => void containerApi.addPopoutGroup(group))}
@@ -156,6 +161,7 @@ export function PanelMenuButton({
                   </button>
                 )}
                 <button
+                  type="button"
                   role="menuitem"
                   aria-expanded={moveOpen}
                   onClick={() => setMoveOpen(!moveOpen)}
@@ -179,6 +185,7 @@ export function PanelMenuButton({
                           ] as const
                         ).map(([position, label]) => (
                           <button
+                            type="button"
                             key={position}
                             role="menuitem"
                             className="exo-menu__sub"
@@ -190,7 +197,7 @@ export function PanelMenuButton({
                       </div>
                     ))
                   ))}
-                <button role="menuitem" onClick={act(() => api.close())}>
+                <button type="button" role="menuitem" onClick={act(() => api.close())}>
                   Close
                 </button>
               </>

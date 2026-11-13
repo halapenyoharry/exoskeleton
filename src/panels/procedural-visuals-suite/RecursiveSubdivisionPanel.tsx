@@ -17,9 +17,9 @@ function makePRNG(seed: number) {
 }
 
 function hexToHsl(hex: string) {
-  let r = parseInt(hex.slice(1, 3), 16) / 255;
-  let g = parseInt(hex.slice(3, 5), 16) / 255;
-  let b = parseInt(hex.slice(5, 7), 16) / 255;
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
   const max = Math.max(r, g, b),
     min = Math.min(r, g, b);
   let h = 0,
@@ -55,7 +55,7 @@ function hslToHex(h: number, s: number, l: number) {
     if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
     return p;
   };
-  let r, g, b;
+  let r: number, g: number, b: number;
   if (s === 0) {
     r = g = b = l;
   } else {
@@ -118,7 +118,9 @@ export default function RecursiveSubdivisionPanel(
     return () => {
       sendOsc(availableAddress, [{ type: "bool", value: false }]);
       unsubPing();
-      unsubs.forEach((u) => u());
+      unsubs.forEach((u) => {
+        u();
+      });
     };
   }, [docId]);
 
@@ -196,6 +198,7 @@ export default function RecursiveSubdivisionPanel(
 
   return (
     <div className="procedural-viz-root">
+      {/* biome-ignore lint/a11y/noSvgWithoutTitle: SVG children are wiped and populated imperatively via svgRef */}
       <svg ref={svgRef} viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
   );

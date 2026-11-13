@@ -21,6 +21,7 @@
   min-width: 160px;
   /* Fit the visible space below the trigger button (vh fallback, then dvh). */
   max-height: calc(100vh - var(--exo-menu-top, 44px) - 8px);
+  /* biome-ignore lint/suspicious/noDuplicateProperties: 100vh fallback before 100dvh with safe-area-inset-bottom */
   max-height: calc(100dvh - var(--exo-menu-top, 44px) - 8px - env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
   overscroll-behavior: contain;

@@ -238,7 +238,7 @@ export function chooseNext(
     return (
       pickWeighted(
         field.nodes.filter((n) => n.id !== fromId),
-        (n) => Math.pow(n.mass, rules.gravityBias),
+        (n) => n.mass ** rules.gravityBias,
         rng,
       )?.id ?? null
     );
@@ -248,7 +248,7 @@ export function chooseNext(
     const e = field.edges[i];
     const to = otherEnd(e, fromId!);
     const target = field.byId.get(to)!;
-    let w = e.weight * Math.pow(target.mass, rules.gravityBias);
+    let w = e.weight * target.mass ** rules.gravityBias;
     if (to === walker.from) w *= rules.backtrackPenalty;
     return { to, w };
   });

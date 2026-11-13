@@ -287,6 +287,8 @@ test("the four channels do not cross-talk", () => {
   broadcastNodeFocus("default", "n", "p");
   setActiveDocumentId("other-doc");
   setGraphsConnected(false);
-  offs.forEach((off) => off());
+  offs.forEach((off) => {
+    off();
+  });
   assert.deepStrictEqual(hits, { selection: 1, focus: 1, active: 1, connected: 1 });
 });

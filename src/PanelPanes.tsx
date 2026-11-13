@@ -261,6 +261,7 @@ function CellView({
       const clamp = (x: number) =>
         Math.min(cell.max ?? Infinity, Math.max(cell.min ?? -Infinity, x));
       return (
+        // biome-ignore lint/a11y/useSemanticElements: div with role="group" avoids browser fieldset border and flex layout quirks
         <div className="pp-stepper" title={tip} role="group" aria-label={cell.label}>
           <button
             type="button"
@@ -598,7 +599,9 @@ function PanesCell(props: ISplitviewPanelProps) {
     const ro = new ResizeObserver(() => fit());
     ro.observe(host);
     const mo = new MutationObserver(() => {
-      host.querySelectorAll("[data-controls-tab]").forEach((el) => ro.observe(el));
+      host.querySelectorAll("[data-controls-tab]").forEach((el) => {
+        ro.observe(el);
+      });
       fit();
     });
     mo.observe(host, { childList: true, subtree: true });

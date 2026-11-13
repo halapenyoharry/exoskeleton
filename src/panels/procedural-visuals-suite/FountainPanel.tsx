@@ -21,9 +21,9 @@ const interpolators: Record<string, (t: number) => string> = {
     return `rgb(${r}, ${g}, ${b})`;
   },
   magma: (t) => {
-    const r = Math.floor(255 * Math.pow(t, 0.5));
-    const g = Math.floor(255 * Math.pow(t, 1.5));
-    const b = Math.floor(255 * Math.pow(t, 3.0));
+    const r = Math.floor(255 * t ** 0.5);
+    const g = Math.floor(255 * t ** 1.5);
+    const b = Math.floor(255 * t ** 3.0);
     return `rgb(${r}, ${g}, ${b})`;
   },
   rainbow: (t) => `hsl(${t * 360}, 80%, 60%)`,
@@ -127,7 +127,9 @@ export default function FountainPanel(props: IDockviewPanelProps<ProceduralSuite
     return () => {
       sendOsc(availableAddress, [{ type: "bool", value: false }]);
       unsubPing();
-      unsubs.forEach((u) => u());
+      unsubs.forEach((u) => {
+        u();
+      });
     };
   }, [docId]);
 

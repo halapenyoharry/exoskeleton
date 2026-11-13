@@ -620,6 +620,7 @@ export default function JsonEditPanel(props: IDockviewPanelProps<JsonEditParams>
           {renaming !== null && (
             <input
               className="json-edit-rename"
+              // biome-ignore lint/a11y/noAutofocus: inline rename input requires immediate focus when opened
               autoFocus
               value={renaming}
               onChange={(e) => setRenaming(e.target.value)}
@@ -636,6 +637,7 @@ export default function JsonEditPanel(props: IDockviewPanelProps<JsonEditParams>
             </span>
           )}
           {flash && (
+            // biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: transient status flash dismissed on click
             <span
               className={`json-edit-flash json-edit-flash--${flash.kind}`}
               title="Click to dismiss"

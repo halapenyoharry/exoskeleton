@@ -362,6 +362,7 @@ export default function JsonTreePanel(props: IDockviewPanelProps<JsonTreeParams>
             explode
           </label>
           <button
+            type="button"
             className="json-tree-reset-btn"
             onClick={() => resetRef.current()}
             title="Reset view"
@@ -378,7 +379,9 @@ export default function JsonTreePanel(props: IDockviewPanelProps<JsonTreeParams>
               {params.nodeThreshold.toLocaleString()}).
             </p>
             <p>Rendering may be slow. Click to proceed anyway, or reduce the JSON size.</p>
-            <button onClick={() => setBypassPerf(true)}>Render anyway</button>
+            <button type="button" onClick={() => setBypassPerf(true)}>
+              Render anyway
+            </button>
           </div>
         )}
       </div>

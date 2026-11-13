@@ -43,6 +43,7 @@ export function Segmented<V extends string | number>({
   className,
 }: SegmentedProps<V>) {
   return (
+    // biome-ignore lint/a11y/useSemanticElements: div with role="group" avoids browser fieldset border and flex layout quirks
     <div
       className={["xo-segmented", className].filter(Boolean).join(" ")}
       role="group"
@@ -133,6 +134,7 @@ export function SwatchPicker<V extends string | number>({
   className,
 }: SwatchPickerProps<V>) {
   return (
+    // biome-ignore lint/a11y/useSemanticElements: div with role="group" avoids browser fieldset border and flex layout quirks
     <div
       className={["xo-swatches", className].filter(Boolean).join(" ")}
       role="group"
@@ -175,6 +177,7 @@ export interface ToolbarGroupProps {
 /** Caption-above-controls container. Groups sit side by side and wrap. */
 export function ToolbarGroup({ label, title, children, className }: ToolbarGroupProps) {
   return (
+    // biome-ignore lint/a11y/useSemanticElements: div with role="group" avoids browser fieldset border and flex layout quirks
     <div
       className={["xo-toolbar-group", className].filter(Boolean).join(" ")}
       role="group"

@@ -1,6 +1,7 @@
 import type { PanelManifest } from "../../panel-manifest";
 import PianoPanel from "./PianoPanel";
 
+// biome-ignore lint/suspicious/noEmptyInterface: empty panel params contract
 export interface PianoParams {}
 
 const manifest: PanelManifest<PianoParams> = {

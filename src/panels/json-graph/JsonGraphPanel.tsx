@@ -12,7 +12,7 @@ import {
   broadcastNodeFocus,
   onNodeFocusBroadcast,
 } from "../../osc/channels";
-import { type DetectedGraph, type GraphNode } from "../../data/json-utils/graphDetect";
+import type { DetectedGraph, GraphNode } from "../../data/json-utils/graphDetect";
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats, getDetectedGraph } from "../../data/json-utils/docStats";
 import { useElementSize } from "../../useElementSize";
@@ -451,6 +451,7 @@ export default function JsonGraphPanel(props: IDockviewPanelProps<JsonGraphParam
             freeze
           </label>
           <button
+            type="button"
             onClick={() => resetRef.current()}
             title="Fit graph to view"
             className="json-graph-reset-btn"
@@ -471,7 +472,9 @@ export default function JsonGraphPanel(props: IDockviewPanelProps<JsonGraphParam
               <strong>{nodeCount.toLocaleString()}</strong> nodes detected (threshold{" "}
               {params.nodeThreshold.toLocaleString()}).
             </p>
-            <button onClick={() => setBypassPerf(true)}>Render anyway</button>
+            <button type="button" onClick={() => setBypassPerf(true)}>
+              Render anyway
+            </button>
           </div>
         )}
         {isGraph && !perfBlocked && <div className="json-graph-canvas" ref={containerRef} />}

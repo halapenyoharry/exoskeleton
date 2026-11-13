@@ -122,8 +122,10 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
     <>
       {/* Inline buttons; hidden by CSS when the host renders the slim toolbar. */}
       <div className="panel-toolbar">
-        <button onClick={openFile}>open</button>
-        <button onClick={() => void saveFile()} disabled={!dirty && !!path}>
+        <button type="button" onClick={openFile}>
+          open
+        </button>
+        <button type="button" onClick={() => void saveFile()} disabled={!dirty && !!path}>
           save
         </button>
       </div>
@@ -135,6 +137,7 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
           {dirty ? " •" : ""}
         </span>
         {flash && (
+          // biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: transient status flash dismissed on click
           <span
             onClick={clear}
             title="Click to dismiss"

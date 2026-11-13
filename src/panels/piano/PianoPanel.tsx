@@ -30,6 +30,7 @@ const BLACK_LEFT_COL: Record<number, number> = {
   70: 6, // A♯ — right of white #5 (A)
 };
 
+// biome-ignore lint/suspicious/noEmptyInterface: empty panel params contract
 export interface PianoParams {}
 
 export default function PianoPanel(_props: IDockviewPanelProps<PianoParams>) {

@@ -613,7 +613,7 @@ export function initManifoldScene(
   scene.add(wireframeMesh);
 
   const autoRotateSpeed = 0.8;
-  let paused = false;
+  const paused = false;
   const clock = new THREE.Clock();
   let accumulatedTime = 0;
   let rafHandle = 0;

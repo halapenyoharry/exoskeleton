@@ -62,7 +62,7 @@ export default function TempoClockPanel(props: IDockviewPanelProps<TempoClockPar
     <>
       <div className="tempo-clock-body">
         <div className="tempo-clock-controls">
-          <button onClick={toggle} className="tempo-clock-play">
+          <button type="button" onClick={toggle} className="tempo-clock-play">
             {playing ? "■ stop" : "▶ play"}
           </button>
           <input
@@ -77,6 +77,7 @@ export default function TempoClockPanel(props: IDockviewPanelProps<TempoClockPar
           />
           <span className="tempo-clock-bpm-label">bpm</span>
         </div>
+        {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: beat indicator div carries aria-label for state readout */}
         <div
           key={beat}
           className={`tempo-clock-beat${playing ? " is-active" : ""}`}

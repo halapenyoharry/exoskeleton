@@ -131,6 +131,7 @@ function renderContainment({ layer, topology }: RenderArgs) {
         if (!source || !target) return null;
         return (
           <div
+            // biome-ignore lint/suspicious/noArrayIndexKey: parallel links between the same source and target require index disambiguation
             key={`${link.source}-${link.target}-${i}`}
             className="dp-containment-pair"
             style={{ borderColor: tokens.stroke, background: tokens.fill }}
@@ -184,7 +185,9 @@ function ReificationRegion({
         {spokes.map((spoke, i) => {
           const node = topology.nodesById.get(spoke.target);
           const role = linkSpokeRole(spoke);
+          // biome-ignore lint/suspicious/noArrayIndexKey: spokes may target the same node multiple times with different roles
           if (!node) return <MissingTile key={i} id={spoke.target} />;
+          // biome-ignore lint/suspicious/noArrayIndexKey: spokes may target the same node multiple times with different roles
           return <NodeTile key={spoke.target + i} node={node} role={role} />;
         })}
       </div>
@@ -208,6 +211,7 @@ function renderStateChange({ layer, topology }: RenderArgs) {
         const target = topology.nodesById.get(link.target);
         if (!source || !target) return null;
         return (
+          // biome-ignore lint/suspicious/noArrayIndexKey: parallel links between the same source and target require index disambiguation
           <div key={`${link.source}-${link.target}-${i}`} className="dp-state-pair">
             <NodeTile node={source} role={link.source_role} />
             <div className="dp-state-flow">
@@ -261,7 +265,9 @@ function StateChangeRegion({
           {inputs.map((spoke, i) => {
             const node = topology.nodesById.get(spoke.target);
             const role = linkSpokeRole(spoke);
+            // biome-ignore lint/suspicious/noArrayIndexKey: spokes may target the same node multiple times with different roles
             if (!node) return <MissingTile key={i} id={spoke.target} />;
+            // biome-ignore lint/suspicious/noArrayIndexKey: spokes may target the same node multiple times with different roles
             return <NodeTile key={spoke.target + i} node={node} role={role} />;
           })}
         </div>
@@ -269,7 +275,9 @@ function StateChangeRegion({
           {outputs.map((spoke, i) => {
             const node = topology.nodesById.get(spoke.target);
             const role = linkSpokeRole(spoke);
+            // biome-ignore lint/suspicious/noArrayIndexKey: spokes may target the same node multiple times with different roles
             if (!node) return <MissingTile key={i} id={spoke.target} />;
+            // biome-ignore lint/suspicious/noArrayIndexKey: spokes may target the same node multiple times with different roles
             return <NodeTile key={spoke.target + i} node={node} role={role} />;
           })}
         </div>
@@ -294,6 +302,7 @@ function renderInteractivity({ layer, topology }: RenderArgs) {
         const target = topology.nodesById.get(link.target);
         if (!source || !target) return null;
         return (
+          // biome-ignore lint/suspicious/noArrayIndexKey: parallel links between the same source and target require index disambiguation
           <div key={`${link.source}-${link.target}-${i}`} className="dp-interactivity-pair">
             <div className="dp-interactivity-blob dp-interactivity-blob--a">
               <NodeTile node={source} role={link.source_role} />
@@ -336,8 +345,10 @@ function InteractivityRegion({
         {spokes.map((spoke, i) => {
           const node = topology.nodesById.get(spoke.target);
           const role = linkSpokeRole(spoke);
+          // biome-ignore lint/suspicious/noArrayIndexKey: spokes may target the same node multiple times with different roles
           if (!node) return <MissingTile key={i} id={spoke.target} />;
           return (
+            // biome-ignore lint/suspicious/noArrayIndexKey: spokes may target the same node multiple times with different roles
             <div key={spoke.target + i} className="dp-interactivity-participant">
               <NodeTile node={node} role={role} />
             </div>
@@ -360,6 +371,7 @@ function renderReference({ layer, topology }: RenderArgs) {
         const targetLabel = target ? nodeLabel(target) : link.target;
         const predicate = link.attrs?.["i2t:predicate"] ?? link.layer;
         return (
+          // biome-ignore lint/suspicious/noArrayIndexKey: parallel links between the same source and target require index disambiguation
           <div key={`${link.source}-${link.target}-${i}`} className="dp-reference-row">
             <NodeTile node={source} />
             <span className="dp-reference-tag">
@@ -382,6 +394,7 @@ function renderReference({ layer, topology }: RenderArgs) {
           {spokes.map((spoke, i) => {
             const node = topology.nodesById.get(spoke.target);
             return (
+              // biome-ignore lint/suspicious/noArrayIndexKey: spokes may target the same node multiple times with different roles
               <span key={i} className="dp-reference-target">
                 {node ? nodeLabel(node) : spoke.target}
               </span>
@@ -495,6 +508,7 @@ export default function JsonDyadicPanel(props: IDockviewPanelProps<JsonDyadicPar
             <p>This document doesn't look like a TopoThink dyadic graph.</p>
             <ul>
               {topology.warnings.slice(0, 5).map((w, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: static list of parse warning messages
                 <li key={i}>{w}</li>
               ))}
             </ul>
@@ -507,7 +521,9 @@ export default function JsonDyadicPanel(props: IDockviewPanelProps<JsonDyadicPar
               <strong>{docNodeCount.toLocaleString()}</strong> JSON nodes (threshold{" "}
               {PARSE_THRESHOLD.toLocaleString()}).
             </p>
-            <button onClick={() => setBypassPerf(true)}>Parse anyway</button>
+            <button type="button" onClick={() => setBypassPerf(true)}>
+              Parse anyway
+            </button>
           </div>
         )}
 

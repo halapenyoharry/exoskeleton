@@ -841,6 +841,7 @@ export default function App() {
         />
         {!isStatusBarVisible && !deckMode && mainApiRef.current && (
           <button
+            type="button"
             className="status-bar-summoner-btn"
             onClick={() => mountStatusBar(mainApiRef.current!)}
             title="Summon Astromech Status Bar"

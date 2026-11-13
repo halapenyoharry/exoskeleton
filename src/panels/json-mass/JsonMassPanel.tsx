@@ -413,6 +413,7 @@ export default function JsonMassPanel(props: IDockviewPanelProps<JsonMassParams>
     <>
       <div className="panel-header json-mass-header">
         <button
+          type="button"
           onClick={() => resetRef.current()}
           title="Reset view"
           className="json-mass-reset-btn"
@@ -427,7 +428,9 @@ export default function JsonMassPanel(props: IDockviewPanelProps<JsonMassParams>
               <strong>{nodeCount.toLocaleString()}</strong> tree nodes detected (threshold{" "}
               {params.nodeThreshold.toLocaleString()}).
             </p>
-            <button onClick={() => setBypassPerf(true)}>Render anyway</button>
+            <button type="button" onClick={() => setBypassPerf(true)}>
+              Render anyway
+            </button>
           </div>
         )}
       </div>

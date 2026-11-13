@@ -123,6 +123,7 @@ export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerPar
                 : {};
 
               return (
+                // biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: prose block card selects node on click without turning block heading and markdown into a button
                 <div
                   key={block.id}
                   ref={(el) => {

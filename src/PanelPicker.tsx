@@ -20,6 +20,7 @@ export default function PanelPicker({
         .filter((entry) => isPanelSupported(entry))
         .map((entry) => (
           <button
+            type="button"
             key={entry.id}
             className="panel-picker-btn watermark-btn"
             style={{ color: panelAccent(entry.id) }}

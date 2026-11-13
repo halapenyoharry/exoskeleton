@@ -16,11 +16,14 @@ export function emitPanelMenu(panelId: string, itemId: string): void {
 
 export function onPanelMenu(panelId: string, handler: Handler): () => void {
   let set = handlers.get(panelId);
-  if (!set) handlers.set(panelId, (set = new Set()));
+  if (!set) {
+    set = new Set();
+    handlers.set(panelId, set);
+  }
   set.add(handler);
   return () => {
-    set!.delete(handler);
-    if (set!.size === 0) handlers.delete(panelId);
+    set.delete(handler);
+    if (set.size === 0) handlers.delete(panelId);
   };
 }
 

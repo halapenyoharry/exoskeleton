@@ -24,5 +24,3 @@ import { ADDR } from "./channels/codecs.ts";
 retain(ADDR.selectAny); // StatusBarPanel reads current selection on mount
 retain(ADDR.activeDoc); // panels mounting later need the current document
 retain(ADDR.graphsConnected); // the status bar renders this toggle on mount
-
-export {};

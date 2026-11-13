@@ -322,8 +322,7 @@ export function ollamaChat(config: {
       const { done, value } = await reader.read();
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
-      let nl: number;
-      while ((nl = buffer.indexOf("\n")) >= 0) {
+      for (let nl = buffer.indexOf("\n"); nl >= 0; nl = buffer.indexOf("\n")) {
         handleLine(buffer.slice(0, nl));
         buffer = buffer.slice(nl + 1);
       }

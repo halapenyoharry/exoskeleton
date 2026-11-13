@@ -36,8 +36,12 @@ export default function LanWebview(props: IDockviewPanelProps<LanWebviewParams>)
           placeholder="https://example.com or http://lan-host:port"
           spellCheck={false}
         />
-        <button onClick={go}>go</button>
-        <button onClick={() => setReloadKey((k) => k + 1)}>reload</button>
+        <button type="button" onClick={go}>
+          go
+        </button>
+        <button type="button" onClick={() => setReloadKey((k) => k + 1)}>
+          reload
+        </button>
       </div>
       <div className="panel-body">
         <iframe

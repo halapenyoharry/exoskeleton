@@ -397,6 +397,7 @@ export default function JsonCirclesPanel(props: IDockviewPanelProps<JsonCirclesP
             [N]
           </label>
           <button
+            type="button"
             onClick={() => resetRef.current()}
             title="Reset view"
             className="json-circles-reset-btn"
@@ -412,7 +413,9 @@ export default function JsonCirclesPanel(props: IDockviewPanelProps<JsonCirclesP
               <strong>{nodeCount.toLocaleString()}</strong> tree nodes detected (threshold{" "}
               {params.nodeThreshold.toLocaleString()}).
             </p>
-            <button onClick={() => setBypassPerf(true)}>Render anyway</button>
+            <button type="button" onClick={() => setBypassPerf(true)}>
+              Render anyway
+            </button>
           </div>
         )}
       </div>

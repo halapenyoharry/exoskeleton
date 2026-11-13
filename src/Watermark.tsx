@@ -23,6 +23,7 @@ export default function Watermark(props: IWatermarkPanelProps) {
             .filter((p) => p.id !== "blank")
             .map((preset) => (
               <button
+                type="button"
                 key={preset.id}
                 className="watermark-preset-btn"
                 onClick={() => applyPreset(preset.id)}

@@ -83,6 +83,7 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
     <div className="status-bar-container">
       <div className="status-bar-left">
         <button
+          type="button"
           className={`status-bar-link-btn ${connected ? "connected" : "decoupled"}`}
           onClick={toggleConnection}
           title={connected ? "Click to decouple views" : "Click to coordinate views"}
@@ -116,7 +117,12 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
           <span className="status-stats-label">Edges:</span>
           <span className="status-stats-val">{stats.edges}</span>
         </div>
-        <button className="status-bar-close-btn" onClick={handleClose} title="Minimize Status Bar">
+        <button
+          type="button"
+          className="status-bar-close-btn"
+          onClick={handleClose}
+          title="Minimize Status Bar"
+        >
           ✕
         </button>
       </div>

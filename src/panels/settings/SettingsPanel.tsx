@@ -83,10 +83,11 @@ export default function SettingsPanel(props: Partial<IDockviewPanelProps> = {}) 
   return (
     <div className="settings-panel">
       <div className="settings-panel__toolbar">
-        <button onClick={loadFromDisk} title="reread state from disk">
+        <button type="button" onClick={loadFromDisk} title="reread state from disk">
           refresh
         </button>
         <button
+          type="button"
           onClick={apply}
           disabled={!dirty || error !== null}
           title="parse + write state back to disk and apply live"

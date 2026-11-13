@@ -8,7 +8,9 @@ const entries = new Map<string, Entry>();
 const listeners = new Set<() => void>();
 
 function emit() {
-  listeners.forEach((l) => l());
+  listeners.forEach((l) => {
+    l();
+  });
 }
 
 export function registerPanesVisibility(panelId: string, entry: Entry): () => void {

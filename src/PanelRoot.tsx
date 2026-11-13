@@ -83,6 +83,7 @@ export class PanelErrorBoundary extends Component<
             </div>
             <div style={{ display: "flex", gap: "8px", marginTop: "auto" }}>
               <button
+                type="button"
                 onClick={this.handleRetry}
                 style={{
                   padding: "6px 12px",
@@ -97,6 +98,7 @@ export class PanelErrorBoundary extends Component<
               </button>
               {this.props.onClose && (
                 <button
+                  type="button"
                   onClick={this.props.onClose}
                   style={{
                     padding: "6px 12px",

@@ -282,7 +282,7 @@ export default function JsonAttentionPanel(props: IDockviewPanelProps<JsonAttent
             token.x = t.x;
             token.y = t.y;
           }
-          const k = 1 - Math.pow(0.001, dt);
+          const k = 1 - 0.001 ** dt;
           token.x += (t.x - token.x) * k;
           token.y += (t.y - token.y) * k;
           const last = token.trail[token.trail.length - 1];
