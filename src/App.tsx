@@ -95,7 +95,6 @@ const BouncingBallsPanel = lazy(() => import("./panels/procedural-visuals-suite/
 const FountainPanel = lazy(() => import("./panels/procedural-visuals-suite/FountainPanel"));
 const RecursiveSubdivisionPanel = lazy(() => import("./panels/procedural-visuals-suite/RecursiveSubdivisionPanel"));
 const ManifoldPanel = lazy(() => import("./panels/procedural-visuals-suite/ManifoldPanel"));
-const TldrawPanel = lazy(() => import("./panels/tldraw/TldrawPanel"));
 const JsonCosmosPanel = lazy(() => import("./panels/json-cosmos/JsonCosmosPanel"));
 
 function lazyPanel(Component: React.ComponentType<any>, accent: string) {
@@ -139,7 +138,6 @@ const components = {
   "procedural-visuals-recursive":   lazyPanel(RecursiveSubdivisionPanel, "var(--accent-procedural-recursive)"),
   "procedural-visuals-manifold": lazyPanel(ManifoldPanel,  "var(--accent-procedural-manifold)"),
   "json-attention":lazyPanel(JsonAttentionPanel,"var(--accent-json-attention)"),
-  tldraw:          lazyPanel(TldrawPanel,       "var(--accent-tldraw)"),
   "json-cosmos":   lazyPanel(JsonCosmosPanel,   "var(--accent-json-cosmos)"),
   // Registered raw (no exoPanel wrapper) on purpose: the status bar owns
   // its full-width chrome and doesn't take the accent-stripe convention.
