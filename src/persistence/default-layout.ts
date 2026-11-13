@@ -17,6 +17,7 @@ import {
   type CapabilityId,
 } from "../panel-manifest.ts";
 import {
+  DEFAULT_PRESET_ID,
   defaultPresetId,
   isWebRuntime,
   presets,
@@ -560,14 +561,20 @@ export function addOrFocusPanel(api: DockviewApi, id: string) {
  *  Picks the platform layout ("phone" vs "desktop") from presets.ts when
  *  present, or falls back to adding the preset's panelIds in registry order.
  *  Panels whose required capabilities the host lacks are skipped. */
-export function buildPreset(api: DockviewApi, presetId: string) {
-  const platform = isPhoneWidth() ? "phone" : "desktop";
-  const supportedIds = panelRegistry.filter((e) => isPanelSupported(e)).map((e) => e.id);
+export function buildPreset(
+  api: DockviewApi,
+  presetId: string,
+  opts: { phone?: boolean; web?: boolean } = {},
+) {
+  const phone = opts.phone ?? isPhoneWidth();
+  const web = opts.web ?? isWebRuntime();
+  const platform = phone ? "phone" : "desktop";
+  const supportedIds = panelRegistry.filter((e) => isPanelSupported(e, web)).map((e) => e.id);
   const placements = resolvePresetPlacements(presetId, platform, supportedIds);
   if (placements) {
     const sized: { panel: IDockviewPanel; size: number; horizontal: boolean }[] = [];
     for (const p of placements) {
-      if (p.id === DOCUMENT_PANEL_ID || !isPanelSupported(p.id)) continue;
+      if (p.id === DOCUMENT_PANEL_ID || !isPanelSupported(p.id, web)) continue;
       const entry = getRegistryEntry(p.id);
       if (!entry) continue;
       const direction = p.direction ?? "right";
@@ -595,18 +602,18 @@ export function buildPreset(api: DockviewApi, presetId: string) {
         /* ignore if group cannot be resized */
       }
     }
-    finishPreset(api, presetId);
+    finishPreset(api, presetId, phone);
     return;
   }
 
   const targetIds = new Set(resolvePresetPanelIds(presetId, supportedIds));
   for (const entry of panelRegistry) {
     // The document is not a grid pane (see finishPreset).
-    if (targetIds.has(entry.id) && entry.id !== DOCUMENT_PANEL_ID && isPanelSupported(entry)) {
+    if (targetIds.has(entry.id) && entry.id !== DOCUMENT_PANEL_ID && isPanelSupported(entry, web)) {
       addRegistryPanel(api, entry);
     }
   }
-  finishPreset(api, presetId);
+  finishPreset(api, presetId, phone);
 }
 
 /** Ensure the bottom edge group and status-bar panel exist with its group header hidden. */
@@ -638,9 +645,8 @@ export function ensureStatusBar(api: DockviewApi): IDockviewPanel | undefined {
  *  Settings + Exo-skeleton tabs (open when the preset is about JSON and we
  *  are not on a phone), the status bar is restored at the bottom, and
  *  JSON Lab / Everything seed chapter one of Elinor Jones. */
-function finishPreset(api: DockviewApi, presetId: string) {
+function finishPreset(api: DockviewApi, presetId: string, phone: boolean = isPhoneWidth()) {
   const prev = api.activePanel;
-  const phone = isPhoneWidth();
   const open = !phone && presets.find((p) => p.id === presetId)?.documentOpen === true;
   const doc = ensureDocumentEdge(api, { phone, open });
   ensureEdgeTabs(api);
@@ -681,10 +687,27 @@ function seedPresetDocument(presetId: string) {
   })();
 }
 
-/** Build the default layout (called when no saved state exists). Default:
- *  "blank" (empty grid + preset picker). */
-export function buildDefaultLayout(api: DockviewApi) {
-  buildPreset(api, defaultPresetId());
+/** Build the default layout (called when no saved state exists). Web opens on
+ *  JSON Lab (or VITE_WEB_DEFAULT_PRESET); desktop opens on "blank". */
+export function buildDefaultLayout(
+  api: DockviewApi,
+  opts: { phone?: boolean; web?: boolean; overridePresetId?: string } = {},
+) {
+  const web = opts.web ?? isWebRuntime();
+  buildPreset(api, defaultPresetId(web, opts.overridePresetId), {
+    phone: opts.phone,
+    web,
+  });
+}
+
+/** Reset the layout to the empty grid with the Watermark preset picker, on
+ *  both the web and the desktop. */
+export function resetLayout(
+  api: DockviewApi,
+  opts: { phone?: boolean; web?: boolean } = {},
+) {
+  api.clear();
+  buildPreset(api, DEFAULT_PRESET_ID, opts);
 }
 
 /**

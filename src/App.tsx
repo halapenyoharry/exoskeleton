@@ -37,11 +37,11 @@ import {
   addOrFocusPanel,
   applyWorkspaceState,
   buildDefaultLayout,
-  buildPreset,
   ensureStatusBar,
   migrateLayout,
   migrateSavedLayout,
   repairLayout,
+  resetLayout,
 } from "./persistence/default-layout";
 import {
   createWorkspace,
@@ -74,7 +74,7 @@ import {
 import { appStorage } from "./persistence/app-storage";
 import { createDebounce } from "./utils/debounce";
 import { errorText, inTauri, saveTextFile } from "./utils/file-io";
-import { defaultPresetId, isWebRuntime, presets } from "./persistence/presets";
+import { DEFAULT_PRESET_ID, isWebRuntime, presets } from "./persistence/presets";
 import {
   parseWorkspaceDocument,
   serializeWorkspaceDocument,
@@ -763,11 +763,10 @@ export default function App() {
       if (!api) return;
       if (
         window.confirm(
-          `Reset layout to default (${presets.find((p) => p.id === defaultPresetId())?.name ?? "Blank Canvas"})? Any unsaved panel position changes will be cleared.`,
+          `Reset layout to default (${presets.find((p) => p.id === DEFAULT_PRESET_ID)?.name ?? "Blank Canvas"})? Any unsaved panel position changes will be cleared.`,
         )
       ) {
-        api.clear();
-        buildPreset(api, defaultPresetId());
+        resetLayout(api);
         if (deckModeRef.current && appStateRef.current) {
           // The preset is a grid: it becomes the desktop layout, and the
           // deck is rebuilt from it.

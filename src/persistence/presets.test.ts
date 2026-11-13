@@ -1,13 +1,22 @@
 import { test } from "node:test";
 import assert from "node:assert";
+import type { DockviewApi } from "dockview-react";
 import {
   DEFAULT_PRESET_ID,
+  WEB_DEFAULT_PRESET_ID,
+  defaultPresetId,
   presets,
   resolvePresetPanelIds,
   resolvePresetPlacements,
   shouldSeedPresetDocument,
+  webDefaultPresetId,
 } from "./presets.ts";
-import { isPanelSupported, panelRegistry } from "./default-layout.ts";
+import {
+  buildDefaultLayout,
+  isPanelSupported,
+  panelRegistry,
+  resetLayout,
+} from "./default-layout.ts";
 
 test("presets have unique ids", () => {
   const ids = presets.map((p) => p.id);
@@ -121,4 +130,160 @@ test("isPanelSupported omits pty-requiring terminal on web and keeps it on deskt
   assert.strictEqual(isPanelSupported("terminal", false), true);
   assert.strictEqual(isPanelSupported("editor", true), true);
   assert.strictEqual(isPanelSupported("webview", true), true);
+});
+
+function createFakeDockviewApi() {
+  const panels = new Map<string, any>();
+  const edges = new Map<string, any>();
+  let activeId: string | undefined;
+
+  const api = {
+    get panels() {
+      return [...panels.values()];
+    },
+    get activePanel() {
+      return activeId ? panels.get(activeId) : undefined;
+    },
+    getPanel: (id: string) => panels.get(id),
+    getEdgeGroup: (pos: string) => edges.get(pos),
+    addEdgeGroup: (pos: string, opts: { id: string; collapsed?: boolean }) => {
+      let collapsed = Boolean(opts.collapsed);
+      let headerPosition = "top";
+      const edge = {
+        id: opts.id,
+        isCollapsed: () => collapsed,
+        expand: () => {
+          collapsed = false;
+        },
+        collapse: () => {
+          collapsed = true;
+        },
+        getHeaderPosition: () => headerPosition,
+        setHeaderPosition: (p: string) => {
+          headerPosition = p;
+        },
+      };
+      edges.set(pos, edge);
+      return edge;
+    },
+    addPanel: (opts: { id: string; component: string; title?: string; position?: any }) => {
+      const isEdge =
+        opts.position &&
+        "referenceGroup" in opts.position &&
+        [...edges.values()].some((e) => e.id === opts.position.referenceGroup);
+      const panel = {
+        id: opts.id,
+        title: opts.title ?? opts.id,
+        view: { contentComponent: opts.component },
+        group: {
+          header: { hidden: false },
+          api: { setSize: () => {} },
+        },
+        api: {
+          location: { type: isEdge ? "edge" : "grid" },
+          setActive: () => {
+            activeId = opts.id;
+          },
+          setTitle: (t: string) => {
+            panel.title = t;
+          },
+        },
+      };
+      panels.set(opts.id, panel);
+      activeId = opts.id;
+      return panel;
+    },
+    clear: () => {
+      panels.clear();
+      edges.clear();
+      activeId = undefined;
+    },
+    gridPanelIds: () =>
+      [...panels.values()]
+        .filter((p) => p.api.location.type === "grid")
+        .map((p) => p.id),
+  };
+
+  return api as unknown as DockviewApi & {
+    gridPanelIds: () => string[];
+  };
+}
+
+test("first visit in a browser defaults to json-lab (which seeds Berry Thief) on desktop and phone; desktop Tauri stays blank", () => {
+  assert.strictEqual(WEB_DEFAULT_PRESET_ID, "json-lab");
+  assert.strictEqual(DEFAULT_PRESET_ID, "blank");
+  assert.strictEqual(defaultPresetId(true), "json-lab");
+  assert.strictEqual(defaultPresetId(false), "blank");
+  assert.strictEqual(shouldSeedPresetDocument(defaultPresetId(true)), true);
+
+  // Web desktop first visit: JSON Lab desktop grid panels + expanded document edge
+  const webDesktop = createFakeDockviewApi();
+  buildDefaultLayout(webDesktop, { web: true, phone: false });
+  assert.deepStrictEqual(webDesktop.gridPanelIds(), [
+    "json-tree",
+    "json-graph",
+    "json-graph3d",
+    "json-cytoscape",
+  ]);
+  assert.strictEqual(webDesktop.getEdgeGroup("left")?.isCollapsed(), false);
+
+  // Web phone first visit: JSON Lab phone arrangement + collapsed document edge
+  const webPhone = createFakeDockviewApi();
+  buildDefaultLayout(webPhone, { web: true, phone: true });
+  assert.deepStrictEqual(webPhone.gridPanelIds(), [
+    "text-viewer",
+    "json-graph3d-inspect",
+  ]);
+  assert.strictEqual(webPhone.getEdgeGroup("left")?.isCollapsed(), true);
+
+  // Desktop (Tauri) first visit: empty grid (Watermark)
+  const tauriDesktop = createFakeDockviewApi();
+  buildDefaultLayout(tauriDesktop, { web: false, phone: false });
+  assert.deepStrictEqual(tauriDesktop.gridPanelIds(), []);
+  assert.strictEqual(tauriDesktop.getEdgeGroup("left")?.isCollapsed(), true);
+});
+
+test("resetLayout returns to the empty grid (Watermark) on web and desktop", () => {
+  for (const [web, phone] of [
+    [true, false],
+    [true, true],
+    [false, false],
+  ] as const) {
+    const api = createFakeDockviewApi();
+    buildDefaultLayout(api, { web, phone });
+    resetLayout(api, { web, phone });
+    assert.deepStrictEqual(
+      api.gridPanelIds(),
+      [],
+      `resetLayout should leave an empty grid for Watermark (web=${web}, phone=${phone})`,
+    );
+    assert.strictEqual(api.getEdgeGroup("left")?.isCollapsed(), true);
+    assert.ok(api.getPanel("status-bar"), "status bar stays mounted after reset");
+  }
+});
+
+test("VITE_WEB_DEFAULT_PRESET still overrides the first-visit web preset when set", () => {
+  const prev = process.env.VITE_WEB_DEFAULT_PRESET;
+  try {
+    process.env.VITE_WEB_DEFAULT_PRESET = "av-lab";
+    assert.strictEqual(webDefaultPresetId(), "av-lab");
+    assert.strictEqual(defaultPresetId(true), "av-lab");
+    assert.strictEqual(defaultPresetId(false), "blank");
+
+    const api = createFakeDockviewApi();
+    buildDefaultLayout(api, { web: true, phone: false });
+    assert.deepStrictEqual(api.gridPanelIds(), ["piano", "scope", "tempo-clock"]);
+
+    process.env.VITE_WEB_DEFAULT_PRESET = "blank";
+    assert.strictEqual(defaultPresetId(true), "blank");
+
+    process.env.VITE_WEB_DEFAULT_PRESET = "unknown-preset-id";
+    assert.strictEqual(defaultPresetId(true), "json-lab");
+
+    delete process.env.VITE_WEB_DEFAULT_PRESET;
+    assert.strictEqual(defaultPresetId(true), "json-lab");
+  } finally {
+    if (prev === undefined) delete process.env.VITE_WEB_DEFAULT_PRESET;
+    else process.env.VITE_WEB_DEFAULT_PRESET = prev;
+  }
 });

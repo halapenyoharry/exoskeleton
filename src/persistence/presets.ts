@@ -33,9 +33,9 @@ export interface LayoutPreset {
 
 export const DEFAULT_PRESET_ID = "blank";
 
-/** Preset for first-run web visitors: an empty grid (the Watermark picker
- *  shows). Same as DEFAULT_PRESET_ID. */
-export const WEB_DEFAULT_PRESET_ID = "blank";
+/** Preset for first-run web visitors: JSON Lab (with Berry Thief seeded so
+ *  the synced graph views open on screen). Desktop keeps DEFAULT_PRESET_ID. */
+export const WEB_DEFAULT_PRESET_ID = "json-lab";
 
 /** True when running in a plain browser tab rather than the Tauri shell.
  *  Runtime check so one dist/ serves both. Kept dependency-free so node
@@ -51,15 +51,26 @@ export function isWebRuntime(): boolean {
 /** Build-time override for the web default preset. Set
  *  VITE_WEB_DEFAULT_PRESET=<preset id> when building (the outer-rim deploy
  *  script passes it from its config), so what exo-skeleton.org opens with is
- *  a deploy option, not a code change. Unknown ids fall back to "blank". */
-function webDefaultPresetId(): string {
-  const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
-  const id = env?.VITE_WEB_DEFAULT_PRESET?.trim();
+ *  a deploy option, not a code change. Unknown ids fall back to WEB_DEFAULT_PRESET_ID. */
+export function webDefaultPresetId(overrideId?: string): string {
+  const viteEnv = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
+  const nodeEnv =
+    typeof process !== "undefined"
+      ? (process as unknown as { env?: Record<string, string | undefined> }).env
+      : undefined;
+  const raw =
+    overrideId !== undefined
+      ? overrideId
+      : (viteEnv?.VITE_WEB_DEFAULT_PRESET ?? nodeEnv?.VITE_WEB_DEFAULT_PRESET);
+  const id = raw?.trim();
   return id && presets.some((p) => p.id === id) ? id : WEB_DEFAULT_PRESET_ID;
 }
 
-export function defaultPresetId(): string {
-  return isWebRuntime() ? webDefaultPresetId() : DEFAULT_PRESET_ID;
+export function defaultPresetId(
+  web: boolean = isWebRuntime(),
+  overrideId?: string,
+): string {
+  return web ? webDefaultPresetId(overrideId) : DEFAULT_PRESET_ID;
 }
 
 export const presets: LayoutPreset[] = [
