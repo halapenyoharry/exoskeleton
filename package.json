@@ -52,6 +52,7 @@
     "three-spritetext": "^1.10.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.6.4",
     "@tauri-apps/cli": "^2",
     "@types/cytoscape": "^3.21.0",
     "@types/d3": "^7.4.3",
