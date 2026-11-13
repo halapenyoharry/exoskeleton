@@ -73,8 +73,7 @@ export async function saveTextFile(
   if (inTauri()) {
     const { save } = await import("@tauri-apps/plugin-dialog");
     const { writeTextFile } = await import("@tauri-apps/plugin-fs");
-    const target =
-      existingPath ?? (await save({ defaultPath: suggestedName, filters }));
+    const target = existingPath ?? (await save({ defaultPath: suggestedName, filters }));
     if (!target) return null;
     try {
       await writeTextFile(target, text);
@@ -138,11 +137,7 @@ export async function openTextFiles(
       const list = Array.from(input.files ?? []);
       cleanup();
       try {
-        resolve(
-          await Promise.all(
-            list.map(async (f) => ({ name: f.name, text: await f.text() })),
-          ),
-        );
+        resolve(await Promise.all(list.map(async (f) => ({ name: f.name, text: await f.text() }))));
       } catch (err) {
         reject(new Error(`Could not read the file: ${errorText(err)}`));
       }

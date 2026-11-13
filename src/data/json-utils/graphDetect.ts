@@ -49,10 +49,7 @@ const SOURCE_KEYS = ["source", "from", "src", "start", "origin"];
 const TARGET_KEYS = ["target", "to", "dst", "dest", "end", "destination"];
 const INCIDENCE_KEYS = ["incidences", "incidence", "memberships"];
 
-function findKey(
-  obj: Record<string, unknown>,
-  candidates: string[],
-): string | null {
+function findKey(obj: Record<string, unknown>, candidates: string[]): string | null {
   const keys = Object.keys(obj);
   for (const c of candidates) {
     const found = keys.find((k) => k.toLowerCase() === c.toLowerCase());
@@ -93,22 +90,14 @@ function isEdgeLike(obj: Record<string, unknown>): boolean {
 function extractEdgeLabel(edge: Record<string, unknown>): string | undefined {
   const topKey = Object.keys(edge).find(
     (k) =>
-      k.toLowerCase() === "label" ||
-      k.toLowerCase() === "relation" ||
-      k.toLowerCase() === "type",
+      k.toLowerCase() === "label" || k.toLowerCase() === "relation" || k.toLowerCase() === "type",
   );
   if (topKey && typeof edge[topKey] !== "object") return String(edge[topKey]);
 
   const attrs = edge.attrs;
   if (typeof attrs === "object" && attrs !== null) {
     const a = attrs as Record<string, unknown>;
-    const candidates = [
-      a["i2t:predicate"],
-      a.predicate,
-      a.relation,
-      a.type,
-      a.label,
-    ];
+    const candidates = [a["i2t:predicate"], a.predicate, a.relation, a.type, a.label];
     for (const c of candidates) {
       if (typeof c === "string" || typeof c === "number") return String(c);
     }
@@ -122,9 +111,7 @@ function extractKind(node: Record<string, unknown>): GraphNodeKind | undefined {
   return undefined;
 }
 
-function extractAttrs(
-  obj: Record<string, unknown>,
-): Record<string, unknown> | undefined {
+function extractAttrs(obj: Record<string, unknown>): Record<string, unknown> | undefined {
   const a = obj.attrs;
   if (typeof a === "object" && a !== null && !Array.isArray(a)) {
     return a as Record<string, unknown>;
@@ -162,20 +149,12 @@ export function detectGraph(json: unknown): DetectedGraph | null {
     const nodeKey = findKey(obj, NODE_KEYS);
     const edgeKey = findKey(obj, EDGE_KEYS);
 
-    if (
-      nodeKey &&
-      edgeKey &&
-      Array.isArray(obj[nodeKey]) &&
-      Array.isArray(obj[edgeKey])
-    ) {
+    if (nodeKey && edgeKey && Array.isArray(obj[nodeKey]) && Array.isArray(obj[edgeKey])) {
       const rawNodes = obj[nodeKey] as unknown[];
       const rawEdges = obj[edgeKey] as unknown[];
 
       const nodes: GraphNode[] = rawNodes.map((n, i) => {
-        const nObj =
-          typeof n === "object" && n !== null
-            ? (n as Record<string, unknown>)
-            : null;
+        const nObj = typeof n === "object" && n !== null ? (n as Record<string, unknown>) : null;
         return {
           id: extractId(n, i),
           label: extractLabel(n),
@@ -216,10 +195,7 @@ export function detectGraph(json: unknown): DetectedGraph | null {
       // per incidence, using the incidence's role.
       if (links.length === 0) {
         const incKey = findKey(obj, INCIDENCE_KEYS);
-        const rawInc =
-          incKey && Array.isArray(obj[incKey])
-            ? (obj[incKey] as unknown[])
-            : null;
+        const rawInc = incKey && Array.isArray(obj[incKey]) ? (obj[incKey] as unknown[]) : null;
         if (rawInc && rawInc.length > 0) {
           const edgeById = new Map<string, Record<string, unknown>>();
           rawEdges.forEach((e, i) => {
@@ -309,9 +285,7 @@ export function detectGraph(json: unknown): DetectedGraph | null {
     const firstFew = json.slice(0, Math.min(5, json.length));
     const allEdgeLike = firstFew.every(
       (item) =>
-        typeof item === "object" &&
-        item !== null &&
-        isEdgeLike(item as Record<string, unknown>),
+        typeof item === "object" && item !== null && isEdgeLike(item as Record<string, unknown>),
     );
 
     if (allEdgeLike) {
@@ -376,9 +350,7 @@ export function detectGraph(json: unknown): DetectedGraph | null {
           for (const e of rawEdges) {
             if (typeof e === "object" && e !== null) {
               const edge = e as Record<string, unknown>;
-              const tgtKey = Object.keys(edge).find((k) =>
-                k.toLowerCase().includes("target"),
-              );
+              const tgtKey = Object.keys(edge).find((k) => k.toLowerCase().includes("target"));
               if (tgtKey) {
                 const target = String(edge[tgtKey]);
                 const labelKey = Object.keys(edge).find(

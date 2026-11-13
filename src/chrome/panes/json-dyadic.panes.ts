@@ -5,17 +5,37 @@ import { registerPanes } from "../panes-registry.ts";
 
 export const jsonDyadicStrip: PanelPane[] = [
   {
-    id: "layers", kind: "pane", icon: "◫", label: "layers", tooltip: "Dynamic layer",
-    body: { layout: "stack", cells: [
-      { type: "select", param: "selectedLayer", label: "layer", optionsFrom: "layers", span: [3, 1] },
-    ] },
+    id: "layers",
+    kind: "pane",
+    icon: "◫",
+    label: "layers",
+    tooltip: "Dynamic layer",
+    body: {
+      layout: "stack",
+      cells: [
+        {
+          type: "select",
+          param: "selectedLayer",
+          label: "layer",
+          optionsFrom: "layers",
+          span: [3, 1],
+        },
+      ],
+    },
   },
   {
-    id: "show", kind: "pane", icon: "◐", label: "show", tooltip: "Legend and metadata",
-    body: { layout: "grid", cells: [
-      { type: "toggle", param: "showCategoryLegend", label: "legend" },
-      { type: "toggle", param: "showMetadata", label: "metadata" },
-    ] },
+    id: "show",
+    kind: "pane",
+    icon: "◐",
+    label: "show",
+    tooltip: "Legend and metadata",
+    body: {
+      layout: "grid",
+      cells: [
+        { type: "toggle", param: "showCategoryLegend", label: "legend" },
+        { type: "toggle", param: "showMetadata", label: "metadata" },
+      ],
+    },
   },
 ];
 

@@ -91,7 +91,8 @@ function checkEdgeGroups(layout: unknown, label: string): void {
   const bad = (why: string) => new Error(`Invalid workspace structure: ${label}.edgeGroups ${why}`);
   if (!eg || typeof eg !== "object" || Array.isArray(eg)) throw bad("is malformed");
   for (const [pos, entry] of Object.entries(eg as Record<string, unknown>)) {
-    if (!["top", "bottom", "left", "right"].includes(pos)) throw bad(`has unknown position "${pos}"`);
+    if (!["top", "bottom", "left", "right"].includes(pos))
+      throw bad(`has unknown position "${pos}"`);
     const e = entry as {
       size?: unknown;
       visible?: unknown;
@@ -147,7 +148,10 @@ function stripPanelParams(workspace: Workspace, keys: readonly string[]): Worksp
   return out;
 }
 
-function stripLayoutParams(layout: Workspace["layout"], keys: readonly string[]): Workspace["layout"] {
+function stripLayoutParams(
+  layout: Workspace["layout"],
+  keys: readonly string[],
+): Workspace["layout"] {
   const panels = layout?.panels;
   if (!panels || typeof panels !== "object") return layout;
 

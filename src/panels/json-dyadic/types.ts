@@ -7,11 +7,7 @@
 // the dyadic schema had to spell as nodes. The renderer must never feed
 // them into the node-drawing code path. parse.ts enforces that split.
 
-export type EdgeCategory =
-  | "containment"
-  | "state_change"
-  | "interactivity"
-  | "reference";
+export type EdgeCategory = "containment" | "state_change" | "interactivity" | "reference";
 
 export interface TopoAttrs {
   label?: string;

@@ -231,33 +231,31 @@ export function chooseNext(
 ): string | null {
   if (field.nodes.length === 0) return null;
   const fromId = walker.at;
-  const inc = fromId ? field.incident.get(fromId) ?? [] : [];
+  const inc = fromId ? (field.incident.get(fromId) ?? []) : [];
 
   const jump = fromId === null || inc.length === 0 || rng() < rules.jumpRate;
   if (jump) {
-    return pickWeighted(
-      field.nodes.filter((n) => n.id !== fromId),
-      (n) => Math.pow(n.mass, rules.gravityBias),
-      rng,
-    )?.id ?? null;
+    return (
+      pickWeighted(
+        field.nodes.filter((n) => n.id !== fromId),
+        (n) => n.mass ** rules.gravityBias,
+        rng,
+      )?.id ?? null
+    );
   }
 
   const candidates = inc.map((i) => {
     const e = field.edges[i];
     const to = otherEnd(e, fromId!);
     const target = field.byId.get(to)!;
-    let w = e.weight * Math.pow(target.mass, rules.gravityBias);
+    let w = e.weight * target.mass ** rules.gravityBias;
     if (to === walker.from) w *= rules.backtrackPenalty;
     return { to, w };
   });
   return pickWeighted(candidates, (c) => c.w, rng)?.to ?? null;
 }
 
-function pickWeighted<T>(
-  items: T[],
-  weightOf: (t: T) => number,
-  rng: () => number,
-): T | undefined {
+function pickWeighted<T>(items: T[], weightOf: (t: T) => number, rng: () => number): T | undefined {
   let total = 0;
   for (const it of items) total += Math.max(0, weightOf(it));
   if (total <= 0) return items[Math.floor(rng() * items.length)];
@@ -275,12 +273,7 @@ function pickWeighted<T>(
  * attention without adding weight: landing somewhere by gravity is not
  * the same as having walked there.
  */
-export function traverse(
-  field: Field,
-  walker: Walker,
-  toId: string,
-  rules: FieldRules,
-): void {
+export function traverse(field: Field, walker: Walker, toId: string, rules: FieldRules): void {
   const to = field.byId.get(toId);
   if (!to) return;
   const fromId = walker.at;

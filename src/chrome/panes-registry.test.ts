@@ -20,5 +20,8 @@ test("registry: exact, prefix (longest wins), miss, cap at 4", () => {
 
 test("json-graph3d-inspect panes register and is valid", () => {
   assert.equal(getPanes("json-graph3d-inspect-1a2b")?.length, 4);
-  assert.deepEqual(json3dInspectPanes.map((t) => t.id), ["look", "structure", "motion", "fit"]);
+  assert.deepEqual(
+    json3dInspectPanes.map((t) => t.id),
+    ["look", "structure", "motion", "fit"],
+  );
 });

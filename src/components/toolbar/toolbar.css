@@ -144,7 +144,9 @@
   border-radius: 50%;
   border: 1px solid var(--xo-fg-dim);
   background: transparent;
-  transition: background 120ms ease, border-color 120ms ease;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
 }
 
 .xo-toggle[aria-pressed="true"] {
@@ -185,7 +187,9 @@
   height: 14px;
   border-radius: 50%;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
-  transition: transform 120ms ease, box-shadow 120ms ease;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .xo-swatch:hover .xo-swatch-dot {
@@ -193,7 +197,9 @@
 }
 
 .xo-swatch[aria-pressed="true"] .xo-swatch-dot {
-  box-shadow: 0 0 0 2px var(--xo-bg), 0 0 0 4px #ffffff;
+  box-shadow:
+    0 0 0 2px var(--xo-bg),
+    0 0 0 4px #ffffff;
 }
 
 /* --- Disabled ----------------------------------------------------------- */

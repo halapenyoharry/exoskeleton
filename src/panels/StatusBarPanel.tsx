@@ -83,12 +83,15 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
     <div className="status-bar-container">
       <div className="status-bar-left">
         <button
+          type="button"
           className={`status-bar-link-btn ${connected ? "connected" : "decoupled"}`}
           onClick={toggleConnection}
           title={connected ? "Click to decouple views" : "Click to coordinate views"}
         >
           <span className="status-indicator-dot" />
-          <span className="status-link-long">{connected ? "COORDINATED LINK ACTIVE" : "LINK DECOUPLED"}</span>
+          <span className="status-link-long">
+            {connected ? "COORDINATED LINK ACTIVE" : "LINK DECOUPLED"}
+          </span>
           <span className="status-link-short">{connected ? "linked" : "decoupled"}</span>
         </button>
         <span className="status-doc-badge" title="Active Editor Target">
@@ -101,7 +104,7 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
         <div className="status-selection">
           <span className="status-selection-label">Selected Node:</span>
           <span className="status-selection-value">
-            {selectedNode.nodeId ? (selectedNode.label || selectedNode.nodeId) : "No Selection"}
+            {selectedNode.nodeId ? selectedNode.label || selectedNode.nodeId : "No Selection"}
           </span>
         </div>
       </div>
@@ -115,6 +118,7 @@ export default function StatusBarPanel(props: IDockviewPanelProps) {
           <span className="status-stats-val">{stats.edges}</span>
         </div>
         <button
+          type="button"
           className="status-bar-close-btn"
           onClick={handleClose}
           title="Minimize Status Bar"

@@ -7,8 +7,7 @@ const manifest: PanelManifest = {
   id: "terminal",
   title: "terminal",
   component: TerminalPanel,
-  description:
-    "Real shell (xterm.js + tauri-plugin-pty). The workspace's hands.",
+  description: "Real shell (xterm.js + tauri-plugin-pty). The workspace's hands.",
 
   accent: "#ff9800",
   glyph: "▸",

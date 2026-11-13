@@ -9,7 +9,9 @@
   line-height: 1;
   padding: 2px 8px;
 }
-.exo-menu-btn:hover { color: #ffffff; }
+.exo-menu-btn:hover {
+  color: #ffffff;
+}
 
 .exo-menu {
   position: fixed;
@@ -19,6 +21,7 @@
   min-width: 160px;
   /* Fit the visible space below the trigger button (vh fallback, then dvh). */
   max-height: calc(100vh - var(--exo-menu-top, 44px) - 8px);
+  /* biome-ignore lint/suspicious/noDuplicateProperties: 100vh fallback before 100dvh with safe-area-inset-bottom */
   max-height: calc(100dvh - var(--exo-menu-top, 44px) - 8px - env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -40,15 +43,48 @@
   border-radius: 6px;
   cursor: pointer;
 }
-.exo-menu button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
-.exo-menu button:disabled { opacity: 0.4; cursor: default; }
-.exo-menu__rule { width: 100%; border: 0; border-top: 1px solid rgba(255,255,255,0.15); margin: 4px 0; }
-.exo-menu__heading { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; opacity: .6; padding: 6px 10px 2px; }
+.exo-menu button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+}
+.exo-menu button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.exo-menu__rule {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  margin: 4px 0;
+}
+.exo-menu__heading {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  padding: 6px 10px 2px;
+}
 .exo-phone .exo-menu__heading,
-body:has(.exo-phone) .exo-menu__heading { font-size: 12px; }
+body:has(.exo-phone) .exo-menu__heading {
+  font-size: 12px;
+}
 .exo-phone .exo-menu__popout,
-body:has(.exo-phone) .exo-menu__popout { display: none; }
-.exo-menu__group { display: flex; flex-direction: column; }
-.exo-menu button.exo-menu__sub { padding-left: 20px; }
-.exo-menu__kbd { float: right; margin-left: 16px; opacity: .55; }
-@media (pointer: coarse) { .exo-menu button { min-height: 44px; } }
+body:has(.exo-phone) .exo-menu__popout {
+  display: none;
+}
+.exo-menu__group {
+  display: flex;
+  flex-direction: column;
+}
+.exo-menu button.exo-menu__sub {
+  padding-left: 20px;
+}
+.exo-menu__kbd {
+  float: right;
+  margin-left: 16px;
+  opacity: 0.55;
+}
+@media (pointer: coarse) {
+  .exo-menu button {
+    min-height: 44px;
+  }
+}

@@ -38,8 +38,7 @@ export function useElementSize(
       setSize({ width: 0, height: 0 });
       return;
     }
-    const update = () =>
-      setSize({ width: el.clientWidth, height: el.clientHeight });
+    const update = () => setSize({ width: el.clientWidth, height: el.clientHeight });
     update(); // initial measure is immediate; only observer ticks debounce
     let t: number | undefined;
     const ro = new ResizeObserver(() => {

@@ -85,7 +85,11 @@ test("migrateSavedLayout drops panels whose component no longer exists and prune
   assert.strictEqual(restored.panels[removedComp], undefined);
   assert.strictEqual(restored.panels[cloneId], undefined);
   assert.strictEqual(restored.activeGroup, "g1");
-  const leaves = (restored.grid.root as unknown as { data: { data: { id: string; views: string[]; activeView: string } }[] }).data;
+  const leaves = (
+    restored.grid.root as unknown as {
+      data: { data: { id: string; views: string[]; activeView: string } }[];
+    }
+  ).data;
   assert.strictEqual(leaves.length, 1);
   assert.deepStrictEqual(leaves[0].data.views, ["json-tree", "json-cosmos"]);
   assert.strictEqual(leaves[0].data.activeView, "json-tree");

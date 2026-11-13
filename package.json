@@ -8,6 +8,10 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "lint": "biome lint",
+    "format": "biome format --write",
+    "format:check": "biome format",
+    "check": "biome check",
     "ship:web": "npm run build && wrangler pages deploy dist --project-name=exo-skeleton-org --commit-dirty=true",
     "tauri": "tauri",
     "test": "node --experimental-strip-types --test --test-reporter=spec \"src/**/*.test.ts\""
@@ -48,6 +52,7 @@
     "three-spritetext": "^1.10.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.6.4",
     "@tauri-apps/cli": "^2",
     "@types/cytoscape": "^3.21.0",
     "@types/d3": "^7.4.3",

@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, dev ]
 
 jobs:
   build-and-test:
@@ -49,6 +49,9 @@ jobs:
 
       - name: Install Node dependencies
         run: npm ci
+
+      - name: Lint and format check
+        run: npm run check
 
       - name: Run TypeScript build & Node tests
         run: |

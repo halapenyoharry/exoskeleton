@@ -48,11 +48,7 @@ function hexDigit(code: number): number {
  * Parses a #rgb or #rrggbb hex color into `out` at `offset` as RGB in 0..1.
  * Returns true if `value` was a valid 3- or 6-digit hex color.
  */
-function writeHexRgb(
-  value: string | undefined,
-  out: Float32Array,
-  offset: number,
-): boolean {
+function writeHexRgb(value: string | undefined, out: Float32Array, offset: number): boolean {
   if (typeof value !== "string") return false;
   const len = value.length;
   if ((len !== 4 && len !== 7) || value.charCodeAt(0) !== 35) return false;
@@ -86,10 +82,7 @@ function writeHexRgb(
  * Positions are centered at `(2048, 2048)` inside cosmos.gl's default `4096`
  * space so negative coordinates are not clamped by the GPU simulation step.
  */
-export function toCosmos(
-  graph: DetectedGraph,
-  seed = 0x9e3779b9,
-): CosmosGraphData {
+export function toCosmos(graph: DetectedGraph, seed = 0x9e3779b9): CosmosGraphData {
   const { nodes, links: rawLinks } = graph;
   const nodeCount = nodes.length;
 
@@ -109,11 +102,7 @@ export function toCosmos(
     const cached = layerColorCache.get(key);
     if (cached) return cached;
     writeHexRgb(colorForLayer(key || undefined), scratchRgb, 0);
-    const tuple: [number, number, number] = [
-      scratchRgb[0],
-      scratchRgb[1],
-      scratchRgb[2],
-    ];
+    const tuple: [number, number, number] = [scratchRgb[0], scratchRgb[1], scratchRgb[2]];
     layerColorCache.set(key, tuple);
     return tuple;
   };
@@ -137,7 +126,14 @@ export function toCosmos(
     const colorOffset = i * 4;
     if (!writeHexRgb(firstString(node.color, attrs?.color, raw?.color), pointColors, colorOffset)) {
       const rgb = getLayerRgb(
-        firstString(attrs?.["i2t:kind"], node.type, raw?.type, raw?.group, attrs?.type, attrs?.group) ??
+        firstString(
+          attrs?.["i2t:kind"],
+          node.type,
+          raw?.type,
+          raw?.group,
+          attrs?.type,
+          attrs?.group,
+        ) ??
           node.kind ??
           "node",
       );
@@ -194,7 +190,6 @@ export function toCosmos(
     droppedLinks,
     pointColors,
     pointSizes,
-    linkColors:
-      droppedLinks === 0 ? linkRgba : linkRgba.slice(0, keptLinks * 4),
+    linkColors: droppedLinks === 0 ? linkRgba : linkRgba.slice(0, keptLinks * 4),
   };
 }

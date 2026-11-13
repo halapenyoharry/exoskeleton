@@ -15,9 +15,10 @@ import type { DetectedGraph } from "../../data/json-utils/graphDetect.ts";
 
 // A hub ("amy") connected to five leaves, plus a two-node island.
 function hubGraph(): DetectedGraph {
-  const nodes = ["amy", "club", "money", "dog", "text", "school", "bird", "plant"].map(
-    (id) => ({ id, label: id }),
-  );
+  const nodes = ["amy", "club", "money", "dog", "text", "school", "bird", "plant"].map((id) => ({
+    id,
+    label: id,
+  }));
   const links = [
     { source: "amy", target: "club" },
     { source: "amy", target: "money" },
@@ -49,7 +50,10 @@ test("density is the clustering coefficient, fixed by topology", () => {
 
 test("parallel edges merge into one heavier edge; self-loops and unknown ids drop", () => {
   const f = buildField({
-    nodes: [{ id: "a", label: "a" }, { id: "b", label: "b" }],
+    nodes: [
+      { id: "a", label: "a" },
+      { id: "b", label: "b" },
+    ],
     links: [
       { source: "a", target: "b" },
       { source: "b", target: "a" },

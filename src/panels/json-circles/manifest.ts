@@ -1,8 +1,5 @@
 import type { PanelManifest } from "../../panel-manifest";
-import JsonCirclesPanel, {
-  jsonCirclesDefaults,
-  type JsonCirclesParams,
-} from "./JsonCirclesPanel";
+import JsonCirclesPanel, { jsonCirclesDefaults, type JsonCirclesParams } from "./JsonCirclesPanel";
 
 const manifest: PanelManifest<JsonCirclesParams> = {
   id: "json-circles",

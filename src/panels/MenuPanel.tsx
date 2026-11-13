@@ -25,6 +25,7 @@ export default function MenuPanel(_props: IDockviewPanelProps) {
           {m.workspaces.map((ws) => (
             <div key={ws.id} className="menu-row-group">
               <button
+                type="button"
                 className={`menu-row menu-row--grow${ws.id === m.activeWorkspaceId ? " menu-row--active" : ""}`}
                 onClick={() => m.switchWorkspace(ws.id)}
               >
@@ -33,6 +34,7 @@ export default function MenuPanel(_props: IDockviewPanelProps) {
               </button>
               {inTauri() && (
                 <button
+                  type="button"
                   className="menu-row menu-row--icon"
                   title="Open workspace in new window"
                   onClick={() => m.openWorkspaceInNewWindow(ws.id)}
@@ -44,19 +46,30 @@ export default function MenuPanel(_props: IDockviewPanelProps) {
           ))}
         </div>
         <div className="menu-actions">
-          <button className="menu-row" onClick={m.createWorkspace}>+ New</button>
-          <button className="menu-row" onClick={m.renameWorkspace}>Rename</button>
-          <button className="menu-row menu-row--danger" onClick={m.deleteWorkspace}>Delete</button>
+          <button type="button" className="menu-row" onClick={m.createWorkspace}>
+            + New
+          </button>
+          <button type="button" className="menu-row" onClick={m.renameWorkspace}>
+            Rename
+          </button>
+          <button type="button" className="menu-row menu-row--danger" onClick={m.deleteWorkspace}>
+            Delete
+          </button>
         </div>
         <div className="menu-actions">
-          <button className="menu-row" onClick={m.exportWorkspace}>Export</button>
-          <button className="menu-row" onClick={m.importWorkspace}>Import</button>
+          <button type="button" className="menu-row" onClick={m.exportWorkspace}>
+            Export
+          </button>
+          <button type="button" className="menu-row" onClick={m.importWorkspace}>
+            Import
+          </button>
         </div>
       </section>
 
       <section className="menu-section">
         <div className="menu-list">
           <button
+            type="button"
             className="menu-row"
             onClick={m.toggleDocument}
             aria-pressed={m.isDocumentOpen()}
@@ -76,24 +89,29 @@ export default function MenuPanel(_props: IDockviewPanelProps) {
       {m.phone && (
         <section className="menu-section">
           <h3 className="menu-heading">Deck</h3>
-          <button className="menu-row" onClick={m.toggleDeck} aria-pressed={m.deckOptIn}>
+          <button
+            type="button"
+            className="menu-row"
+            onClick={m.toggleDeck}
+            aria-pressed={m.deckOptIn}
+          >
             <span className="menu-row-label">One pane at a time</span>
             <span className="menu-row-mark">{m.deckOptIn ? "●" : "○"}</span>
           </button>
           {m.deckMode && (
-            <button className="menu-row" onClick={m.toggleStatusBar}>
+            <button type="button" className="menu-row" onClick={m.toggleStatusBar}>
               <span className="menu-row-label">Status bar</span>
               <span className="menu-row-mark">{m.statusBarVisible ? "●" : "○"}</span>
             </button>
           )}
-          <button className="menu-row" onClick={m.toggleSettings}>
+          <button type="button" className="menu-row" onClick={m.toggleSettings}>
             <span className="menu-row-label">Settings</span>
           </button>
         </section>
       )}
 
       <section className="menu-section">
-        <button className="menu-row menu-row--danger" onClick={m.resetLayout}>
+        <button type="button" className="menu-row menu-row--danger" onClick={m.resetLayout}>
           ↺ Reset layout...
         </button>
       </section>

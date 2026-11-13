@@ -12,17 +12,11 @@ import {
   broadcastNodeFocus,
   onNodeFocusBroadcast,
 } from "../../osc/channels";
-import {
-  type DetectedGraph,
-  type GraphNode,
-} from "../../data/json-utils/graphDetect";
+import type { DetectedGraph, GraphNode } from "../../data/json-utils/graphDetect";
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats, getDetectedGraph } from "../../data/json-utils/docStats";
 import { useElementSize } from "../../useElementSize";
-import {
-  buildLayerVisibility,
-  colorForLayer,
-} from "../../data/json-utils/layers";
+import { buildLayerVisibility, colorForLayer } from "../../data/json-utils/layers";
 import "./JsonGraphPanel.css";
 
 interface SimNode extends GraphNode, d3.SimulationNodeDatum {}
@@ -83,18 +77,13 @@ export const jsonGraphDefaults: JsonGraphParams = {
   nodeThreshold: 500,
 };
 
-export default function JsonGraphPanel(
-  props: IDockviewPanelProps<JsonGraphParams>,
-) {
+export default function JsonGraphPanel(props: IDockviewPanelProps<JsonGraphParams>) {
   const params: JsonGraphParams = {
     ...jsonGraphDefaults,
     ...(props.params ?? {}),
   };
 
-  const updateParam = <K extends keyof JsonGraphParams>(
-    key: K,
-    value: JsonGraphParams[K],
-  ) => {
+  const updateParam = <K extends keyof JsonGraphParams>(key: K, value: JsonGraphParams[K]) => {
     props.api.updateParameters({ ...params, [key]: value });
   };
 
@@ -195,11 +184,7 @@ export default function JsonGraphPanel(
     const links: SimLink[] = graph.links.map((l) => ({ ...l }));
     simNodesRef.current = nodes;
 
-    const svg = d3
-      .select(container)
-      .append("svg")
-      .attr("width", width)
-      .attr("height", height);
+    const svg = d3.select(container).append("svg").attr("width", width).attr("height", height);
     svgRef.current = svg.node();
 
     const g = svg.append("g");
@@ -342,10 +327,7 @@ export default function JsonGraphPanel(
         }
       });
 
-    node
-      .append("circle")
-      .attr("r", params.nodeRadius)
-      .attr("class", "json-graph-node-circle");
+    node.append("circle").attr("r", params.nodeRadius).attr("class", "json-graph-node-circle");
 
     node
       .append("text")
@@ -367,16 +349,8 @@ export default function JsonGraphPanel(
         .attr("y2", (d) => (d.target as SimNode).y!);
 
       linkLabel
-        .attr(
-          "x",
-          (d) =>
-            ((d.source as SimNode).x! + (d.target as SimNode).x!) / 2,
-        )
-        .attr(
-          "y",
-          (d) =>
-            ((d.source as SimNode).y! + (d.target as SimNode).y!) / 2,
-        );
+        .attr("x", (d) => ((d.source as SimNode).x! + (d.target as SimNode).x!) / 2)
+        .attr("y", (d) => ((d.source as SimNode).y! + (d.target as SimNode).y!) / 2);
 
       node.attr("transform", (d) => `translate(${d.x},${d.y})`);
     });
@@ -394,14 +368,22 @@ export default function JsonGraphPanel(
     }
 
     const unsubSelection = onNodeSelectionBroadcast((event) => {
-      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) {
+      if (
+        !areGraphsConnected() ||
+        event.sourcePanelId === props.api.id ||
+        event.documentId !== activeDocId
+      ) {
         return;
       }
       node.classed("selected", (d) => d.id === event.nodeId);
     });
 
     const unsubFocus = onNodeFocusBroadcast((event) => {
-      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) {
+      if (
+        !areGraphsConnected() ||
+        event.sourcePanelId === props.api.id ||
+        event.documentId !== activeDocId
+      ) {
         return;
       }
       const target = nodes.find((n) => n.id === event.nodeId);
@@ -414,7 +396,7 @@ export default function JsonGraphPanel(
             d3.zoomIdentity
               .translate(width / 2, height / 2)
               .scale(1.2)
-              .translate(-target.x, -target.y)
+              .translate(-target.x, -target.y),
           );
       }
     });
@@ -451,8 +433,7 @@ export default function JsonGraphPanel(
   useEffect(() => {
     const link = linkSelectionRef.current;
     const label = linkLabelSelectionRef.current;
-    const visible = (l: SimLink) =>
-      !l.layer || params.layerVisibility[l.layer] !== false;
+    const visible = (l: SimLink) => !l.layer || params.layerVisibility[l.layer] !== false;
     if (link) link.style("display", (d) => (visible(d) ? null : "none"));
     if (label) label.style("display", (d) => (visible(d) ? null : "none"));
   }, [params.layerVisibility]);
@@ -470,6 +451,7 @@ export default function JsonGraphPanel(
             freeze
           </label>
           <button
+            type="button"
             onClick={() => resetRef.current()}
             title="Fit graph to view"
             className="json-graph-reset-btn"
@@ -481,25 +463,21 @@ export default function JsonGraphPanel(
       <div className="panel-body json-graph-body">
         {!isGraph && (
           <div className="json-graph-empty">
-            {doc === undefined
-              ? "Waiting for JSON…"
-              : "No graph structure detected in this JSON."}
+            {doc === undefined ? "Waiting for JSON…" : "No graph structure detected in this JSON."}
           </div>
         )}
         {isGraph && perfBlocked && (
           <div className="json-graph-perf-warning">
             <p>
-              <strong>{nodeCount.toLocaleString()}</strong> nodes detected
-              (threshold {params.nodeThreshold.toLocaleString()}).
+              <strong>{nodeCount.toLocaleString()}</strong> nodes detected (threshold{" "}
+              {params.nodeThreshold.toLocaleString()}).
             </p>
-            <button onClick={() => setBypassPerf(true)}>
+            <button type="button" onClick={() => setBypassPerf(true)}>
               Render anyway
             </button>
           </div>
         )}
-        {isGraph && !perfBlocked && (
-          <div className="json-graph-canvas" ref={containerRef} />
-        )}
+        {isGraph && !perfBlocked && <div className="json-graph-canvas" ref={containerRef} />}
       </div>
     </>
   );

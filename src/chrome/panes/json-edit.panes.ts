@@ -7,7 +7,11 @@ import { registerPanes } from "../panes-registry.ts";
 
 export const jsonEditPanes: PanelPane[] = [
   {
-    id: "document", kind: "pane", icon: "{}", label: "document", tooltip: "Open, save, copy or format the loaded document; switch documents",
+    id: "document",
+    kind: "pane",
+    icon: "{}",
+    label: "document",
+    tooltip: "Open, save, copy or format the loaded document; switch documents",
     body: {
       layout: "grid",
       cells: [
@@ -15,8 +19,20 @@ export const jsonEditPanes: PanelPane[] = [
         { type: "action", action: "open", icon: "⤒", label: "Open", tooltip: "Open file…" },
         { type: "action", action: "save", icon: "⤓", label: "Download", tooltip: "Download JSON" },
         { type: "action", action: "copy", icon: "⧉", label: "Copy", tooltip: "Copy JSON" },
-        { type: "action", action: "format", icon: "⇥", label: "Format", tooltip: "Format (pretty-print) JSON" },
-        { type: "text", action: "doc", textFrom: "doc", label: "Document", tooltip: "Current document — click to switch" },
+        {
+          type: "action",
+          action: "format",
+          icon: "⇥",
+          label: "Format",
+          tooltip: "Format (pretty-print) JSON",
+        },
+        {
+          type: "text",
+          action: "doc",
+          textFrom: "doc",
+          label: "Document",
+          tooltip: "Current document — click to switch",
+        },
       ],
     },
   },

@@ -11,10 +11,7 @@ import {
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats } from "../../data/json-utils/docStats";
 import { useElementSize } from "../../useElementSize";
-import {
-  jsonToHierarchy,
-  type HierarchyNode,
-} from "../../data/json-utils/jsonToHierarchy";
+import { jsonToHierarchy, type HierarchyNode } from "../../data/json-utils/jsonToHierarchy";
 import "./JsonTreePanel.css";
 
 export type JsonTreeLayout = "cluster" | "tidy";
@@ -70,18 +67,13 @@ export const jsonTreeDefaults: JsonTreeParams = {
 
 const EMPTY_TREE: HierarchyNode = { name: "Waiting for JSON…" };
 
-export default function JsonTreePanel(
-  props: IDockviewPanelProps<JsonTreeParams>,
-) {
+export default function JsonTreePanel(props: IDockviewPanelProps<JsonTreeParams>) {
   const params: JsonTreeParams = {
     ...jsonTreeDefaults,
     ...(props.params ?? {}),
   };
 
-  const updateParam = <K extends keyof JsonTreeParams>(
-    key: K,
-    value: JsonTreeParams[K],
-  ) => {
+  const updateParam = <K extends keyof JsonTreeParams>(key: K, value: JsonTreeParams[K]) => {
     props.api.updateParameters({ ...params, [key]: value });
   };
 
@@ -116,12 +108,7 @@ export default function JsonTreePanel(
   const rootData = useMemo<HierarchyNode>(() => {
     if (doc === undefined || perfBlocked) return EMPTY_TREE;
     try {
-      return jsonToHierarchy(
-        doc,
-        params.explodePrimitives,
-        "root",
-        params.showArrayIndices,
-      );
+      return jsonToHierarchy(doc, params.explodePrimitives, "root", params.showArrayIndices);
     } catch {
       return { name: "Invalid JSON" };
     }
@@ -150,21 +137,11 @@ export default function JsonTreePanel(
 
     const container = containerRef.current;
     const { width, height } = size;
-    const {
-      layout,
-      direction,
-      spacingX,
-      spacingY,
-      fontSize,
-      nodeColor,
-      linkColor,
-    } = params;
+    const { layout, direction, spacingX, spacingY, fontSize, nodeColor, linkColor } = params;
 
     const root = d3.hierarchy<HierarchyNode>(rootData, (d) => d.children);
     const layoutEngine =
-      layout === "cluster"
-        ? d3.cluster<HierarchyNode>()
-        : d3.tree<HierarchyNode>();
+      layout === "cluster" ? d3.cluster<HierarchyNode>() : d3.tree<HierarchyNode>();
     layoutEngine.nodeSize([spacingX, spacingY])(root);
 
     let x0 = Infinity;
@@ -212,10 +189,7 @@ export default function JsonTreePanel(
         "d",
         isVertical
           ? d3
-              .linkVertical<
-                d3.HierarchyLink<HierarchyNode>,
-                d3.HierarchyPointNode<HierarchyNode>
-              >()
+              .linkVertical<d3.HierarchyLink<HierarchyNode>, d3.HierarchyPointNode<HierarchyNode>>()
               .x((d) => (d.x ?? 0) * xMult)
               .y((d) => (d.y ?? 0) * yMult)
           : d3
@@ -265,15 +239,7 @@ export default function JsonTreePanel(
       .append("text")
       .attr("dy", isVertical ? "1.25em" : "0.31em")
       .attr("x", (d) =>
-        isVertical
-          ? 0
-          : d.children
-            ? direction === "RL"
-              ? 6
-              : -6
-            : direction === "RL"
-              ? -6
-              : 6,
+        isVertical ? 0 : d.children ? (direction === "RL" ? 6 : -6) : direction === "RL" ? -6 : 6,
       )
       .attr("text-anchor", (d) =>
         isVertical
@@ -296,11 +262,7 @@ export default function JsonTreePanel(
 
     const defaultTransform = d3.zoomIdentity
       .translate(
-        isVertical
-          ? width / 2
-          : direction === "RL"
-            ? width - spacingY
-            : spacingY,
+        isVertical ? width / 2 : direction === "RL" ? width - spacingY : spacingY,
         isVertical
           ? direction === "BT"
             ? height - spacingY
@@ -367,9 +329,7 @@ export default function JsonTreePanel(
         <div className="json-tree-controls">
           <select
             value={params.layout}
-            onChange={(e) =>
-              updateParam("layout", e.target.value as JsonTreeLayout)
-            }
+            onChange={(e) => updateParam("layout", e.target.value as JsonTreeLayout)}
             title="Layout algorithm"
           >
             <option value="cluster">cluster</option>
@@ -377,9 +337,7 @@ export default function JsonTreePanel(
           </select>
           <select
             value={params.direction}
-            onChange={(e) =>
-              updateParam("direction", e.target.value as JsonTreeDirection)
-            }
+            onChange={(e) => updateParam("direction", e.target.value as JsonTreeDirection)}
             title="Orientation"
           >
             <option value="LR">L → R</option>
@@ -391,9 +349,7 @@ export default function JsonTreePanel(
             <input
               type="checkbox"
               checked={params.showArrayIndices}
-              onChange={(e) =>
-                updateParam("showArrayIndices", e.target.checked)
-              }
+              onChange={(e) => updateParam("showArrayIndices", e.target.checked)}
             />
             [N]
           </label>
@@ -401,13 +357,12 @@ export default function JsonTreePanel(
             <input
               type="checkbox"
               checked={params.explodePrimitives}
-              onChange={(e) =>
-                updateParam("explodePrimitives", e.target.checked)
-              }
+              onChange={(e) => updateParam("explodePrimitives", e.target.checked)}
             />
             explode
           </label>
           <button
+            type="button"
             className="json-tree-reset-btn"
             onClick={() => resetRef.current()}
             title="Reset view"
@@ -420,14 +375,11 @@ export default function JsonTreePanel(
         {perfBlocked && (
           <div className="json-tree-perf-warning">
             <p>
-              <strong>{nodeCount.toLocaleString()}</strong> tree nodes detected
-              (threshold {params.nodeThreshold.toLocaleString()}).
+              <strong>{nodeCount.toLocaleString()}</strong> tree nodes detected (threshold{" "}
+              {params.nodeThreshold.toLocaleString()}).
             </p>
-            <p>
-              Rendering may be slow. Click to proceed anyway, or reduce the JSON
-              size.
-            </p>
-            <button onClick={() => setBypassPerf(true)}>
+            <p>Rendering may be slow. Click to proceed anyway, or reduce the JSON size.</p>
+            <button type="button" onClick={() => setBypassPerf(true)}>
               Render anyway
             </button>
           </div>

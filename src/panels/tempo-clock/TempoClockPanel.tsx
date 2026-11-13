@@ -11,13 +11,9 @@ export interface TempoClockParams {
   playing: boolean;
 }
 
-export default function TempoClockPanel(
-  props: IDockviewPanelProps<TempoClockParams>,
-) {
+export default function TempoClockPanel(props: IDockviewPanelProps<TempoClockParams>) {
   const [bpm, setBpm] = useState<number>(props.params?.bpm ?? 120);
-  const [playing, setPlaying] = useState<boolean>(
-    props.params?.playing ?? false,
-  );
+  const [playing, setPlaying] = useState<boolean>(props.params?.playing ?? false);
   const [beat, setBeat] = useState<number>(0);
 
   // Persist BPM + playing to panel params so they survive a reload.
@@ -45,9 +41,7 @@ export default function TempoClockPanel(
       if (tickCount % PPQ === 0) {
         beatCount++;
         setBeat(beatCount);
-        void sendOsc("/exoskeleton/clock/beat", [
-          { type: "int", value: beatCount },
-        ]);
+        void sendOsc("/exoskeleton/clock/beat", [{ type: "int", value: beatCount }]);
       }
     }, tickMs);
 
@@ -68,7 +62,7 @@ export default function TempoClockPanel(
     <>
       <div className="tempo-clock-body">
         <div className="tempo-clock-controls">
-          <button onClick={toggle} className="tempo-clock-play">
+          <button type="button" onClick={toggle} className="tempo-clock-play">
             {playing ? "■ stop" : "▶ play"}
           </button>
           <input
@@ -83,6 +77,7 @@ export default function TempoClockPanel(
           />
           <span className="tempo-clock-bpm-label">bpm</span>
         </div>
+        {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: beat indicator div carries aria-label for state readout */}
         <div
           key={beat}
           className={`tempo-clock-beat${playing ? " is-active" : ""}`}

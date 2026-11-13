@@ -107,7 +107,9 @@
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 229, 255, 0.3);
   border-radius: 6px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 229, 255, 0.1);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.5),
+    0 0 10px rgba(0, 229, 255, 0.1);
   padding: 4px;
   z-index: 1000;
   display: flex;
@@ -147,7 +149,6 @@
 .json-edit-dropdown-item--danger:hover {
   color: #ff6b6b;
 }
-
 
 .json-edit-library-item {
   padding-left: 24px;
@@ -201,11 +202,19 @@
   border: 0;
   border-radius: 4px;
   color: #c5d1e6;
-  font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+  font:
+    11px ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
 }
-.json-edit-doc-menu button:hover { background: rgba(89, 184, 255, 0.18); }
-.json-edit-doc-menu button.is-current { color: #59b8ff; }
+.json-edit-doc-menu button:hover {
+  background: rgba(89, 184, 255, 0.18);
+}
+.json-edit-doc-menu button.is-current {
+  color: #59b8ff;
+}

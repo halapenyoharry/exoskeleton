@@ -43,6 +43,7 @@ export function Segmented<V extends string | number>({
   className,
 }: SegmentedProps<V>) {
   return (
+    // biome-ignore lint/a11y/useSemanticElements: div with role="group" avoids browser fieldset border and flex layout quirks
     <div
       className={["xo-segmented", className].filter(Boolean).join(" ")}
       role="group"
@@ -64,7 +65,11 @@ export function Segmented<V extends string | number>({
               if (!active) onChange(opt.value);
             }}
           >
-            {opt.icon !== undefined && <span className="xo-segmented-icon" aria-hidden="true">{opt.icon}</span>}
+            {opt.icon !== undefined && (
+              <span className="xo-segmented-icon" aria-hidden="true">
+                {opt.icon}
+              </span>
+            )}
             <span className="xo-segmented-label">{opt.label}</span>
           </button>
         );
@@ -129,6 +134,7 @@ export function SwatchPicker<V extends string | number>({
   className,
 }: SwatchPickerProps<V>) {
   return (
+    // biome-ignore lint/a11y/useSemanticElements: div with role="group" avoids browser fieldset border and flex layout quirks
     <div
       className={["xo-swatches", className].filter(Boolean).join(" ")}
       role="group"
@@ -171,7 +177,12 @@ export interface ToolbarGroupProps {
 /** Caption-above-controls container. Groups sit side by side and wrap. */
 export function ToolbarGroup({ label, title, children, className }: ToolbarGroupProps) {
   return (
-    <div className={["xo-toolbar-group", className].filter(Boolean).join(" ")} role="group" aria-label={label}>
+    // biome-ignore lint/a11y/useSemanticElements: div with role="group" avoids browser fieldset border and flex layout quirks
+    <div
+      className={["xo-toolbar-group", className].filter(Boolean).join(" ")}
+      role="group"
+      aria-label={label}
+    >
       <span className="xo-toolbar-caption" title={title}>
         {label}
       </span>
@@ -190,7 +201,11 @@ export interface ToolbarProps {
 /** Wrapping flex strip. Never overflows horizontally. */
 export function Toolbar({ children, className, label }: ToolbarProps) {
   return (
-    <div className={["xo-toolbar", className].filter(Boolean).join(" ")} role="toolbar" aria-label={label}>
+    <div
+      className={["xo-toolbar", className].filter(Boolean).join(" ")}
+      role="toolbar"
+      aria-label={label}
+    >
       {children}
     </div>
   );

@@ -76,7 +76,10 @@ test("resolveLinkCategory is undefined for untyped links", () => {
 });
 
 test("linkInlineText prefers role (spoke) over label (predicate)", () => {
-  assert.strictEqual(linkInlineText({ source: "x", target: "y", role: "member", label: "contains" }), "member");
+  assert.strictEqual(
+    linkInlineText({ source: "x", target: "y", role: "member", label: "contains" }),
+    "member",
+  );
   assert.strictEqual(linkInlineText({ source: "x", target: "y", label: "refers_to" }), "refers_to");
   assert.strictEqual(linkInlineText({ source: "x", target: "y" }), "");
 });
@@ -98,7 +101,10 @@ test("containmentGroups groups participants per containment hyperedge and names 
 });
 
 test("containmentGroups ignores interactivity hyperedges", () => {
-  assert.strictEqual(containmentGroups(graph, byId).some((g) => g.relationId === "i:pair"), false);
+  assert.strictEqual(
+    containmentGroups(graph, byId).some((g) => g.relationId === "i:pair"),
+    false,
+  );
 });
 
 test("nodeColor overrides go id > kind > attrs.color > fallback", () => {
@@ -114,7 +120,10 @@ test("hyperedge nodes take their category color", () => {
 test("linkColor honors overrides then the chosen scheme", () => {
   const l = graph.links[4];
   assert.strictEqual(linkColor(l, "reference", "category", {}), CATEGORY_TOKENS.reference.color);
-  assert.strictEqual(linkColor(l, "reference", "category", { "predicate:refers_to": "#abc" }), "#abc");
+  assert.strictEqual(
+    linkColor(l, "reference", "category", { "predicate:refers_to": "#abc" }),
+    "#abc",
+  );
   assert.strictEqual(linkColor(l, "reference", "layer", { "layer:pointers": "#def" }), "#def");
 });
 

@@ -98,7 +98,12 @@ export class FieldWorld {
   field: Field;
   opts: PhysicsOptions;
 
-  constructor(R: Rapier, field: Field, opts: PhysicsOptions, seedPositions?: Map<string, { x: number; y: number }>) {
+  constructor(
+    R: Rapier,
+    field: Field,
+    opts: PhysicsOptions,
+    seedPositions?: Map<string, { x: number; y: number }>,
+  ) {
     this.R = R;
     this.field = field;
     this.opts = opts;
@@ -155,7 +160,8 @@ export class FieldWorld {
   }
 
   private applyForces(): void {
-    const { G, repulsion, minGravityDistance, springK, springRest, centering, maxForce } = this.opts;
+    const { G, repulsion, minGravityDistance, springK, springRest, centering, maxForce } =
+      this.opts;
     const nodes = this.field.nodes;
     const pos: { x: number; y: number }[] = new Array(nodes.length);
     const fx = new Float64Array(nodes.length);
@@ -279,7 +285,10 @@ export class FieldWorld {
 
   /** Bounding box of all bodies, for fit-to-view. */
   bounds(): { minX: number; minY: number; maxX: number; maxY: number } {
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
     for (const node of this.field.nodes) {
       const t = this.bodies.get(node.id)!.translation();
       const r = this.radiusFor(node.mass);

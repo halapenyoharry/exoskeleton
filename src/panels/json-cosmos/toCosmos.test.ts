@@ -187,10 +187,7 @@ test("toCosmos: converts a 50,000-node / 100,000-link graph in under 2 seconds",
   assert.equal(out.links.length, linkCount * 2);
   assert.equal(out.linkColors.length, linkCount * 4);
   assert.equal(out.droppedLinks, 0);
-  assert.ok(
-    elapsedMs < 2000,
-    `Expected conversion under 2000ms, took ${elapsedMs.toFixed(1)}ms`,
-  );
+  assert.ok(elapsedMs < 2000, `Expected conversion under 2000ms, took ${elapsedMs.toFixed(1)}ms`);
 });
 
 test("toCosmos: reads color, size and category from attrs and the raw node, as graphDetect produces them", () => {
@@ -199,8 +196,19 @@ test("toCosmos: reads color, size and category from attrs and the raw node, as g
     nodes: [
       { id: "a", label: "A", kind: "node", attrs: { "i2t:kind": "person" }, data: { id: "a" } },
       { id: "b", label: "B", kind: "node", data: { id: "b", type: "group-3" } },
-      { id: "c", label: "C", kind: "node", data: { id: "c", group: "cluster-x", color: "#00ff00", size: 9 } },
-      { id: "d", label: "D", kind: "node", attrs: { "i2t:kind": "place", color: "#123456" }, data: { id: "d" } },
+      {
+        id: "c",
+        label: "C",
+        kind: "node",
+        data: { id: "c", group: "cluster-x", color: "#00ff00", size: 9 },
+      },
+      {
+        id: "d",
+        label: "D",
+        kind: "node",
+        attrs: { "i2t:kind": "place", color: "#123456" },
+        data: { id: "d" },
+      },
     ],
     links: [],
   };

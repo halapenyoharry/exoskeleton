@@ -34,6 +34,7 @@ import type { SerializedDockview } from "dockview-react";
 //       and containment hulls.
 export const CURRENT_VERSION = 11;
 
+// biome-ignore lint/suspicious/noEmptyInterface: reserved preferences contract
 export interface Preferences {
   // Empty for now; reserved for theme, tab-position, etc. when those land.
 }
@@ -218,11 +219,7 @@ export function deleteWorkspace(state: AppStateV8, id: string): AppStateV8 {
   };
 }
 
-export function renameWorkspace(
-  state: AppStateV8,
-  id: string,
-  newName: string,
-): AppStateV8 {
+export function renameWorkspace(state: AppStateV8, id: string, newName: string): AppStateV8 {
   const target = state.workspaces[id];
   if (!target) return state;
 

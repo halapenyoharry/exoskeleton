@@ -165,9 +165,7 @@ function passLine(p: PassRecord, chunkCount: number): string {
 }
 
 // ── Component ────────────────────────────────────────────────────────
-export default function TopologyExtractPanel(
-  props: IDockviewPanelProps<TopologyExtractParams>,
-) {
+export default function TopologyExtractPanel(props: IDockviewPanelProps<TopologyExtractParams>) {
   const params: TopologyExtractParams = {
     ...topologyExtractDefaults,
     ...(props.params ?? {}),
@@ -227,24 +225,25 @@ export default function TopologyExtractPanel(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [p.provider]);
 
-  const pushToLibrary = useCallback(
-    (doc: TopoDocument, existingId: string | null): string => {
-      const title =
-        (typeof doc.metadata?.title === "string" && doc.metadata.title) || "Extracted topology";
-      const model =
-        typeof doc.metadata?.model === "string" ? doc.metadata.model : "unknown model";
-      const id = existingId ?? uniqueJsonId(`extract-${title}`);
-      setJson(id, doc as unknown as JsonValue, { title, source: `topology-extract · ${model}` });
-      setActiveDocumentId(id);
-      setPushedId(id);
-      return id;
-    },
-    [],
-  );
+  const pushToLibrary = useCallback((doc: TopoDocument, existingId: string | null): string => {
+    const title =
+      (typeof doc.metadata?.title === "string" && doc.metadata.title) || "Extracted topology";
+    const model = typeof doc.metadata?.model === "string" ? doc.metadata.model : "unknown model";
+    const id = existingId ?? uniqueJsonId(`extract-${title}`);
+    setJson(id, doc as unknown as JsonValue, { title, source: `topology-extract · ${model}` });
+    setActiveDocumentId(id);
+    setPushedId(id);
+    return id;
+  }, []);
 
   const followUps = p.provider === "ollama" ? p.ollamaFollowUps : p.openrouterFollowUps;
   const chunkChars = p.provider === "ollama" ? p.ollamaChunkChars : p.openrouterChunkChars;
-  const modelLabel = p.provider === "ollama" ? p.ollamaModel : p.provider === "openrouter" ? p.model : `i2t_cli ${p.adapter}`;
+  const modelLabel =
+    p.provider === "ollama"
+      ? p.ollamaModel
+      : p.provider === "openrouter"
+        ? p.model
+        : `i2t_cli ${p.adapter}`;
 
   async function handleExtract() {
     if (extracting) {
@@ -279,7 +278,11 @@ export default function TopologyExtractPanel(
           { apiKey: p.apiKey, model: p.model, adapter: p.adapter },
           (msg) => setLog((prev) => [...prev, msg].slice(-100)),
         )) as TopoDocument;
-        doc.metadata = { ...(doc.metadata ?? {}), extracted_at: new Date().toISOString(), model: modelLabel };
+        doc.metadata = {
+          ...(doc.metadata ?? {}),
+          extracted_at: new Date().toISOString(),
+          model: modelLabel,
+        };
         finish({ document: doc, json: JSON.stringify(doc, null, 2) });
         return;
       }
@@ -323,7 +326,11 @@ export default function TopologyExtractPanel(
         "i2t:passes": outcome.passes.length,
         "i2t:parts": outcome.chunkCount,
         ...(totalCost > 0 ? { "i2t:cost_usd": Number(totalCost.toFixed(4)) } : {}),
-        ...(outcome.complete ? {} : { "i2t:partial": `${outcome.chunksCompleted} of ${outcome.chunkCount} parts complete` }),
+        ...(outcome.complete
+          ? {}
+          : {
+              "i2t:partial": `${outcome.chunksCompleted} of ${outcome.chunkCount} parts complete`,
+            }),
       };
       if (outcome.error) setError(outcome.error);
       const hasContent = outcome.document.relations.length > 1 || outcome.document.nodes.length > 0;
@@ -388,7 +395,10 @@ export default function TopologyExtractPanel(
 
   async function handleSaveJson() {
     if (!result) return;
-    const title = typeof result.document.metadata?.title === "string" ? result.document.metadata.title : "topology";
+    const title =
+      typeof result.document.metadata?.title === "string"
+        ? result.document.metadata.title
+        : "topology";
     try {
       const saved = await saveTextFile(
         result.json,
@@ -396,7 +406,12 @@ export default function TopologyExtractPanel(
         [{ name: "JSON", extensions: ["json"] }],
       );
       if (!saved) return;
-      show("ok", saved.method === "dialog" ? `Saved to ${saved.path}` : `Downloaded ${saved.path} — check your Downloads folder`);
+      show(
+        "ok",
+        saved.method === "dialog"
+          ? `Saved to ${saved.path}`
+          : `Downloaded ${saved.path} — check your Downloads folder`,
+      );
     } catch (err) {
       show("error", errorText(err));
     }
@@ -428,8 +443,13 @@ export default function TopologyExtractPanel(
       })()
     : 0;
   const meta = result?.document.metadata ?? {};
-  const unverified = typeof meta["i2t:evidence_unverified"] === "number" ? (meta["i2t:evidence_unverified"] as number) : 0;
-  const warnings = Array.isArray(meta["i2t:extraction_warnings"]) ? (meta["i2t:extraction_warnings"] as string[]) : [];
+  const unverified =
+    typeof meta["i2t:evidence_unverified"] === "number"
+      ? (meta["i2t:evidence_unverified"] as number)
+      : 0;
+  const warnings = Array.isArray(meta["i2t:extraction_warnings"])
+    ? (meta["i2t:extraction_warnings"] as string[])
+    : [];
   const partial = typeof meta["i2t:partial"] === "string" ? (meta["i2t:partial"] as string) : null;
 
   return (
@@ -496,6 +516,7 @@ export default function TopologyExtractPanel(
               </datalist>
             </label>
             <button
+              type="button"
               className="topo-extract-source-btn"
               onClick={() => void refreshOllamaModels()}
               title="List the models installed on this host"
@@ -526,9 +547,8 @@ export default function TopologyExtractPanel(
       {/* ── API key row ──────────────────────────────── */}
       {p.provider === "openrouter" && (
         <div className="topo-extract-key-row">
-          <label style={{ fontSize: 11, color: "#7e879b", whiteSpace: "nowrap" }}>
-            API Key
-          </label>
+          {/* biome-ignore lint/a11y/noLabelWithoutControl: visual caption beside input; panel may be mounted multiple times */}
+          <label style={{ fontSize: 11, color: "#7e879b", whiteSpace: "nowrap" }}>API Key</label>
           <input
             className="topo-extract-key-input"
             type={showKey ? "text" : "password"}
@@ -539,6 +559,7 @@ export default function TopologyExtractPanel(
             autoComplete="off"
           />
           <button
+            type="button"
             className="topo-extract-key-toggle"
             onClick={() => setShowKey(!showKey)}
             title={showKey ? "Hide key" : "Show key"}
@@ -621,10 +642,20 @@ export default function TopologyExtractPanel(
           placeholder="Paste source text here (⌘V), or load a file — then Extract Topology."
         />
         <div className="topo-extract-source-actions">
-          <button className="topo-extract-source-btn" onClick={handleLoadFile} disabled={extracting}>
+          <button
+            type="button"
+            className="topo-extract-source-btn"
+            onClick={handleLoadFile}
+            disabled={extracting}
+          >
             📂 Load File
           </button>
-          <button className="topo-extract-source-btn" onClick={handlePaste} disabled={extracting}>
+          <button
+            type="button"
+            className="topo-extract-source-btn"
+            onClick={handlePaste}
+            disabled={extracting}
+          >
             📋 From Clipboard
           </button>
           <span className="topo-extract-token-estimate">
@@ -637,6 +668,7 @@ export default function TopologyExtractPanel(
 
       {/* ── Advanced: prompt editor ──────────────────── */}
       <button
+        type="button"
         className="topo-extract-advanced-toggle"
         onClick={() => setShowAdvanced(!showAdvanced)}
       >
@@ -653,6 +685,7 @@ export default function TopologyExtractPanel(
           />
           {p.systemPrompt !== "" && (
             <button
+              type="button"
               className="topo-extract-prompt-reset"
               onClick={() => set("systemPrompt", "")}
             >
@@ -665,6 +698,7 @@ export default function TopologyExtractPanel(
       {/* ── Extract trigger ──────────────────────────── */}
       <div className="topo-extract-trigger">
         <button
+          type="button"
           className={`topo-extract-btn ${extracting ? "topo-extract-btn--cancel" : ""}`}
           disabled={!canExtract && !extracting}
           onClick={handleExtract}
@@ -699,9 +733,13 @@ export default function TopologyExtractPanel(
               </span>
               {progress ? (
                 <span>
-                  {progress.chunkCount > 1 ? `Part ${progress.chunk + 1} of ${progress.chunkCount} · ` : ""}
+                  {progress.chunkCount > 1
+                    ? `Part ${progress.chunk + 1} of ${progress.chunkCount} · `
+                    : ""}
                   pass {progress.pass + 1} of {progress.passCount} ({progress.passLabel})
-                  {progress.tokens > 0 ? ` · ${progress.tokens.toLocaleString()} tokens` : " · waiting for the model…"}
+                  {progress.tokens > 0
+                    ? ` · ${progress.tokens.toLocaleString()} tokens`
+                    : " · waiting for the model…"}
                   {" · "}
                   {progress.totalNodes} nodes, {progress.totalRelations} relations so far
                 </span>
@@ -714,6 +752,7 @@ export default function TopologyExtractPanel(
             <details className="topo-extract-progress-log" open={extracting}>
               <summary>Pass log ({log.length})</summary>
               {log.map((line, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: append-only log lines may contain duplicate text
                 <div key={i} className={line.includes("✗") ? "topo-extract-log-error" : ""}>
                   {line}
                 </div>
@@ -740,7 +779,8 @@ export default function TopologyExtractPanel(
               <span>
                 {partial ? `Partial (${partial}): ` : ""}
                 {nodeCount} node{nodeCount !== 1 ? "s" : ""}
-                {hyperedgeCount > 0 && `, ${hyperedgeCount} hyperedge${hyperedgeCount !== 1 ? "s" : ""}`}
+                {hyperedgeCount > 0 &&
+                  `, ${hyperedgeCount} hyperedge${hyperedgeCount !== 1 ? "s" : ""}`}
                 , {dyadicLinkCount} edge
                 {dyadicLinkCount !== 1 ? "s" : ""}
                 {result.outcome && ` · ${result.outcome.passes.length} passes`}
@@ -780,23 +820,36 @@ export default function TopologyExtractPanel(
 
             {(unverified > 0 || warnings.length > 0) && (
               <div className="topo-extract-quality">
-                {unverified > 0 && `${unverified} relation${unverified !== 1 ? "s" : ""} cite evidence not found verbatim in the source. `}
-                {warnings.length > 0 && `${warnings.length} projection warning${warnings.length !== 1 ? "s" : ""} (see metadata).`}
+                {unverified > 0 &&
+                  `${unverified} relation${unverified !== 1 ? "s" : ""} cite evidence not found verbatim in the source. `}
+                {warnings.length > 0 &&
+                  `${warnings.length} projection warning${warnings.length !== 1 ? "s" : ""} (see metadata).`}
               </div>
             )}
 
             <div className="topo-extract-result-actions">
               <button
+                type="button"
                 className="topo-extract-result-btn topo-extract-result-btn--primary"
                 onClick={handlePush}
                 title="Put this result in the document library and make it the active document"
               >
                 {pushedId ? "✓ In library — update" : "Add to library ▸"}
               </button>
-              <button className="topo-extract-result-btn" onClick={handleCopyJson} title="Copy the JSON">
+              <button
+                type="button"
+                className="topo-extract-result-btn"
+                onClick={handleCopyJson}
+                title="Copy the JSON"
+              >
                 Copy JSON
               </button>
-              <button className="topo-extract-result-btn" onClick={handleSaveJson} title="Save the JSON to a file">
+              <button
+                type="button"
+                className="topo-extract-result-btn"
+                onClick={handleSaveJson}
+                title="Save the JSON to a file"
+              >
                 {inTauri() ? "Save…" : "Download"}
               </button>
               {result.outcome && result.outcome.passes.some((r) => r.usage?.cost) && (
@@ -808,8 +861,8 @@ export default function TopologyExtractPanel(
 
             {pushedId && (
               <div className="topo-extract-pushed">
-                In the library as <code>{pushedId}</code>. It is the active document: json-edit and the
-                viewers now show it. Switch documents from json-edit's picker.
+                In the library as <code>{pushedId}</code>. It is the active document: json-edit and
+                the viewers now show it. Switch documents from json-edit's picker.
               </div>
             )}
 
@@ -825,6 +878,7 @@ export default function TopologyExtractPanel(
           </div>
         )}
         {flash && (
+          // biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: transient status flash dismissed on click
           <div
             className={`topo-extract-flash topo-extract-flash--${flash.kind}`}
             onClick={clear}

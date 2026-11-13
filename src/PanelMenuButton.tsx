@@ -19,13 +19,17 @@ export function closeBackClosers(): boolean {
   if (backClosers.size === 0) return false;
   const fns = [...backClosers];
   backClosers.clear();
-  fns.forEach((f) => f());
+  fns.forEach((f) => {
+    f();
+  });
   return true;
 }
 
 /** Does this panel declare a "menu" cell among its controls? Then the
  *  header actions leave the ≡ to the controls. */
-export function panelHasMenuCell(panes: { body?: { cells: { type: string }[] } }[] | undefined): boolean {
+export function panelHasMenuCell(
+  panes: { body?: { cells: { type: string }[] } }[] | undefined,
+): boolean {
   return !!panes?.some((p) => p.body?.cells.some((c) => c.type === "menu"));
 }
 
@@ -38,7 +42,13 @@ export interface PanelMenuButtonProps {
   className?: string;
 }
 
-export function PanelMenuButton({ panelId, api, containerApi, structural, className }: PanelMenuButtonProps) {
+export function PanelMenuButton({
+  panelId,
+  api,
+  containerApi,
+  structural,
+  className,
+}: PanelMenuButtonProps) {
   const key = resolveComponentKey(panelId) ?? panelId;
   const items = getPanelMenu(key);
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
@@ -94,6 +104,7 @@ export function PanelMenuButton({ panelId, api, containerApi, structural, classN
       </div>
     ) : (
       <button
+        type="button"
         key={item.id}
         role="menuitem"
         className={nested ? "exo-menu__sub" : undefined}
@@ -131,13 +142,17 @@ export function PanelMenuButton({ panelId, api, containerApi, structural, classN
               <>
                 {items && <hr className="exo-menu__rule" />}
                 <button
+                  type="button"
                   role="menuitem"
-                  onClick={act(() => (group.api.isMaximized() ? group.api.exitMaximized() : group.api.maximize()))}
+                  onClick={act(() =>
+                    group.api.isMaximized() ? group.api.exitMaximized() : group.api.maximize(),
+                  )}
                 >
                   {group.api.isMaximized() ? "Restore" : "Maximize"}
                 </button>
                 {!isPhone && (
                   <button
+                    type="button"
                     role="menuitem"
                     className="exo-menu__popout"
                     onClick={act(() => void containerApi.addPopoutGroup(group))}
@@ -145,7 +160,12 @@ export function PanelMenuButton({ panelId, api, containerApi, structural, classN
                     Pop out
                   </button>
                 )}
-                <button role="menuitem" aria-expanded={moveOpen} onClick={() => setMoveOpen(!moveOpen)}>
+                <button
+                  type="button"
+                  role="menuitem"
+                  aria-expanded={moveOpen}
+                  onClick={() => setMoveOpen(!moveOpen)}
+                >
                   Move to… {moveOpen ? "▾" : "▸"}
                 </button>
                 {moveOpen &&
@@ -165,6 +185,7 @@ export function PanelMenuButton({ panelId, api, containerApi, structural, classN
                           ] as const
                         ).map(([position, label]) => (
                           <button
+                            type="button"
                             key={position}
                             role="menuitem"
                             className="exo-menu__sub"
@@ -176,7 +197,7 @@ export function PanelMenuButton({ panelId, api, containerApi, structural, classN
                       </div>
                     ))
                   ))}
-                <button role="menuitem" onClick={act(() => api.close())}>
+                <button type="button" role="menuitem" onClick={act(() => api.close())}>
                   Close
                 </button>
               </>

@@ -8,26 +8,49 @@ import { registerPanes } from "../panes-registry.ts";
 
 export const jsonCytoscapeStrip: PanelPane[] = [
   {
-    id: "layout", kind: "pane", icon: "⌗", label: "layout", tooltip: "Layout algorithm",
+    id: "layout",
+    kind: "pane",
+    icon: "⌗",
+    label: "layout",
+    tooltip: "Layout algorithm",
     body: {
       layout: "grid",
       cells: [
-        { type: "segmented", param: "layout", label: "algorithm", tooltip: "Layout algorithm", span: [3, 3],
+        {
+          type: "segmented",
+          param: "layout",
+          label: "algorithm",
+          tooltip: "Layout algorithm",
+          span: [3, 3],
           options: [
-            { value: "fcose", label: "fcose" }, { value: "cose", label: "cose" },
-            { value: "breadthfirst", label: "breadthfirst" }, { value: "concentric", label: "concentric" },
-            { value: "circle", label: "circle" }, { value: "grid", label: "grid" }, { value: "random", label: "random" },
-          ] },
+            { value: "fcose", label: "fcose" },
+            { value: "cose", label: "cose" },
+            { value: "breadthfirst", label: "breadthfirst" },
+            { value: "concentric", label: "concentric" },
+            { value: "circle", label: "circle" },
+            { value: "grid", label: "grid" },
+            { value: "random", label: "random" },
+          ],
+        },
       ],
     },
   },
   {
-    id: "style", kind: "pane", icon: "◐", label: "style", tooltip: "Edges and labels",
+    id: "style",
+    kind: "pane",
+    icon: "◐",
+    label: "style",
+    tooltip: "Edges and labels",
     body: {
       layout: "stack",
       cells: [
         { type: "toggle", param: "curveEdges", label: "curve", tooltip: "Curve multi-edges" },
-        { type: "toggle", param: "labelPrimary", label: "label", tooltip: "Label-primary: text is the node, no circle chrome" },
+        {
+          type: "toggle",
+          param: "labelPrimary",
+          label: "label",
+          tooltip: "Label-primary: text is the node, no circle chrome",
+        },
       ],
     },
   },

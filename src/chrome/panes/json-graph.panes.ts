@@ -8,10 +8,21 @@ import { registerPanes } from "../panes-registry.ts";
 
 export const jsonGraphStrip: PanelPane[] = [
   {
-    id: "physics", kind: "pane", icon: "⌗", label: "physics", tooltip: "Layout simulation",
+    id: "physics",
+    kind: "pane",
+    icon: "⌗",
+    label: "physics",
+    tooltip: "Layout simulation",
     body: {
       layout: "stack",
-      cells: [{ type: "toggle", param: "freezeLayout", label: "freeze", tooltip: "Freeze the physics simulation" }],
+      cells: [
+        {
+          type: "toggle",
+          param: "freezeLayout",
+          label: "freeze",
+          tooltip: "Freeze the physics simulation",
+        },
+      ],
     },
   },
   { id: "fit", kind: "action", icon: "⤢", label: "fit", tooltip: "Fit graph to view" },

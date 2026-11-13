@@ -47,7 +47,13 @@ export function LeftHeaderActions(props: IDockviewHeaderActionsProps) {
   return (
     <div className="header-actions header-actions--left">
       {showMenu && (
-        <PanelMenuButton panelId={id} api={active.api} containerApi={props.containerApi} structural={isDocEdge} className="header-btn header-btn--menu" />
+        <PanelMenuButton
+          panelId={id}
+          api={active.api}
+          containerApi={props.containerApi}
+          structural={isDocEdge}
+          className="header-btn header-btn--menu"
+        />
       )}
       {showRestore && (
         <button
@@ -114,7 +120,9 @@ export function RightHeaderActions(props: IDockviewHeaderActionsProps) {
     ensureCompanions(props.containerApi, component);
   }
   function closeGroup() {
-    [...props.panels].forEach((p) => p.api.close());
+    [...props.panels].forEach((p) => {
+      p.api.close();
+    });
   }
   function popoutGroup() {
     props.containerApi.addPopoutGroup(props.group);

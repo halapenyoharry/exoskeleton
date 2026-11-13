@@ -54,7 +54,7 @@
 }
 
 .json-mass-label text {
-  fill: #DCE5E7;
+  fill: #dce5e7;
   paint-order: stroke;
   stroke: rgba(10, 14, 39, 0.85);
   stroke-width: 3px;
@@ -62,11 +62,11 @@
 }
 
 .json-mass-label .container-text {
-  fill: #E6FBFF;
+  fill: #e6fbff;
 }
 
 .json-mass-label .leaf-text {
-  fill: #DCE5E7;
+  fill: #dce5e7;
 }
 
 .json-mass-perf-warning {
@@ -78,7 +78,7 @@
   justify-content: center;
   padding: 24px;
   text-align: center;
-  color: #DCE5E7;
+  color: #dce5e7;
   background: rgba(8, 12, 34, 0.9);
 }
 

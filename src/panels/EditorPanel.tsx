@@ -79,7 +79,10 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
       if (!result) return;
       if (result.method === "dialog") rememberPath(result.path);
       setDirty(false);
-      show("ok", result.method === "dialog" ? `Saved to ${result.path}` : `Downloaded ${result.path}`);
+      show(
+        "ok",
+        result.method === "dialog" ? `Saved to ${result.path}` : `Downloaded ${result.path}`,
+      );
     } catch (err) {
       show("error", errorText(err));
     }
@@ -95,7 +98,10 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
   const actions = {
     openFile,
     newFile,
-    saveFile: () => { if (!dirty && path) return; return saveFile(); },
+    saveFile: () => {
+      if (!dirty && path) return;
+      return saveFile();
+    },
     saveAs: () => saveFile(true),
   };
   const actionsRef = useRef(actions);
@@ -116,8 +122,10 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
     <>
       {/* Inline buttons; hidden by CSS when the host renders the slim toolbar. */}
       <div className="panel-toolbar">
-        <button onClick={openFile}>open</button>
-        <button onClick={() => void saveFile()} disabled={!dirty && !!path}>
+        <button type="button" onClick={openFile}>
+          open
+        </button>
+        <button type="button" onClick={() => void saveFile()} disabled={!dirty && !!path}>
           save
         </button>
       </div>
@@ -125,9 +133,11 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
           visible when the toolbar is replaced by header actions. */}
       <div className="editor-status">
         <span style={{ flex: 1, color: "#4a6a78", fontStyle: dirty ? "italic" : "normal" }}>
-          {path ?? "untitled"}{dirty ? " •" : ""}
+          {path ?? "untitled"}
+          {dirty ? " •" : ""}
         </span>
         {flash && (
+          // biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: transient status flash dismissed on click
           <span
             onClick={clear}
             title="Click to dismiss"

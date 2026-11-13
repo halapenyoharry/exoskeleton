@@ -1,4 +1,12 @@
-import { Component, useEffect, useState, type ComponentType, type CSSProperties, type ErrorInfo, type ReactNode } from "react";
+import {
+  Component,
+  useEffect,
+  useState,
+  type ComponentType,
+  type CSSProperties,
+  type ErrorInfo,
+  type ReactNode,
+} from "react";
 import type { IDockviewPanelProps } from "dockview-react";
 import { resolveComponentKey } from "./ColoredTab";
 import { PanelPanes } from "./PanelPanes";
@@ -75,6 +83,7 @@ export class PanelErrorBoundary extends Component<
             </div>
             <div style={{ display: "flex", gap: "8px", marginTop: "auto" }}>
               <button
+                type="button"
                 onClick={this.handleRetry}
                 style={{
                   padding: "6px 12px",
@@ -89,6 +98,7 @@ export class PanelErrorBoundary extends Component<
               </button>
               {this.props.onClose && (
                 <button
+                  type="button"
                   onClick={this.props.onClose}
                   style={{
                     padding: "6px 12px",
@@ -166,7 +176,9 @@ export function exoPanel<P extends Record<string, any>>(
     const [inEdge, setInEdge] = useState(() => props.api.group.id === DOCUMENT_EDGE_ID);
     const [title, setTitle] = useState(() => props.api.title ?? props.api.id);
     useEffect(() => {
-      const d1 = props.api.onDidGroupChange(() => setInEdge(props.api.group.id === DOCUMENT_EDGE_ID));
+      const d1 = props.api.onDidGroupChange(() =>
+        setInEdge(props.api.group.id === DOCUMENT_EDGE_ID),
+      );
       const d2 = props.api.onDidTitleChange((e) => setTitle(e.title));
       return () => {
         d1.dispose();
@@ -175,11 +187,7 @@ export function exoPanel<P extends Record<string, any>>(
     }, [props.api]);
     const content = <Component {...props} />;
     return (
-      <PanelErrorBoundary
-        panelTitle={title}
-        accent={accent}
-        onClose={() => props.api.close()}
-      >
+      <PanelErrorBoundary panelTitle={title} accent={accent} onClose={() => props.api.close()}>
         <PanelRoot accent={accent} hasPanes={hasPanes}>
           {hasPanes || inEdge ? (
             <PanelPanes

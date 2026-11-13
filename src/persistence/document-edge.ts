@@ -68,13 +68,16 @@ function removeFromNonEdge(
   }
   // Dockview 8: a floating/popout entry carries either `data` (one group) or
   // `grid` (nested layout); only the `data` form can hold the document.
-  const strip = <T extends { data?: { views: string[]; activeView?: string } }>(groups: T[] | undefined) =>
+  const strip = <T extends { data?: { views: string[]; activeView?: string } }>(
+    groups: T[] | undefined,
+  ) =>
     groups
       ?.map((g) => {
         if (!g.data || !g.data.views.includes(id)) return g;
         found = true;
         const views = g.data.views.filter((v) => v !== id);
-        const activeView = g.data.activeView && views.includes(g.data.activeView) ? g.data.activeView : views[0];
+        const activeView =
+          g.data.activeView && views.includes(g.data.activeView) ? g.data.activeView : views[0];
         return { ...g, data: { ...g.data, views, activeView } };
       })
       .filter((g) => !g.data || g.data.views.length > 0);
@@ -155,7 +158,8 @@ export function migrateEdgeLayout(
     }
     // Keep the document first so the strip reads document, settings, menu.
     views.sort((x, y) => (x === DOCUMENT_PANEL_ID ? -1 : y === DOCUMENT_PANEL_ID ? 1 : 0));
-    const activeView = doc?.group?.activeView && have.has(doc.group.activeView) ? doc.group.activeView : views[0];
+    const activeView =
+      doc?.group?.activeView && have.has(doc.group.activeView) ? doc.group.activeView : views[0];
     edges.left = {
       size: doc?.size ?? DOCUMENT_EDGE_SIZE,
       visible: doc?.visible ?? true,
@@ -221,7 +225,11 @@ function addDocumentEdge(api: DockviewApi, opts: { phone: boolean; collapsed: bo
  * Call before `api.fromJSON(layout)`. The document edge is created collapsed;
  * the layout's own edge state then overrides that.
  */
-export function precreateEdgeGroups(api: DockviewApi, _layout: SerializedDockview, phone: boolean): void {
+export function precreateEdgeGroups(
+  api: DockviewApi,
+  _layout: SerializedDockview,
+  phone: boolean,
+): void {
   if (!api.getEdgeGroup(DOCUMENT_EDGE)) addDocumentEdge(api, { phone, collapsed: true });
 }
 
@@ -255,7 +263,12 @@ export function ensureEdgeTabs(api: DockviewApi): void {
       continue;
     }
     try {
-      api.addPanel({ id, component: id, title: EDGE_TAB_TITLES[id], position: { referenceGroup: edge.id } });
+      api.addPanel({
+        id,
+        component: id,
+        title: EDGE_TAB_TITLES[id],
+        position: { referenceGroup: edge.id },
+      });
     } catch (e) {
       console.warn(`[exoskeleton] ensureEdgeTabs ${id} failed:`, e);
     }
@@ -277,7 +290,12 @@ export function openEdgeTab(api: DockviewApi, id: EdgeTabId, phone: boolean): vo
 export function toggleEdgeTab(api: DockviewApi, id: EdgeTabId, phone: boolean): void {
   const panel = api.getPanel(id);
   const edge = api.getEdgeGroup(DOCUMENT_EDGE);
-  const showing = !!panel && !!edge && !edge.isCollapsed() && panel.api.location.type === "edge" && api.activePanel?.id === id;
+  const showing =
+    !!panel &&
+    !!edge &&
+    !edge.isCollapsed() &&
+    panel.api.location.type === "edge" &&
+    api.activePanel?.id === id;
   if (showing) edge!.collapse();
   else openEdgeTab(api, id, phone);
 }
@@ -293,7 +311,9 @@ export function ensureDocumentEdge(
   opts: { phone: boolean; open?: boolean; params?: Record<string, unknown> },
 ): IDockviewPanel | undefined {
   const open = opts.open === true;
-  const edge = api.getEdgeGroup(DOCUMENT_EDGE) ?? addDocumentEdge(api, { phone: opts.phone, collapsed: !open });
+  const edge =
+    api.getEdgeGroup(DOCUMENT_EDGE) ??
+    addDocumentEdge(api, { phone: opts.phone, collapsed: !open });
   const existing = api.getPanel(DOCUMENT_PANEL_ID);
   if (existing) {
     ensureEdgeTabs(api);

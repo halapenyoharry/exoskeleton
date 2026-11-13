@@ -16,16 +16,19 @@ export default function PanelPicker({
 }) {
   return (
     <div className={`panel-picker panel-picker--${variant}`}>
-      {panelRegistry.filter((entry) => isPanelSupported(entry)).map((entry) => (
-        <button
-          key={entry.id}
-          className="panel-picker-btn watermark-btn"
-          style={{ color: panelAccent(entry.id) }}
-          onClick={() => onPick(entry.id)}
-        >
-          {panelGlyph(entry.id)} {entry.id}
-        </button>
-      ))}
+      {panelRegistry
+        .filter((entry) => isPanelSupported(entry))
+        .map((entry) => (
+          <button
+            type="button"
+            key={entry.id}
+            className="panel-picker-btn watermark-btn"
+            style={{ color: panelAccent(entry.id) }}
+            onClick={() => onPick(entry.id)}
+          >
+            {panelGlyph(entry.id)} {entry.id}
+          </button>
+        ))}
     </div>
   );
 }

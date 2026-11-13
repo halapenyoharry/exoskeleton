@@ -1,10 +1,4 @@
-import type {
-  EdgeCategory,
-  RenderableNode,
-  TopoDocument,
-  TopoLink,
-  TopoNode,
-} from "./types";
+import type { EdgeCategory, RenderableNode, TopoDocument, TopoLink, TopoNode } from "./types";
 
 // Prefixes the dyadic projection uses when reifying an n-ary edge as a
 // node so it can be addressed by id. The convention has evolved — `c:`
@@ -122,8 +116,7 @@ export function parseTopology(input: unknown): ParsedTopology {
     // it keeps a tile. Its category still reaches the layer via
     // resolveLayerCategory, which reads edge-as-node endpoints.
     const kindIsReified =
-      node.kind === "hyperedge" ||
-      (typeof node.kind !== "string" && isReificationId(node.id));
+      node.kind === "hyperedge" || (typeof node.kind !== "string" && isReificationId(node.id));
     if (kindIsReified) {
       reificationsById.set(node.id, node);
     } else {
@@ -182,8 +175,7 @@ export function parseTopology(input: unknown): ParsedTopology {
       warnings,
     );
     const linkCount =
-      reifications.reduce((sum, r) => sum + r.spokes.length, 0) +
-      bucket.dyadic.length;
+      reifications.reduce((sum, r) => sum + r.spokes.length, 0) + bucket.dyadic.length;
 
     layers.set(layer, {
       layer,
@@ -199,23 +191,17 @@ export function parseTopology(input: unknown): ParsedTopology {
     const lb = layers.get(b)!;
     if (la.primaryCategory !== lb.primaryCategory) {
       // Category order: containment, state_change, interactivity, reference.
-      const order: EdgeCategory[] = [
-        "containment",
-        "state_change",
-        "interactivity",
-        "reference",
-      ];
-      return (
-        order.indexOf(la.primaryCategory) - order.indexOf(lb.primaryCategory)
-      );
+      const order: EdgeCategory[] = ["containment", "state_change", "interactivity", "reference"];
+      return order.indexOf(la.primaryCategory) - order.indexOf(lb.primaryCategory);
     }
     return lb.linkCount - la.linkCount;
   });
 
   return {
-    metadata: typeof doc.metadata === "object" && doc.metadata
-      ? (doc.metadata as Record<string, unknown>)
-      : undefined,
+    metadata:
+      typeof doc.metadata === "object" && doc.metadata
+        ? (doc.metadata as Record<string, unknown>)
+        : undefined,
     nodesById,
     reificationsById,
     layers,
@@ -243,9 +229,9 @@ function resolveLayerCategory(
     }
     if (categories.size > 1) {
       warnings.push(
-        `layer "${layerName}" has reifications with mixed categories: ${[
-          ...categories,
-        ].join(", ")} — picking first`,
+        `layer "${layerName}" has reifications with mixed categories: ${[...categories].join(
+          ", ",
+        )} — picking first`,
       );
       return [...categories][0];
     }
@@ -280,9 +266,7 @@ function resolveLayerCategory(
   }
   // 3. Fallback — lowest-weight idiom so an unclassified layer can't
   //    dominate the visual.
-  warnings.push(
-    `layer "${layerName}" has no edge_category info; defaulting to reference`,
-  );
+  warnings.push(`layer "${layerName}" has no edge_category info; defaulting to reference`);
   return "reference";
 }
 
@@ -291,9 +275,6 @@ function resolveLayerCategory(
  * the endpoint is a reification (nested case — v1 doesn't recurse) or
  * when the id isn't known.
  */
-export function resolveEndpoint(
-  topology: ParsedTopology,
-  id: string,
-): RenderableNode | undefined {
+export function resolveEndpoint(topology: ParsedTopology, id: string): RenderableNode | undefined {
   return topology.nodesById.get(id);
 }

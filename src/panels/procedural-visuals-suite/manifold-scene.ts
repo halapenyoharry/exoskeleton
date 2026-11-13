@@ -455,44 +455,52 @@ function createTorusGeometry() {
 function createMobiusGeometry() {
   const R = 2.0;
   const width = 1.5;
-  return createParametricGeometry((u, v) => {
-    const theta = u * Math.PI * 2;
-    const halfTheta = theta * 0.5;
-    const cosHalf = Math.cos(halfTheta);
-    const sinHalf = Math.sin(halfTheta);
-    const cosTheta = Math.cos(theta);
-    const sinTheta = Math.sin(theta);
-    const t = (v - 0.5) * width;
+  return createParametricGeometry(
+    (u, v) => {
+      const theta = u * Math.PI * 2;
+      const halfTheta = theta * 0.5;
+      const cosHalf = Math.cos(halfTheta);
+      const sinHalf = Math.sin(halfTheta);
+      const cosTheta = Math.cos(theta);
+      const sinTheta = Math.sin(theta);
+      const t = (v - 0.5) * width;
 
-    const x = (R + t * cosHalf) * cosTheta;
-    const y = (R + t * cosHalf) * sinTheta;
-    const z = t * sinHalf;
-    return new THREE.Vector3(x, y, z);
-  }, 180, 40);
+      const x = (R + t * cosHalf) * cosTheta;
+      const y = (R + t * cosHalf) * sinTheta;
+      const z = t * sinHalf;
+      return new THREE.Vector3(x, y, z);
+    },
+    180,
+    40,
+  );
 }
 
 function createKleinGeometry() {
   const r0 = 2.2;
   const s = 0.85;
-  return createParametricGeometry((u, v) => {
-    const uRad = u * Math.PI * 2;
-    const vRad = v * Math.PI * 2;
-    const halfU = uRad * 0.5;
-    const cosHalf = Math.cos(halfU);
-    const sinHalf = Math.sin(halfU);
-    const cosU = Math.cos(uRad);
-    const sinU = Math.sin(uRad);
+  return createParametricGeometry(
+    (u, v) => {
+      const uRad = u * Math.PI * 2;
+      const vRad = v * Math.PI * 2;
+      const halfU = uRad * 0.5;
+      const cosHalf = Math.cos(halfU);
+      const sinHalf = Math.sin(halfU);
+      const cosU = Math.cos(uRad);
+      const sinU = Math.sin(uRad);
 
-    const sinV = Math.sin(vRad);
-    const sin2V = Math.sin(2.0 * vRad);
+      const sinV = Math.sin(vRad);
+      const sin2V = Math.sin(2.0 * vRad);
 
-    const r = r0 + s * (cosHalf * sinV - sinHalf * sin2V);
-    const z = s * (sinHalf * sinV + cosHalf * sin2V);
-    const x = r * cosU;
-    const y = r * sinU;
+      const r = r0 + s * (cosHalf * sinV - sinHalf * sin2V);
+      const z = s * (sinHalf * sinV + cosHalf * sin2V);
+      const x = r * cosU;
+      const y = r * sinU;
 
-    return new THREE.Vector3(x, y, z);
-  }, 160, 80);
+      return new THREE.Vector3(x, y, z);
+    },
+    160,
+    80,
+  );
 }
 
 function createTrefoilGeometry() {
@@ -512,7 +520,11 @@ export interface ManifoldSceneHandle {
   dispose(): void;
 }
 
-export function initManifoldScene(canvas: HTMLCanvasElement, width: number, height: number): ManifoldSceneHandle {
+export function initManifoldScene(
+  canvas: HTMLCanvasElement,
+  width: number,
+  height: number,
+): ManifoldSceneHandle {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: true,
@@ -601,7 +613,7 @@ export function initManifoldScene(canvas: HTMLCanvasElement, width: number, heig
   scene.add(wireframeMesh);
 
   const autoRotateSpeed = 0.8;
-  let paused = false;
+  const paused = false;
   const clock = new THREE.Clock();
   let accumulatedTime = 0;
   let rafHandle = 0;

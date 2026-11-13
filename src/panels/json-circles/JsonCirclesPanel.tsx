@@ -11,10 +11,7 @@ import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats } from "../../data/json-utils/docStats";
 import { onPanelMenu } from "../../panel-menu";
 import { useElementSize } from "../../useElementSize";
-import {
-  jsonToHierarchy,
-  type HierarchyNode,
-} from "../../data/json-utils/jsonToHierarchy";
+import { jsonToHierarchy, type HierarchyNode } from "../../data/json-utils/jsonToHierarchy";
 import "./JsonCirclesPanel.css";
 
 type PackNode = d3.HierarchyCircularNode<HierarchyNode>;
@@ -58,11 +55,7 @@ function splitIntoLines(words: string[], n: number): string[] {
   let currentLine = 0;
   let currentChars = 0;
   for (const w of words) {
-    if (
-      currentChars > 0 &&
-      currentChars + w.length / 2 >= target &&
-      currentLine < n - 1
-    ) {
+    if (currentChars > 0 && currentChars + w.length / 2 >= target && currentLine < n - 1) {
       currentLine++;
       currentChars = 0;
     }
@@ -122,18 +115,13 @@ function circlePathTopClockwise(r: number): string {
   return `M 0 ${-r} A ${r} ${r} 0 0 1 0 ${r} A ${r} ${r} 0 0 1 0 ${-r}`;
 }
 
-export default function JsonCirclesPanel(
-  props: IDockviewPanelProps<JsonCirclesParams>,
-) {
+export default function JsonCirclesPanel(props: IDockviewPanelProps<JsonCirclesParams>) {
   const params: JsonCirclesParams = {
     ...jsonCirclesDefaults,
     ...(props.params ?? {}),
   };
 
-  const updateParam = <K extends keyof JsonCirclesParams>(
-    key: K,
-    value: JsonCirclesParams[K],
-  ) => {
+  const updateParam = <K extends keyof JsonCirclesParams>(key: K, value: JsonCirclesParams[K]) => {
     props.api.updateParameters({ ...params, [key]: value });
   };
 
@@ -174,12 +162,7 @@ export default function JsonCirclesPanel(
   const rootData = useMemo<HierarchyNode>(() => {
     if (doc === undefined || perfBlocked) return EMPTY_TREE;
     try {
-      return jsonToHierarchy(
-        doc,
-        params.explodePrimitives,
-        "root",
-        params.showArrayIndices,
-      );
+      return jsonToHierarchy(doc, params.explodePrimitives, "root", params.showArrayIndices);
     } catch {
       return { name: "Invalid JSON" };
     }
@@ -207,10 +190,7 @@ export default function JsonCirclesPanel(
       .sum((d) => (d.children && d.children.length > 0 ? 0 : 1))
       .sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
 
-    const pack = d3
-      .pack<HierarchyNode>()
-      .size([diameter, diameter])
-      .padding(params.padding);
+    const pack = d3.pack<HierarchyNode>().size([diameter, diameter]).padding(params.padding);
 
     const root = pack(hierarchy);
 
@@ -224,10 +204,7 @@ export default function JsonCirclesPanel(
     const svg = d3
       .select(container)
       .append("svg")
-      .attr(
-        "viewBox",
-        `-${diameter / 2} -${diameter / 2} ${diameter} ${diameter}`,
-      )
+      .attr("viewBox", `-${diameter / 2} -${diameter / 2} ${diameter} ${diameter}`)
       .attr("width", width)
       .attr("height", height)
       .attr("preserveAspectRatio", "xMidYMid meet")
@@ -238,9 +215,7 @@ export default function JsonCirclesPanel(
     let focus: PackNode = root;
     let view: [number, number, number] = [root.x, root.y, root.r * 2];
 
-    const panZoomGroup = svg
-      .append("g")
-      .attr("class", "json-circles-pan-zoom");
+    const panZoomGroup = svg.append("g").attr("class", "json-circles-pan-zoom");
 
     const node = panZoomGroup
       .append("g")
@@ -249,25 +224,16 @@ export default function JsonCirclesPanel(
       .join("circle")
       .attr("class", "json-circle-node")
       .attr("fill", (d) => (d.children ? color(d.depth) : params.leafFill))
-      .attr("stroke", (d) =>
-        d.children ? "rgba(0, 229, 255, 0.18)" : "rgba(0, 229, 255, 0.35)",
-      )
+      .attr("stroke", (d) => (d.children ? "rgba(0, 229, 255, 0.18)" : "rgba(0, 229, 255, 0.35)"))
       .attr("stroke-width", 0.6)
       .attr("pointer-events", (d) => (!d.children ? "none" : null))
       .on("mouseover", function () {
         d3.select(this).attr("stroke", "#00e5ff").attr("stroke-width", 2);
       })
       .on("mouseout", function () {
-        const d = d3
-          .select<SVGCircleElement, PackNode>(this)
-          .datum();
+        const d = d3.select<SVGCircleElement, PackNode>(this).datum();
         d3.select(this)
-          .attr(
-            "stroke",
-            d.children
-              ? "rgba(0, 229, 255, 0.18)"
-              : "rgba(0, 229, 255, 0.35)",
-          )
+          .attr("stroke", d.children ? "rgba(0, 229, 255, 0.18)" : "rgba(0, 229, 255, 0.35)")
           .attr("stroke-width", 0.6);
       })
       .on("click", (event: MouseEvent, d) => {
@@ -354,13 +320,9 @@ export default function JsonCirclesPanel(
       view = v;
       label.attr(
         "transform",
-        (d) =>
-          `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k}) scale(${k})`,
+        (d) => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k}) scale(${k})`,
       );
-      node.attr(
-        "transform",
-        (d) => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`,
-      );
+      node.attr("transform", (d) => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
       node.attr("r", (d) => d.r * k);
     }
 
@@ -370,20 +332,13 @@ export default function JsonCirclesPanel(
         .transition()
         .duration(750)
         .tween("zoom", () => {
-          const i = d3.interpolateZoom(view, [
-            focus.x,
-            focus.y,
-            focus.r * 2,
-          ]);
+          const i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2]);
           return (t) => zoomTo(i(t) as [number, number, number]);
         });
 
       label
         .filter(function (d) {
-          return (
-            d.parent === focus ||
-            (this as SVGGElement).style.display !== "none"
-          );
+          return d.parent === focus || (this as SVGGElement).style.display !== "none";
         })
         // d3's `.transition(other)` signature has invariant generics that
         // we can't satisfy from this call site without a deep rebuild of
@@ -392,12 +347,10 @@ export default function JsonCirclesPanel(
         .transition(transition as any)
         .style("opacity", (d) => (d.parent === focus ? 1 : 0))
         .on("start", function (d) {
-          if (d.parent === focus)
-            (this as SVGGElement).style.display = "";
+          if (d.parent === focus) (this as SVGGElement).style.display = "";
         })
         .on("end", function (d) {
-          if (d.parent !== focus)
-            (this as SVGGElement).style.display = "none";
+          if (d.parent !== focus) (this as SVGGElement).style.display = "none";
         });
     }
 
@@ -439,13 +392,12 @@ export default function JsonCirclesPanel(
             <input
               type="checkbox"
               checked={params.showArrayIndices}
-              onChange={(e) =>
-                updateParam("showArrayIndices", e.target.checked)
-              }
+              onChange={(e) => updateParam("showArrayIndices", e.target.checked)}
             />
             [N]
           </label>
           <button
+            type="button"
             onClick={() => resetRef.current()}
             title="Reset view"
             className="json-circles-reset-btn"
@@ -458,10 +410,10 @@ export default function JsonCirclesPanel(
         {perfBlocked && (
           <div className="json-circles-perf-warning">
             <p>
-              <strong>{nodeCount.toLocaleString()}</strong> tree nodes detected
-              (threshold {params.nodeThreshold.toLocaleString()}).
+              <strong>{nodeCount.toLocaleString()}</strong> tree nodes detected (threshold{" "}
+              {params.nodeThreshold.toLocaleString()}).
             </p>
-            <button onClick={() => setBypassPerf(true)}>
+            <button type="button" onClick={() => setBypassPerf(true)}>
               Render anyway
             </button>
           </div>

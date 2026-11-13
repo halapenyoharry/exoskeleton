@@ -1,8 +1,5 @@
 import type { PanelManifest } from "../../panel-manifest";
-import JsonTreePanel, {
-  jsonTreeDefaults,
-  type JsonTreeParams,
-} from "./JsonTreePanel";
+import JsonTreePanel, { jsonTreeDefaults, type JsonTreeParams } from "./JsonTreePanel";
 
 const manifest: PanelManifest<JsonTreeParams> = {
   // identity

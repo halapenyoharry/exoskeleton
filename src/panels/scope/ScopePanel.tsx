@@ -24,7 +24,7 @@ function midiToName(midi: number) {
 }
 
 function midiToFreq(midi: number) {
-  return 440 * Math.pow(2, (midi - 69) / 12);
+  return 440 * 2 ** ((midi - 69) / 12);
 }
 
 export interface ScopeParams {
@@ -33,14 +33,12 @@ export interface ScopeParams {
 }
 
 const MAX_LOG = 24;
-const ATTACK = 0.01;    // 10ms
-const RELEASE = 0.15;   // 150ms
+const ATTACK = 0.01; // 10ms
+const RELEASE = 0.15; // 150ms
 
 export default function ScopePanel(props: IDockviewPanelProps<ScopeParams>) {
   const [log, setLog] = useState<NoteEvent[]>([]);
-  const [logVisible, setLogVisible] = useState<boolean>(
-    props.params?.logVisible ?? true,
-  );
+  const [logVisible, setLogVisible] = useState<boolean>(props.params?.logVisible ?? true);
   // tempo-clock's beat counter (null until the first beat arrives).
   // Scope is the in-app consumer of the clock — before this, the clock's
   // OSC only mattered over the UDP bridge (hypergraph observation #5).
@@ -64,8 +62,7 @@ export default function ScopePanel(props: IDockviewPanelProps<ScopeParams>) {
   useEffect(() => {
     const Ctor =
       window.AudioContext ??
-      (window as unknown as { webkitAudioContext: typeof AudioContext })
-        .webkitAudioContext;
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!Ctor) {
       console.warn("[scope] no AudioContext available");
       return;
@@ -261,8 +258,7 @@ export default function ScopePanel(props: IDockviewPanelProps<ScopeParams>) {
       ctx2d!.stroke();
 
       const accent =
-        getComputedStyle(canvas!).getPropertyValue("--panel-accent").trim() ||
-        "#00ff7f";
+        getComputedStyle(canvas!).getPropertyValue("--panel-accent").trim() || "#00ff7f";
       ctx2d!.strokeStyle = accent;
       ctx2d!.lineWidth = 2 * dpr;
       ctx2d!.beginPath();
@@ -298,9 +294,7 @@ export default function ScopePanel(props: IDockviewPanelProps<ScopeParams>) {
               : "log hidden — click ▸ to show"}
           </span>
           <span
-            className={`scope-toolbar__clock${
-              clockPulse ? " scope-toolbar__clock--pulse" : ""
-            }`}
+            className={`scope-toolbar__clock${clockPulse ? " scope-toolbar__clock--pulse" : ""}`}
             title="tempo-clock beats (/exoskeleton/clock/beat)"
           >
             ♩ {clockBeat ?? "–"}
@@ -310,18 +304,14 @@ export default function ScopePanel(props: IDockviewPanelProps<ScopeParams>) {
           <div className="scope-log">
             {log.length === 0 ? (
               <div className="scope-log__empty">
-                waiting for OSC notes on <code>/exoskeleton/piano/note-on</code>{" "}
-                …
+                waiting for OSC notes on <code>/exoskeleton/piano/note-on</code> …
               </div>
             ) : (
               log.map((entry) => (
                 <div key={entry.id} className="scope-log__row">
                   <span className="scope-log__note">{entry.noteName}</span>
                   <span className="scope-log__midi">midi {entry.midi}</span>
-                  <div
-                    className="scope-log__vel"
-                    title={`velocity ${entry.velocity} / 127`}
-                  >
+                  <div className="scope-log__vel" title={`velocity ${entry.velocity} / 127`}>
                     <div
                       className="scope-log__vel-bar"
                       style={{ width: `${(entry.velocity / 127) * 100}%` }}

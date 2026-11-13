@@ -1,8 +1,5 @@
 import type { PanelManifest } from "../../panel-manifest";
-import JsonCosmosPanel, {
-  jsonCosmosDefaults,
-  type JsonCosmosParams,
-} from "./JsonCosmosPanel";
+import JsonCosmosPanel, { jsonCosmosDefaults, type JsonCosmosParams } from "./JsonCosmosPanel";
 
 const manifest: PanelManifest<JsonCosmosParams> = {
   id: "json-cosmos",

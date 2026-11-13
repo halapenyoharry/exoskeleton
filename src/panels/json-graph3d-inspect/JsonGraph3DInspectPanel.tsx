@@ -214,8 +214,7 @@ function attrsToHtml(
     .slice(0, maxAttrs)
     .map(([k, v]) => {
       const val = typeof v === "object" ? JSON.stringify(v) : String(v);
-      const truncated =
-        val.length > maxLen ? val.slice(0, maxLen - 3) + "..." : val;
+      const truncated = val.length > maxLen ? val.slice(0, maxLen - 3) + "..." : val;
       return `<div><span style="opacity:0.6">${escapeHtml(k)}</span>: ${escapeHtml(truncated)}</div>`;
     })
     .join("");
@@ -355,7 +354,14 @@ export default function JsonGraph3DInspectPanel(
       maxDegree,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [graph, overridesKey, params.edgeColorBy, params.linkWidth, params.curvature, params.nodeDefaultColor]);
+  }, [
+    graph,
+    overridesKey,
+    params.edgeColorBy,
+    params.linkWidth,
+    params.curvature,
+    params.nodeDefaultColor,
+  ]);
 
   const { data, groups, nodesById, maxDegree } = model;
 
@@ -400,9 +406,7 @@ export default function JsonGraph3DInspectPanel(
       }
       const sprite = new SpriteText(slug(text, p.labelMaxWords));
       const t =
-        p.nodeSizeBy === "degree"
-          ? Math.pow(n.degree / Math.max(1, maxDegree), p.nodeSizeExponent)
-          : 0.5;
+        p.nodeSizeBy === "degree" ? (n.degree / Math.max(1, maxDegree)) ** p.nodeSizeExponent : 0.5;
       let height = p.nodeTextHeightMin + t * (p.nodeTextHeightMax - p.nodeTextHeightMin);
       if (isHyper) height *= p.hyperedgeTextScale;
       sprite.textHeight = height;
@@ -505,7 +509,8 @@ export default function JsonGraph3DInspectPanel(
       if (!l) continue;
       const s = l.source as { x?: number; y?: number; z?: number };
       const t = l.target as { x?: number; y?: number; z?: number };
-      if (typeof s !== "object" || typeof t !== "object" || s.x === undefined || t.x === undefined) continue;
+      if (typeof s !== "object" || typeof t !== "object" || s.x === undefined || t.x === undefined)
+        continue;
       _start.set(s.x, s.y ?? 0, s.z ?? 0);
       _end.set(t.x, t.y ?? 0, t.z ?? 0);
       orientAlong(m, _start, _end, camera);
@@ -559,7 +564,15 @@ export default function JsonGraph3DInspectPanel(
       }
       hullsRef.current = [];
     };
-  }, [groups, nodesById, params.hulls, params.hullOpacity, params.hullMode, perfBlocked, graphReady]);
+  }, [
+    groups,
+    nodesById,
+    params.hulls,
+    params.hullOpacity,
+    params.hullMode,
+    perfBlocked,
+    graphReady,
+  ]);
 
   const updateHulls = useCallback(() => {
     const p = paramsRef.current;
@@ -585,7 +598,9 @@ export default function JsonGraph3DInspectPanel(
       if (convexOk) {
         // Pad each point outward from the centroid so the hull clears the
         // labels, then let ConvexGeometry do the wrapping.
-        const c = pts.reduce((a, v) => a.add(v), new THREE.Vector3()).multiplyScalar(1 / pts.length);
+        const c = pts
+          .reduce((a, v) => a.add(v), new THREE.Vector3())
+          .multiplyScalar(1 / pts.length);
         const padded: THREE.Vector3[] = [];
         for (const v of pts) {
           const dir = v.clone().sub(c);
@@ -593,7 +608,14 @@ export default function JsonGraph3DInspectPanel(
           dir.normalize();
           // Six jittered copies per point give the hull some roundness
           // instead of a hard polytope through label centers.
-          for (const o of [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]) {
+          for (const o of [
+            [1, 0, 0],
+            [-1, 0, 0],
+            [0, 1, 0],
+            [0, -1, 0],
+            [0, 0, 1],
+            [0, 0, -1],
+          ]) {
             padded.push(v.clone().add(new THREE.Vector3(o[0], o[1], o[2]).multiplyScalar(pad)));
           }
           padded.push(v.clone().add(dir.multiplyScalar(pad * 1.4)));
@@ -682,11 +704,21 @@ export default function JsonGraph3DInspectPanel(
 
   useEffect(() => {
     const unsubSelection = onNodeSelectionBroadcast((event) => {
-      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) return;
+      if (
+        !areGraphsConnected() ||
+        event.sourcePanelId === props.api.id ||
+        event.documentId !== activeDocId
+      )
+        return;
       setSelectedNodeId(event.nodeId);
     });
     const unsubFocus = onNodeFocusBroadcast((event) => {
-      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) return;
+      if (
+        !areGraphsConnected() ||
+        event.sourcePanelId === props.api.id ||
+        event.documentId !== activeDocId
+      )
+        return;
       const target = nodesById.get(event.nodeId);
       if (target && target.x !== undefined && target.y !== undefined && fgRef.current) {
         const { x, y } = target;
@@ -743,7 +775,11 @@ export default function JsonGraph3DInspectPanel(
               onChange={(v) => updateParam("edgeLabels", v)}
               options={[
                 { value: "always", label: "always", title: "Show the text on every connection" },
-                { value: "hover", label: "hover", title: "Show a connection's text only while the pointer is over it" },
+                {
+                  value: "hover",
+                  label: "hover",
+                  title: "Show a connection's text only while the pointer is over it",
+                },
                 { value: "never", label: "never", title: "Hide all text on connections" },
               ]}
             />
@@ -752,8 +788,18 @@ export default function JsonGraph3DInspectPanel(
               value={params.edgeLabelOrientation}
               onChange={(v) => updateParam("edgeLabelOrientation", v)}
               options={[
-                { value: "along", label: "along", icon: "⟶", title: "Lay the text along the line of the connection" },
-                { value: "billboard", label: "face", icon: "◱", title: "Turn the text to always face you" },
+                {
+                  value: "along",
+                  label: "along",
+                  icon: "⟶",
+                  title: "Lay the text along the line of the connection",
+                },
+                {
+                  value: "billboard",
+                  label: "face",
+                  icon: "◱",
+                  title: "Turn the text to always face you",
+                },
               ]}
             />
           </ToolbarGroup>
@@ -764,8 +810,18 @@ export default function JsonGraph3DInspectPanel(
               value={params.nodeSizeBy}
               onChange={(v) => updateParam("nodeSizeBy", v)}
               options={[
-                { value: "uniform", label: "same", icon: "●", title: "Every node is drawn the same size" },
-                { value: "degree", label: "by links", icon: "⬤", title: "Bigger nodes have more connections" },
+                {
+                  value: "uniform",
+                  label: "same",
+                  icon: "●",
+                  title: "Every node is drawn the same size",
+                },
+                {
+                  value: "degree",
+                  label: "by links",
+                  icon: "⬤",
+                  title: "Bigger nodes have more connections",
+                },
               ]}
             />
           </ToolbarGroup>
@@ -784,15 +840,28 @@ export default function JsonGraph3DInspectPanel(
                       {CATEGORY_ORDER.map((c) => (
                         <span
                           key={c}
-                          style={{ background: params.colorOverrides[`category:${c}`] ?? CATEGORY_TOKENS[c].color }}
+                          style={{
+                            background:
+                              params.colorOverrides[`category:${c}`] ?? CATEGORY_TOKENS[c].color,
+                          }}
                         />
                       ))}
                     </span>
                   ),
-                  title: "Color each connection by its kind: containment, state change, interactivity, reference",
+                  title:
+                    "Color each connection by its kind: containment, state change, interactivity, reference",
                 },
-                { value: "layer", label: "layer", title: "Color each connection by the layer it belongs to" },
-                { value: "predicate", label: "verb", title: "Color each connection by its predicate (the verb that links the two nodes)" },
+                {
+                  value: "layer",
+                  label: "layer",
+                  title: "Color each connection by the layer it belongs to",
+                },
+                {
+                  value: "predicate",
+                  label: "verb",
+                  title:
+                    "Color each connection by its predicate (the verb that links the two nodes)",
+                },
               ]}
             />
           </ToolbarGroup>
@@ -810,8 +879,18 @@ export default function JsonGraph3DInspectPanel(
               onChange={(v) => updateParam("hullMode", v)}
               disabled={!params.hulls}
               options={[
-                { value: "ellipsoid", label: "blob", icon: "◯", title: "Round, soft shell around the group" },
-                { value: "convex", label: "convex", icon: "⬡", title: "Tight shell that hugs the outermost nodes" },
+                {
+                  value: "ellipsoid",
+                  label: "blob",
+                  icon: "◯",
+                  title: "Round, soft shell around the group",
+                },
+                {
+                  value: "convex",
+                  label: "convex",
+                  icon: "⬡",
+                  title: "Tight shell that hugs the outermost nodes",
+                },
               ]}
             />
             <Toggle
@@ -829,7 +908,12 @@ export default function JsonGraph3DInspectPanel(
               onChange={(v) => updateParam("hyperedgeLabel", v)}
               options={[
                 { value: "predicate", label: "verb", title: "Show the relation's verb as text" },
-                { value: "dot", label: "dot", icon: "•", title: "Show the relation as a small junction dot" },
+                {
+                  value: "dot",
+                  label: "dot",
+                  icon: "•",
+                  title: "Show the relation as a small junction dot",
+                },
                 { value: "id", label: "id", title: "Show the relation's raw id" },
               ]}
             />
@@ -848,7 +932,12 @@ export default function JsonGraph3DInspectPanel(
               onChange={(v) => updateParam("showLegend", v)}
               title="Show the color key for connection kinds in the corner"
             />
-            <button onClick={resetView} title="Zoom and center so the whole graph fits in view" className="json-graph3d-inspect-reset-btn">
+            <button
+              type="button"
+              onClick={resetView}
+              title="Zoom and center so the whole graph fits in view"
+              className="json-graph3d-inspect-reset-btn"
+            >
               ⤢
             </button>
           </ToolbarGroup>
@@ -866,13 +955,20 @@ export default function JsonGraph3DInspectPanel(
               <strong>{nodeCount.toLocaleString()}</strong> nodes detected (threshold{" "}
               {params.nodeThreshold.toLocaleString()}). Text sprites per node are heavy.
             </p>
-            <button onClick={() => setBypassPerf(true)}>Render anyway</button>
+            <button type="button" onClick={() => setBypassPerf(true)}>
+              Render anyway
+            </button>
           </div>
         )}
         {isGraph && !perfBlocked && params.showLegend && (
           <div className="json-graph3d-inspect-legend">
             {CATEGORY_ORDER.map((c) => (
-              <span key={c} style={{ color: params.colorOverrides[`category:${c}`] ?? CATEGORY_TOKENS[c].color }}>
+              <span
+                key={c}
+                style={{
+                  color: params.colorOverrides[`category:${c}`] ?? CATEGORY_TOKENS[c].color,
+                }}
+              >
                 {c === "containment" ? "◌" : "—"} {CATEGORY_TOKENS[c].label}
               </span>
             ))}
@@ -893,12 +989,18 @@ export default function JsonGraph3DInspectPanel(
             nodeVal={(n) => 1 + (params.nodeSizeBy === "degree" ? n.degree : 0)}
             onNodeHover={(node) => {
               if (areGraphsConnected()) {
-                broadcastNodeSelection(activeDocId, node ? node.id : null, props.api.id, node ? node.name : undefined);
+                broadcastNodeSelection(
+                  activeDocId,
+                  node ? node.id : null,
+                  props.api.id,
+                  node ? node.name : undefined,
+                );
               }
               setSelectedNodeId(node ? node.id : null);
             }}
             onNodeClick={(node) => {
-              if (node && areGraphsConnected()) broadcastNodeFocus(activeDocId, node.id, props.api.id);
+              if (node && areGraphsConnected())
+                broadcastNodeFocus(activeDocId, node.id, props.api.id);
             }}
             nodeLabel={(n) =>
               attrsToHtml(n.attrs, n.name, params.tooltipMaxAttrs, params.tooltipValueMaxLen)
@@ -915,7 +1017,10 @@ export default function JsonGraph3DInspectPanel(
             linkDirectionalArrowRelPos={1}
             linkDirectionalArrowColor={(l) => l.color}
             linkDirectionalParticles={(l) =>
-              params.particles && !params.freezeLayout && linkVisible(l) && l.category === "state_change"
+              params.particles &&
+              !params.freezeLayout &&
+              linkVisible(l) &&
+              l.category === "state_change"
                 ? params.particleCount
                 : 0
             }

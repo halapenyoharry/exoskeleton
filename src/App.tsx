@@ -9,11 +9,7 @@ import {
 import { listen } from "@tauri-apps/api/event";
 import ColoredTab from "./ColoredTab";
 import Watermark from "./Watermark";
-import {
-  LeftHeaderActions,
-  RightHeaderActions,
-  closeBackClosers,
-} from "./HeaderActions";
+import { LeftHeaderActions, RightHeaderActions, closeBackClosers } from "./HeaderActions";
 import EditorPanel from "./panels/EditorPanel";
 import TerminalPanel from "./panels/TerminalPanel";
 import LanWebview from "./panels/LanWebview";
@@ -75,25 +71,28 @@ import { appStorage } from "./persistence/app-storage";
 import { createDebounce } from "./utils/debounce";
 import { errorText, inTauri, saveTextFile } from "./utils/file-io";
 import { DEFAULT_PRESET_ID, isWebRuntime, presets } from "./persistence/presets";
-import {
-  parseWorkspaceDocument,
-  serializeWorkspaceDocument,
-} from "./persistence/workspace-file";
+import { parseWorkspaceDocument, serializeWorkspaceDocument } from "./persistence/workspace-file";
 import "./App.css";
 
 // Lazy-loaded heavy visualization panels for optimal initial startup performance
 const JsonCytoscapePanel = lazy(() => import("./panels/json-cytoscape/JsonCytoscapePanel"));
 const JsonGraph3DPanel = lazy(() => import("./panels/json-graph3d/JsonGraph3DPanel"));
-const JsonGraph3DInspectPanel = lazy(() => import("./panels/json-graph3d-inspect/JsonGraph3DInspectPanel"));
+const JsonGraph3DInspectPanel = lazy(
+  () => import("./panels/json-graph3d-inspect/JsonGraph3DInspectPanel"),
+);
 const JsonDyadicPanel = lazy(() => import("./panels/json-dyadic/JsonDyadicPanel"));
 const JsonMassPanel = lazy(() => import("./panels/json-mass/JsonMassPanel"));
 const JsonAttentionPanel = lazy(() => import("./panels/json-attention/JsonAttentionPanel"));
 const ScopePanel = lazy(() => import("./panels/scope/ScopePanel"));
 const TopologyExtractPanel = lazy(() => import("./panels/topology-extract/TopologyExtractPanel"));
 const ProceduralControlPanel = lazy(() => import("./panels/procedural-visuals-suite/ControlPanel"));
-const BouncingBallsPanel = lazy(() => import("./panels/procedural-visuals-suite/BouncingBallsPanel"));
+const BouncingBallsPanel = lazy(
+  () => import("./panels/procedural-visuals-suite/BouncingBallsPanel"),
+);
 const FountainPanel = lazy(() => import("./panels/procedural-visuals-suite/FountainPanel"));
-const RecursiveSubdivisionPanel = lazy(() => import("./panels/procedural-visuals-suite/RecursiveSubdivisionPanel"));
+const RecursiveSubdivisionPanel = lazy(
+  () => import("./panels/procedural-visuals-suite/RecursiveSubdivisionPanel"),
+);
 const ManifoldPanel = lazy(() => import("./panels/procedural-visuals-suite/ManifoldPanel"));
 const JsonCosmosPanel = lazy(() => import("./panels/json-cosmos/JsonCosmosPanel"));
 
@@ -112,33 +111,39 @@ function lazyPanel(Component: React.ComponentType<any>, accent: string) {
 // Each entry is wrapped with `exoPanel(Component, accent)` or `lazyPanel` so the host
 // (not the panel) owns positioning and the accent stripe.
 const components = {
-  blank:           exoPanel(BlankPanel,         "var(--accent-settings)"),
-  menu:            exoPanel(MenuPanel,          "var(--accent-settings)"),
-  editor:          exoPanel(EditorPanel,        "var(--accent-editor)"),
-  terminal:        exoPanel(TerminalPanel,      "var(--accent-terminal)"),
-  webview:         exoPanel(LanWebview,         "var(--accent-webview)"),
-  "tempo-clock":   exoPanel(TempoClockPanel,    "var(--accent-tempo-clock)"),
-  settings:        exoPanel(SettingsPanel,      "var(--accent-settings)"),
-  piano:           exoPanel(PianoPanel,         "var(--accent-piano)"),
-  scope:           lazyPanel(ScopePanel,        "var(--accent-scope)"),
-  "json-edit":     exoPanel(JsonEditPanel,      "var(--accent-json-edit)"),
-  "json-tree":     exoPanel(JsonTreePanel,      "var(--accent-json-tree)"),
-  "json-circles":  exoPanel(JsonCirclesPanel,   "var(--accent-json-circles)"),
-  "json-mass":     lazyPanel(JsonMassPanel,     "var(--accent-json-mass)"),
-  "json-cytoscape":lazyPanel(JsonCytoscapePanel, "var(--accent-json-cytoscape)"),
-  "json-graph":    exoPanel(JsonGraphPanel,     "var(--accent-json-graph)"),
-  "json-graph3d":  lazyPanel(JsonGraph3DPanel,  "var(--accent-json-graph3d)"),
+  blank: exoPanel(BlankPanel, "var(--accent-settings)"),
+  menu: exoPanel(MenuPanel, "var(--accent-settings)"),
+  editor: exoPanel(EditorPanel, "var(--accent-editor)"),
+  terminal: exoPanel(TerminalPanel, "var(--accent-terminal)"),
+  webview: exoPanel(LanWebview, "var(--accent-webview)"),
+  "tempo-clock": exoPanel(TempoClockPanel, "var(--accent-tempo-clock)"),
+  settings: exoPanel(SettingsPanel, "var(--accent-settings)"),
+  piano: exoPanel(PianoPanel, "var(--accent-piano)"),
+  scope: lazyPanel(ScopePanel, "var(--accent-scope)"),
+  "json-edit": exoPanel(JsonEditPanel, "var(--accent-json-edit)"),
+  "json-tree": exoPanel(JsonTreePanel, "var(--accent-json-tree)"),
+  "json-circles": exoPanel(JsonCirclesPanel, "var(--accent-json-circles)"),
+  "json-mass": lazyPanel(JsonMassPanel, "var(--accent-json-mass)"),
+  "json-cytoscape": lazyPanel(JsonCytoscapePanel, "var(--accent-json-cytoscape)"),
+  "json-graph": exoPanel(JsonGraphPanel, "var(--accent-json-graph)"),
+  "json-graph3d": lazyPanel(JsonGraph3DPanel, "var(--accent-json-graph3d)"),
   "json-graph3d-inspect": lazyPanel(JsonGraph3DInspectPanel, "var(--accent-json-graph3d-inspect)"),
-  "json-dyadic":   lazyPanel(JsonDyadicPanel,   "var(--accent-json-dyadic)"),
-  "text-viewer":   exoPanel(TextViewerPanel,    "var(--accent-editor)"),
+  "json-dyadic": lazyPanel(JsonDyadicPanel, "var(--accent-json-dyadic)"),
+  "text-viewer": exoPanel(TextViewerPanel, "var(--accent-editor)"),
   "topology-extract": lazyPanel(TopologyExtractPanel, "var(--accent-topology-extract)"),
-  "procedural-visuals-control":     lazyPanel(ProceduralControlPanel,    "var(--accent-procedural-control)"),
-  "procedural-visuals-balls":       lazyPanel(BouncingBallsPanel,        "var(--accent-procedural-balls)"),
-  "procedural-visuals-fountain":    lazyPanel(FountainPanel,             "var(--accent-procedural-fountain)"),
-  "procedural-visuals-recursive":   lazyPanel(RecursiveSubdivisionPanel, "var(--accent-procedural-recursive)"),
-  "procedural-visuals-manifold": lazyPanel(ManifoldPanel,  "var(--accent-procedural-manifold)"),
-  "json-attention":lazyPanel(JsonAttentionPanel,"var(--accent-json-attention)"),
-  "json-cosmos":   lazyPanel(JsonCosmosPanel,   "var(--accent-json-cosmos)"),
+  "procedural-visuals-control": lazyPanel(
+    ProceduralControlPanel,
+    "var(--accent-procedural-control)",
+  ),
+  "procedural-visuals-balls": lazyPanel(BouncingBallsPanel, "var(--accent-procedural-balls)"),
+  "procedural-visuals-fountain": lazyPanel(FountainPanel, "var(--accent-procedural-fountain)"),
+  "procedural-visuals-recursive": lazyPanel(
+    RecursiveSubdivisionPanel,
+    "var(--accent-procedural-recursive)",
+  ),
+  "procedural-visuals-manifold": lazyPanel(ManifoldPanel, "var(--accent-procedural-manifold)"),
+  "json-attention": lazyPanel(JsonAttentionPanel, "var(--accent-json-attention)"),
+  "json-cosmos": lazyPanel(JsonCosmosPanel, "var(--accent-json-cosmos)"),
   // Registered raw (no exoPanel wrapper) on purpose: the status bar owns
   // its full-width chrome and doesn't take the accent-stripe convention.
   "status-bar-panel": StatusBarPanel,
@@ -149,7 +154,6 @@ const components = {
 // every reload used to fall back to the default layout).
 const storage = appStorage;
 
-
 /** Deck is opt-in: a phone shows the grid unless "One pane at a time" is on. */
 function wantsDeck(): boolean {
   return isPhoneWidth() && loadDeckOptIn();
@@ -159,7 +163,9 @@ function wantsDeck(): boolean {
  *  reconciled with the grid (panels added/removed on desktop follow), or a
  *  fresh deck built from the grid. */
 function deckLayoutFor(ws: Workspace) {
-  return ws.mobileLayout ? reconcileLayouts(ws.mobileLayout, ws.layout) : buildDeckLayout(ws.layout);
+  return ws.mobileLayout
+    ? reconcileLayouts(ws.mobileLayout, ws.layout)
+    : buildDeckLayout(ws.layout);
 }
 
 export default function App() {
@@ -463,7 +469,8 @@ export default function App() {
       };
     }
     const onKey = (e: KeyboardEvent) => {
-      if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || e.key.toLowerCase() !== "j") return;
+      if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || e.key.toLowerCase() !== "j")
+        return;
       e.preventDefault();
       toggleDocumentNow();
     };
@@ -498,10 +505,7 @@ export default function App() {
         // cleared state — a real UX trap for library-panel installs.
         migrateLayout(event.api, appState.version);
       } catch (e) {
-        console.warn(
-          "[exoskeleton] main fromJSON failed, falling back to defaults:",
-          e,
-        );
+        console.warn("[exoskeleton] main fromJSON failed, falling back to defaults:", e);
         // fromJSON can partially apply before throwing; clear the wreckage
         // so buildDefaultLayout starts from a clean grid.
         event.api.clear();
@@ -755,7 +759,8 @@ export default function App() {
     createWorkspace: handleCreateWorkspace,
     renameWorkspace: handleRenameWorkspace,
     deleteWorkspace: handleDeleteWorkspace,
-    openWorkspaceInNewWindow: (id) => handleOpenWorkspaceInNewWindow(id, { stopPropagation() {} } as React.MouseEvent),
+    openWorkspaceInNewWindow: (id) =>
+      handleOpenWorkspaceInNewWindow(id, { stopPropagation() {} } as React.MouseEvent),
     exportWorkspace: handleExportWorkspace,
     importWorkspace: handleImportWorkspace,
     resetLayout: () => {
@@ -822,28 +827,29 @@ export default function App() {
 
   return (
     <MenuContext.Provider value={menuActions}>
-    <div className={`app-frame${deckMode ? " exo-deck" : ""}${phone ? " exo-phone" : ""}`}>
-      <DockviewReact
-        components={components}
-        theme={themeGithubDark}
-        // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —
-        defaultTabComponent={ColoredTab}
-        leftHeaderActionsComponent={LeftHeaderActions}
-        watermarkComponent={Watermark}
-        rightHeaderActionsComponent={RightHeaderActions}
-        floatingGroupBounds="boundedWithinViewport"
-        onReady={onMainReady}
-      />
-      {!isStatusBarVisible && !deckMode && mainApiRef.current && (
-        <button
-          className="status-bar-summoner-btn"
-          onClick={() => mountStatusBar(mainApiRef.current!)}
-          title="Summon Astromech Status Bar"
-        >
-          ⌬
-        </button>
-      )}
-    </div>
+      <div className={`app-frame${deckMode ? " exo-deck" : ""}${phone ? " exo-phone" : ""}`}>
+        <DockviewReact
+          components={components}
+          theme={themeGithubDark}
+          // — chrome slots: see ColoredTab.tsx, Watermark.tsx, HeaderActions.tsx —
+          defaultTabComponent={ColoredTab}
+          leftHeaderActionsComponent={LeftHeaderActions}
+          watermarkComponent={Watermark}
+          rightHeaderActionsComponent={RightHeaderActions}
+          floatingGroupBounds="boundedWithinViewport"
+          onReady={onMainReady}
+        />
+        {!isStatusBarVisible && !deckMode && mainApiRef.current && (
+          <button
+            type="button"
+            className="status-bar-summoner-btn"
+            onClick={() => mountStatusBar(mainApiRef.current!)}
+            title="Summon Astromech Status Bar"
+          >
+            ⌬
+          </button>
+        )}
+      </div>
     </MenuContext.Provider>
   );
 }

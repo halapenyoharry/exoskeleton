@@ -97,8 +97,7 @@ export function setJson(
     createdAt: prev?.createdAt ?? now,
     updatedAt: now,
   };
-  const listChanged =
-    !prev || prev.title !== next.title || prev.source !== next.source;
+  const listChanged = !prev || prev.title !== next.title || prev.source !== next.source;
   values.set(id, value);
   metas.set(id, next);
   dispatch(id, value);
@@ -128,10 +127,7 @@ export function listJson(): DocEntry[] {
 }
 
 /** Update a document's title or path. The id stays stable for subscribers. */
-export function updateJsonMeta(
-  id: string,
-  patch: { title?: string; path?: string },
-): void {
+export function updateJsonMeta(id: string, patch: { title?: string; path?: string }): void {
   const prev = metas.get(id);
   const value = values.get(id);
   if (!prev || value === undefined) return;
@@ -190,9 +186,7 @@ export function onJsonStore(listener: (e: StoreEvent) => void): () => void {
  * may have published before storage finished loading). Does not echo back
  * to storage.
  */
-export function hydrateJson(
-  entries: { id: string; value: JsonValue; meta: DocMeta }[],
-): void {
+export function hydrateJson(entries: { id: string; value: JsonValue; meta: DocMeta }[]): void {
   let added = false;
   for (const e of entries) {
     if (values.has(e.id)) continue;

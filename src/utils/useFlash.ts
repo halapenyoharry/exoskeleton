@@ -33,9 +33,12 @@ export function useFlash(clearAfterMs = 4000) {
     [clearAfterMs],
   );
 
-  useEffect(() => () => {
-    if (timer.current !== null) window.clearTimeout(timer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (timer.current !== null) window.clearTimeout(timer.current);
+    },
+    [],
+  );
 
   return { flash, show, clear };
 }

@@ -93,9 +93,7 @@ interface Token {
   trail: { x: number; y: number }[];
 }
 
-export default function JsonAttentionPanel(
-  props: IDockviewPanelProps<JsonAttentionParams>,
-) {
+export default function JsonAttentionPanel(props: IDockviewPanelProps<JsonAttentionParams>) {
   const params: JsonAttentionParams = {
     ...jsonAttentionDefaults,
     ...(props.params ?? {}),
@@ -158,7 +156,11 @@ export default function JsonAttentionPanel(
   const transformRef = useRef(d3.zoomIdentity);
   const viewRef = useRef<BodyView[]>([]);
   const [generation, setGeneration] = useState(0);
-  const [status, setStatus] = useState<{ at: string | null; mass: number; heaviest: string | null }>({
+  const [status, setStatus] = useState<{
+    at: string | null;
+    mass: number;
+    heaviest: string | null;
+  }>({
     at: null,
     mass: 0,
     heaviest: null,
@@ -220,17 +222,20 @@ export default function JsonAttentionPanel(
 
   // ─── the walker clock ───
   useEffect(() => {
-    const id = window.setInterval(() => {
-      const field = fieldRef.current;
-      if (!field || !props.api.isVisible) return;
-      const w = walkerRef.current;
-      if (w.mode === "paused") return;
-      stepWalker(field, w, rulesRef.current, rngRef.current);
-      tokenRef.current.targetId = w.at;
-      const node = w.at ? field.byId.get(w.at) : undefined;
-      const top = heaviest(field);
-      setStatus({ at: node?.label ?? null, mass: node?.mass ?? 0, heaviest: top?.label ?? null });
-    }, Math.max(60, params.hopMs));
+    const id = window.setInterval(
+      () => {
+        const field = fieldRef.current;
+        if (!field || !props.api.isVisible) return;
+        const w = walkerRef.current;
+        if (w.mode === "paused") return;
+        stepWalker(field, w, rulesRef.current, rngRef.current);
+        tokenRef.current.targetId = w.at;
+        const node = w.at ? field.byId.get(w.at) : undefined;
+        const top = heaviest(field);
+        setStatus({ at: node?.label ?? null, mass: node?.mass ?? 0, heaviest: top?.label ?? null });
+      },
+      Math.max(60, params.hopMs),
+    );
     return () => window.clearInterval(id);
   }, [params.hopMs, props.api]);
 
@@ -277,7 +282,7 @@ export default function JsonAttentionPanel(
             token.x = t.x;
             token.y = t.y;
           }
-          const k = 1 - Math.pow(0.001, dt);
+          const k = 1 - 0.001 ** dt;
           token.x += (t.x - token.x) * k;
           token.y += (t.y - token.y) * k;
           const last = token.trail[token.trail.length - 1];
@@ -413,18 +418,15 @@ export default function JsonAttentionPanel(
     [size.width, size.height],
   );
 
-  const parkAttentionOn = useCallback(
-    (id: string) => {
-      const field = fieldRef.current;
-      if (!field || !field.byId.has(id)) return;
-      const w = walkerRef.current;
-      traverse(field, w, id, rulesRef.current);
-      tokenRef.current.targetId = id;
-      const node = field.byId.get(id)!;
-      setStatus({ at: node.label, mass: node.mass, heaviest: heaviest(field)?.label ?? null });
-    },
-    [],
-  );
+  const parkAttentionOn = useCallback((id: string) => {
+    const field = fieldRef.current;
+    if (!field || !field.byId.has(id)) return;
+    const w = walkerRef.current;
+    traverse(field, w, id, rulesRef.current);
+    tokenRef.current.targetId = id;
+    const node = field.byId.get(id)!;
+    setStatus({ at: node.label, mass: node.mass, heaviest: heaviest(field)?.label ?? null });
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -496,7 +498,13 @@ export default function JsonAttentionPanel(
       const hn = id ? fieldRef.current?.byId.get(id) : undefined;
       setHoverInfo(
         hn
-          ? { label: hn.label, mass: hn.mass, density: hn.density, visits: hn.visits, dwelled: hn.dwelled }
+          ? {
+              label: hn.label,
+              mass: hn.mass,
+              density: hn.density,
+              visits: hn.visits,
+              dwelled: hn.dwelled,
+            }
           : null,
       );
       if (areGraphsConnected()) {
@@ -523,11 +531,21 @@ export default function JsonAttentionPanel(
   // ─── incoming sync from other panels ───
   useEffect(() => {
     const unsubSel = onNodeSelectionBroadcast((event) => {
-      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) return;
+      if (
+        !areGraphsConnected() ||
+        event.sourcePanelId === props.api.id ||
+        event.documentId !== activeDocId
+      )
+        return;
       selectedRef.current = event.nodeId;
     });
     const unsubFocus = onNodeFocusBroadcast((event) => {
-      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) return;
+      if (
+        !areGraphsConnected() ||
+        event.sourcePanelId === props.api.id ||
+        event.documentId !== activeDocId
+      )
+        return;
       parkAttentionOn(event.nodeId);
       // Ease the camera there in this panel's own coordinates.
       const pos = worldRef.current?.positionOf(event.nodeId);
@@ -566,7 +584,8 @@ export default function JsonAttentionPanel(
     const cy = (b.minY + b.maxY) / 2;
     transformRef.current = d3.zoomIdentity.translate(-cx * k, -cy * k).scale(k);
     const canvas = canvasRef.current;
-    if (canvas) d3.select(canvas).call(d3.zoom<HTMLCanvasElement, unknown>().transform, transformRef.current);
+    if (canvas)
+      d3.select(canvas).call(d3.zoom<HTMLCanvasElement, unknown>().transform, transformRef.current);
   };
 
   // Fit once the first frames have settled, like the other graph viewers.
@@ -706,7 +725,11 @@ export default function JsonAttentionPanel(
             <div>
               {nodeCount} nodes — above the {params.nodeThreshold}-node gate (gravity is n²).
             </div>
-            <button type="button" className="json-attention-btn" onClick={() => setBypassPerf(true)}>
+            <button
+              type="button"
+              className="json-attention-btn"
+              onClick={() => setBypassPerf(true)}
+            >
               run it anyway
             </button>
           </div>

@@ -94,9 +94,7 @@ function kb(text: string): string {
   return `${Math.max(1, Math.round(text.length / 1024)).toLocaleString()} KB`;
 }
 
-export default function JsonEditPanel(
-  props: IDockviewPanelProps<JsonEditParams>,
-) {
+export default function JsonEditPanel(props: IDockviewPanelProps<JsonEditParams>) {
   const rawParams = props.params ?? {};
   // Handle layout migration gracefully if saved params carry legacy keys
   const params: JsonEditParams = {
@@ -105,15 +103,14 @@ export default function JsonEditPanel(
     lineWrapping:
       typeof rawParams.lineWrapping === "boolean"
         ? rawParams.lineWrapping
-        : (rawParams as unknown as Record<string, unknown>).wordWrap === "on" || jsonEditDefaults.lineWrapping,
+        : (rawParams as unknown as Record<string, unknown>).wordWrap === "on" ||
+          jsonEditDefaults.lineWrapping,
   };
 
   // Start on the document this panel last had open (saved in its params);
   // the mount effect below reconciles it with the active document.
   const [docId, setDocId] = useState<string>(() => params.documentId);
-  const [value, setValue] = useState<string>(() =>
-    textFor(docId, params.tabSize),
-  );
+  const [value, setValue] = useState<string>(() => textFor(docId, params.tabSize));
   const [parseError, setParseError] = useState<string | null>(null);
   const [docs, setDocs] = useState<DocEntry[]>(() => listJson());
   const [renaming, setRenaming] = useState<string | null>(null);
@@ -372,8 +369,16 @@ export default function JsonEditPanel(
   }
 
   // Keyboard shortcuts while the editor has focus.
-  const actionsRef = useRef({ open: openFiles, save: () => saveToFile(false), saveAs: () => saveToFile(true) });
-  actionsRef.current = { open: openFiles, save: () => saveToFile(false), saveAs: () => saveToFile(true) };
+  const actionsRef = useRef({
+    open: openFiles,
+    save: () => saveToFile(false),
+    saveAs: () => saveToFile(true),
+  });
+  actionsRef.current = {
+    open: openFiles,
+    save: () => saveToFile(false),
+    saveAs: () => saveToFile(true),
+  };
 
   // Pill ☰ menu dispatch (items declared in manifest.ts).
   const menuRef = useRef<(itemId: string) => void>(() => {});
@@ -385,19 +390,22 @@ export default function JsonEditPanel(
     else if (itemId === "format") formatJson();
     else if (itemId === "doc") {
       if (docsRef.current.length < 2) return;
-      const chip = containerRef.current?.parentElement?.querySelector<HTMLElement>('[data-action-item="doc"]');
+      const chip = containerRef.current?.parentElement?.querySelector<HTMLElement>(
+        '[data-action-item="doc"]',
+      );
       const body = containerRef.current;
-      const left = chip && body ? Math.max(0, chip.getBoundingClientRect().left - body.getBoundingClientRect().left) : 8;
+      const left =
+        chip && body
+          ? Math.max(0, chip.getBoundingClientRect().left - body.getBoundingClientRect().left)
+          : 8;
       setDocMenu((m) => (m ? null : { left }));
     } else if (itemId === "copy") void copyJson();
-    else if (itemId === "rename") setRenaming(getJsonMeta(docIdRef.current)?.title ?? docIdRef.current);
+    else if (itemId === "rename")
+      setRenaming(getJsonMeta(docIdRef.current)?.title ?? docIdRef.current);
     else if (itemId === "delete") deleteDocument();
     else if (itemId.startsWith("library:")) void openFromLibrary(itemId.slice("library:".length));
   };
-  useEffect(
-    () => onPanelMenu(props.api.id, (itemId) => menuRef.current(itemId)),
-    [props.api.id],
-  );
+  useEffect(() => onPanelMenu(props.api.id, (itemId) => menuRef.current(itemId)), [props.api.id]);
 
   // Mount CodeMirror 6 EditorView. Recreated per document so undo history
   // never crosses documents.
@@ -408,7 +416,11 @@ export default function JsonEditPanel(
       Prec.highest(
         keymap.of([
           { key: "Mod-s", preventDefault: true, run: () => (void actionsRef.current.save(), true) },
-          { key: "Mod-Alt-s", preventDefault: true, run: () => (void actionsRef.current.saveAs(), true) },
+          {
+            key: "Mod-Alt-s",
+            preventDefault: true,
+            run: () => (void actionsRef.current.saveAs(), true),
+          },
           { key: "Mod-o", preventDefault: true, run: () => (void actionsRef.current.open(), true) },
         ]),
       ),
@@ -511,7 +523,7 @@ export default function JsonEditPanel(
       if (pos >= 0) {
         view.dispatch({
           selection: EditorSelection.single(pos, pos + targetStr.length),
-          effects: EditorView.scrollIntoView(pos, { y: "center" })
+          effects: EditorView.scrollIntoView(pos, { y: "center" }),
         });
       }
     });
@@ -527,7 +539,11 @@ export default function JsonEditPanel(
       .then((content) => {
         const parsed = JSON.parse(content) as JsonValue;
         const name = legacyPath.split(/[/\\]/).pop() ?? legacyPath;
-        setJson(docIdRef.current, parsed, { title: name, source: `file: ${name}`, path: legacyPath });
+        setJson(docIdRef.current, parsed, {
+          title: name,
+          source: `file: ${name}`,
+          path: legacyPath,
+        });
       })
       .catch((err) => show("error", `Could not reopen ${legacyPath}: ${errorText(err)}`));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -587,7 +603,10 @@ export default function JsonEditPanel(
   useEffect(() => {
     if (!docMenu) return;
     const close = () => setDocMenu(null);
-    const t = window.setTimeout(() => window.addEventListener("pointerdown", close, { once: true }), 0);
+    const t = window.setTimeout(
+      () => window.addEventListener("pointerdown", close, { once: true }),
+      0,
+    );
     return () => {
       window.clearTimeout(t);
       window.removeEventListener("pointerdown", close);
@@ -601,6 +620,7 @@ export default function JsonEditPanel(
           {renaming !== null && (
             <input
               className="json-edit-rename"
+              // biome-ignore lint/a11y/noAutofocus: inline rename input requires immediate focus when opened
               autoFocus
               value={renaming}
               onChange={(e) => setRenaming(e.target.value)}
@@ -617,6 +637,7 @@ export default function JsonEditPanel(
             </span>
           )}
           {flash && (
+            // biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: transient status flash dismissed on click
             <span
               className={`json-edit-flash json-edit-flash--${flash.kind}`}
               title="Click to dismiss"
@@ -630,7 +651,11 @@ export default function JsonEditPanel(
       )}
       <div className="panel-body json-edit-body" ref={containerRef}>
         {docMenu && (
-          <ul className="json-edit-doc-menu" style={{ left: docMenu.left }} onPointerDown={(e) => e.stopPropagation()}>
+          <ul
+            className="json-edit-doc-menu"
+            style={{ left: docMenu.left }}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
             {pickerEntries.map((d) => (
               <li key={d.id}>
                 <button

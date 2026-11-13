@@ -37,13 +37,25 @@ function legacy(): SerializedDockview {
         type: "branch",
         size: 800,
         data: [
-          { type: "leaf", size: 400, data: { id: "g1", views: ["json-edit"], activeView: "json-edit" } },
+          {
+            type: "leaf",
+            size: 400,
+            data: { id: "g1", views: ["json-edit"], activeView: "json-edit" },
+          },
           {
             type: "branch",
             size: 800,
             data: [
-              { type: "leaf", size: 400, data: { id: "g2", views: ["json-tree"], activeView: "json-tree" } },
-              { type: "leaf", size: 400, data: { id: "g3", views: ["editor"], activeView: "editor" } },
+              {
+                type: "leaf",
+                size: 400,
+                data: { id: "g2", views: ["json-tree"], activeView: "json-tree" },
+              },
+              {
+                type: "leaf",
+                size: 400,
+                data: { id: "g3", views: ["editor"], activeView: "editor" },
+              },
             ],
           },
         ],
@@ -66,7 +78,12 @@ function legacy(): SerializedDockview {
       bottom: {
         size: 85,
         visible: true,
-        group: { id: "status-bar-group", views: ["status-bar"], activeView: "status-bar", hideHeader: true },
+        group: {
+          id: "status-bar-group",
+          views: ["status-bar"],
+          activeView: "status-bar",
+          hideHeader: true,
+        },
       },
     },
   } as unknown as SerializedDockview;
@@ -91,7 +108,10 @@ test("json-edit in the grid moves to the document edge; empty grid group is remo
   assert.strictEqual(left.visible, true);
   assert.ok(!left.collapsed, "desktop: a migrated document is expanded, it was on screen before");
   // panel state (and so the document it edits) rides along
-  assert.deepStrictEqual(next.panels["json-edit"].params, { documentId: "doc-7", followActive: false });
+  assert.deepStrictEqual(next.panels["json-edit"].params, {
+    documentId: "doc-7",
+    followActive: false,
+  });
   // the removed leaf was the active group: activeGroup points at a surviving one
   assert.ok(["g2", "g3"].includes(next.activeGroup as string));
   // the source is not mutated
@@ -112,7 +132,13 @@ test("settings alone on the left (no json-edit anywhere): the group becomes the 
   const l = legacy();
   l.grid = {
     ...l.grid,
-    root: { type: "branch", size: 800, data: [{ type: "leaf", size: 400, data: { id: "g3", views: ["editor"], activeView: "editor" } }] },
+    root: {
+      type: "branch",
+      size: 800,
+      data: [
+        { type: "leaf", size: 400, data: { id: "g3", views: ["editor"], activeView: "editor" } },
+      ],
+    },
   } as unknown as SerializedDockview["grid"];
   delete (l.panels as any)["json-edit"];
   delete (l.panels as any)["json-tree"];
@@ -156,7 +182,10 @@ test("json-edit in a floating group moves too; an emptied floating group is drop
   const l = legacy();
   (l.grid.root as any).data[0].data.views = ["editor"];
   l.floatingGroups = [
-    { data: { id: "f1", views: ["json-edit"], activeView: "json-edit" }, position: { left: 10, top: 10, width: 300, height: 300 } },
+    {
+      data: { id: "f1", views: ["json-edit"], activeView: "json-edit" },
+      position: { left: 10, top: 10, width: 300, height: 300 },
+    },
   ] as any;
   const next = migrateEdgeLayout(l);
   assert.ok(!next.floatingGroups || next.floatingGroups.length === 0);
@@ -180,7 +209,17 @@ test("a json-edit-only grid migrates to an empty grid with the document on the e
   const l = legacy();
   l.grid = {
     ...l.grid,
-    root: { type: "branch", size: 800, data: [{ type: "leaf", size: 400, data: { id: "g1", views: ["json-edit"], activeView: "json-edit" } }] },
+    root: {
+      type: "branch",
+      size: 800,
+      data: [
+        {
+          type: "leaf",
+          size: 400,
+          data: { id: "g1", views: ["json-edit"], activeView: "json-edit" },
+        },
+      ],
+    },
   } as unknown as SerializedDockview["grid"];
   const next = migrateEdgeLayout(l);
   assert.deepStrictEqual((next.grid.root as any).data, []);
@@ -207,7 +246,10 @@ test("deck: the document stays on its edge, is not a deck tab, and its state is 
   const deck = buildDeckLayout(grid);
   assert.deepStrictEqual(layoutPanelOrder(deck), ["json-tree", "editor"]);
   assert.deepStrictEqual(deck.edgeGroups, grid.edgeGroups);
-  assert.deepStrictEqual(deck.panels["json-edit"].params, { documentId: "doc-7", followActive: false });
+  assert.deepStrictEqual(deck.panels["json-edit"].params, {
+    documentId: "doc-7",
+    followActive: false,
+  });
   assert.ok(deck.panels["settings"] && deck.panels["status-bar"]);
 });
 
@@ -217,7 +259,11 @@ test("reconcile never folds the document into the grid, either way", () => {
   edges(deck).left.collapsed = true; // the phone collapsed its own copy
   const backToGrid = reconcileLayouts(grid, deck);
   assert.ok(!gridIds(backToGrid).includes("json-edit"));
-  assert.deepStrictEqual(backToGrid.edgeGroups, grid.edgeGroups, "the grid keeps its own edge state");
+  assert.deepStrictEqual(
+    backToGrid.edgeGroups,
+    grid.edgeGroups,
+    "the grid keeps its own edge state",
+  );
   const backToDeck = reconcileLayouts(deck, grid);
   assert.ok(!gridIds(backToDeck).includes("json-edit"));
   assert.strictEqual(edges(backToDeck).left.collapsed, true, "the deck keeps its own edge state");

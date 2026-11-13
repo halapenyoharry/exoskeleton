@@ -166,6 +166,7 @@ export default function ColoredTab(props: IDockviewPanelHeaderProps) {
   }
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: outer wrapper around DockviewDefaultTab (which contains buttons); keyboard tab navigation is handled by Dockview
     <div
       ref={rootRef}
       className={`exo-tab${isDocEdge ? " exo-tab--doc" : ""}`}
@@ -175,10 +176,7 @@ export default function ColoredTab(props: IDockviewPanelHeaderProps) {
       }}
       onClick={onClick}
     >
-      <DockviewDefaultTab
-        {...props}
-        hideClose={isDocEdge}
-      />
+      <DockviewDefaultTab {...props} hideClose={isDocEdge} />
     </div>
   );
 }

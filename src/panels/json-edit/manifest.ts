@@ -1,9 +1,6 @@
 import { graphLibrary } from "../../fixtures/graphs";
 import type { PanelManifest } from "../../panel-manifest";
-import JsonEditPanel, {
-  jsonEditDefaults,
-  type JsonEditParams,
-} from "./JsonEditPanel";
+import JsonEditPanel, { jsonEditDefaults, type JsonEditParams } from "./JsonEditPanel";
 
 const manifest: PanelManifest<JsonEditParams> = {
   // identity
@@ -12,7 +9,6 @@ const manifest: PanelManifest<JsonEditParams> = {
   component: JsonEditPanel,
   description:
     "CodeMirror 6 JSON editor. Publishes parsed JSON to the json-bus (default channel 'default'); JSON-visualizer panels subscribe to render.",
-
 
   // pill ☰ menu; handled in JsonEditPanel via onPanelMenu
   menu: [
@@ -45,7 +41,7 @@ const manifest: PanelManifest<JsonEditParams> = {
   paramsDefault: jsonEditDefaults,
 
   npmDependencies: {
-    "codemirror": "^6.0.0",
+    codemirror: "^6.0.0",
     "@codemirror/lang-json": "^6.0.0",
   },
 };

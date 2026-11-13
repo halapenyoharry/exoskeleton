@@ -26,7 +26,10 @@ test("presets have unique ids", () => {
 
 test("minimal preset is removed and DEFAULT_PRESET_ID is blank, while founding panels stay in registry", () => {
   assert.strictEqual(DEFAULT_PRESET_ID, "blank");
-  assert.strictEqual(presets.find((p) => p.id === "minimal"), undefined);
+  assert.strictEqual(
+    presets.find((p) => p.id === "minimal"),
+    undefined,
+  );
   const validIds = new Set(panelRegistry.map((p) => p.id));
   for (const id of ["editor", "terminal", "webview"]) {
     assert.ok(validIds.has(id), `${id} remains in panelRegistry`);
@@ -37,10 +40,7 @@ test("all preset panelIds and layouts entries name real panelRegistry ids", () =
   const validIds = new Set(panelRegistry.map((p) => p.id));
   for (const preset of presets) {
     for (const id of preset.panelIds) {
-      assert.ok(
-        validIds.has(id),
-        `preset "${preset.id}" contains unknown panel id "${id}"`,
-      );
+      assert.ok(validIds.has(id), `preset "${preset.id}" contains unknown panel id "${id}"`);
     }
     for (const platform of ["desktop", "phone"] as const) {
       const layout = preset.layouts?.[platform];
@@ -64,7 +64,10 @@ test("resolvePresetPanelIds resolves empty array to every registry id but the do
   const allRegistryIds = panelRegistry.map((p) => p.id);
   const resolved = resolvePresetPanelIds("everything", allRegistryIds);
   // json-edit is the document: it lives in the left edge, never in a preset's grid.
-  assert.deepStrictEqual(resolved, allRegistryIds.filter((id) => id !== "json-edit"));
+  assert.deepStrictEqual(
+    resolved,
+    allRegistryIds.filter((id) => id !== "json-edit"),
+  );
 });
 
 test("no preset puts json-edit in its grid or platform layouts (the left edge always has it)", () => {
@@ -87,9 +90,15 @@ test("no preset puts json-edit in its grid or platform layouts (the left edge al
 });
 
 test("json-lab and everything open the document edge and seed Berry Thief; the rest do not", () => {
-  const open = presets.filter((p) => p.documentOpen).map((p) => p.id).sort();
+  const open = presets
+    .filter((p) => p.documentOpen)
+    .map((p) => p.id)
+    .sort();
   assert.deepStrictEqual(open, ["everything", "json-lab"]);
-  const seeded = presets.filter((p) => shouldSeedPresetDocument(p.id)).map((p) => p.id).sort();
+  const seeded = presets
+    .filter((p) => shouldSeedPresetDocument(p.id))
+    .map((p) => p.id)
+    .sort();
   assert.deepStrictEqual(seeded, ["everything", "json-lab"]);
 });
 
@@ -105,17 +114,40 @@ test("phone layouts match preferred one-column arrangements", () => {
   ]);
   assert.deepStrictEqual(resolvePresetPlacements("procedural-lab", "phone"), [
     { id: "procedural-visuals-control", direction: "right" },
-    { id: "procedural-visuals-manifold", reference: "procedural-visuals-control", direction: "below" },
-    { id: "procedural-visuals-balls", reference: "procedural-visuals-manifold", direction: "within" },
-    { id: "procedural-visuals-fountain", reference: "procedural-visuals-manifold", direction: "within" },
-    { id: "procedural-visuals-recursive", reference: "procedural-visuals-manifold", direction: "within" },
+    {
+      id: "procedural-visuals-manifold",
+      reference: "procedural-visuals-control",
+      direction: "below",
+    },
+    {
+      id: "procedural-visuals-balls",
+      reference: "procedural-visuals-manifold",
+      direction: "within",
+    },
+    {
+      id: "procedural-visuals-fountain",
+      reference: "procedural-visuals-manifold",
+      direction: "within",
+    },
+    {
+      id: "procedural-visuals-recursive",
+      reference: "procedural-visuals-manifold",
+      direction: "within",
+    },
   ]);
   // "tabs": every panel of the preset, in registry order, in one group.
   const ids = panelRegistry.map((p) => p.id);
   const everythingPhone = resolvePresetPlacements("everything", "phone", ids) ?? [];
-  assert.deepStrictEqual(everythingPhone.map((s) => s.id), resolvePresetPanelIds("everything", ids));
+  assert.deepStrictEqual(
+    everythingPhone.map((s) => s.id),
+    resolvePresetPanelIds("everything", ids),
+  );
   assert.strictEqual(everythingPhone[0]?.direction, "right");
-  assert.ok(everythingPhone.slice(1).every((s) => s.reference === everythingPhone[0].id && s.direction === "within"));
+  assert.ok(
+    everythingPhone
+      .slice(1)
+      .every((s) => s.reference === everythingPhone[0].id && s.direction === "within"),
+  );
 });
 
 test("resolvePresetPanelIds falls back to DEFAULT_PRESET_ID (blank) for unknown preset id", () => {
@@ -199,9 +231,7 @@ function createFakeDockviewApi() {
       activeId = undefined;
     },
     gridPanelIds: () =>
-      [...panels.values()]
-        .filter((p) => p.api.location.type === "grid")
-        .map((p) => p.id),
+      [...panels.values()].filter((p) => p.api.location.type === "grid").map((p) => p.id),
   };
 
   return api as unknown as DockviewApi & {
@@ -230,10 +260,7 @@ test("first visit in a browser defaults to json-lab (which seeds Berry Thief) on
   // Web phone first visit: JSON Lab phone arrangement + collapsed document edge
   const webPhone = createFakeDockviewApi();
   buildDefaultLayout(webPhone, { web: true, phone: true });
-  assert.deepStrictEqual(webPhone.gridPanelIds(), [
-    "text-viewer",
-    "json-graph3d-inspect",
-  ]);
+  assert.deepStrictEqual(webPhone.gridPanelIds(), ["text-viewer", "json-graph3d-inspect"]);
   assert.strictEqual(webPhone.getEdgeGroup("left")?.isCollapsed(), true);
 
   // Desktop (Tauri) first visit: empty grid (Watermark)

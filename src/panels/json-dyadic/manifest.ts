@@ -1,8 +1,5 @@
 import type { PanelManifest } from "../../panel-manifest";
-import JsonDyadicPanel, {
-  jsonDyadicDefaults,
-  type JsonDyadicParams,
-} from "./JsonDyadicPanel";
+import JsonDyadicPanel, { jsonDyadicDefaults, type JsonDyadicParams } from "./JsonDyadicPanel";
 
 const manifest: PanelManifest<JsonDyadicParams> = {
   id: "json-dyadic",

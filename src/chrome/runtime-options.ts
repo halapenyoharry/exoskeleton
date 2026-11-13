@@ -28,11 +28,14 @@ export function getOptions(panelId: string, key: string): RuntimeOption[] {
 export function onOptions(panelId: string, key: string, cb: Listener): () => void {
   const id = k(panelId, key);
   let set = listeners.get(id);
-  if (!set) listeners.set(id, (set = new Set()));
+  if (!set) {
+    set = new Set();
+    listeners.set(id, set);
+  }
   set.add(cb);
   return () => {
-    set!.delete(cb);
-    if (set!.size === 0) listeners.delete(id);
+    set.delete(cb);
+    if (set.size === 0) listeners.delete(id);
   };
 }
 
@@ -54,10 +57,13 @@ export function getText(panelId: string, key: string): string {
 export function onText(panelId: string, key: string, cb: TextListener): () => void {
   const id = k(panelId, key);
   let set = textListeners.get(id);
-  if (!set) textListeners.set(id, (set = new Set()));
+  if (!set) {
+    set = new Set();
+    textListeners.set(id, set);
+  }
   set.add(cb);
   return () => {
-    set!.delete(cb);
-    if (set!.size === 0) textListeners.delete(id);
+    set.delete(cb);
+    if (set.size === 0) textListeners.delete(id);
   };
 }

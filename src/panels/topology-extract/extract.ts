@@ -68,7 +68,12 @@ export function findDivisions(source: string): Division[] {
     let id: string;
     let label: string;
     if (heading) {
-      const base = heading.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "section";
+      const base =
+        heading
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .slice(0, 40) || "section";
       id = base;
       for (let k = 2; usedIds.has(id); k++) id = `${base}-${k}`;
       label = heading;
@@ -91,14 +96,24 @@ export function findDivisions(source: string): Division[] {
 }
 
 /** Split [start, end) into pieces of at most maxChars, at paragraph, then sentence, boundaries. */
-function splitRange(source: string, start: number, end: number, maxChars: number): [number, number][] {
+function splitRange(
+  source: string,
+  start: number,
+  end: number,
+  maxChars: number,
+): [number, number][] {
   const pieces: [number, number][] = [];
   let s = start;
   while (end - s > maxChars) {
     const window = source.slice(s, s + maxChars);
     let cut = window.lastIndexOf("\n\n");
     if (cut < maxChars * 0.4) {
-      const sentence = Math.max(window.lastIndexOf(". "), window.lastIndexOf("? "), window.lastIndexOf("! "), window.lastIndexOf(".\n"));
+      const sentence = Math.max(
+        window.lastIndexOf(". "),
+        window.lastIndexOf("? "),
+        window.lastIndexOf("! "),
+        window.lastIndexOf(".\n"),
+      );
       cut = sentence > maxChars * 0.4 ? sentence + 1 : maxChars;
     }
     pieces.push([s, s + cut]);
@@ -115,14 +130,24 @@ function splitRange(source: string, start: number, end: number, maxChars: number
  */
 export function chunkSource(source: string, divisions: Division[], maxChars: number): Chunk[] {
   if (maxChars <= 0 || source.length <= maxChars) {
-    return [{ index: 0, text: source, start: 0, end: source.length, divisionIds: divisions.map((d) => d.id) }];
+    return [
+      {
+        index: 0,
+        text: source,
+        start: 0,
+        end: source.length,
+        divisionIds: divisions.map((d) => d.id),
+      },
+    ];
   }
   const units: { start: number; end: number; divisionId?: string }[] = [];
   if (divisions.length === 0) {
-    for (const [s, e] of splitRange(source, 0, source.length, maxChars)) units.push({ start: s, end: e });
+    for (const [s, e] of splitRange(source, 0, source.length, maxChars))
+      units.push({ start: s, end: e });
   } else {
     for (const d of divisions) {
-      for (const [s, e] of splitRange(source, d.start, d.end, maxChars)) units.push({ start: s, end: e, divisionId: d.id });
+      for (const [s, e] of splitRange(source, d.start, d.end, maxChars))
+        units.push({ start: s, end: e, divisionId: d.id });
     }
   }
   const chunks: Chunk[] = [];
@@ -133,10 +158,24 @@ export function chunkSource(source: string, divisions: Division[], maxChars: num
       if (u.divisionId && !current.ids.includes(u.divisionId)) current.ids.push(u.divisionId);
       continue;
     }
-    if (current) chunks.push({ index: chunks.length, text: source.slice(current.start, current.end), start: current.start, end: current.end, divisionIds: current.ids });
+    if (current)
+      chunks.push({
+        index: chunks.length,
+        text: source.slice(current.start, current.end),
+        start: current.start,
+        end: current.end,
+        divisionIds: current.ids,
+      });
     current = { start: u.start, end: u.end, ids: u.divisionId ? [u.divisionId] : [] };
   }
-  if (current) chunks.push({ index: chunks.length, text: source.slice(current.start, current.end), start: current.start, end: current.end, divisionIds: current.ids });
+  if (current)
+    chunks.push({
+      index: chunks.length,
+      text: source.slice(current.start, current.end),
+      start: current.start,
+      end: current.end,
+      divisionIds: current.ids,
+    });
   return chunks;
 }
 
@@ -144,7 +183,12 @@ export function chunkSource(source: string, divisions: Division[], maxChars: num
 export function structureFor(divisions: Division[]): RelationDocument {
   if (divisions.length === 0) return { nodes: [], relations: [] };
   const nodes: TopoNode[] = [
-    { id: "source-text", kind: "node", label: "Source text", attrs: { "i2t:kind": "structure", description: "The whole source." } },
+    {
+      id: "source-text",
+      kind: "node",
+      label: "Source text",
+      attrs: { "i2t:kind": "structure", description: "The whole source." },
+    },
     ...divisions.map((d) => ({
       id: d.id,
       kind: "node" as const,
@@ -175,7 +219,10 @@ export function structureFor(divisions: Division[]): RelationDocument {
 // ── Merging ──────────────────────────────────────────────────────────
 
 function slug(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function predicateStem(p: string): string {
@@ -248,7 +295,9 @@ export class Accumulator {
         this.byName.get(slug(node.id)) ??
         (node.label ? this.byName.get(slug(node.label)) : undefined) ??
         (Array.isArray(node.attrs?.aliases)
-          ? (node.attrs!.aliases as unknown[]).map((a) => (typeof a === "string" ? this.byName.get(slug(a)) : undefined)).find(Boolean)
+          ? (node.attrs!.aliases as unknown[])
+              .map((a) => (typeof a === "string" ? this.byName.get(slug(a)) : undefined))
+              .find(Boolean)
           : undefined);
       if (existingId) {
         idMap.set(node.id, existingId);
@@ -285,7 +334,8 @@ export class Accumulator {
       const duplicate = this.relations.some(
         (r) =>
           participantKey(r) === key &&
-          (evidenceOverlaps(r.evidence, rel.evidence) || predicateStem(r.predicate) === predicateStem(rel.predicate)),
+          (evidenceOverlaps(r.evidence, rel.evidence) ||
+            predicateStem(r.predicate) === predicateStem(rel.predicate)),
       );
       if (duplicate) continue;
       this.relations.push(rel);
@@ -336,7 +386,7 @@ export const FOCUSED_PASSES: PassKind[] = [
     id: "modes",
     label: "modes",
     question:
-      "Which events in this passage are not simply reported as happening? Events the narration foretells, things a character plans, intends, hopes for, or expects, things someone commands or requests, things that are only possible or hypothetical, claims a character makes that the narration does not confirm, alternative versions the text offers, and things the text says did not happen. A sentence saying someone did not plan, expect, or mean to do something that the story goes on to imply foretells the event itself. Add each one that is missing or recorded with the wrong mode, with the right \"mode\".",
+      'Which events in this passage are not simply reported as happening? Events the narration foretells, things a character plans, intends, hopes for, or expects, things someone commands or requests, things that are only possible or hypothetical, claims a character makes that the narration does not confirm, alternative versions the text offers, and things the text says did not happen. A sentence saying someone did not plan, expect, or mean to do something that the story goes on to imply foretells the event itself. Add each one that is missing or recorded with the wrong mode, with the right "mode".',
   },
   {
     id: "changes",
@@ -354,7 +404,7 @@ export const FOCUSED_PASSES: PassKind[] = [
     id: "identity",
     label: "identity",
     question:
-      "Check identity. Which names, nicknames, usernames, and handles refer to the same individual (record them as aliases by re-declaring the node with an \"aliases\" list)? Which unnamed or generic mentions might be a named node (add claimed_identical_to with mode \"unresolved\")? Which group mentions should be individual nodes? Inside games, dreams, or stories within the story, which avatars and inhabitants act on which? Add what is missing.",
+      'Check identity. Which names, nicknames, usernames, and handles refer to the same individual (record them as aliases by re-declaring the node with an "aliases" list)? Which unnamed or generic mentions might be a named node (add claimed_identical_to with mode "unresolved")? Which group mentions should be individual nodes? Inside games, dreams, or stories within the story, which avatars and inhabitants act on which? Add what is missing.',
   },
 ];
 
@@ -377,9 +427,10 @@ export function followUpSequence(followUps: number): PassKind[] {
 function nodeLines(nodes: TopoNode[]): string {
   return nodes
     .map((n) => {
-      const aliases = Array.isArray(n.attrs?.aliases) && (n.attrs!.aliases as string[]).length > 0
-        ? ` | aka ${(n.attrs!.aliases as string[]).join(", ")}`
-        : "";
+      const aliases =
+        Array.isArray(n.attrs?.aliases) && (n.attrs!.aliases as string[]).length > 0
+          ? ` | aka ${(n.attrs!.aliases as string[]).join(", ")}`
+          : "";
       return `${n.id} | ${n.label ?? n.id} | ${n.attrs?.["i2t:kind"] ?? "?"}${aliases}`;
     })
     .join("\n");
@@ -387,7 +438,10 @@ function nodeLines(nodes: TopoNode[]): string {
 
 function relationLines(relations: ExtractedRelation[]): string {
   return relations
-    .map((r) => `${r.predicate} [${r.category}, ${r.mode ?? "asserted"}] ${r.participants.map((p) => `${p.node}(${p.role ?? "?"})`).join(" ")}`)
+    .map(
+      (r) =>
+        `${r.predicate} [${r.category}, ${r.mode ?? "asserted"}] ${r.participants.map((p) => `${p.node}(${p.role ?? "?"})`).join(" ")}`,
+    )
     .join("\n");
 }
 
@@ -396,14 +450,20 @@ function passageHeader(chunk: Chunk, chunkCount: number, divisions: Division[]):
   const structure =
     divisions.length > 0
       ? `\nSTRUCTURE: the structure nodes already exist (source-text, ${divisions.map((d) => d.id).join(", ")}). Do not declare structure nodes. This passage covers ${chunk.divisionIds.join(", ") || "part of the source"}; set "locus" to the one each relation's evidence comes from.\n`
-      : "\nSTRUCTURE: the source has no marked divisions. Do not declare structure nodes and omit \"locus\".\n";
+      : '\nSTRUCTURE: the source has no marked divisions. Do not declare structure nodes and omit "locus".\n';
   return `SOURCE PASSAGE${where}:\n<<<\n${chunk.text}\n>>>\n${structure}`;
 }
 
-export function firstPassMessage(chunk: Chunk, chunkCount: number, divisions: Division[], known: TopoNode[]): string {
-  const knownBlock = known.length > 0
-    ? `\nKNOWN NODES from earlier parts (id | label | kind). Reuse these ids for the same entities; declare a node again only to add aliases:\n${nodeLines(known)}\n`
-    : "";
+export function firstPassMessage(
+  chunk: Chunk,
+  chunkCount: number,
+  divisions: Division[],
+  known: TopoNode[],
+): string {
+  const knownBlock =
+    known.length > 0
+      ? `\nKNOWN NODES from earlier parts (id | label | kind). Reuse these ids for the same entities; declare a node again only to add aliases:\n${nodeLines(known)}\n`
+      : "";
   return `${passageHeader(chunk, chunkCount, divisions)}${knownBlock}\nExtract the nodes and relations in this passage, following the instructions. Return the JSON object.`;
 }
 
@@ -515,7 +575,14 @@ export async function extractIteratively(opts: ExtractOptions): Promise<ExtractO
           )
         : firstPassMessage(chunk, chunks.length, divisions, contentNodes());
       const started = Date.now();
-      const record: PassRecord = { chunk: chunk.index, pass: p, kind: kind?.id ?? "first", newNodes: 0, newRelations: 0, ms: 0 };
+      const record: PassRecord = {
+        chunk: chunk.index,
+        pass: p,
+        kind: kind?.id ?? "first",
+        newNodes: 0,
+        newRelations: 0,
+        ms: 0,
+      };
       const call = () =>
         chat(systemPrompt, user, {
           signal,
@@ -560,12 +627,30 @@ export async function extractIteratively(opts: ExtractOptions): Promise<ExtractO
         record.ms = Date.now() - started;
         passes.push(record);
         error = aborted ? "Cancelled." : `Part ${chunk.index + 1}, ${label}: ${record.error}`;
-        onProgress?.({ chunk: chunk.index, chunkCount: chunks.length, pass: p, passCount: plan.length, passLabel: label, totalNodes: acc.nodes.length, totalRelations: acc.relations.length, finished: record });
+        onProgress?.({
+          chunk: chunk.index,
+          chunkCount: chunks.length,
+          pass: p,
+          passCount: plan.length,
+          passLabel: label,
+          totalNodes: acc.nodes.length,
+          totalRelations: acc.relations.length,
+          finished: record,
+        });
         break outer;
       }
       record.ms = Date.now() - started;
       passes.push(record);
-      onProgress?.({ chunk: chunk.index, chunkCount: chunks.length, pass: p, passCount: plan.length, passLabel: label, totalNodes: acc.nodes.length, totalRelations: acc.relations.length, finished: record });
+      onProgress?.({
+        chunk: chunk.index,
+        chunkCount: chunks.length,
+        pass: p,
+        passCount: plan.length,
+        passLabel: label,
+        totalNodes: acc.nodes.length,
+        totalRelations: acc.relations.length,
+        finished: record,
+      });
 
       // "Anything missed" sweeps repeat only while they keep finding things.
       if (kind?.id === MISSED_PASS.id && record.newNodes + record.newRelations === 0) break;

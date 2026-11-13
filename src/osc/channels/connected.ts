@@ -28,9 +28,7 @@ export function setGraphsConnected(connected: boolean): void {
   void sendOsc(ADDR.graphsConnected, encodeGraphsConnected(connected));
 }
 
-export function onGraphsConnectionChange(
-  listener: (connected: boolean) => void,
-): () => void {
+export function onGraphsConnectionChange(listener: (connected: boolean) => void): () => void {
   return subscribeOsc(ADDR.graphsConnected, (_address, args) => {
     const connected = decodeGraphsConnected(args);
     if (connected === null) return;

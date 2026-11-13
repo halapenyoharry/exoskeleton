@@ -42,9 +42,7 @@ interface TooltipState {
   attrs?: Record<string, unknown>;
 }
 
-function formatAttrs(
-  attrs: Record<string, unknown> | undefined,
-): [string, string][] {
+function formatAttrs(attrs: Record<string, unknown> | undefined): [string, string][] {
   if (!attrs) return [];
   return Object.entries(attrs)
     .filter(([, v]) => v !== null && v !== undefined && v !== "")
@@ -52,16 +50,12 @@ function formatAttrs(
     .map(([k, v]) => {
       const val = typeof v === "object" ? JSON.stringify(v) : String(v);
       const truncated =
-        val.length > MAX_TOOLTIP_VALUE_LEN
-          ? val.slice(0, MAX_TOOLTIP_VALUE_LEN - 3) + "..."
-          : val;
+        val.length > MAX_TOOLTIP_VALUE_LEN ? val.slice(0, MAX_TOOLTIP_VALUE_LEN - 3) + "..." : val;
       return [k, truncated];
     });
 }
 
-export default function JsonCosmosPanel(
-  props: IDockviewPanelProps<JsonCosmosParams>,
-) {
+export default function JsonCosmosPanel(props: IDockviewPanelProps<JsonCosmosParams>) {
   const params: JsonCosmosParams = {
     ...jsonCosmosDefaults,
     ...(props.params ?? {}),
@@ -196,20 +190,15 @@ export default function JsonCosmosPanel(
           rawX = event.clientX - rect.left;
           rawY = event.clientY - rect.top;
         } else {
-          const [sx, sy] =
-            graphRef.current?.spaceToScreenPosition(pointPosition) ?? [0, 0];
+          const [sx, sy] = graphRef.current?.spaceToScreenPosition(pointPosition) ?? [0, 0];
           rawX = sx;
           rawY = sy;
         }
 
         const x =
-          width > 0
-            ? Math.max(8, Math.min(rawX + 12, Math.max(8, width - 260)))
-            : rawX + 12;
+          width > 0 ? Math.max(8, Math.min(rawX + 12, Math.max(8, width - 260))) : rawX + 12;
         const y =
-          height > 0
-            ? Math.max(8, Math.min(rawY + 12, Math.max(8, height - 140)))
-            : rawY + 12;
+          height > 0 ? Math.max(8, Math.min(rawY + 12, Math.max(8, height - 140))) : rawY + 12;
 
         const label = node.label || node.id;
         const kindOrType =
@@ -237,11 +226,7 @@ export default function JsonCosmosPanel(
         }
       },
       onPointClick: (index) => {
-        const {
-          detectedGraph: currentGraph,
-          activeDocId: docId,
-          panelId,
-        } = latestRef.current;
+        const { detectedGraph: currentGraph, activeDocId: docId, panelId } = latestRef.current;
         const node = currentGraph?.nodes[index];
         if (!node) return;
         if (areGraphsConnected()) {
@@ -412,10 +397,7 @@ export default function JsonCosmosPanel(
       }
     }
   };
-  useEffect(
-    () => onPanelMenu(props.api.id, (id) => menuRef.current(id)),
-    [props.api.id],
-  );
+  useEffect(() => onPanelMenu(props.api.id, (id) => menuRef.current(id)), [props.api.id]);
 
   const pointCount = cosmosData?.ids.length ?? 0;
   const linkCount = cosmosData ? cosmosData.links.length / 2 : 0;
@@ -425,26 +407,18 @@ export default function JsonCosmosPanel(
     <div className="panel-body json-cosmos-body">
       {!isGraph && (
         <div className="json-cosmos-empty">
-          {doc === undefined
-            ? "Waiting for JSON…"
-            : "No graph structure detected in this JSON."}
+          {doc === undefined ? "Waiting for JSON…" : "No graph structure detected in this JSON."}
         </div>
       )}
       {isGraph && <div className="json-cosmos-canvas" ref={containerRef} />}
       {isGraph && cosmosData && (
         <div className="json-cosmos-counts">
-          {pointCount.toLocaleString()} points · {linkCount.toLocaleString()}{" "}
-          links
-          {droppedLinks > 0
-            ? ` · ${droppedLinks.toLocaleString()} links dropped`
-            : ""}
+          {pointCount.toLocaleString()} points · {linkCount.toLocaleString()} links
+          {droppedLinks > 0 ? ` · ${droppedLinks.toLocaleString()} links dropped` : ""}
         </div>
       )}
       {tooltip && isGraph && (
-        <div
-          className="json-cosmos-tooltip"
-          style={{ left: tooltip.x, top: tooltip.y }}
-        >
+        <div className="json-cosmos-tooltip" style={{ left: tooltip.x, top: tooltip.y }}>
           <strong className="json-cosmos-tooltip-title">{tooltip.label}</strong>
           {tooltip.kindOrType && (
             <div className="json-cosmos-tooltip-kind">{tooltip.kindOrType}</div>

@@ -1,6 +1,7 @@
 import type { PanelManifest } from "../../panel-manifest";
 import ScopePanel from "./ScopePanel";
 
+// biome-ignore lint/suspicious/noEmptyInterface: empty panel params contract
 export interface ScopeParams {}
 
 const manifest: PanelManifest<ScopeParams> = {

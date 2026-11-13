@@ -1,9 +1,6 @@
 import type { PanelManifest } from "../../panel-manifest";
 import { textViewerPanes } from "../../chrome/panes/text-viewer.panes";
-import TextViewerPanel, {
-  textViewerDefaults,
-  type TextViewerParams,
-} from "./TextViewerPanel";
+import TextViewerPanel, { textViewerDefaults, type TextViewerParams } from "./TextViewerPanel";
 
 const manifest: PanelManifest<TextViewerParams> = {
   id: "text-viewer",
@@ -20,4 +17,3 @@ const manifest: PanelManifest<TextViewerParams> = {
 };
 
 export default manifest;
-

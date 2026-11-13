@@ -42,9 +42,7 @@ export const WEB_DEFAULT_PRESET_ID = "json-lab";
  *  tests can import this module. */
 export function isWebRuntime(): boolean {
   return (
-    typeof window !== "undefined" &&
-    !("__TAURI_INTERNALS__" in window) &&
-    !("__TAURI__" in window)
+    typeof window !== "undefined" && !("__TAURI_INTERNALS__" in window) && !("__TAURI__" in window)
   );
 }
 
@@ -66,10 +64,7 @@ export function webDefaultPresetId(overrideId?: string): string {
   return id && presets.some((p) => p.id === id) ? id : WEB_DEFAULT_PRESET_ID;
 }
 
-export function defaultPresetId(
-  web: boolean = isWebRuntime(),
-  overrideId?: string,
-): string {
+export function defaultPresetId(web: boolean = isWebRuntime(), overrideId?: string): string {
   return web ? webDefaultPresetId(overrideId) : DEFAULT_PRESET_ID;
 }
 
@@ -120,7 +115,8 @@ export const presets: LayoutPreset[] = [
   {
     id: "procedural-lab",
     name: "Procedural Lab",
-    description: "Generative visualizers and 3D topological manifolds driven by central OSC controls.",
+    description:
+      "Generative visualizers and 3D topological manifolds driven by central OSC controls.",
     panelIds: [
       "procedural-visuals-control",
       "procedural-visuals-manifold",
@@ -131,10 +127,26 @@ export const presets: LayoutPreset[] = [
     layouts: {
       phone: [
         { id: "procedural-visuals-control", direction: "right" },
-        { id: "procedural-visuals-manifold", reference: "procedural-visuals-control", direction: "below" },
-        { id: "procedural-visuals-balls", reference: "procedural-visuals-manifold", direction: "within" },
-        { id: "procedural-visuals-fountain", reference: "procedural-visuals-manifold", direction: "within" },
-        { id: "procedural-visuals-recursive", reference: "procedural-visuals-manifold", direction: "within" },
+        {
+          id: "procedural-visuals-manifold",
+          reference: "procedural-visuals-control",
+          direction: "below",
+        },
+        {
+          id: "procedural-visuals-balls",
+          reference: "procedural-visuals-manifold",
+          direction: "within",
+        },
+        {
+          id: "procedural-visuals-fountain",
+          reference: "procedural-visuals-manifold",
+          direction: "within",
+        },
+        {
+          id: "procedural-visuals-recursive",
+          reference: "procedural-visuals-manifold",
+          direction: "within",
+        },
       ],
     },
   },
@@ -156,11 +168,9 @@ export const presets: LayoutPreset[] = [
  * If panelIds is empty on a non-blank preset (e.g. "everything"), returns all available panel IDs.
  * If the preset ID is unknown, falls back to the default preset ("blank").
  */
-export function resolvePresetPanelIds(
-  presetId: string,
-  availablePanelIds: string[],
-): string[] {
-  const target = presets.find((p) => p.id === presetId) ?? presets.find((p) => p.id === DEFAULT_PRESET_ID);
+export function resolvePresetPanelIds(presetId: string, availablePanelIds: string[]): string[] {
+  const target =
+    presets.find((p) => p.id === presetId) ?? presets.find((p) => p.id === DEFAULT_PRESET_ID);
   if (!target || target.id === "blank") return [];
   if (target.panelIds.length === 0) return availablePanelIds.filter(notDocument);
   return target.panelIds.filter(notDocument);
@@ -174,12 +184,15 @@ export function resolvePresetPlacements(
   platform: PresetPlatform,
   availablePanelIds: string[] = [],
 ): Placement[] | undefined {
-  const target = presets.find((p) => p.id === presetId) ?? presets.find((p) => p.id === DEFAULT_PRESET_ID);
+  const target =
+    presets.find((p) => p.id === presetId) ?? presets.find((p) => p.id === DEFAULT_PRESET_ID);
   const layout = target?.layouts?.[platform];
   if (!layout) return undefined;
   if (layout === "tabs") {
     const ids = resolvePresetPanelIds(target!.id, availablePanelIds);
-    return ids.map((id, i) => (i === 0 ? { id, direction: "right" } : { id, reference: ids[0], direction: "within" }));
+    return ids.map((id, i) =>
+      i === 0 ? { id, direction: "right" } : { id, reference: ids[0], direction: "within" },
+    );
   }
   return layout.filter((p) => notDocument(p.id));
 }

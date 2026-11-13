@@ -2,7 +2,7 @@ export interface ProceduralSuiteParams {
   documentId?: string;
 }
 
-export type VizType = 'bouncing-balls' | 'fountain' | 'recursive-subdivision' | 'manifold';
+export type VizType = "bouncing-balls" | "fountain" | "recursive-subdivision" | "manifold";
 
 export interface SuiteState {
   activeVisualizations: Record<VizType, boolean>;

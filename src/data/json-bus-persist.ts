@@ -9,12 +9,7 @@
 // Best-effort by design: if IndexedDB is unavailable (private window,
 // blocked storage), the bus still works in memory and the status says so.
 
-import {
-  hydrateJson,
-  onJsonStore,
-  type DocMeta,
-  type JsonValue,
-} from "./json-bus";
+import { hydrateJson, onJsonStore, type DocMeta, type JsonValue } from "./json-bus";
 
 const DB_NAME = "exoskeleton";
 const STORE = "json-docs";
@@ -66,7 +61,10 @@ export async function startJsonBusPersistence(): Promise<void> {
     db = await openDb();
   } catch (err) {
     status = "unavailable";
-    console.warn("[json-bus-persist] IndexedDB unavailable; documents will not survive a reload:", err);
+    console.warn(
+      "[json-bus-persist] IndexedDB unavailable; documents will not survive a reload:",
+      err,
+    );
     return;
   }
 

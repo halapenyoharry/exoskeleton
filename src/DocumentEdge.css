@@ -9,7 +9,9 @@
    edge; clicking another tab activates it and expands the edge.
    ColoredTab.tsx tags the group root with `.exo-doc-edge`. */
 
-.dv-groupview.exo-doc-edge { background: #0a0e27; }
+.dv-groupview.exo-doc-edge {
+  background: #0a0e27;
+}
 
 /* Narrow 26px vertical tab strip with clear contrast against #0d1326 page bg. */
 .dv-groupview.exo-doc-edge > .dv-tabs-and-actions-container.dv-groupview-header-vertical {
@@ -28,7 +30,10 @@
 
 /* Trim cross-axis padding and horizontal glyph/content margins so one line of
    vertical tab text centers cleanly inside the 26px strip without clipping. */
-.dv-groupview.exo-doc-edge > .dv-tabs-and-actions-container .dv-tabs-container.dv-tabs-container-vertical .dv-tab {
+.dv-groupview.exo-doc-edge
+  > .dv-tabs-and-actions-container
+  .dv-tabs-container.dv-tabs-container-vertical
+  .dv-tab {
   padding: 8px 3px;
   display: flex;
   align-items: center;
@@ -47,30 +52,57 @@
 .dv-groupview.exo-doc-edge > .dv-tabs-and-actions-container .dv-default-tab {
   justify-content: center;
 }
-.dv-groupview.exo-doc-edge > .dv-tabs-and-actions-container .dv-default-tab .dv-default-tab-content {
+.dv-groupview.exo-doc-edge
+  > .dv-tabs-and-actions-container
+  .dv-default-tab
+  .dv-default-tab-content {
   margin-right: 0;
 }
-.dv-groupview.exo-doc-edge > .dv-tabs-and-actions-container .dv-default-tab .dv-default-tab-content::before {
+.dv-groupview.exo-doc-edge
+  > .dv-tabs-and-actions-container
+  .dv-default-tab
+  .dv-default-tab-content::before {
   display: none;
 }
 
 /* High-contrast inactive tab names; the active tab is white (above). */
-.dv-groupview.exo-doc-edge > .dv-tabs-and-actions-container .dv-tab.dv-inactive-tab .exo-tab .dv-default-tab {
+.dv-groupview.exo-doc-edge
+  > .dv-tabs-and-actions-container
+  .dv-tab.dv-inactive-tab
+  .exo-tab
+  .dv-default-tab {
   color: #c5d4e6;
 }
-.dv-groupview.exo-doc-edge > .dv-tabs-and-actions-container .dv-tab.dv-active-tab .exo-tab .dv-default-tab {
+.dv-groupview.exo-doc-edge
+  > .dv-tabs-and-actions-container
+  .dv-tab.dv-active-tab
+  .exo-tab
+  .dv-default-tab {
   color: #ffffff;
 }
 
 /* Edge tabs cannot be closed on any platform. */
-.dv-groupview.exo-doc-edge.dv-edge-collapsed { cursor: pointer; }
-.dv-groupview.exo-doc-edge > .dv-tabs-and-actions-container .dv-default-tab-action { display: none; }
+.dv-groupview.exo-doc-edge.dv-edge-collapsed {
+  cursor: pointer;
+}
+.dv-groupview.exo-doc-edge > .dv-tabs-and-actions-container .dv-default-tab-action {
+  display: none;
+}
 
 /* Phone: the expanded document is a sheet over the grid, full width. */
-.exo-phone .dv-shell > .dv-split-view-container > .dv-view-container > .dv-view:has(> .dv-groupview.exo-doc-edge:not(.dv-edge-collapsed)) {
+.exo-phone
+  .dv-shell
+  > .dv-split-view-container
+  > .dv-view-container
+  > .dv-view:has(> .dv-groupview.exo-doc-edge:not(.dv-edge-collapsed)) {
   width: 100% !important;
   z-index: 30;
 }
-.exo-phone .dv-shell > .dv-split-view-container:has(> .dv-view-container > .dv-view > .dv-groupview.exo-doc-edge:not(.dv-edge-collapsed)) > .dv-sash-container {
+.exo-phone
+  .dv-shell
+  > .dv-split-view-container:has(
+    > .dv-view-container > .dv-view > .dv-groupview.exo-doc-edge:not(.dv-edge-collapsed)
+  )
+  > .dv-sash-container {
   display: none;
 }

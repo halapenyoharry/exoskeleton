@@ -8,7 +8,9 @@ const KEY = "exo.chrome.settings";
 /** Phone "one pane at a time": opt-in, default off (phones show the grid). */
 export function loadDeckOptIn(): boolean {
   try {
-    return (JSON.parse(localStorage.getItem(KEY) ?? "{}") as { deckOptIn?: unknown }).deckOptIn === true;
+    return (
+      (JSON.parse(localStorage.getItem(KEY) ?? "{}") as { deckOptIn?: unknown }).deckOptIn === true
+    );
   } catch {
     return false;
   }

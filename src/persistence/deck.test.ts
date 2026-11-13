@@ -10,7 +10,12 @@ import {
   isDeckShaped,
 } from "./deck.ts";
 
-const p = (id: string, params?: Record<string, unknown>) => ({ id, contentComponent: id, title: id, ...(params ? { params } : {}) });
+const p = (id: string, params?: Record<string, unknown>) => ({
+  id,
+  contentComponent: id,
+  title: id,
+  ...(params ? { params } : {}),
+});
 
 // editor | (webview over terminal), plus status-bar edge resident.
 const grid = {
@@ -27,8 +32,16 @@ const grid = {
           type: "branch",
           size: 600,
           data: [
-            { type: "leaf", size: 400, data: { id: "g2", views: ["webview"], activeView: "webview" } },
-            { type: "leaf", size: 400, data: { id: "g3", views: ["terminal"], activeView: "terminal" } },
+            {
+              type: "leaf",
+              size: 400,
+              data: { id: "g2", views: ["webview"], activeView: "webview" },
+            },
+            {
+              type: "leaf",
+              size: 400,
+              data: { id: "g3", views: ["terminal"], activeView: "terminal" },
+            },
           ],
         },
       ],
@@ -60,14 +73,26 @@ test("reconcile deck <- grid: added panels appended, removed dropped, params fol
   // desktop edits: terminal closed, a json-tree added, editor file changed
   const edited = {
     ...grid,
-    panels: { ...grid.panels, "json-tree": p("json-tree"), editor: p("editor", { filePath: "/b.md" }) },
+    panels: {
+      ...grid.panels,
+      "json-tree": p("json-tree"),
+      editor: p("editor", { filePath: "/b.md" }),
+    },
     grid: {
       ...grid.grid,
       root: {
         ...(grid.grid.root as any),
         data: [
-          { type: "leaf", size: 600, data: { id: "g1", views: ["editor", "json-tree"], activeView: "editor" } },
-          { type: "leaf", size: 600, data: { id: "g2", views: ["webview"], activeView: "webview" } },
+          {
+            type: "leaf",
+            size: 600,
+            data: { id: "g1", views: ["editor", "json-tree"], activeView: "editor" },
+          },
+          {
+            type: "leaf",
+            size: 600,
+            data: { id: "g2", views: ["webview"], activeView: "webview" },
+          },
         ],
       },
     },
@@ -85,10 +110,25 @@ test("reconcile grid <- deck: removal prunes empty groups, addition lands in act
   // phone edits: webview closed, scope added
   const edited = reconcileLayouts(deck, {
     ...deck,
-    panels: { editor: deck.panels.editor, terminal: deck.panels.terminal, scope: p("scope"), "status-bar": deck.panels["status-bar"] },
+    panels: {
+      editor: deck.panels.editor,
+      terminal: deck.panels.terminal,
+      scope: p("scope"),
+      "status-bar": deck.panels["status-bar"],
+    },
     grid: {
       ...deck.grid,
-      root: { type: "branch", size: 800, data: [{ type: "leaf", size: 400, data: { id: "g1", views: ["editor", "terminal", "scope"], activeView: "scope" } }] },
+      root: {
+        type: "branch",
+        size: 800,
+        data: [
+          {
+            type: "leaf",
+            size: 400,
+            data: { id: "g1", views: ["editor", "terminal", "scope"], activeView: "scope" },
+          },
+        ],
+      },
     } as any,
   } as unknown as SerializedDockview);
   const next = reconcileLayouts(grid, edited);
@@ -105,7 +145,10 @@ test("reconcile grid <- deck: removal prunes empty groups, addition lands in act
 
 test("reconcile removes a whole side and folds the lone branch", () => {
   const src = buildDeckLayout(grid);
-  const onlyEditor = { ...src, panels: { editor: src.panels.editor, "status-bar": src.panels["status-bar"] } } as unknown as SerializedDockview;
+  const onlyEditor = {
+    ...src,
+    panels: { editor: src.panels.editor, "status-bar": src.panels["status-bar"] },
+  } as unknown as SerializedDockview;
   (onlyEditor.grid.root as any).data[0].data.views = ["editor"];
   const next = reconcileLayouts(grid, onlyEditor);
   assert.deepStrictEqual(layoutPanelOrder(next), ["editor"]);
@@ -114,7 +157,10 @@ test("reconcile removes a whole side and folds the lone branch", () => {
 });
 
 test("reconcile into an empty grid builds a single group", () => {
-  const empty = { grid: { orientation: "HORIZONTAL", width: 1, height: 1, root: { type: "branch", data: [] } }, panels: {} } as unknown as SerializedDockview;
+  const empty = {
+    grid: { orientation: "HORIZONTAL", width: 1, height: 1, root: { type: "branch", data: [] } },
+    panels: {},
+  } as unknown as SerializedDockview;
   const next = reconcileLayouts(empty, buildDeckLayout(grid));
   assert.deepStrictEqual(layoutPanelOrder(next), ["editor", "webview", "terminal"]);
 });
