@@ -46,12 +46,7 @@ export interface RelationDocument {
   relations: ExtractedRelation[];
 }
 
-const CATEGORIES: EdgeCategory[] = [
-  "containment",
-  "state_change",
-  "interactivity",
-  "reference",
-];
+const CATEGORIES: EdgeCategory[] = ["containment", "state_change", "interactivity", "reference"];
 
 // Undeclared participant references longer than this are quotations or
 // descriptions rather than entity names, and are dropped, not auto-created.
@@ -68,12 +63,7 @@ const HYPEREDGE_PREFIX: Record<EdgeCategory, string> = {
 
 export function isRelationDocument(doc: unknown): doc is RelationDocument {
   const d = doc as Record<string, unknown> | null;
-  return (
-    !!d &&
-    typeof d === "object" &&
-    Array.isArray(d.nodes) &&
-    Array.isArray(d.relations)
-  );
+  return !!d && typeof d === "object" && Array.isArray(d.nodes) && Array.isArray(d.relations);
 }
 
 /**
@@ -102,10 +92,7 @@ function slug(s: string): string {
  * is given, every relation's evidence is checked against it and marked
  * with `i2t:evidence_verified`.
  */
-export function projectRelations(
-  doc: RelationDocument,
-  sourceText?: string,
-): TopoDocument {
+export function projectRelations(doc: RelationDocument, sourceText?: string): TopoDocument {
   const warnings: string[] = [];
   const nodes: TopoNode[] = [];
   const nodeIds = new Set<string>();
@@ -162,17 +149,13 @@ export function projectRelations(
     return id;
   };
 
-  const resolve = (
-    ref: string | undefined,
-    evidence?: string,
-  ): string | undefined => {
+  const resolve = (ref: string | undefined, evidence?: string): string | undefined => {
     if (typeof ref !== "string") return undefined;
     if (nodeIds.has(ref)) return ref;
     return byName.get(slug(ref)) ?? autoCreate(ref, evidence);
   };
 
-  const haystack =
-    sourceText !== undefined ? normalizeForMatch(sourceText) : undefined;
+  const haystack = sourceText !== undefined ? normalizeForMatch(sourceText) : undefined;
   const usedIds = new Set(nodeIds);
   const links: TopoLink[] = [];
   let unverified = 0;
@@ -208,11 +191,7 @@ export function projectRelations(
     if (category === "containment") {
       const c = participants.findIndex((p) => p.role === "container");
       if (c > 0) {
-        participants = [
-          participants[c],
-          ...participants.slice(0, c),
-          ...participants.slice(c + 1),
-        ];
+        participants = [participants[c], ...participants.slice(0, c), ...participants.slice(c + 1)];
       }
     }
 
@@ -253,8 +232,7 @@ export function projectRelations(
       return;
     }
 
-    const base =
-      HYPEREDGE_PREFIX[category] + slug(`${r.predicate}-${participants[0].node}`);
+    const base = HYPEREDGE_PREFIX[category] + slug(`${r.predicate}-${participants[0].node}`);
     let id = base;
     for (let k = 2; usedIds.has(id); k++) id = `${base}-${k}`;
     usedIds.add(id);

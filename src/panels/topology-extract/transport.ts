@@ -153,8 +153,7 @@ export const OLLAMA_MAX_OUTPUT_TOKENS = 12288;
 /** Where to send an Ollama API request from this runtime. */
 function ollamaRoute(host: string, path: string): { url: string; headers: Record<string, string> } {
   const base = host.trim().replace(/\/+$/, "");
-  const viaDevServer =
-    typeof window !== "undefined" && !inTauri() && Boolean(import.meta.env?.DEV);
+  const viaDevServer = typeof window !== "undefined" && !inTauri() && Boolean(import.meta.env?.DEV);
   if (viaDevServer) {
     return { url: `/__ollama${path}`, headers: { "x-exo-ollama-target": base } };
   }
@@ -197,8 +196,15 @@ export const RELATION_DOC_SCHEMA = {
           mode: {
             type: "string",
             enum: [
-              "asserted", "commanded", "intended", "foretold", "hypothetical",
-              "attributed", "contested", "negated", "unresolved",
+              "asserted",
+              "commanded",
+              "intended",
+              "foretold",
+              "hypothetical",
+              "attributed",
+              "contested",
+              "negated",
+              "unresolved",
             ],
           },
           asserted_by: { type: "string" },
@@ -267,7 +273,11 @@ export function ollamaChat(config: {
         status === 403
           ? " Ollama refused this page's origin; open the app via the dev server or the desktop app, or set OLLAMA_ORIGINS on the Ollama host."
           : "";
-      throw new ExtractionError(`Ollama error ${status}: ${body.slice(0, 300)}${hint}`, "api", status);
+      throw new ExtractionError(
+        `Ollama error ${status}: ${body.slice(0, 300)}${hint}`,
+        "api",
+        status,
+      );
     }
 
     // Streamed NDJSON: one object per line, content in message.content.
@@ -329,7 +339,11 @@ export async function ollamaListModels(host: string): Promise<string[]> {
   const { url, headers } = ollamaRoute(host, "/api/tags");
   const response = await fetch(url, { headers });
   if (!response.ok) {
-    throw new ExtractionError(`Ollama error ${response.status} listing models`, "api", response.status);
+    throw new ExtractionError(
+      `Ollama error ${response.status} listing models`,
+      "api",
+      response.status,
+    );
   }
   const data = await response.json();
   return Array.isArray(data?.models)
@@ -373,10 +387,15 @@ export function parseModelJson(text: string): unknown {
         "parse",
       );
     }
-    const body = inString ? `${escaped ? stripped.slice(0, -1) : stripped}"` : stripped.replace(/,\s*$/, "");
+    const body = inString
+      ? `${escaped ? stripped.slice(0, -1) : stripped}"`
+      : stripped.replace(/,\s*$/, "");
     const closed =
-      body.replace(/,\s*$/, "").replace(/:\s*$/, ': null') +
-      stack.reverse().map((c) => (c === "{" ? "}" : "]")).join("");
+      body.replace(/,\s*$/, "").replace(/:\s*$/, ": null") +
+      stack
+        .reverse()
+        .map((c) => (c === "{" ? "}" : "]"))
+        .join("");
     try {
       return JSON.parse(closed);
     } catch {

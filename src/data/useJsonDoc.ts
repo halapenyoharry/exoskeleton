@@ -12,13 +12,8 @@ import { useEffect, useState } from "react";
 import type { DockviewPanelApi } from "dockview-react";
 import { getJson, onJsonChange, type JsonValue } from "./json-bus";
 
-export function useJsonDoc(
-  api: DockviewPanelApi,
-  documentId: string,
-): JsonValue | undefined {
-  const [doc, setDoc] = useState<JsonValue | undefined>(() =>
-    getJson(documentId),
-  );
+export function useJsonDoc(api: DockviewPanelApi, documentId: string): JsonValue | undefined {
+  const [doc, setDoc] = useState<JsonValue | undefined>(() => getJson(documentId));
 
   useEffect(() => {
     // Re-seed when the document id changes (viewers that follow the

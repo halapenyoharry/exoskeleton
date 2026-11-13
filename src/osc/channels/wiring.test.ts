@@ -30,11 +30,7 @@ import {
 } from "./index.ts";
 import { sendOsc } from "../index.ts";
 import { clearRetained } from "../retainer.ts";
-import {
-  beginBridgeDispatch,
-  endBridgeDispatch,
-  resetLocalSources,
-} from "../local-sources.ts";
+import { beginBridgeDispatch, endBridgeDispatch, resetLocalSources } from "../local-sources.ts";
 import type { OscArg } from "../types.ts";
 
 /** sendOsc without its promise, for readability in synchronous assertions. */

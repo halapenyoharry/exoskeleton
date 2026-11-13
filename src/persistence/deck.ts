@@ -19,7 +19,10 @@ export type LeafData = { views: string[]; activeView?: string; id: string; [k: s
  *  structural chrome, never tabs of the deck and never folded into the grid. */
 export function edgeViewIds(layout: SerializedDockview): string[] {
   const out: string[] = [];
-  const eg = (layout.edgeGroups ?? {}) as Record<string, { group?: { views?: unknown } } | undefined>;
+  const eg = (layout.edgeGroups ?? {}) as Record<
+    string,
+    { group?: { views?: unknown } } | undefined
+  >;
   for (const pos of ["top", "bottom", "left", "right"]) {
     const views = eg[pos]?.group?.views;
     if (Array.isArray(views)) for (const v of views) if (typeof v === "string") out.push(v);
@@ -41,7 +44,8 @@ export function layoutPanelOrder(layout: SerializedDockview): string[] {
   const ids: string[] = [];
   const edge = new Set(edgeViewIds(layout));
   const push = (id: string) => {
-    if (!NON_DECK_IDS.has(id) && !edge.has(id) && layout.panels?.[id] && !ids.includes(id)) ids.push(id);
+    if (!NON_DECK_IDS.has(id) && !edge.has(id) && layout.panels?.[id] && !ids.includes(id))
+      ids.push(id);
   };
   for (const lf of leaves(root(layout))) lf.views.forEach(push);
   for (const g of layout.floatingGroups ?? []) g.data?.views.forEach(push);
@@ -54,10 +58,17 @@ export function layoutActivePanel(layout: SerializedDockview): string | undefine
   const all = leaves(root(layout));
   const grp = all.find((l) => l.id === layout.activeGroup) ?? all[0];
   const a = grp?.activeView;
-  return a && !NON_DECK_IDS.has(a) && !edgeViewIds(layout).includes(a) ? a : layoutPanelOrder(layout)[0];
+  return a && !NON_DECK_IDS.has(a) && !edgeViewIds(layout).includes(a)
+    ? a
+    : layoutPanelOrder(layout)[0];
 }
 
-function singleGroup(base: SerializedDockview, views: string[], active: string | undefined, groupId: string): SerializedDockview {
+function singleGroup(
+  base: SerializedDockview,
+  views: string[],
+  active: string | undefined,
+  groupId: string,
+): SerializedDockview {
   const panels: SerializedDockview["panels"] = {};
   for (const id of views) panels[id] = base.panels[id];
   for (const id of NON_DECK_IDS) if (base.panels?.[id]) panels[id] = base.panels[id];
@@ -73,7 +84,11 @@ function singleGroup(base: SerializedDockview, views: string[], active: string |
           {
             type: "leaf",
             size: base.grid?.width ?? 400,
-            data: { views, activeView: active && views.includes(active) ? active : views[0], id: groupId },
+            data: {
+              views,
+              activeView: active && views.includes(active) ? active : views[0],
+              id: groupId,
+            },
           },
         ],
       } as unknown as SerializedDockview["grid"]["root"],
@@ -127,7 +142,10 @@ function prune(node: GridNode, removed: Set<string>): GridNode[] {
   return [{ ...node, data: kids }];
 }
 
-export function pruneRoot(grid: SerializedDockview, removed: Set<string>): SerializedDockview["grid"] {
+export function pruneRoot(
+  grid: SerializedDockview,
+  removed: Set<string>,
+): SerializedDockview["grid"] {
   let rootNode = grid.grid.root as unknown as GridNode;
   let orientation = grid.grid.orientation;
   let kids = (rootNode.data as GridNode[]).flatMap((c) => prune(c, removed));
@@ -137,7 +155,11 @@ export function pruneRoot(grid: SerializedDockview, removed: Set<string>): Seria
     orientation = (orientation === "HORIZONTAL" ? "VERTICAL" : "HORIZONTAL") as typeof orientation;
   }
   rootNode = { ...rootNode, data: kids };
-  return { ...grid.grid, orientation, root: rootNode as unknown as SerializedDockview["grid"]["root"] };
+  return {
+    ...grid.grid,
+    orientation,
+    root: rootNode as unknown as SerializedDockview["grid"]["root"],
+  };
 }
 
 /**
@@ -165,17 +187,32 @@ export function reconcileLayouts(
     const out: SerializedDockview = {
       ...target,
       panels,
-      grid: { ...target.grid, root: { ...(tRoot ?? { type: "branch" }), data: [] } as unknown as SerializedDockview["grid"]["root"] },
+      grid: {
+        ...target.grid,
+        root: {
+          ...(tRoot ?? { type: "branch" }),
+          data: [],
+        } as unknown as SerializedDockview["grid"]["root"],
+      },
     };
     delete out.activeGroup;
     delete out.floatingGroups;
     delete out.popoutGroups;
     return stripMaximized(out);
   }
-  if (!tRoot || leaves(tRoot).length === 0 || leaves(tRoot).every((l) => l.views.every((v) => removed.has(v)) )) {
+  if (
+    !tRoot ||
+    leaves(tRoot).length === 0 ||
+    leaves(tRoot).every((l) => l.views.every((v) => removed.has(v)))
+  ) {
     // Nothing to keep in target: arrange all of source's panels in one group.
     const keepActive = layoutActivePanel(source);
-    return singleGroup({ ...target, panels: { ...target.panels, ...source.panels } }, srcIds, keepActive, leaves(tRoot)[0]?.id ?? "deck");
+    return singleGroup(
+      { ...target, panels: { ...target.panels, ...source.panels } },
+      srcIds,
+      keepActive,
+      leaves(tRoot)[0]?.id ?? "deck",
+    );
   }
 
   const nextGrid = pruneRoot(target, removed);
@@ -196,11 +233,16 @@ export function reconcileLayouts(
     ...target,
     grid: nextGrid,
     panels,
-    activeGroup: target.activeGroup && keptGroupIds.has(target.activeGroup) ? target.activeGroup : host?.id,
+    activeGroup:
+      target.activeGroup && keptGroupIds.has(target.activeGroup) ? target.activeGroup : host?.id,
   };
   if (target.floatingGroups) {
     const fg = target.floatingGroups
-      .map((g) => (g.data ? { ...g, data: { ...g.data, views: g.data.views.filter((v) => !removed.has(v)) } } : g))
+      .map((g) =>
+        g.data
+          ? { ...g, data: { ...g.data, views: g.data.views.filter((v) => !removed.has(v)) } }
+          : g,
+      )
       .filter((g) => !g.data || g.data.views.length > 0);
     out.floatingGroups = fg;
   }

@@ -44,13 +44,23 @@ export default function MenuPanel(_props: IDockviewPanelProps) {
           ))}
         </div>
         <div className="menu-actions">
-          <button className="menu-row" onClick={m.createWorkspace}>+ New</button>
-          <button className="menu-row" onClick={m.renameWorkspace}>Rename</button>
-          <button className="menu-row menu-row--danger" onClick={m.deleteWorkspace}>Delete</button>
+          <button className="menu-row" onClick={m.createWorkspace}>
+            + New
+          </button>
+          <button className="menu-row" onClick={m.renameWorkspace}>
+            Rename
+          </button>
+          <button className="menu-row menu-row--danger" onClick={m.deleteWorkspace}>
+            Delete
+          </button>
         </div>
         <div className="menu-actions">
-          <button className="menu-row" onClick={m.exportWorkspace}>Export</button>
-          <button className="menu-row" onClick={m.importWorkspace}>Import</button>
+          <button className="menu-row" onClick={m.exportWorkspace}>
+            Export
+          </button>
+          <button className="menu-row" onClick={m.importWorkspace}>
+            Import
+          </button>
         </div>
       </section>
 

@@ -1,8 +1,5 @@
 import type { PanelManifest } from "../../panel-manifest";
-import JsonMassPanel, {
-  jsonMassDefaults,
-  type JsonMassParams,
-} from "./JsonMassPanel";
+import JsonMassPanel, { jsonMassDefaults, type JsonMassParams } from "./JsonMassPanel";
 
 const manifest: PanelManifest<JsonMassParams> = {
   id: "json-mass",

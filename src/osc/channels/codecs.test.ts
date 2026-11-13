@@ -106,7 +106,10 @@ test("selection on a foreign address decodes to null", () => {
 });
 
 test("selection tolerates junk arg types off the wire", () => {
-  const args: OscArg[] = [{ type: "float", value: 1.5 }, { type: "int", value: 7 }];
+  const args: OscArg[] = [
+    { type: "float", value: 1.5 },
+    { type: "int", value: 7 },
+  ];
   const event = decodeSelection(ADDR.select("default"), args);
   assert.deepStrictEqual(event, {
     documentId: "default",
@@ -128,10 +131,7 @@ test("focus round-trips", () => {
 
 test("focus without a node id is not a message", () => {
   assert.strictEqual(decodeFocus(ADDR.focus("d"), []), null);
-  assert.strictEqual(
-    decodeFocus(ADDR.focus("d"), [{ type: "nil", value: null }]),
-    null,
-  );
+  assert.strictEqual(decodeFocus(ADDR.focus("d"), [{ type: "nil", value: null }]), null);
 });
 
 // --- Active document ------------------------------------------------------

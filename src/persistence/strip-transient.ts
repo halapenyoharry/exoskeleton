@@ -17,7 +17,9 @@ export function stripTransientPanels(layout: SerializedDockview): SerializedDock
   // (nested layout); only the `data` form is filtered here.
   const floatingGroups = layout.floatingGroups
     ?.map((g) =>
-      g.data ? { ...g, data: { ...g.data, views: g.data.views.filter((v) => !transient.has(v)) } } : g,
+      g.data
+        ? { ...g, data: { ...g.data, views: g.data.views.filter((v) => !transient.has(v)) } }
+        : g,
     )
     .filter((g) => !g.data || g.data.views.length > 0);
   const out: SerializedDockview = { ...layout, panels };

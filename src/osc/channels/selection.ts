@@ -13,12 +13,7 @@ import { sendOsc, subscribeOsc } from "../index.ts";
 import type { OscArg } from "../types.ts";
 import { getLast, getMostRecent } from "../retainer.ts";
 import { isEcho, registerLocalSource } from "../local-sources.ts";
-import {
-  ADDR,
-  decodeSelection,
-  encodeSelection,
-  type SelectionEvent,
-} from "./codecs.ts";
+import { ADDR, decodeSelection, encodeSelection, type SelectionEvent } from "./codecs.ts";
 
 export type { SelectionEvent };
 
@@ -32,9 +27,7 @@ export function broadcastNodeSelection(
   void sendOsc(ADDR.select(documentId), encodeSelection(nodeId, sourcePanelId, label));
 }
 
-export function onNodeSelectionBroadcast(
-  handler: (event: SelectionEvent) => void,
-): () => void {
+export function onNodeSelectionBroadcast(handler: (event: SelectionEvent) => void): () => void {
   return subscribeOsc(ADDR.selectAny, (address, args) => {
     const event = decodeSelection(address, args);
     if (event === null) return; // malformed, likely off the wire

@@ -52,13 +52,16 @@ function ollamaRelay(): Plugin {
         if (!isLocalNetworkTarget(target)) {
           res.statusCode = 400;
           res.setHeader("content-type", "application/json");
-          res.end(JSON.stringify({ error: `Ollama relay: "${target}" is not a local-network address` }));
+          res.end(
+            JSON.stringify({ error: `Ollama relay: "${target}" is not a local-network address` }),
+          );
           return;
         }
         const controller = new AbortController();
         res.on("close", () => controller.abort()); // browser cancelled
         try {
-          const body = req.method === "GET" || req.method === "HEAD" ? undefined : await readBody(req);
+          const body =
+            req.method === "GET" || req.method === "HEAD" ? undefined : await readBody(req);
           const upstream = await fetch(`${target}${req.url ?? "/"}`, {
             method: req.method,
             headers: { "content-type": "application/json" },

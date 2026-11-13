@@ -27,21 +27,36 @@ const interpolators: Record<string, (t: number) => string> = {
     return `rgb(${r}, ${g}, ${b})`;
   },
   rainbow: (t) => `hsl(${t * 360}, 80%, 60%)`,
-  cool: (t) => `hsl(${180 + t * 60}, 80%, 60%)`
+  cool: (t) => `hsl(${180 + t * 60}, 80%, 60%)`,
 };
 
 class Particle {
-  x: number; y: number; vx: number; vy: number;
-  t: number; life: number; decay: number; baseSize: number; size: number;
-  animSpeed: number; colorScheme: string;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  t: number;
+  life: number;
+  decay: number;
+  baseSize: number;
+  size: number;
+  animSpeed: number;
+  colorScheme: string;
 
-  constructor(x: number, y: number, t: number, animSpeed: number, particleSize: number, colorScheme: string) {
+  constructor(
+    x: number,
+    y: number,
+    t: number,
+    animSpeed: number,
+    particleSize: number,
+    colorScheme: string,
+  ) {
     this.x = x;
     this.y = y;
     this.animSpeed = animSpeed;
     this.colorScheme = colorScheme;
     this.vx = (Math.random() - 0.5) * 6 * animSpeed;
-    this.vy = ((Math.random() * -10) - 2) * animSpeed;
+    this.vy = (Math.random() * -10 - 2) * animSpeed;
     this.t = t;
     this.life = 1.0;
     this.decay = (Math.random() * 0.02 + 0.005) * (1 / animSpeed);
@@ -79,44 +94,54 @@ export default function FountainPanel(props: IDockviewPanelProps<ProceduralSuite
     sources: 1,
     particleSize: 4,
     animSpeed: 1.0,
-    colorScheme: 'viridis'
+    colorScheme: "viridis",
   });
 
   useEffect(() => {
-    const availableAddress = getAvailableAddress(docId, 'fountain');
+    const availableAddress = getAvailableAddress(docId, "fountain");
     retain(availableAddress);
-    sendOsc(availableAddress, [{ type: 'bool', value: true }]);
+    sendOsc(availableAddress, [{ type: "bool", value: true }]);
 
     const unsubPing = subscribeOsc(getPingAddress(docId), () => {
-      sendOsc(availableAddress, [{ type: 'bool', value: true }]);
+      sendOsc(availableAddress, [{ type: "bool", value: true }]);
     });
 
     const unsubs = [
-      subscribeOsc(getControlAddress(docId, 'fountain', 'trailFade'), (_, args) => { configRef.current.trailFade = Number(args[0]?.value ?? 0.2); }),
-      subscribeOsc(getControlAddress(docId, 'fountain', 'sources'), (_, args) => { configRef.current.sources = Number(args[0]?.value ?? 1); }),
-      subscribeOsc(getControlAddress(docId, 'fountain', 'particleSize'), (_, args) => { configRef.current.particleSize = Number(args[0]?.value ?? 4); }),
-      subscribeOsc(getControlAddress(docId, 'fountain', 'animSpeed'), (_, args) => { configRef.current.animSpeed = Number(args[0]?.value ?? 1.0); }),
-      subscribeOsc(getControlAddress(docId, 'fountain', 'colorScheme'), (_, args) => { configRef.current.colorScheme = String(args[0]?.value ?? 'viridis'); }),
+      subscribeOsc(getControlAddress(docId, "fountain", "trailFade"), (_, args) => {
+        configRef.current.trailFade = Number(args[0]?.value ?? 0.2);
+      }),
+      subscribeOsc(getControlAddress(docId, "fountain", "sources"), (_, args) => {
+        configRef.current.sources = Number(args[0]?.value ?? 1);
+      }),
+      subscribeOsc(getControlAddress(docId, "fountain", "particleSize"), (_, args) => {
+        configRef.current.particleSize = Number(args[0]?.value ?? 4);
+      }),
+      subscribeOsc(getControlAddress(docId, "fountain", "animSpeed"), (_, args) => {
+        configRef.current.animSpeed = Number(args[0]?.value ?? 1.0);
+      }),
+      subscribeOsc(getControlAddress(docId, "fountain", "colorScheme"), (_, args) => {
+        configRef.current.colorScheme = String(args[0]?.value ?? "viridis");
+      }),
     ];
 
     return () => {
-      sendOsc(availableAddress, [{ type: 'bool', value: false }]);
+      sendOsc(availableAddress, [{ type: "bool", value: false }]);
       unsubPing();
-      unsubs.forEach(u => u());
+      unsubs.forEach((u) => u());
     };
   }, [docId]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const resize = () => {
       canvas.width = canvas.parentElement?.clientWidth || 800;
       canvas.height = canvas.parentElement?.clientHeight || 600;
     };
-    window.addEventListener('resize', resize);
+    window.addEventListener("resize", resize);
     resize();
 
     let animationFrameId: number;
@@ -133,7 +158,9 @@ export default function FountainPanel(props: IDockviewPanelProps<ProceduralSuite
         const t = (i / (config.sources + 1) + Date.now() / 5000) % 1.0;
         const count = Math.floor(Math.random() * 4) + 2;
         for (let j = 0; j < count; j++) {
-          particlesRef.current.push(new Particle(x, y, t, config.animSpeed, config.particleSize, config.colorScheme));
+          particlesRef.current.push(
+            new Particle(x, y, t, config.animSpeed, config.particleSize, config.colorScheme),
+          );
         }
       }
 
@@ -150,7 +177,7 @@ export default function FountainPanel(props: IDockviewPanelProps<ProceduralSuite
     loop();
 
     return () => {
-      window.removeEventListener('resize', resize);
+      window.removeEventListener("resize", resize);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);

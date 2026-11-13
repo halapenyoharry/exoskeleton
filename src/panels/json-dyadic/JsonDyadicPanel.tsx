@@ -17,11 +17,7 @@ import {
   type ReifiedRelation,
 } from "./parse";
 import { CATEGORY_TOKENS } from "./categories";
-import type {
-  EdgeCategory,
-  RenderableNode,
-  TopoLink,
-} from "./types";
+import type { EdgeCategory, RenderableNode, TopoLink } from "./types";
 import "./JsonDyadicPanel.css";
 
 // ─── params ─────────────────────────────────────────────────────────────
@@ -104,10 +100,7 @@ function NodeTile({
 
 function MissingTile({ id }: { id: string }) {
   return (
-    <div
-      className="dp-tile dp-tile--missing"
-      title={`Referenced id not in nodes: ${id}`}
-    >
+    <div className="dp-tile dp-tile--missing" title={`Referenced id not in nodes: ${id}`}>
       <span className="dp-tile-label">{id}</span>
       <span className="dp-tile-kind">unresolved</span>
     </div>
@@ -146,9 +139,7 @@ function renderContainment({ layer, topology }: RenderArgs) {
               <span className="dp-region-predicate">
                 {link.attrs?.["i2t:predicate"] ?? link.layer}
               </span>
-              {link.label && (
-                <span className="dp-region-note">{link.label}</span>
-              )}
+              {link.label && <span className="dp-region-note">{link.label}</span>}
             </div>
             <NodeTile node={source} role={link.source_role} />
             <div className="dp-containment-nested">
@@ -176,8 +167,7 @@ function ReificationRegion({
   fill: string;
   stroke: string;
 }) {
-  const predicate =
-    relation.attrs?.["i2t:predicate"] ?? relation.attrs?.label ?? relation.id;
+  const predicate = relation.attrs?.["i2t:predicate"] ?? relation.attrs?.label ?? relation.id;
   return (
     <section
       className="dp-region"
@@ -218,10 +208,7 @@ function renderStateChange({ layer, topology }: RenderArgs) {
         const target = topology.nodesById.get(link.target);
         if (!source || !target) return null;
         return (
-          <div
-            key={`${link.source}-${link.target}-${i}`}
-            className="dp-state-pair"
-          >
+          <div key={`${link.source}-${link.target}-${i}`} className="dp-state-pair">
             <NodeTile node={source} role={link.source_role} />
             <div className="dp-state-flow">
               <span className="dp-state-flow-label">
@@ -258,15 +245,11 @@ function StateChangeRegion({
       inputs.push(spoke);
     }
   }
-  const predicate =
-    relation.attrs?.["i2t:predicate"] ?? relation.attrs?.label ?? relation.id;
+  const predicate = relation.attrs?.["i2t:predicate"] ?? relation.attrs?.label ?? relation.id;
   return (
     <section className="dp-state-region" data-reification-id={relation.id}>
       <header className="dp-region-header">
-        <span
-          className="dp-region-predicate"
-          style={{ color: CATEGORY_TOKENS.state_change.color }}
-        >
+        <span className="dp-region-predicate" style={{ color: CATEGORY_TOKENS.state_change.color }}>
           {predicate}
         </span>
         <span className="dp-region-count">
@@ -311,10 +294,7 @@ function renderInteractivity({ layer, topology }: RenderArgs) {
         const target = topology.nodesById.get(link.target);
         if (!source || !target) return null;
         return (
-          <div
-            key={`${link.source}-${link.target}-${i}`}
-            className="dp-interactivity-pair"
-          >
+          <div key={`${link.source}-${link.target}-${i}`} className="dp-interactivity-pair">
             <div className="dp-interactivity-blob dp-interactivity-blob--a">
               <NodeTile node={source} role={link.source_role} />
             </div>
@@ -340,13 +320,9 @@ function InteractivityRegion({
   spokes: TopoLink[];
   topology: ParsedTopology;
 }) {
-  const predicate =
-    relation.attrs?.["i2t:predicate"] ?? relation.attrs?.label ?? relation.id;
+  const predicate = relation.attrs?.["i2t:predicate"] ?? relation.attrs?.label ?? relation.id;
   return (
-    <section
-      className="dp-interactivity-region"
-      data-reification-id={relation.id}
-    >
+    <section className="dp-interactivity-region" data-reification-id={relation.id}>
       <header className="dp-region-header">
         <span
           className="dp-region-predicate"
@@ -384,10 +360,7 @@ function renderReference({ layer, topology }: RenderArgs) {
         const targetLabel = target ? nodeLabel(target) : link.target;
         const predicate = link.attrs?.["i2t:predicate"] ?? link.layer;
         return (
-          <div
-            key={`${link.source}-${link.target}-${i}`}
-            className="dp-reference-row"
-          >
+          <div key={`${link.source}-${link.target}-${i}`} className="dp-reference-row">
             <NodeTile node={source} />
             <span className="dp-reference-tag">
               <span className="dp-reference-predicate">{predicate}</span>
@@ -420,10 +393,7 @@ function renderReference({ layer, topology }: RenderArgs) {
   );
 }
 
-const RENDERERS: Record<
-  EdgeCategory,
-  (args: RenderArgs) => React.ReactElement
-> = {
+const RENDERERS: Record<EdgeCategory, (args: RenderArgs) => React.ReactElement> = {
   containment: renderContainment,
   state_change: renderStateChange,
   interactivity: renderInteractivity,
@@ -432,9 +402,7 @@ const RENDERERS: Record<
 
 // ─── panel ─────────────────────────────────────────────────────────────
 
-export default function JsonDyadicPanel(
-  props: IDockviewPanelProps<JsonDyadicParams>,
-) {
+export default function JsonDyadicPanel(props: IDockviewPanelProps<JsonDyadicParams>) {
   const params: JsonDyadicParams = {
     ...jsonDyadicDefaults,
     ...(props.params ?? {}),
@@ -460,8 +428,7 @@ export default function JsonDyadicPanel(
   // selected layer's tiles hit the DOM), so only the O(N) parse needs
   // guarding against truly enormous documents. Session-only bypass.
   const [bypassPerf, setBypassPerf] = useState(false);
-  const docNodeCount =
-    doc === undefined ? 0 : getDocStats(doc).hierarchyNodeCount;
+  const docNodeCount = doc === undefined ? 0 : getDocStats(doc).hierarchyNodeCount;
   const perfBlocked = docNodeCount > PARSE_THRESHOLD && !bypassPerf;
 
   const topology = useMemo<ParsedTopology>(() => {
@@ -472,10 +439,7 @@ export default function JsonDyadicPanel(
   // surface warnings once per parse (dev console only)
   useEffect(() => {
     if (topology.warnings.length > 0) {
-      console.warn(
-        "[json-dyadic] parse warnings:",
-        topology.warnings,
-      );
+      console.warn("[json-dyadic] parse warnings:", topology.warnings);
     }
   }, [topology]);
 
@@ -540,8 +504,8 @@ export default function JsonDyadicPanel(
         {perfBlocked && (
           <div className="dp-empty">
             <p>
-              <strong>{docNodeCount.toLocaleString()}</strong> JSON nodes
-              (threshold {PARSE_THRESHOLD.toLocaleString()}).
+              <strong>{docNodeCount.toLocaleString()}</strong> JSON nodes (threshold{" "}
+              {PARSE_THRESHOLD.toLocaleString()}).
             </p>
             <button onClick={() => setBypassPerf(true)}>Parse anyway</button>
           </div>
@@ -551,27 +515,15 @@ export default function JsonDyadicPanel(
           <div className="dp-empty">
             <p>Pick a layer to start.</p>
             <p className="dp-empty-sub">
-              {layerOrder.length} layers · {topology.nodesById.size} nodes ·
-              {" "}
+              {layerOrder.length} layers · {topology.nodesById.size} nodes ·{" "}
               {topology.reificationsById.size} reified relations
             </p>
           </div>
         )}
 
-        {selected && (
-          <LayerView
-            layer={selected}
-            topology={topology}
-            primary
-          />
-        )}
+        {selected && <LayerView layer={selected} topology={topology} primary />}
         {overlays.map((overlay) => (
-          <LayerView
-            key={overlay.layer}
-            layer={overlay}
-            topology={topology}
-            primary={false}
-          />
+          <LayerView key={overlay.layer} layer={overlay} topology={topology} primary={false} />
         ))}
 
         {params.showMetadata && topology.metadata && (
@@ -602,10 +554,7 @@ function LayerView({
       data-category={layer.primaryCategory}
     >
       <header className="dp-layer-view-header">
-        <span
-          className="dp-layer-view-dot"
-          style={{ background: tokens.color }}
-        />
+        <span className="dp-layer-view-dot" style={{ background: tokens.color }} />
         <span className="dp-layer-view-name">{layer.layer}</span>
         <span className="dp-layer-view-category">{tokens.label}</span>
         <span className="dp-layer-view-count">{layer.linkCount}</span>
@@ -621,10 +570,7 @@ function CategoryLegend() {
       {(["containment", "state_change", "interactivity", "reference"] as EdgeCategory[]).map(
         (c) => (
           <span key={c} className="dp-legend-item">
-            <span
-              className="dp-legend-dot"
-              style={{ background: CATEGORY_TOKENS[c].color }}
-            />
+            <span className="dp-legend-dot" style={{ background: CATEGORY_TOKENS[c].color }} />
             {CATEGORY_TOKENS[c].label}
           </span>
         ),

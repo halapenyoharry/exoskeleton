@@ -6,7 +6,11 @@ import { registerPanes } from "../panes-registry.ts";
 
 export const editorPanes: PanelPane[] = [
   {
-    id: "file", kind: "pane", icon: "◆", label: "file", tooltip: "Open and save the file",
+    id: "file",
+    kind: "pane",
+    icon: "◆",
+    label: "file",
+    tooltip: "Open and save the file",
     body: {
       layout: "grid",
       cells: [

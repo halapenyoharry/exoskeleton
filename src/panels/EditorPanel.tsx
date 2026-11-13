@@ -79,7 +79,10 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
       if (!result) return;
       if (result.method === "dialog") rememberPath(result.path);
       setDirty(false);
-      show("ok", result.method === "dialog" ? `Saved to ${result.path}` : `Downloaded ${result.path}`);
+      show(
+        "ok",
+        result.method === "dialog" ? `Saved to ${result.path}` : `Downloaded ${result.path}`,
+      );
     } catch (err) {
       show("error", errorText(err));
     }
@@ -95,7 +98,10 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
   const actions = {
     openFile,
     newFile,
-    saveFile: () => { if (!dirty && path) return; return saveFile(); },
+    saveFile: () => {
+      if (!dirty && path) return;
+      return saveFile();
+    },
     saveAs: () => saveFile(true),
   };
   const actionsRef = useRef(actions);
@@ -125,7 +131,8 @@ export default function EditorPanel(props: IDockviewPanelProps<EditorParams>) {
           visible when the toolbar is replaced by header actions. */}
       <div className="editor-status">
         <span style={{ flex: 1, color: "#4a6a78", fontStyle: dirty ? "italic" : "normal" }}>
-          {path ?? "untitled"}{dirty ? " •" : ""}
+          {path ?? "untitled"}
+          {dirty ? " •" : ""}
         </span>
         {flash && (
           <span

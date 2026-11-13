@@ -80,10 +80,7 @@ test("getMostRecent picks the latest write across documents", () => {
   // Re-writing an older address makes it most recent again — recency is by
   // write, not by address.
   retainIfRegistered("/json/a/select", s("from-a-again"));
-  assert.deepStrictEqual(getMostRecent("/json/*/select"), [
-    "/json/a/select",
-    s("from-a-again"),
-  ]);
+  assert.deepStrictEqual(getMostRecent("/json/*/select"), ["/json/a/select", s("from-a-again")]);
 });
 
 test("getMostRecent is undefined when nothing matches", () => {

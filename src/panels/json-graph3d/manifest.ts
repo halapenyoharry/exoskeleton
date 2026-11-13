@@ -1,8 +1,5 @@
 import type { PanelManifest } from "../../panel-manifest";
-import JsonGraph3DPanel, {
-  jsonGraph3DDefaults,
-  type JsonGraph3DParams,
-} from "./JsonGraph3DPanel";
+import JsonGraph3DPanel, { jsonGraph3DDefaults, type JsonGraph3DParams } from "./JsonGraph3DPanel";
 
 const manifest: PanelManifest<JsonGraph3DParams> = {
   id: "json-graph3d",

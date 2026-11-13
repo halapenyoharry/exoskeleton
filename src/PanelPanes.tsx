@@ -23,7 +23,15 @@
 // context below crosses every boundary intact; all state stays in the
 // panel's params.
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   DockviewDefaultTab,
   DockviewReact,
@@ -45,7 +53,13 @@ import {
 import { registerPanesVisibility, setPanesVisible } from "./panes-visibility";
 import { PanelMenuButton } from "./PanelMenuButton";
 import { Segmented, SwatchPicker, Toggle } from "./components/toolbar/Toolbar";
-import { getOptions, onOptions, getText, onText, type RuntimeOption } from "./chrome/runtime-options";
+import {
+  getOptions,
+  onOptions,
+  getText,
+  onText,
+  type RuntimeOption,
+} from "./chrome/runtime-options";
 import { emitPanelMenu } from "./panel-menu";
 import type { PaneCell, PanelPane } from "./panel-manifest";
 import pkg from "../package.json";
@@ -93,10 +107,25 @@ function useCellOptions(panelId: string, cell: PaneCell): RuntimeOption[] {
   return (cell.options ?? []).map((o) => ({ value: o.value, label: o.label ?? o.value }));
 }
 
-function SelectCell({ panelId, cell, value, onChange }: { panelId: string; cell: PaneCell; value: unknown; onChange: (v: unknown) => void }) {
+function SelectCell({
+  panelId,
+  cell,
+  value,
+  onChange,
+}: {
+  panelId: string;
+  cell: PaneCell;
+  value: unknown;
+  onChange: (v: unknown) => void;
+}) {
   const opts = useCellOptions(panelId, cell);
   const tip = cell.tooltip ?? cell.label;
-  if (opts.length === 0) return <span className="pp-dim" title={tip}>no {cell.label}s</span>;
+  if (opts.length === 0)
+    return (
+      <span className="pp-dim" title={tip}>
+        no {cell.label}s
+      </span>
+    );
   const cur = value == null ? "" : String(value);
   if (opts.length <= 4) {
     return (
@@ -110,9 +139,19 @@ function SelectCell({ panelId, cell, value, onChange }: { panelId: string; cell:
     );
   }
   return (
-    <select className="pp-select" aria-label={cell.label} title={tip} value={cur} onChange={(e) => onChange(e.target.value || null)}>
+    <select
+      className="pp-select"
+      aria-label={cell.label}
+      title={tip}
+      value={cur}
+      onChange={(e) => onChange(e.target.value || null)}
+    >
       {!opts.some((o) => o.value === cur) && <option value="">{"— pick —"}</option>}
-      {opts.map((o) => <option key={o.value} value={o.value} title={o.title}>{o.label}</option>)}
+      {opts.map((o) => (
+        <option key={o.value} value={o.value} title={o.title}>
+          {o.label}
+        </option>
+      ))}
     </select>
   );
 }
@@ -151,7 +190,17 @@ function MenuCell({ cell }: { cell: PaneCell }) {
   );
 }
 
-function CellView({ panelId, cell, value, onChange }: { panelId: string; cell: PaneCell; value: unknown; onChange: (v: unknown) => void }) {
+function CellView({
+  panelId,
+  cell,
+  value,
+  onChange,
+}: {
+  panelId: string;
+  cell: PaneCell;
+  value: unknown;
+  onChange: (v: unknown) => void;
+}) {
   const tip = cell.tooltip ?? cell.label;
   const numeric = typeof value === "number";
   const coerce = (s: string) => (numeric ? Number(s) : s);
@@ -180,7 +229,12 @@ function CellView({ panelId, cell, value, onChange }: { panelId: string; cell: P
           title={tip}
           value={String(value)}
           onChange={(v) => onChange(coerce(v))}
-          options={(cell.options ?? []).map((o) => ({ value: o.value, label: o.label ?? o.value, icon: o.icon, title: o.label ?? o.value }))}
+          options={(cell.options ?? []).map((o) => ({
+            value: o.value,
+            label: o.label ?? o.value,
+            icon: o.icon,
+            title: o.label ?? o.value,
+          }))}
         />
       );
     case "select":
@@ -194,18 +248,35 @@ function CellView({ panelId, cell, value, onChange }: { panelId: string; cell: P
           title={tip}
           value={String(value)}
           onChange={(v) => onChange(coerce(v))}
-          options={(cell.options ?? []).map((o) => ({ value: o.value, color: o.color ?? o.value, title: o.label ?? o.value }))}
+          options={(cell.options ?? []).map((o) => ({
+            value: o.value,
+            color: o.color ?? o.value,
+            title: o.label ?? o.value,
+          }))}
         />
       );
     case "stepper": {
       const step = cell.step ?? 1;
       const n = typeof value === "number" ? value : 0;
-      const clamp = (x: number) => Math.min(cell.max ?? Infinity, Math.max(cell.min ?? -Infinity, x));
+      const clamp = (x: number) =>
+        Math.min(cell.max ?? Infinity, Math.max(cell.min ?? -Infinity, x));
       return (
         <div className="pp-stepper" title={tip} role="group" aria-label={cell.label}>
-          <button type="button" aria-label={`decrease ${cell.label}`} onClick={() => onChange(clamp(n - step))}>−</button>
+          <button
+            type="button"
+            aria-label={`decrease ${cell.label}`}
+            onClick={() => onChange(clamp(n - step))}
+          >
+            −
+          </button>
           <output>{n}</output>
-          <button type="button" aria-label={`increase ${cell.label}`} onClick={() => onChange(clamp(n + step))}>+</button>
+          <button
+            type="button"
+            aria-label={`increase ${cell.label}`}
+            onClick={() => onChange(clamp(n + step))}
+          >
+            +
+          </button>
         </div>
       );
     }
@@ -226,13 +297,32 @@ function CellView({ panelId, cell, value, onChange }: { panelId: string; cell: P
   }
 }
 
-function Cell({ panelId, cell, params, write }: { panelId: string; cell: PaneCell; params: Params; write: (p: Params) => void }) {
+function Cell({
+  panelId,
+  cell,
+  params,
+  write,
+}: {
+  panelId: string;
+  cell: PaneCell;
+  params: Params;
+  write: (p: Params) => void;
+}) {
   const bare = cell.type === "action" || cell.type === "text" || cell.type === "menu";
   const param = cell.param ?? "";
   return (
     <div className={bare ? "pp-cell pp-cell--bare" : "pp-cell"}>
-      {!bare && <span className="pp-cell-caption" title={cell.tooltip}>{cell.label}</span>}
-      <CellView panelId={panelId} cell={cell} value={param ? params[param] : undefined} onChange={(v) => param && write({ [param]: v })} />
+      {!bare && (
+        <span className="pp-cell-caption" title={cell.tooltip}>
+          {cell.label}
+        </span>
+      )}
+      <CellView
+        panelId={panelId}
+        cell={cell}
+        value={param ? params[param] : undefined}
+        onChange={(v) => param && write({ [param]: v })}
+      />
     </div>
   );
 }
@@ -247,39 +337,86 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 }
 
 /** The ⚙ "pane" section every panel gets: window, move, follow, accent, about. */
-function PaneSettings({ api, containerApi, params, write, about }: { api: DockviewPanelApi; containerApi: DockviewApi; params: Params; write: (x: Params) => void; about?: { description?: string; docs?: string } }) {
+function PaneSettings({
+  api,
+  containerApi,
+  params,
+  write,
+  about,
+}: {
+  api: DockviewPanelApi;
+  containerApi: DockviewApi;
+  params: Params;
+  write: (x: Params) => void;
+  about?: { description?: string; docs?: string };
+}) {
   const [maxed, setMaxed] = useState(() => api.group.api.isMaximized());
-  const others = containerApi.groups.filter((g) => g.id !== api.group.id && g.api.location.type === "grid");
+  const others = containerApi.groups.filter(
+    (g) => g.id !== api.group.id && g.api.location.type === "grid",
+  );
   const accent = typeof params.accent === "string" ? params.accent : ACCENTS[0];
   return (
     <div className="pp-stack">
       <Row label="Window">
-        <button type="button" className="pp-btn" onClick={() => {
-          if (maxed) api.group.api.exitMaximized(); else api.group.api.maximize();
-          setMaxed(!maxed);
-        }}>{maxed ? "Restore" : "Maximize"}</button>
-        <button type="button" className="pp-btn pp-btn--popout" onClick={() => containerApi.addPopoutGroup(api.group)}>Pop out</button>
+        <button
+          type="button"
+          className="pp-btn"
+          onClick={() => {
+            if (maxed) api.group.api.exitMaximized();
+            else api.group.api.maximize();
+            setMaxed(!maxed);
+          }}
+        >
+          {maxed ? "Restore" : "Maximize"}
+        </button>
+        <button
+          type="button"
+          className="pp-btn pp-btn--popout"
+          onClick={() => containerApi.addPopoutGroup(api.group)}
+        >
+          Pop out
+        </button>
       </Row>
       <Row label="Move to…">
         {others.length === 0 && <span className="pp-dim">no other groups</span>}
         {others.map((g, i) => (
-          <button key={g.id} type="button" className="pp-btn" title={`Move into group ${g.id}`}
-            onClick={() => api.moveTo({ group: g, position: "center" })}>
+          <button
+            key={g.id}
+            type="button"
+            className="pp-btn"
+            title={`Move into group ${g.id}`}
+            onClick={() => api.moveTo({ group: g, position: "center" })}
+          >
             {g.activePanel?.title ?? g.panels[0]?.title ?? `group ${i + 1}`}
           </button>
         ))}
       </Row>
       <Row label="Follow active document">
-        <Toggle label="follow" title="Follow the active document in the editor" checked={params.followActive !== false} onChange={(v) => write({ followActive: v })} />
+        <Toggle
+          label="follow"
+          title="Follow the active document in the editor"
+          checked={params.followActive !== false}
+          onChange={(v) => write({ followActive: v })}
+        />
       </Row>
       <Row label="Accent">
-        <SwatchPicker<string> label="Accent" value={accent} onChange={(v) => write({ accent: v })}
-          options={ACCENTS.map((c) => ({ value: c, color: c, title: c }))} />
+        <SwatchPicker<string>
+          label="Accent"
+          value={accent}
+          onChange={(v) => write({ accent: v })}
+          options={ACCENTS.map((c) => ({ value: c, color: c, title: c }))}
+        />
       </Row>
       <div className="pp-about">
         <div className="pp-about-title">About</div>
         {about?.description && <p>{about.description}</p>}
-        {about?.docs && <p><a href={about.docs} target="_blank" rel="noreferrer">Docs</a></p>}
+        {about?.docs && (
+          <p>
+            <a href={about.docs} target="_blank" rel="noreferrer">
+              Docs
+            </a>
+          </p>
+        )}
         <p className="pp-dim">Exoskeleton v{pkg.version}</p>
       </div>
     </div>
@@ -323,14 +460,28 @@ function ControlsTab(props: IDockviewPanelProps<{ paneId: string }>) {
   const id = props.params.paneId;
   let inner: ReactNode = null;
   if (id === SETTINGS_ID) {
-    inner = <PaneSettings api={api} containerApi={containerApi} params={params} write={write} about={about} />;
+    inner = (
+      <PaneSettings
+        api={api}
+        containerApi={containerApi}
+        params={params}
+        write={write}
+        about={about}
+      />
+    );
   } else {
     const pane = panes.find((p) => p.id === id);
     if (pane?.body) {
       inner = (
         <div className={pane.body.layout === "grid" ? "pp-grid" : "pp-stack"}>
           {pane.body.cells.map((c, i) => (
-            <Cell key={c.param ?? c.action ?? c.textFrom ?? i} panelId={panelId} cell={c} params={params} write={write} />
+            <Cell
+              key={c.param ?? c.action ?? c.textFrom ?? i}
+              panelId={panelId}
+              cell={c}
+              params={params}
+              write={write}
+            />
           ))}
         </div>
       );
@@ -357,25 +508,39 @@ function ControlsPane(_props: IPaneviewPanelProps<{ paneId: string }>) {
   const onReady = (e: DockviewReadyEvent) => {
     const { panes, api: panelApi, settingsPane } = ctx;
     const sets = panes.filter((p) => p.kind === "pane");
-    const titleCase = (t: string) => t.replace(/(^|[\s-])([a-z])/g, (_m, pre: string, c: string) => pre + c.toUpperCase());
+    const titleCase = (t: string) =>
+      t.replace(/(^|[\s-])([a-z])/g, (_m, pre: string, c: string) => pre + c.toUpperCase());
     for (const p of sets) {
-      e.api.addPanel({ id: p.id, component: "controls", title: ctx.plain ? titleCase(p.label) : p.label, params: { paneId: p.id } });
+      e.api.addPanel({
+        id: p.id,
+        component: "controls",
+        title: ctx.plain ? titleCase(p.label) : p.label,
+        params: { paneId: p.id },
+      });
     }
     if (settingsPane) {
-      e.api.addPanel({ id: SETTINGS_ID, component: "controls", title: SETTINGS_TITLE, params: { paneId: SETTINGS_ID } });
+      e.api.addPanel({
+        id: SETTINGS_ID,
+        component: "controls",
+        title: SETTINGS_TITLE,
+        params: { paneId: SETTINGS_ID },
+      });
     }
     // Tab groups: tabs sharing a declared label sit under one chip.
     const group = e.api.groups[0];
     if (group) {
       const byLabel = new Map<string, string[]>();
-      for (const p of sets) if (p.tabGroup) byLabel.set(p.tabGroup, [...(byLabel.get(p.tabGroup) ?? []), p.id]);
+      for (const p of sets)
+        if (p.tabGroup) byLabel.set(p.tabGroup, [...(byLabel.get(p.tabGroup) ?? []), p.id]);
       for (const [label, ids] of byLabel) {
         const tg = e.api.createTabGroup({ groupId: group.id, label });
-        for (const id of ids) e.api.addPanelToTabGroup({ groupId: group.id, tabGroupId: tg.id, panelId: id });
+        for (const id of ids)
+          e.api.addPanelToTabGroup({ groupId: group.id, tabGroupId: tg.id, panelId: id });
       }
     }
     const remembered = panelApi.getParameters().controlsTab as string | undefined;
-    const first = remembered && e.api.getPanel(remembered) ? remembered : sets[0]?.id ?? SETTINGS_ID;
+    const first =
+      remembered && e.api.getPanel(remembered) ? remembered : (sets[0]?.id ?? SETTINGS_ID);
     e.api.getPanel(first)?.api.setActive();
     e.api.onDidActivePanelChange((ev) => {
       if (ev.panel) panelApi.updateParameters({ controlsTab: ev.panel.id });
@@ -418,7 +583,9 @@ function PanesCell(props: ISplitviewPanelProps) {
       total += PANE_HEADER;
       if (p.id === CONTROLS_ID && p.api.isExpanded) {
         const active = ctx?.bridge.nestedApi?.activePanel?.id;
-        const body = active ? host.querySelector<HTMLElement>(`[data-controls-tab="${active}"]`) : null;
+        const body = active
+          ? host.querySelector<HTMLElement>(`[data-controls-tab="${active}"]`)
+          : null;
         total += NESTED_STRIP + (body ? body.scrollHeight : 0);
       }
     }
@@ -482,7 +649,8 @@ function PanesCell(props: ISplitviewPanelProps) {
         params: { paneId: CONTROLS_ID },
       });
       controls.api.onDidExpansionChange((ev) => {
-        const cur = (ctx.api.getParameters().panesExpanded as Record<string, boolean> | undefined) ?? {};
+        const cur =
+          (ctx.api.getParameters().panesExpanded as Record<string, boolean> | undefined) ?? {};
         ctx.api.updateParameters({ panesExpanded: { ...cur, [CONTROLS_ID]: ev.isExpanded } });
         ctx.setControlsFolded(!ev.isExpanded);
         fit();
@@ -535,11 +703,23 @@ export interface PanelPanesProps {
   children: ReactNode;
 }
 
-export function PanelPanes({ panelId, api, containerApi, panes, titlePane, settingsPane = true, about, children }: PanelPanesProps) {
+export function PanelPanes({
+  panelId,
+  api,
+  containerApi,
+  panes,
+  titlePane,
+  settingsPane = true,
+  about,
+  children,
+}: PanelPanesProps) {
   const [params, write] = useParams(api);
   const unregisterRef = useRef<(() => void) | null>(null);
   useEffect(() => () => unregisterRef.current?.(), []);
-  const bridge = useRef<{ nestedApi: DockviewApi | null; onChange: () => void }>({ nestedApi: null, onChange: () => {} }).current;
+  const bridge = useRef<{ nestedApi: DockviewApi | null; onChange: () => void }>({
+    nestedApi: null,
+    onChange: () => {},
+  }).current;
   // Panels in an edge group never get the "Pane" tab, and only get a
   // Controls section when they declare panes of their own (e.g. JSON Edit).
   const inEdge = !!titlePane || api.location?.type === "edge";
@@ -554,8 +734,20 @@ export function PanelPanes({ panelId, api, containerApi, panes, titlePane, setti
     const titleOnlySize = titlePane ? PANE_HEADER : 0;
     const top = e.api.addPanel(
       hasControls
-        ? { id: "panes", component: "panes", minimumSize: PANE_HEADER, snap: true, size: PANE_HEADER * 2 + 35 + 60 }
-        : { id: "panes", component: "panes", minimumSize: titleOnlySize, maximumSize: titleOnlySize, size: titleOnlySize },
+        ? {
+            id: "panes",
+            component: "panes",
+            minimumSize: PANE_HEADER,
+            snap: true,
+            size: PANE_HEADER * 2 + 35 + 60,
+          }
+        : {
+            id: "panes",
+            component: "panes",
+            minimumSize: titleOnlySize,
+            maximumSize: titleOnlySize,
+            size: titleOnlySize,
+          },
     );
     e.api.addPanel({ id: "content", component: "content", priority: LayoutPriority.High });
     // Snapped away → a restore button in the group's header actions.
@@ -588,7 +780,12 @@ export function PanelPanes({ panelId, api, containerApi, panes, titlePane, setti
       }}
     >
       <div className="pp-root" data-controls-folded={controlsFolded ? "true" : "false"}>
-        <SplitviewReact className={themeGithubDark.className} orientation={Orientation.VERTICAL} components={components} onReady={onReady} />
+        <SplitviewReact
+          className={themeGithubDark.className}
+          orientation={Orientation.VERTICAL}
+          components={components}
+          onReady={onReady}
+        />
       </div>
     </PanelPanesCtx.Provider>
   );

@@ -15,12 +15,14 @@ const LEGACY_KEY = "exoskeleton.state";
 export const webStorage: Storage = {
   async load(): Promise<AppStateV8 | null> {
     try {
-      const text =
-        window.localStorage.getItem(KEY) ?? window.localStorage.getItem(LEGACY_KEY);
+      const text = window.localStorage.getItem(KEY) ?? window.localStorage.getItem(LEGACY_KEY);
       if (text === null) return null;
       const raw = JSON.parse(text);
       if (!isCompatible(raw)) {
-        console.warn("[exoskeleton] saved state has incompatible version, falling back to defaults", raw);
+        console.warn(
+          "[exoskeleton] saved state has incompatible version, falling back to defaults",
+          raw,
+        );
         return null;
       }
       return migrateToV8(raw as AppState);

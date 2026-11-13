@@ -10,7 +10,8 @@ import {
 export const proceduralVisualsSuite: SuiteManifest = {
   id: "procedural-visuals",
   title: "Procedural Visuals Lab",
-  description: "Suite of dynamic algorithmic visualizers and 3D manifolds driven by a central OSC control hub.",
+  description:
+    "Suite of dynamic algorithmic visualizers and 3D manifolds driven by a central OSC control hub.",
   accent: "#f5a623",
   glyph: "▦",
   oscPrefix: "/procedural-suite",

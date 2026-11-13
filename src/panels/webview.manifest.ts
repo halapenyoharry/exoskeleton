@@ -8,8 +8,7 @@ const manifest: PanelManifest<LanWebviewParams> = {
   title: "webview",
   toolbar: true,
   component: LanWebview,
-  description:
-    "Iframe with a URL bar, for LAN HTTP services and other iframe-friendly surfaces.",
+  description: "Iframe with a URL bar, for LAN HTTP services and other iframe-friendly surfaces.",
 
   accent: "#6dffaa",
   glyph: "◯",

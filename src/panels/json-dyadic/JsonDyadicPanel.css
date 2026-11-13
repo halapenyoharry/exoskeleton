@@ -313,14 +313,13 @@
 .dp-state-region {
   border: 1px solid rgba(24, 255, 255, 0.25);
   border-radius: 12px;
-  background:
-    linear-gradient(
-      to right,
-      rgba(24, 255, 255, 0.18) 0%,
-      rgba(24, 255, 255, 0.06) 35%,
-      rgba(255, 107, 157, 0.05) 65%,
-      rgba(255, 107, 157, 0.20) 100%
-    );
+  background: linear-gradient(
+    to right,
+    rgba(24, 255, 255, 0.18) 0%,
+    rgba(24, 255, 255, 0.06) 35%,
+    rgba(255, 107, 157, 0.05) 65%,
+    rgba(255, 107, 157, 0.2) 100%
+  );
   padding: 14px;
 }
 
@@ -337,8 +336,12 @@
   gap: 8px;
 }
 
-.dp-state-side--from { justify-content: flex-start; }
-.dp-state-side--to   { justify-content: flex-end; }
+.dp-state-side--from {
+  justify-content: flex-start;
+}
+.dp-state-side--to {
+  justify-content: flex-end;
+}
 
 .dp-state-pair {
   display: grid;
@@ -356,8 +359,12 @@
   );
 }
 
-.dp-state-pair > .dp-tile:first-child { justify-self: start; }
-.dp-state-pair > .dp-tile:last-child  { justify-self: end; }
+.dp-state-pair > .dp-tile:first-child {
+  justify-self: start;
+}
+.dp-state-pair > .dp-tile:last-child {
+  justify-self: end;
+}
 
 .dp-state-flow {
   display: flex;
@@ -389,13 +396,12 @@
   position: relative;
   border-radius: 14px;
   padding: 14px;
-  background:
-    radial-gradient(
-      ellipse at center,
-      rgba(255, 179, 0, 0.22) 0%,
-      rgba(255, 179, 0, 0.08) 55%,
-      rgba(255, 179, 0, 0) 100%
-    );
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 179, 0, 0.22) 0%,
+    rgba(255, 179, 0, 0.08) 55%,
+    rgba(255, 179, 0, 0) 100%
+  );
 }
 
 .dp-interactivity-region-body {
@@ -418,7 +424,7 @@
   background: radial-gradient(
     circle at center,
     rgba(255, 179, 0, 0.45) 0%,
-    rgba(255, 179, 0, 0.0) 70%
+    rgba(255, 179, 0, 0) 70%
   );
   mix-blend-mode: screen;
   pointer-events: none;
@@ -537,4 +543,8 @@
   padding: 4px 6px;
 }
 
-.dp-doc { padding: 2px 8px; font-size: 11px; color: #5a7080; }
+.dp-doc {
+  padding: 2px 8px;
+  font-size: 11px;
+  color: #5a7080;
+}

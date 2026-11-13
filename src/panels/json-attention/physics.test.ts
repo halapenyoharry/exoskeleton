@@ -31,7 +31,10 @@ test("bodies integrate without blowing up and the heavy node ends nearest the ce
   const byId = new Map(view.map((v) => [v.id, v]));
   const hubD = Math.hypot(byId.get("hub")!.x, byId.get("hub")!.y);
   const farD = Math.hypot(byId.get("far1")!.x, byId.get("far1")!.y);
-  assert.ok(hubD < farD, `hub (${hubD.toFixed(1)}) should sit nearer the centre than the island (${farD.toFixed(1)})`);
+  assert.ok(
+    hubD < farD,
+    `hub (${hubD.toFixed(1)}) should sit nearer the centre than the island (${farD.toFixed(1)})`,
+  );
   world.dispose();
 });
 

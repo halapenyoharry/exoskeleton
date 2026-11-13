@@ -1,15 +1,20 @@
 import { test } from "node:test";
 import assert from "node:assert";
-import {
-  serializeWorkspaceDocument,
-  parseWorkspaceDocument,
-} from "./workspace-file.ts";
+import { serializeWorkspaceDocument, parseWorkspaceDocument } from "./workspace-file.ts";
 import type { Workspace } from "./storage.ts";
 
 const mockWorkspace: Workspace = {
   id: "ws-test-123",
   name: "Audio Visualizer Workspace",
-  layout: { grid: { root: { type: "branch", data: [] }, height: 100, width: 100, orientation: "HORIZONTAL" }, panels: {} } as any,
+  layout: {
+    grid: {
+      root: { type: "branch", data: [] },
+      height: 100,
+      width: 100,
+      orientation: "HORIZONTAL",
+    },
+    panels: {},
+  } as any,
   updatedAt: 1700000000000,
 };
 
@@ -39,7 +44,10 @@ test("parseWorkspaceDocument rejects wrong document type", () => {
     version: 8,
     workspace: mockWorkspace,
   });
-  assert.throws(() => parseWorkspaceDocument(invalidType), /Not an Exoskeleton workspace document/i);
+  assert.throws(
+    () => parseWorkspaceDocument(invalidType),
+    /Not an Exoskeleton workspace document/i,
+  );
 });
 
 test("parseWorkspaceDocument rejects missing or invalid workspace payload", () => {
@@ -62,7 +70,12 @@ test("parseWorkspaceDocument strips filePath from every panel's params", () => {
     id: "ws-test-456",
     name: "Has local paths",
     layout: {
-      grid: { root: { type: "branch", data: [] }, height: 100, width: 100, orientation: "HORIZONTAL" },
+      grid: {
+        root: { type: "branch", data: [] },
+        height: 100,
+        width: 100,
+        orientation: "HORIZONTAL",
+      },
       panels: {
         "json-edit-1": {
           id: "json-edit-1",
@@ -144,13 +157,26 @@ test("workspace documents round-trip an optional mobileLayout and strip secrets 
     ...mockWorkspace,
     mobileLayout: {
       grid: { root: { type: "branch", data: [] }, height: 1, width: 1, orientation: "HORIZONTAL" },
-      panels: { t: { id: "t", contentComponent: "topology-extract", params: { apiKey: "sk-secret", keep: 1 } } },
+      panels: {
+        t: {
+          id: "t",
+          contentComponent: "topology-extract",
+          params: { apiKey: "sk-secret", keep: 1 },
+        },
+      },
     },
   } as any as Workspace;
   const parsed = parseWorkspaceDocument(serializeWorkspaceDocument(withDeck));
   assert.deepStrictEqual((parsed.mobileLayout as any).panels.t.params, { keep: 1 });
   assert.throws(
-    () => parseWorkspaceDocument(JSON.stringify({ type: "exoskeleton-workspace", version: 8, workspace: { ...mockWorkspace, mobileLayout: 5 } })),
+    () =>
+      parseWorkspaceDocument(
+        JSON.stringify({
+          type: "exoskeleton-workspace",
+          version: 8,
+          workspace: { ...mockWorkspace, mobileLayout: 5 },
+        }),
+      ),
     /mobileLayout/,
   );
   // absent stays absent
@@ -163,21 +189,49 @@ const docEdgeWorkspace = (): Workspace => ({
   id: "ws-doc-edge",
   name: "With a document edge",
   layout: {
-    grid: { root: { type: "branch", data: [] }, height: 100, width: 100, orientation: "HORIZONTAL" },
+    grid: {
+      root: { type: "branch", data: [] },
+      height: 100,
+      width: 100,
+      orientation: "HORIZONTAL",
+    },
     panels: {
-      "json-edit": { id: "json-edit", contentComponent: "json-edit", params: { documentId: "doc-7", theme: "midnight-alaska" } },
+      "json-edit": {
+        id: "json-edit",
+        contentComponent: "json-edit",
+        params: { documentId: "doc-7", theme: "midnight-alaska" },
+      },
       settings: { id: "settings", contentComponent: "settings" },
     },
     edgeGroups: {
-      left: { size: 410, visible: true, collapsed: true, group: { id: "document-edge", views: ["json-edit"], activeView: "json-edit" } },
-      right: { size: 320, visible: true, group: { id: "side-grid", views: ["settings"], activeView: "settings" } },
+      left: {
+        size: 410,
+        visible: true,
+        collapsed: true,
+        group: { id: "document-edge", views: ["json-edit"], activeView: "json-edit" },
+      },
+      right: {
+        size: 320,
+        visible: true,
+        group: { id: "side-grid", views: ["settings"], activeView: "settings" },
+      },
     },
   } as any,
   mobileLayout: {
-    grid: { root: { type: "branch", data: [] }, height: 100, width: 100, orientation: "HORIZONTAL" },
+    grid: {
+      root: { type: "branch", data: [] },
+      height: 100,
+      width: 100,
+      orientation: "HORIZONTAL",
+    },
     panels: { "json-edit": { id: "json-edit", contentComponent: "json-edit" } },
     edgeGroups: {
-      left: { size: 275, visible: true, collapsed: true, group: { id: "document-edge", views: ["json-edit"], activeView: "json-edit" } },
+      left: {
+        size: 275,
+        visible: true,
+        collapsed: true,
+        group: { id: "document-edge", views: ["json-edit"], activeView: "json-edit" },
+      },
     },
   } as any,
   updatedAt: 1700000000000,
@@ -196,12 +250,33 @@ test("parseWorkspaceDocument rejects malformed edgeGroups in layout or mobileLay
     mutate(ws);
     return JSON.stringify({ type: "exoskeleton-workspace", version: 8, workspace: ws });
   };
-  assert.throws(() => parseWorkspaceDocument(doc((ws) => (ws.layout.edgeGroups = "left"))), /layout\.edgeGroups is malformed/);
-  assert.throws(() => parseWorkspaceDocument(doc((ws) => (ws.layout.edgeGroups.left.size = "wide"))), /"left" is malformed/);
-  assert.throws(() => parseWorkspaceDocument(doc((ws) => delete ws.layout.edgeGroups.left.visible)), /"left" is malformed/);
-  assert.throws(() => parseWorkspaceDocument(doc((ws) => (ws.layout.edgeGroups.left.collapsed = "yes"))), /"left" is malformed/);
-  assert.throws(() => parseWorkspaceDocument(doc((ws) => (ws.layout.edgeGroups.left.group.views = [7]))), /group is malformed/);
-  assert.throws(() => parseWorkspaceDocument(doc((ws) => (ws.layout.edgeGroups.middle = { size: 1, visible: true }))), /unknown position/);
+  assert.throws(
+    () => parseWorkspaceDocument(doc((ws) => (ws.layout.edgeGroups = "left"))),
+    /layout\.edgeGroups is malformed/,
+  );
+  assert.throws(
+    () => parseWorkspaceDocument(doc((ws) => (ws.layout.edgeGroups.left.size = "wide"))),
+    /"left" is malformed/,
+  );
+  assert.throws(
+    () => parseWorkspaceDocument(doc((ws) => delete ws.layout.edgeGroups.left.visible)),
+    /"left" is malformed/,
+  );
+  assert.throws(
+    () => parseWorkspaceDocument(doc((ws) => (ws.layout.edgeGroups.left.collapsed = "yes"))),
+    /"left" is malformed/,
+  );
+  assert.throws(
+    () => parseWorkspaceDocument(doc((ws) => (ws.layout.edgeGroups.left.group.views = [7]))),
+    /group is malformed/,
+  );
+  assert.throws(
+    () =>
+      parseWorkspaceDocument(
+        doc((ws) => (ws.layout.edgeGroups.middle = { size: 1, visible: true })),
+      ),
+    /unknown position/,
+  );
   assert.throws(
     () => parseWorkspaceDocument(doc((ws) => (ws.mobileLayout.edgeGroups.left.group = null))),
     /mobileLayout\.edgeGroups "left"\.group is malformed/,

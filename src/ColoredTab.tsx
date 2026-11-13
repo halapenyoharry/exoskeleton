@@ -175,10 +175,7 @@ export default function ColoredTab(props: IDockviewPanelHeaderProps) {
       }}
       onClick={onClick}
     >
-      <DockviewDefaultTab
-        {...props}
-        hideClose={isDocEdge}
-      />
+      <DockviewDefaultTab {...props} hideClose={isDocEdge} />
     </div>
   );
 }

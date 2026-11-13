@@ -65,7 +65,13 @@ test("store listeners see sets and deletes; hydrate does not echo or overwrite",
   const off = onJsonStore((e) => events.push(e));
   setJson("lib-d", { live: true });
   deleteJson("lib-d");
-  assert.deepStrictEqual(events.map((e) => [e.type, e.id]), [["set", "lib-d"], ["delete", "lib-d"]]);
+  assert.deepStrictEqual(
+    events.map((e) => [e.type, e.id]),
+    [
+      ["set", "lib-d"],
+      ["delete", "lib-d"],
+    ],
+  );
 
   setJson("lib-e", { live: true });
   events.length = 0;

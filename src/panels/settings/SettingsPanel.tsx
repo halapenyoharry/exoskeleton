@@ -74,9 +74,7 @@ export default function SettingsPanel(props: Partial<IDockviewPanelProps> = {}) 
       dirtyRef.current = false;
       setDirty(false);
       setError(null);
-      window.dispatchEvent(
-        new CustomEvent("exoskeleton:state-applied", { detail: parsed }),
-      );
+      window.dispatchEvent(new CustomEvent("exoskeleton:state-applied", { detail: parsed }));
     } catch (e) {
       setError((e as Error).message);
     }

@@ -41,13 +41,9 @@ export function isRelationRow(kind: GraphNode["kind"] | undefined): boolean {
   return kind === "hyperedge" || kind === "edge-as-node";
 }
 
-function categoryFromAttrs(
-  attrs: Record<string, unknown> | undefined,
-): EdgeCategory | undefined {
+function categoryFromAttrs(attrs: Record<string, unknown> | undefined): EdgeCategory | undefined {
   const c = attrs?.["i2t:edge_category"] ?? attrs?.["i2t:category"];
-  return typeof c === "string" && CATEGORIES.has(c)
-    ? (c as EdgeCategory)
-    : undefined;
+  return typeof c === "string" && CATEGORIES.has(c) ? (c as EdgeCategory) : undefined;
 }
 
 /** Category of a link: its own attrs first, then the hyperedge node it is
@@ -141,11 +137,7 @@ export type EdgeColorBy = "category" | "layer" | "predicate";
  *  is amber" gets expressed without a per-document code change. */
 export type ColorOverrides = Record<string, string>;
 
-export function nodeColor(
-  node: GraphNode,
-  overrides: ColorOverrides,
-  fallback: string,
-): string {
+export function nodeColor(node: GraphNode, overrides: ColorOverrides, fallback: string): string {
   const byId = overrides[`node:${node.id}`];
   if (byId) return byId;
   const kind = node.attrs?.["i2t:kind"];

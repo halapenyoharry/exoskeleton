@@ -64,7 +64,11 @@ export function Segmented<V extends string | number>({
               if (!active) onChange(opt.value);
             }}
           >
-            {opt.icon !== undefined && <span className="xo-segmented-icon" aria-hidden="true">{opt.icon}</span>}
+            {opt.icon !== undefined && (
+              <span className="xo-segmented-icon" aria-hidden="true">
+                {opt.icon}
+              </span>
+            )}
             <span className="xo-segmented-label">{opt.label}</span>
           </button>
         );
@@ -171,7 +175,11 @@ export interface ToolbarGroupProps {
 /** Caption-above-controls container. Groups sit side by side and wrap. */
 export function ToolbarGroup({ label, title, children, className }: ToolbarGroupProps) {
   return (
-    <div className={["xo-toolbar-group", className].filter(Boolean).join(" ")} role="group" aria-label={label}>
+    <div
+      className={["xo-toolbar-group", className].filter(Boolean).join(" ")}
+      role="group"
+      aria-label={label}
+    >
       <span className="xo-toolbar-caption" title={title}>
         {label}
       </span>
@@ -190,7 +198,11 @@ export interface ToolbarProps {
 /** Wrapping flex strip. Never overflows horizontally. */
 export function Toolbar({ children, className, label }: ToolbarProps) {
   return (
-    <div className={["xo-toolbar", className].filter(Boolean).join(" ")} role="toolbar" aria-label={label}>
+    <div
+      className={["xo-toolbar", className].filter(Boolean).join(" ")}
+      role="toolbar"
+      aria-label={label}
+    >
       {children}
     </div>
   );

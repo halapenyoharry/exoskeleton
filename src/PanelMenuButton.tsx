@@ -25,7 +25,9 @@ export function closeBackClosers(): boolean {
 
 /** Does this panel declare a "menu" cell among its controls? Then the
  *  header actions leave the ≡ to the controls. */
-export function panelHasMenuCell(panes: { body?: { cells: { type: string }[] } }[] | undefined): boolean {
+export function panelHasMenuCell(
+  panes: { body?: { cells: { type: string }[] } }[] | undefined,
+): boolean {
   return !!panes?.some((p) => p.body?.cells.some((c) => c.type === "menu"));
 }
 
@@ -38,7 +40,13 @@ export interface PanelMenuButtonProps {
   className?: string;
 }
 
-export function PanelMenuButton({ panelId, api, containerApi, structural, className }: PanelMenuButtonProps) {
+export function PanelMenuButton({
+  panelId,
+  api,
+  containerApi,
+  structural,
+  className,
+}: PanelMenuButtonProps) {
   const key = resolveComponentKey(panelId) ?? panelId;
   const items = getPanelMenu(key);
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
@@ -132,7 +140,9 @@ export function PanelMenuButton({ panelId, api, containerApi, structural, classN
                 {items && <hr className="exo-menu__rule" />}
                 <button
                   role="menuitem"
-                  onClick={act(() => (group.api.isMaximized() ? group.api.exitMaximized() : group.api.maximize()))}
+                  onClick={act(() =>
+                    group.api.isMaximized() ? group.api.exitMaximized() : group.api.maximize(),
+                  )}
                 >
                   {group.api.isMaximized() ? "Restore" : "Maximize"}
                 </button>
@@ -145,7 +155,11 @@ export function PanelMenuButton({ panelId, api, containerApi, structural, classN
                     Pop out
                   </button>
                 )}
-                <button role="menuitem" aria-expanded={moveOpen} onClick={() => setMoveOpen(!moveOpen)}>
+                <button
+                  role="menuitem"
+                  aria-expanded={moveOpen}
+                  onClick={() => setMoveOpen(!moveOpen)}
+                >
                   Move to… {moveOpen ? "▾" : "▸"}
                 </button>
                 {moveOpen &&

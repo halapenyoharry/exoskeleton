@@ -68,7 +68,7 @@ export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerPar
       if (!areGraphsConnected() || getActiveDocumentId() !== documentId) return;
       if (!shouldFollowNodeBroadcast(channel, params.scrollOnHover)) return;
       setSelectedNodeId(nodeId);
-      
+
       if (shouldScrollOnBroadcast(channel, nodeId, params.scrollOnHover) && nodeId) {
         const el = nodeRefs.current.get(nodeId);
         if (el) {
@@ -109,18 +109,21 @@ export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerPar
           <div className="text-viewer-empty">No nodes found in graph.</div>
         ) : (
           <div className="text-viewer-flow">
-            {nodeBlocks.map(block => {
+            {nodeBlocks.map((block) => {
               const isSelected = selectedNodeId === block.id;
               let className = "text-viewer-block";
               if (isSelected) className += " selected";
 
-              const blockStyle: React.CSSProperties = isSelected && block.color 
-                ? { borderColor: block.color as string, boxShadow: `0 0 10px ${block.color}40` } 
+              const blockStyle: React.CSSProperties =
+                isSelected && block.color
+                  ? { borderColor: block.color as string, boxShadow: `0 0 10px ${block.color}40` }
+                  : {};
+              const titleStyle: React.CSSProperties = block.color
+                ? { color: block.color as string }
                 : {};
-              const titleStyle: React.CSSProperties = block.color ? { color: block.color as string } : {};
 
               return (
-                <div 
+                <div
                   key={block.id}
                   ref={(el) => {
                     if (el) nodeRefs.current.set(block.id, el);
@@ -130,7 +133,9 @@ export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerPar
                   style={blockStyle}
                   onClick={() => handleNodeClick(block.id, String(block.title))}
                 >
-                  <h3 className="text-viewer-block-title" style={titleStyle}>{String(block.title)}</h3>
+                  <h3 className="text-viewer-block-title" style={titleStyle}>
+                    {String(block.title)}
+                  </h3>
                   {block.content && (
                     <div className="text-viewer-block-content">
                       <ReactMarkdown>{block.content}</ReactMarkdown>
@@ -139,9 +144,22 @@ export default function TextViewerPanel(props: IDockviewPanelProps<TextViewerPar
                   <div className="text-viewer-block-attrs">
                     <span className="text-viewer-pill">id: {block.id}</span>
                     {Object.entries(block.allAttrs).map(([k, v]) => {
-                      if (['text', 'description', 'content', 'detail', 'theme', 'narrative_arc'].includes(k) && block.content) return null;
+                      if (
+                        [
+                          "text",
+                          "description",
+                          "content",
+                          "detail",
+                          "theme",
+                          "narrative_arc",
+                        ].includes(k) &&
+                        block.content
+                      )
+                        return null;
                       return (
-                        <span key={k} className="text-viewer-pill">{k}: {typeof v === "object" ? JSON.stringify(v) : String(v)}</span>
+                        <span key={k} className="text-viewer-pill">
+                          {k}: {typeof v === "object" ? JSON.stringify(v) : String(v)}
+                        </span>
                       );
                     })}
                   </div>

@@ -68,16 +68,11 @@ function extractTree(parsed: unknown): MassNode {
   ) {
     return (parsed as { tree: MassNode }).tree;
   }
-  if (
-    typeof parsed === "object" &&
-    parsed !== null &&
-    "name" in parsed
-  ) {
+  if (typeof parsed === "object" && parsed !== null && "name" in parsed) {
     return parsed as MassNode;
   }
   return jsonToHierarchy(parsed, false, "root", true) as MassNode;
 }
-
 
 function splitIntoLines(words: string[], n: number): string[] {
   if (n <= 1) return [words.join(" ")];
@@ -88,11 +83,7 @@ function splitIntoLines(words: string[], n: number): string[] {
   let currentLine = 0;
   let currentChars = 0;
   for (const w of words) {
-    if (
-      currentChars > 0 &&
-      currentChars + w.length / 2 >= target &&
-      currentLine < n - 1
-    ) {
+    if (currentChars > 0 && currentChars + w.length / 2 >= target && currentLine < n - 1) {
       currentLine++;
       currentChars = 0;
     }
@@ -152,14 +143,11 @@ function circlePathTopClockwise(r: number): string {
   return `M 0 ${-r} A ${r} ${r} 0 0 1 0 ${r} A ${r} ${r} 0 0 1 0 ${-r}`;
 }
 
-export default function JsonMassPanel(
-  props: IDockviewPanelProps<JsonMassParams>,
-) {
+export default function JsonMassPanel(props: IDockviewPanelProps<JsonMassParams>) {
   const params: JsonMassParams = {
     ...jsonMassDefaults,
     ...(props.params ?? {}),
   };
-
 
   // Visibility-aware doc subscription; debounced resize (see the hooks).
   const [activeDocId, setActiveDocId] = useState(params.documentId);
@@ -220,35 +208,23 @@ export default function JsonMassPanel(
       })
       .sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
 
-    const pack = d3
-      .pack<MassNode>()
-      .size([diameter, diameter])
-      .padding(params.padding);
+    const pack = d3.pack<MassNode>().size([diameter, diameter]).padding(params.padding);
 
     const root = pack(hierarchy);
     const maxDepth = d3.max(root.descendants(), (d) => d.depth) ?? 1;
 
-    function substrateFill(
-      substrate: string | undefined,
-      depth: number,
-    ): string {
+    function substrateFill(substrate: string | undefined, depth: number): string {
       if (substrate === "text") return params.textSubstrateColor;
       if (substrate === "image") return params.imageSubstrateColor;
       const t = Math.min(depth / Math.max(maxDepth, 1), 1);
-      const interp = d3.interpolateHcl(
-        params.internalGradientStart,
-        params.internalGradientEnd,
-      );
+      const interp = d3.interpolateHcl(params.internalGradientStart, params.internalGradientEnd);
       return interp(t);
     }
 
     const svg = d3
       .select(container)
       .append("svg")
-      .attr(
-        "viewBox",
-        `-${diameter / 2} -${diameter / 2} ${diameter} ${diameter}`,
-      )
+      .attr("viewBox", `-${diameter / 2} -${diameter / 2} ${diameter} ${diameter}`)
       .attr("width", width)
       .attr("height", height)
       .attr("preserveAspectRatio", "xMidYMid meet")
@@ -268,9 +244,7 @@ export default function JsonMassPanel(
       .join("circle")
       .attr("class", "json-mass-node")
       .attr("fill", (d) => substrateFill(d.data.substrate, d.depth))
-      .attr("stroke", (d) =>
-        d.children ? "rgba(0, 229, 255, 0.18)" : "rgba(0, 229, 255, 0.35)",
-      )
+      .attr("stroke", (d) => (d.children ? "rgba(0, 229, 255, 0.18)" : "rgba(0, 229, 255, 0.35)"))
       .attr("stroke-width", 0.6)
       .attr("pointer-events", (d) => (!d.children ? "none" : null))
       .on("mouseover", function () {
@@ -279,12 +253,7 @@ export default function JsonMassPanel(
       .on("mouseout", function () {
         const d = d3.select<SVGCircleElement, PackNode>(this).datum();
         d3.select(this)
-          .attr(
-            "stroke",
-            d.children
-              ? "rgba(0, 229, 255, 0.18)"
-              : "rgba(0, 229, 255, 0.35)",
-          )
+          .attr("stroke", d.children ? "rgba(0, 229, 255, 0.18)" : "rgba(0, 229, 255, 0.35)")
           .attr("stroke-width", 0.6);
       })
       .on("click", (event: MouseEvent, d) => {
@@ -296,8 +265,7 @@ export default function JsonMassPanel(
 
     node.append("title").text((d) => {
       const mass = d.value ?? 0;
-      const substrate =
-        d.data.substrate ?? (d.children ? "container" : "unknown");
+      const substrate = d.data.substrate ?? (d.children ? "container" : "unknown");
       return `${d.data.name}\nmass: ${mass.toLocaleString()}\nsubstrate: ${substrate}`;
     });
 
@@ -378,13 +346,9 @@ export default function JsonMassPanel(
       view = v;
       label.attr(
         "transform",
-        (d) =>
-          `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k}) scale(${k})`,
+        (d) => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k}) scale(${k})`,
       );
-      node.attr(
-        "transform",
-        (d) => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`,
-      );
+      node.attr("transform", (d) => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
       node.attr("r", (d) => d.r * k);
     }
 
@@ -400,22 +364,17 @@ export default function JsonMassPanel(
 
       label
         .filter(function (d) {
-          return (
-            d.parent === focus ||
-            (this as SVGGElement).style.display !== "none"
-          );
+          return d.parent === focus || (this as SVGGElement).style.display !== "none";
         })
         // See json-circles for the rationale on this cast.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .transition(transition as any)
         .style("opacity", (d) => (d.parent === focus ? 1 : 0))
         .on("start", function (d) {
-          if (d.parent === focus)
-            (this as SVGGElement).style.display = "";
+          if (d.parent === focus) (this as SVGGElement).style.display = "";
         })
         .on("end", function (d) {
-          if (d.parent !== focus)
-            (this as SVGGElement).style.display = "none";
+          if (d.parent !== focus) (this as SVGGElement).style.display = "none";
         });
     }
 
@@ -465,12 +424,10 @@ export default function JsonMassPanel(
         {perfBlocked && (
           <div className="json-mass-perf-warning">
             <p>
-              <strong>{nodeCount.toLocaleString()}</strong> tree nodes detected
-              (threshold {params.nodeThreshold.toLocaleString()}).
+              <strong>{nodeCount.toLocaleString()}</strong> tree nodes detected (threshold{" "}
+              {params.nodeThreshold.toLocaleString()}).
             </p>
-            <button onClick={() => setBypassPerf(true)}>
-              Render anyway
-            </button>
+            <button onClick={() => setBypassPerf(true)}>Render anyway</button>
           </div>
         )}
       </div>

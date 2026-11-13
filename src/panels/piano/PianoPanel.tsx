@@ -6,18 +6,18 @@ import "./PianoPanel.css";
 // One octave starting at middle C. Enough to play melodies, small enough
 // to fit in any panel size. Extending to two+ octaves is a CSS edit away.
 const KEYS = [
-  { midi: 60, name: "C",  black: false },
-  { midi: 61, name: "C♯", black: true  },
-  { midi: 62, name: "D",  black: false },
-  { midi: 63, name: "D♯", black: true  },
-  { midi: 64, name: "E",  black: false },
-  { midi: 65, name: "F",  black: false },
-  { midi: 66, name: "F♯", black: true  },
-  { midi: 67, name: "G",  black: false },
-  { midi: 68, name: "G♯", black: true  },
-  { midi: 69, name: "A",  black: false },
-  { midi: 70, name: "A♯", black: true  },
-  { midi: 71, name: "B",  black: false },
+  { midi: 60, name: "C", black: false },
+  { midi: 61, name: "C♯", black: true },
+  { midi: 62, name: "D", black: false },
+  { midi: 63, name: "D♯", black: true },
+  { midi: 64, name: "E", black: false },
+  { midi: 65, name: "F", black: false },
+  { midi: 66, name: "F♯", black: true },
+  { midi: 67, name: "G", black: false },
+  { midi: 68, name: "G♯", black: true },
+  { midi: 69, name: "A", black: false },
+  { midi: 70, name: "A♯", black: true },
+  { midi: 71, name: "B", black: false },
 ];
 
 // Black keys are positioned absolutely over the white keys. The number here
@@ -106,9 +106,8 @@ export default function PianoPanel(_props: IDockviewPanelProps<PianoParams>) {
     <>
       <div className="piano-body">
         <div className="piano-hint">
-          click + hold a key — sends OSC{" "}
-          <code>/exoskeleton/piano/note-on [midi, velocity]</code> on press,{" "}
-          <code>note-off [midi]</code> on release. velocity = mouse-Y in key.
+          click + hold a key — sends OSC <code>/exoskeleton/piano/note-on [midi, velocity]</code> on
+          press, <code>note-off [midi]</code> on release. velocity = mouse-Y in key.
         </div>
         <div className="piano-keyboard">
           {whites.map((key) => (

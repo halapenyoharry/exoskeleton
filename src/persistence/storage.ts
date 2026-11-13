@@ -218,11 +218,7 @@ export function deleteWorkspace(state: AppStateV8, id: string): AppStateV8 {
   };
 }
 
-export function renameWorkspace(
-  state: AppStateV8,
-  id: string,
-  newName: string,
-): AppStateV8 {
+export function renameWorkspace(state: AppStateV8, id: string, newName: string): AppStateV8 {
   const target = state.workspaces[id];
   if (!target) return state;
 

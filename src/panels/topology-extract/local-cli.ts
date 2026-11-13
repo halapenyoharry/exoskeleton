@@ -8,14 +8,12 @@ export interface LocalCliParams {
   adapter?: string;
 }
 
-export type InputSource = 
-  | { type: "text"; data: string }
-  | { type: "file"; path: string };
+export type InputSource = { type: "text"; data: string } | { type: "file"; path: string };
 
 export async function runLocalInfo2TopoCli(
   input: InputSource,
   params: LocalCliParams,
-  onProgress?: (msg: string) => void
+  onProgress?: (msg: string) => void,
 ): Promise<any> {
   const ts = Date.now();
   const outputFileName = `i2t-output-${ts}.hypergraph.topothink.json`;
@@ -24,14 +22,14 @@ export async function runLocalInfo2TopoCli(
   try {
     const home = await homeDir();
     const tmpDir = await join(home, ".exo-tmp");
-    
+
     if (!(await exists(tmpDir))) {
       await mkdir(tmpDir);
     }
 
     const outputPath = await join(tmpDir, outputFileName);
     const dyadicPath = await join(tmpDir, dyadicFileName);
-    
+
     let inputPath: string;
     let createdTempInput = false;
 
@@ -58,31 +56,33 @@ export async function runLocalInfo2TopoCli(
     if (params.model) {
       args.push("--model", params.model);
     }
-    
+
     args.push("--project");
 
     console.log("[Local CLI] Executing python3 with args:", args);
     const command = Command.create("run-info2topo", args);
 
     if (onProgress) {
-      command.stdout.on('data', line => {
+      command.stdout.on("data", (line) => {
         onProgress(line);
       });
-      command.stderr.on('data', line => {
+      command.stderr.on("data", (line) => {
         // Some Python loggers write to stderr
         onProgress(`[log] ${line}`);
       });
     }
 
-    const result = await new Promise<{code: number | null, signal: number | null}>((resolve, reject) => {
-      command.on('close', data => {
-        resolve(data);
-      });
-      command.on('error', error => {
-        reject(error);
-      });
-      command.spawn().catch(reject);
-    });
+    const result = await new Promise<{ code: number | null; signal: number | null }>(
+      (resolve, reject) => {
+        command.on("close", (data) => {
+          resolve(data);
+        });
+        command.on("error", (error) => {
+          reject(error);
+        });
+        command.spawn().catch(reject);
+      },
+    );
 
     if (result.code !== 0) {
       throw new Error(`info2topo CLI failed (exit ${result.code}, signal ${result.signal})`);
@@ -91,7 +91,7 @@ export async function runLocalInfo2TopoCli(
     // Read the generated dyadic projection
     console.log("[Local CLI] CLI success. Reading projection from", dyadicPath);
     const dyadicContent = await readTextFile(dyadicPath);
-    
+
     // Cleanup temporary files
     if (createdTempInput) {
       await remove(inputPath).catch(console.error);

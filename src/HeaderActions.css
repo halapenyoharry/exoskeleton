@@ -46,7 +46,9 @@
   font-size: 16px;
   line-height: 1;
   opacity: 1;
-  transition: opacity 0.12s, color 0.12s;
+  transition:
+    opacity 0.12s,
+    color 0.12s;
 }
 
 .header-btn:hover {
@@ -72,8 +74,12 @@
   display: none;
 }
 
-.header-btn--icon { opacity: 0.85; }
-.header-btn--icon:hover { opacity: 1; }
+.header-btn--icon {
+  opacity: 0.85;
+}
+.header-btn--icon:hover {
+  opacity: 1;
+}
 .header-btn--chip {
   font-size: 12px;
   padding: 1px 8px;

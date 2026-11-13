@@ -58,9 +58,7 @@ test("parseTopology splits nodes from c: reifications by kind tag", () => {
         },
       },
     ],
-    links: [
-      { source: "c:rel-1", target: "engine:a", layer: "contains", role: "contained" },
-    ],
+    links: [{ source: "c:rel-1", target: "engine:a", layer: "contains", role: "contained" }],
   });
   assert.strictEqual(result.nodesById.size, 1);
   assert.strictEqual(result.reificationsById.size, 1);
@@ -126,34 +124,23 @@ test("parseTopology against a topology file (synthetic fixture or EXO_TOPOLOGY_D
 
   // Structural assertions — shape must always hold.
   assert.ok(result.nodesById.size > 0, "expected real nodes");
-  assert.ok(
-    result.reificationsById.size > 0,
-    "expected at least one c: reification",
-  );
+  assert.ok(result.reificationsById.size > 0, "expected at least one c: reification");
 
   // Disjoint maps — a c: id must never appear as a real node
   for (const id of result.reificationsById.keys()) {
-    assert.ok(
-      !result.nodesById.has(id),
-      `reification ${id} must NOT appear in nodesById`,
-    );
+    assert.ok(!result.nodesById.has(id), `reification ${id} must NOT appear in nodesById`);
   }
 
   // Every reification carries a primary edge_category
   for (const [id, rel] of result.reificationsById) {
-    assert.ok(
-      rel.attrs?.["i2t:edge_category"],
-      `reification ${id} missing i2t:edge_category`,
-    );
+    assert.ok(rel.attrs?.["i2t:edge_category"], `reification ${id} missing i2t:edge_category`);
   }
 
   // At least one layer present, and every layer has a category.
   assert.ok(result.layers.size > 0, "expected layers");
   for (const [name, layer] of result.layers) {
     assert.ok(
-      ["containment", "state_change", "interactivity", "reference"].includes(
-        layer.primaryCategory,
-      ),
+      ["containment", "state_change", "interactivity", "reference"].includes(layer.primaryCategory),
       `layer "${name}" got non-canonical category ${layer.primaryCategory}`,
     );
   }
@@ -168,9 +155,15 @@ test("parseTopology against a topology file (synthetic fixture or EXO_TOPOLOGY_D
   } else {
     // Confirm three-member hyperedge reification is present
     const triadLayer = result.layers.get("triad_layer");
-    const threeMember = triadLayer?.reifications.find((r) => r.relation.id === "c:rel-three-member");
+    const threeMember = triadLayer?.reifications.find(
+      (r) => r.relation.id === "c:rel-three-member",
+    );
     assert.ok(threeMember, "expected three-member hyperedge reification");
-    assert.strictEqual(threeMember.spokes.length, 3, "expected 3 spokes for three-member hyperedge");
+    assert.strictEqual(
+      threeMember.spokes.length,
+      3,
+      "expected 3 spokes for three-member hyperedge",
+    );
 
     // Confirm all 4 canonical edge categories are represented in layers
     const categories = new Set(Array.from(result.layers.values()).map((l) => l.primaryCategory));

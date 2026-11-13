@@ -26,7 +26,10 @@ export function buildNodeBlocks(doc: unknown): NodeBlock[] {
     }
     let text: unknown;
     for (const k of TEXT_KEYS) {
-      if (src[k]) { text = src[k]; break; }
+      if (src[k]) {
+        text = src[k];
+        break;
+      }
     }
     const color = (src["instagraph:color"] ?? src.color ?? null) as string | null;
     return {
@@ -70,4 +73,3 @@ export function shouldScrollOnBroadcast(
   if (!nodeId) return false;
   return shouldFollowNodeBroadcast(channel, scrollOnHover);
 }
-

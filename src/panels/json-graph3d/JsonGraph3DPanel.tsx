@@ -19,10 +19,7 @@ import { type DetectedGraph } from "../../data/json-utils/graphDetect";
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats, getDetectedGraph } from "../../data/json-utils/docStats";
 import { useElementSize } from "../../useElementSize";
-import {
-  buildLayerVisibility,
-  colorForLayer,
-} from "../../data/json-utils/layers";
+import { buildLayerVisibility, colorForLayer } from "../../data/json-utils/layers";
 import "./JsonGraph3DPanel.css";
 
 export type Graph3DLabelMode = "always" | "hover" | "never";
@@ -142,8 +139,7 @@ function attrsToHtml(
     .slice(0, maxAttrs)
     .map(([k, v]) => {
       const val = typeof v === "object" ? JSON.stringify(v) : String(v);
-      const truncated =
-        val.length > maxLen ? val.slice(0, maxLen - 3) + "..." : val;
+      const truncated = val.length > maxLen ? val.slice(0, maxLen - 3) + "..." : val;
       return `<div><span style="opacity:0.6">${escapeHtml(k)}</span>: ${escapeHtml(truncated)}</div>`;
     })
     .join("");
@@ -193,18 +189,13 @@ function annotateLinks(
   return out;
 }
 
-export default function JsonGraph3DPanel(
-  props: IDockviewPanelProps<JsonGraph3DParams>,
-) {
+export default function JsonGraph3DPanel(props: IDockviewPanelProps<JsonGraph3DParams>) {
   const params: JsonGraph3DParams = {
     ...jsonGraph3DDefaults,
     ...(props.params ?? {}),
   };
 
-  const updateParam = <K extends keyof JsonGraph3DParams>(
-    key: K,
-    value: JsonGraph3DParams[K],
-  ) => {
+  const updateParam = <K extends keyof JsonGraph3DParams>(key: K, value: JsonGraph3DParams[K]) => {
     props.api.updateParameters({ ...params, [key]: value });
   };
 
@@ -246,14 +237,10 @@ export default function JsonGraph3DPanel(
   // don't survive 30k links, and a shorter cooldown stops the force sim
   // burning frames long after the shape has emerged.
   const fx = {
-    cooldownTicks: bigGraph
-      ? Math.min(params.cooldownTicks, 60)
-      : params.cooldownTicks,
+    cooldownTicks: bigGraph ? Math.min(params.cooldownTicks, 60) : params.cooldownTicks,
     curvature: bigGraph ? 0 : params.curvature,
     linkWidth: bigGraph ? 0 : params.linkWidth,
-    linkOpacity: bigGraph
-      ? Math.min(params.linkOpacity, 0.3)
-      : params.linkOpacity,
+    linkOpacity: bigGraph ? Math.min(params.linkOpacity, 0.3) : params.linkOpacity,
     particles: bigGraph ? false : params.particles,
     arrowLength: bigGraph ? 0 : params.arrowLength,
     nodeResolution: bigGraph ? 4 : 8,
@@ -277,9 +264,7 @@ export default function JsonGraph3DPanel(
   const size = useElementSize(containerRef);
 
   const prevFreezeRef = useRef(false);
-  const fgRef = useRef<ForceGraphMethods<FGNode, FGLink> | undefined>(
-    undefined,
-  );
+  const fgRef = useRef<ForceGraphMethods<FGNode, FGLink> | undefined>(undefined);
 
   const data = useMemo(() => {
     if (!graph) return { nodes: [] as FGNode[], links: [] as FGLink[] };
@@ -350,17 +335,27 @@ export default function JsonGraph3DPanel(
   // Listen for external Selection & Focus broadcasts
   useEffect(() => {
     const unsubSelection = onNodeSelectionBroadcast((event) => {
-      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) {
+      if (
+        !areGraphsConnected() ||
+        event.sourcePanelId === props.api.id ||
+        event.documentId !== activeDocId
+      ) {
         return;
       }
       setSelectedNodeId(event.nodeId);
     });
 
     const unsubFocus = onNodeFocusBroadcast((event) => {
-      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) {
+      if (
+        !areGraphsConnected() ||
+        event.sourcePanelId === props.api.id ||
+        event.documentId !== activeDocId
+      ) {
         return;
       }
-      const target = data.nodes.find((n) => n.id === event.nodeId) as (FGNode & { x?: number; y?: number; z?: number }) | undefined;
+      const target = data.nodes.find((n) => n.id === event.nodeId) as
+        | (FGNode & { x?: number; y?: number; z?: number })
+        | undefined;
       if (target && target.x !== undefined && target.y !== undefined && fgRef.current) {
         const x = target.x;
         const y = target.y;
@@ -370,7 +365,7 @@ export default function JsonGraph3DPanel(
         fgRef.current.cameraPosition(
           { x: x * distRatio, y: y * distRatio, z: z * distRatio },
           target as { x: number; y: number; z: number },
-          1000
+          1000,
         );
       }
     });
@@ -390,12 +385,7 @@ export default function JsonGraph3DPanel(
         <div className="json-graph3d-controls">
           <select
             value={params.dimensions}
-            onChange={(e) =>
-              updateParam(
-                "dimensions",
-                Number(e.target.value) as 2 | 3,
-              )
-            }
+            onChange={(e) => updateParam("dimensions", Number(e.target.value) as 2 | 3)}
             title="2D or 3D layout"
           >
             <option value={2}>2D</option>
@@ -403,9 +393,7 @@ export default function JsonGraph3DPanel(
           </select>
           <select
             value={params.labelMode}
-            onChange={(e) =>
-              updateParam("labelMode", e.target.value as Graph3DLabelMode)
-            }
+            onChange={(e) => updateParam("labelMode", e.target.value as Graph3DLabelMode)}
             title="Label visibility mode"
           >
             <option value="always">always</option>
@@ -428,11 +416,7 @@ export default function JsonGraph3DPanel(
             />
             freeze
           </label>
-          <button
-            onClick={resetView}
-            title="Fit graph to view"
-            className="json-graph3d-reset-btn"
-          >
+          <button onClick={resetView} title="Fit graph to view" className="json-graph3d-reset-btn">
             ⤢
           </button>
         </div>
@@ -440,20 +424,16 @@ export default function JsonGraph3DPanel(
       <div className="panel-body json-graph3d-body" ref={containerRef}>
         {!isGraph && (
           <div className="json-graph3d-empty">
-            {doc === undefined
-              ? "Waiting for JSON…"
-              : "No graph structure detected in this JSON."}
+            {doc === undefined ? "Waiting for JSON…" : "No graph structure detected in this JSON."}
           </div>
         )}
         {isGraph && perfBlocked && (
           <div className="json-graph3d-perf-warning">
             <p>
-              <strong>{nodeCount.toLocaleString()}</strong> nodes detected
-              (threshold {params.nodeThreshold.toLocaleString()}).
+              <strong>{nodeCount.toLocaleString()}</strong> nodes detected (threshold{" "}
+              {params.nodeThreshold.toLocaleString()}).
             </p>
-            <button onClick={() => setBypassPerf(true)}>
-              Render anyway
-            </button>
+            <button onClick={() => setBypassPerf(true)}>Render anyway</button>
           </div>
         )}
         {isGraph && !perfBlocked && size.width > 0 && size.height > 0 && (
@@ -475,7 +455,12 @@ export default function JsonGraph3DPanel(
             }
             onNodeHover={(node) => {
               if (areGraphsConnected()) {
-                broadcastNodeSelection(activeDocId, node ? node.id : null, props.api.id, node ? node.name : undefined);
+                broadcastNodeSelection(
+                  activeDocId,
+                  node ? node.id : null,
+                  props.api.id,
+                  node ? node.name : undefined,
+                );
               }
               setSelectedNodeId(node ? node.id : null);
             }}
@@ -488,27 +473,16 @@ export default function JsonGraph3DPanel(
             nodeLabel={
               tooltipsEnabled
                 ? (n) =>
-                    attrsToHtml(
-                      n.attrs,
-                      n.name,
-                      params.tooltipMaxAttrs,
-                      params.tooltipValueMaxLen,
-                    )
+                    attrsToHtml(n.attrs, n.name, params.tooltipMaxAttrs, params.tooltipValueMaxLen)
                 : () => ""
             }
-            linkColor={(l) =>
-              l.layer ? colorForLayer(l.layer) : "rgba(0, 229, 255, 0.45)"
-            }
+            linkColor={(l) => (l.layer ? colorForLayer(l.layer) : "rgba(0, 229, 255, 0.45)")}
             linkOpacity={fx.linkOpacity}
             linkWidth={fx.linkWidth}
-            linkVisibility={(l) =>
-              !l.layer || params.layerVisibility[l.layer] !== false
-            }
+            linkVisibility={(l) => !l.layer || params.layerVisibility[l.layer] !== false}
             linkCurvature={(l) => l.curvature}
             linkCurveRotation={(l) => l.rotation}
-            linkDirectionalArrowLength={(l) =>
-              l.directed ? fx.arrowLength : 0
-            }
+            linkDirectionalArrowLength={(l) => (l.directed ? fx.arrowLength : 0)}
             linkDirectionalArrowRelPos={params.arrowRelPos}
             linkDirectionalArrowColor={(l) =>
               l.layer ? colorForLayer(l.layer) : "rgba(0, 229, 255, 0.8)"
@@ -522,9 +496,7 @@ export default function JsonGraph3DPanel(
             }
             linkDirectionalParticleWidth={params.particleWidth}
             linkDirectionalParticleSpeed={params.particleSpeed}
-            linkDirectionalParticleColor={(l) =>
-              l.layer ? colorForLayer(l.layer) : "#00e5ff"
-            }
+            linkDirectionalParticleColor={(l) => (l.layer ? colorForLayer(l.layer) : "#00e5ff")}
             linkLabel={
               tooltipsEnabled
                 ? (l) =>
@@ -539,7 +511,7 @@ export default function JsonGraph3DPanel(
             linkThreeObjectExtend={showInlineLabels}
             linkThreeObject={
               showInlineLabels
-                ? ((l: FGLink) => {
+                ? (l: FGLink) => {
                     // Spokes of a reified relation carry a role, not a
                     // label; without this fallback "always" drew empty
                     // sprites on every TopoThink dyadic document.
@@ -550,7 +522,7 @@ export default function JsonGraph3DPanel(
                     sprite.padding = params.inlineLabelPadding;
                     sprite.borderRadius = 2;
                     return sprite as unknown as Object3D;
-                  })
+                  }
                 : undefined
             }
             linkPositionUpdate={
@@ -561,10 +533,7 @@ export default function JsonGraph3DPanel(
                       y: start.y + (end.y - start.y) / 2,
                       z: start.z + (end.z - start.z) / 2,
                     };
-                    Object.assign(
-                      (sprite as unknown as { position: typeof mid }).position,
-                      mid,
-                    );
+                    Object.assign((sprite as unknown as { position: typeof mid }).position, mid);
                   }
                 : undefined
             }

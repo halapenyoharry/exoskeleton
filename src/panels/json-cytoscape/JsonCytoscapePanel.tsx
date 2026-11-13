@@ -18,10 +18,7 @@ import { type DetectedGraph } from "../../data/json-utils/graphDetect";
 import { useJsonDoc } from "../../data/useJsonDoc";
 import { getDocStats, getDetectedGraph } from "../../data/json-utils/docStats";
 import { useElementSize } from "../../useElementSize";
-import {
-  buildLayerVisibility,
-  colorForLayer,
-} from "../../data/json-utils/layers";
+import { buildLayerVisibility, colorForLayer } from "../../data/json-utils/layers";
 import "./JsonCytoscapePanel.css";
 
 cytoscape.use(fcose);
@@ -93,8 +90,7 @@ function formatAttrs(
     .slice(0, maxAttrs)
     .map(([k, v]) => {
       const val = typeof v === "object" ? JSON.stringify(v) : String(v);
-      const truncated =
-        val.length > maxLen ? val.slice(0, maxLen - 3) + "..." : val;
+      const truncated = val.length > maxLen ? val.slice(0, maxLen - 3) + "..." : val;
       return [k, truncated];
     });
 }
@@ -139,9 +135,7 @@ function buildLayout(name: CytoscapeLayoutName): LayoutOptions {
   }
 }
 
-export default function JsonCytoscapePanel(
-  props: IDockviewPanelProps<JsonCytoscapeParams>,
-) {
+export default function JsonCytoscapePanel(props: IDockviewPanelProps<JsonCytoscapeParams>) {
   const params: JsonCytoscapeParams = {
     ...jsonCytoscapeDefaults,
     ...(props.params ?? {}),
@@ -217,8 +211,7 @@ export default function JsonCytoscapePanel(
           kind: n.kind ?? "node",
           attrs: n.attrs,
         },
-        classes:
-          n.kind && n.kind !== "node" ? `kind-${n.kind}` : undefined,
+        classes: n.kind && n.kind !== "node" ? `kind-${n.kind}` : undefined,
       })),
       ...graph.links.map((l, i) => ({
         data: {
@@ -233,10 +226,7 @@ export default function JsonCytoscapePanel(
           attrs: l.attrs,
         },
         classes:
-          [
-            l.directed === false ? "undirected" : null,
-            l.layer ? "has-layer" : null,
-          ]
+          [l.directed === false ? "undirected" : null, l.layer ? "has-layer" : null]
             .filter(Boolean)
             .join(" ") || undefined,
       })),
@@ -382,12 +372,8 @@ export default function JsonCytoscapePanel(
       const renderedPos = isEdge ? ele.midpoint() : ele.renderedPosition();
       const pan = cy.pan();
       const zoom = cy.zoom();
-      const screenX = isEdge
-        ? renderedPos.x * zoom + pan.x
-        : renderedPos.x;
-      const screenY = isEdge
-        ? renderedPos.y * zoom + pan.y
-        : renderedPos.y;
+      const screenX = isEdge ? renderedPos.x * zoom + pan.x : renderedPos.x;
+      const screenY = isEdge ? renderedPos.y * zoom + pan.y : renderedPos.y;
       setTooltip({
         x: screenX + 12,
         y: screenY + 12,
@@ -407,7 +393,7 @@ export default function JsonCytoscapePanel(
       }
       setTooltip(null);
     });
-    
+
     cy.on("pan zoom drag", () => setTooltip(null));
 
     cy.on("tap", "node", (evt) => {
@@ -418,7 +404,11 @@ export default function JsonCytoscapePanel(
     });
 
     const unsubSelection = onNodeSelectionBroadcast((event) => {
-      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) {
+      if (
+        !areGraphsConnected() ||
+        event.sourcePanelId === props.api.id ||
+        event.documentId !== activeDocId
+      ) {
         return;
       }
       cy.batch(() => {
@@ -433,7 +423,11 @@ export default function JsonCytoscapePanel(
     });
 
     const unsubFocus = onNodeFocusBroadcast((event) => {
-      if (!areGraphsConnected() || event.sourcePanelId === props.api.id || event.documentId !== activeDocId) {
+      if (
+        !areGraphsConnected() ||
+        event.sourcePanelId === props.api.id ||
+        event.documentId !== activeDocId
+      ) {
         return;
       }
       const node = cy.getElementById(event.nodeId);
@@ -501,9 +495,7 @@ export default function JsonCytoscapePanel(
         <div className="json-cytoscape-controls">
           <select
             value={params.layout}
-            onChange={(e) =>
-              updateParam("layout", e.target.value as CytoscapeLayoutName)
-            }
+            onChange={(e) => updateParam("layout", e.target.value as CytoscapeLayoutName)}
             title="Layout algorithm"
           >
             <option value="fcose">fcose</option>
@@ -542,43 +534,29 @@ export default function JsonCytoscapePanel(
       <div className="panel-body json-cytoscape-body">
         {!isGraph && (
           <div className="json-cytoscape-empty">
-            {doc === undefined
-              ? "Waiting for JSON…"
-              : "No graph structure detected in this JSON."}
+            {doc === undefined ? "Waiting for JSON…" : "No graph structure detected in this JSON."}
           </div>
         )}
         {isGraph && perfBlocked && (
           <div className="json-cytoscape-perf-warning">
             <p>
-              <strong>{nodeCount.toLocaleString()}</strong> nodes detected
-              (threshold {params.nodeThreshold.toLocaleString()}).
+              <strong>{nodeCount.toLocaleString()}</strong> nodes detected (threshold{" "}
+              {params.nodeThreshold.toLocaleString()}).
             </p>
-            <button onClick={() => setBypassPerf(true)}>
-              Render anyway
-            </button>
+            <button onClick={() => setBypassPerf(true)}>Render anyway</button>
           </div>
         )}
-        {isGraph && !perfBlocked && (
-          <div
-            className="json-cytoscape-canvas"
-            ref={containerRef}
-          />
-        )}
+        {isGraph && !perfBlocked && <div className="json-cytoscape-canvas" ref={containerRef} />}
         {tooltip && !perfBlocked && (
-          <div
-            className="json-cytoscape-tooltip"
-            style={{ left: tooltip.x, top: tooltip.y }}
-          >
+          <div className="json-cytoscape-tooltip" style={{ left: tooltip.x, top: tooltip.y }}>
             <strong>{tooltip.header}</strong>
-            {formatAttrs(
-              tooltip.attrs,
-              params.tooltipMaxAttrs,
-              params.tooltipValueMaxLen,
-            ).map(([k, v]) => (
-              <div key={k} className="json-cytoscape-tooltip-row">
-                <span className="json-cytoscape-tooltip-key">{k}</span>: {v}
-              </div>
-            ))}
+            {formatAttrs(tooltip.attrs, params.tooltipMaxAttrs, params.tooltipValueMaxLen).map(
+              ([k, v]) => (
+                <div key={k} className="json-cytoscape-tooltip-row">
+                  <span className="json-cytoscape-tooltip-key">{k}</span>: {v}
+                </div>
+              ),
+            )}
           </div>
         )}
       </div>

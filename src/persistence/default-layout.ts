@@ -12,10 +12,7 @@ import type {
 // This is the SCHEMA's idea of "what panels exist and how they're arranged."
 // State (the JSON saved between sessions) is a delta on top of this.
 
-import {
-   hostHasCapabilities,
-  type CapabilityId,
-} from "../panel-manifest.ts";
+import { hostHasCapabilities, type CapabilityId } from "../panel-manifest.ts";
 import {
   DEFAULT_PRESET_ID,
   defaultPresetId,
@@ -271,7 +268,13 @@ export const panelRegistry: RegistryEntry[] = [
   },
   // json-cosmos: cosmos.gl GPU force graph for big documents. Not auto-added:
   // reach it via the ⊞ menu, the + picker, or the Everything preset.
-  { id: "json-cosmos", component: "json-cosmos", title: "cosmos", introducedAt: 11, companions: ["json-edit"] },
+  {
+    id: "json-cosmos",
+    component: "json-cosmos",
+    title: "cosmos",
+    introducedAt: 11,
+    companions: ["json-edit"],
+  },
 ];
 
 /** Components mounted by the shell that are not in `panelRegistry`. */
@@ -292,7 +295,9 @@ export function dropUnknownPanels(
 
   const removed = new Set<string>();
   for (const [id, raw] of Object.entries(layout.panels ?? {})) {
-    const p = raw as { contentComponent?: string; view?: { content?: { id?: string } } } | undefined;
+    const p = raw as
+      | { contentComponent?: string; view?: { content?: { id?: string } } }
+      | undefined;
     const comp = p?.view?.content?.id ?? p?.contentComponent;
     if (!comp || !known.has(comp)) removed.add(id);
   }
@@ -327,10 +332,15 @@ export function dropUnknownPanels(
   if (out.popoutGroups) out = { ...out, popoutGroups: stripGroups(out.popoutGroups) };
 
   if (out.edgeGroups) {
-    type EdgeGroupEntry = { group?: { id: string; views: string[]; activeView?: string }; [k: string]: unknown };
+    type EdgeGroupEntry = {
+      group?: { id: string; views: string[]; activeView?: string };
+      [k: string]: unknown;
+    };
     const nextEdges: Record<string, EdgeGroupEntry> = {};
     let edgeChanged = false;
-    for (const [pos, entry] of Object.entries(out.edgeGroups as Record<string, EdgeGroupEntry | undefined>)) {
+    for (const [pos, entry] of Object.entries(
+      out.edgeGroups as Record<string, EdgeGroupEntry | undefined>,
+    )) {
       if (!entry) continue;
       if (!entry.group || !entry.group.views.some((v) => removed.has(v))) {
         nextEdges[pos] = entry;
@@ -362,9 +372,9 @@ export function dropUnknownPanels(
     const otherIds = new Set<string>([
       ...(out.floatingGroups ?? []).map((g) => g.data?.id ?? ""),
       ...(out.popoutGroups ?? []).map((g) => g.data?.id ?? ""),
-      ...Object.values((out.edgeGroups ?? {}) as Record<string, { group?: { id?: string } } | undefined>).map(
-        (e) => e?.group?.id ?? "",
-      ),
+      ...Object.values(
+        (out.edgeGroups ?? {}) as Record<string, { group?: { id?: string } } | undefined>,
+      ).map((e) => e?.group?.id ?? ""),
     ]);
     if (!gridIds.has(out.activeGroup) && !otherIds.has(out.activeGroup)) {
       const first = [...gridIds][0];
@@ -510,9 +520,7 @@ export function addRegistryPanel(
   }
   if (!position || referenceMissing) {
     const anchor = mainGridAnchor(api);
-    position = anchor
-      ? { referencePanel: anchor.id, direction: "within" }
-      : { direction: "right" }; // absolute → targets the grid, not the active group
+    position = anchor ? { referencePanel: anchor.id, direction: "within" } : { direction: "right" }; // absolute → targets the grid, not the active group
   }
 
   try {
@@ -581,15 +589,9 @@ export function buildPreset(
       const position: AddPanelPositionOptions = p.reference
         ? { referencePanel: p.reference, direction }
         : { direction: direction === "within" ? "right" : direction };
-      const horizontal =
-        direction === "left" ||
-        (direction === "right" && Boolean(p.reference));
+      const horizontal = direction === "left" || (direction === "right" && Boolean(p.reference));
       const initialSize =
-        p.size !== undefined
-          ? horizontal
-            ? { width: p.size }
-            : { height: p.size }
-          : undefined;
+        p.size !== undefined ? (horizontal ? { width: p.size } : { height: p.size }) : undefined;
       const panel = addRegistryPanel(api, entry, undefined, position, initialSize);
       if (panel && p.size !== undefined) {
         sized.push({ panel, size: p.size, horizontal });
@@ -702,10 +704,7 @@ export function buildDefaultLayout(
 
 /** Reset the layout to the empty grid with the Watermark preset picker, on
  *  both the web and the desktop. */
-export function resetLayout(
-  api: DockviewApi,
-  opts: { phone?: boolean; web?: boolean } = {},
-) {
+export function resetLayout(api: DockviewApi, opts: { phone?: boolean; web?: boolean } = {}) {
   api.clear();
   buildPreset(api, DEFAULT_PRESET_ID, opts);
 }
@@ -731,10 +730,7 @@ export function applyWorkspaceState(
     migrateLayout(api, version);
     ensureEdgeTabs(api);
   } catch (e) {
-    console.warn(
-      "[exoskeleton] applyWorkspaceState fromJSON failed, falling back to defaults:",
-      e,
-    );
+    console.warn("[exoskeleton] applyWorkspaceState fromJSON failed, falling back to defaults:", e);
     api.clear();
     buildDefaultLayout(api);
   }
@@ -753,9 +749,7 @@ export function panelsToAutoAdd(
   savedVersion: number,
   registry: RegistryEntry[] = panelRegistry,
 ): RegistryEntry[] {
-  return registry.filter(
-    (entry) => entry.introducedAt > savedVersion && entry.autoAdd === true,
-  );
+  return registry.filter((entry) => entry.introducedAt > savedVersion && entry.autoAdd === true);
 }
 
 /**

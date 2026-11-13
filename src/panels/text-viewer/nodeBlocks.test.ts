@@ -60,4 +60,3 @@ test("text-viewer controls pane registers scroll on hover toggle", () => {
   assert.strictEqual(cell?.param, "scrollOnHover");
   assert.strictEqual(cell?.label, "scroll on hover");
 });
-

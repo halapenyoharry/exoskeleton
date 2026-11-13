@@ -17,7 +17,8 @@ export const textViewerPanes: PanelPane[] = [
           type: "toggle",
           param: "scrollOnHover",
           label: "scroll on hover",
-          tooltip: "Scroll when the pointer moves over a node in a graph; turn off to scroll only on click or tap",
+          tooltip:
+            "Scroll when the pointer moves over a node in a graph; turn off to scroll only on click or tap",
         },
       ],
     },

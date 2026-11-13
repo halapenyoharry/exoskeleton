@@ -30,8 +30,8 @@
   inset: 0;
   background: #0d1326;
   /* PWA standalone / notched devices: keep content out of system bars. */
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
   box-sizing: border-box;
 }
 
@@ -115,10 +115,20 @@
   outline: none;
 }
 
-.panel-toolbar input { flex: 1; min-width: 100px; }
-.panel-toolbar button { cursor: pointer; }
-.panel-toolbar button:hover { color: var(--panel-accent, #18ffff); }
-.panel-toolbar button:disabled { color: #2a3a45; cursor: default; }
+.panel-toolbar input {
+  flex: 1;
+  min-width: 100px;
+}
+.panel-toolbar button {
+  cursor: pointer;
+}
+.panel-toolbar button:hover {
+  color: var(--panel-accent, #18ffff);
+}
+.panel-toolbar button:disabled {
+  color: #2a3a45;
+  cursor: default;
+}
 
 .panel-body {
   flex: 1;
@@ -395,7 +405,9 @@
 /* Panels that declare panes: their controls live in the Paneview above the
    content, so the inline toolbar row is hidden. */
 .panel-pad[data-has-panes="true"] .panel-header,
-.panel-pad[data-has-panes="true"] .panel-toolbar { display: none; }
+.panel-pad[data-has-panes="true"] .panel-toolbar {
+  display: none;
+}
 
 /* Editor status line (path · dirty · flash): content-level, below the pill. */
 .editor-status {
