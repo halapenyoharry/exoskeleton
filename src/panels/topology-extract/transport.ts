@@ -140,7 +140,7 @@ export function openRouterChat(config: { apiKey: string; model: string }): ChatF
 
 // ── Ollama ───────────────────────────────────────────────────────────
 
-export const DEFAULT_OLLAMA_HOST = "http://100.66.0.3:11434";
+export const DEFAULT_OLLAMA_HOST = "http://localhost:11434";
 
 /**
  * Output cap per call. Ollama has no default limit and keeps generating past

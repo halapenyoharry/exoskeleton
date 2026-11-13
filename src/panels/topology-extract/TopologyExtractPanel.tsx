@@ -53,7 +53,7 @@ export interface TopologyExtractParams {
   model: string;
   /** API key (stored in panel params — stripped on workspace export). */
   apiKey: string;
-  /** Ollama host, e.g. http://100.66.0.3:11434. */
+  /** Ollama host, e.g. http://localhost:11434. */
   ollamaHost: string;
   /** Ollama model name. */
   ollamaModel: string;

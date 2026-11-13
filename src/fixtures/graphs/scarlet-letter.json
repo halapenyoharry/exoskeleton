@@ -14,7 +14,7 @@
       "merged_at": "2026-10-18T19:08:34.426936+00:00",
       "i2t:merged_inputs": [
         {
-          "file": "/Users/harold/Knowledge/processed/scarlet-letter/scarlet-letter.paragraphs.hypergraph.topothink.json",
+          "file": "scarlet-letter.paragraphs.hypergraph.topothink.json",
           "metadata": {
             "topothink-version": "0.1",
             "adapter": "instagraph_to_hypergraph.py",
@@ -22,13 +22,13 @@
             "source-meta": {
               "createdDate": "2026-04-29",
               "description": "Knowledge graph of The Epic of Elinor Jones (acts 1-3 partial, manuscript). Paragraph-as-node architecture: each paragraph is a vertex; characters/places/themes are vertices; scenes/chapters/acts are reified hyperedges containing their members. Field attrs on paragraphs (word count, has_dialogue, has_ai_dialogue, position).",
-              "source": "Harry Tajchman, manuscript files in ~/Writing/the_epic_of_elinor_jones/_final-draft-EoEJ/",
+              "source": "manuscript files",
               "extractor": "manuscript_to_hypergraph.py (paragraph splitter + alias-table entity detection); not LLM-based"
             }
           }
         },
         {
-          "file": "/Users/harold/Knowledge/processed/scarlet-letter/scarlet-letter.entities.hypergraph.topothink.json",
+          "file": "scarlet-letter.entities.hypergraph.topothink.json",
           "metadata": {
             "topothink-version": "0.1",
             "schema:name": "The scarlet letter",
@@ -36,11 +36,11 @@
               "Hawthorne, Nathaniel, 1804-1864",
               "i2t extract-book (google/gemini-2.5-flash)"
             ],
-            "source_chapters_dir": "/Users/harold/Knowledge/processed/scarlet-letter/chapters",
+            "source_chapters_dir": "chapters",
             "source_sha256": "5d9f7336a3a30daad79ad8375938697269eabf13ee1550ad1d08889fe8e11c56",
             "extracted_at": "2026-10-18T19:07:57.335961+00:00",
             "model_used": "google/gemini-2.5-flash",
-            "entity_table": "/Users/harold/Knowledge/processed/scarlet-letter/entities.json",
+            "entity_table": "entities.json",
             "i2t:layer": "entity-relations"
           }
         }
